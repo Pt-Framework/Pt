@@ -577,11 +577,20 @@ void WebSocketChannel::onInput()
                 return;
             }
 
-            if( onFrame(*frame) == Stop )
+            if( onFrame(*frame) == NextFrame )
+                continue;
+
+            if( wantsInput() && _wsbuf.in_avail() == 0 )
+                continue;
+
+            if( wantsInput() && ! _receive.isPending() )
             {
-                _inputPending = false;
-                return;
+                _wsbuf.discard();
+                continue;
             }
+
+            _inputPending = false;
+            return;
         }
     }
     catch(const WebSocketError& e)
@@ -672,10 +681,9 @@ WebSocketChannel::InputAction WebSocketChannel::onPeerClose(const Frame& frame)
     else if(_closeState == CloseSent)
     {
         _closeState = CloseExchanged;
-        requestOutput();
-        endStreamIfClosed();
     }
 
+    endStreamIfClosed();
     return Stop;
 }
 
@@ -712,16 +720,7 @@ WebSocketChannel::InputAction WebSocketChannel::onData(const Frame& frame)
     if( _receive.complete( std::exception_ptr() ) )
         restartIdleTimer();
 
-    if( _receive.isPending() )
-        return _wsbuf.in_avail() == 0 ? NextFrame : Stop;
-
-    if( ! wantsInput() )
-        return Stop;
-
-    if(_wsbuf.in_avail() != 0)
-        _wsbuf.discard();
-
-    return NextFrame;
+    return Stop;
 }
 
 
@@ -833,10 +832,9 @@ void WebSocketChannel::onFrameWritten(const PendingFrame& frame)
 
         case PendingFrame::Close:
             if(_closeState == CloseReceived || _closeState == CloseFailing)
-            {
                 _closeState = CloseExchanged;
-                endStreamIfClosed();
-            }
+
+            endStreamIfClosed();
             break;
     }
 }
