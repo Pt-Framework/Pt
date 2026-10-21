@@ -11,6 +11,7 @@
 #include <Pt/Http/Message.h>
 #include "WebSocketBuffer.h"
 #include <Pt/Connectable.h>
+#include <Pt/IOError.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Timer.h>
 #include <deque>
@@ -111,6 +112,7 @@ class WebSocketChannel : public Channel
             public:
                 Operation()
                 : _state(Idle)
+                , _closed(false)
                 { }
 
                 bool isIdle() const
@@ -129,22 +131,46 @@ class WebSocketChannel : public Channel
                 {
                     _state = Pending;
                     _error = std::exception_ptr();
+                    _closed = false;
                 }
 
-                bool complete(std::exception_ptr error)
+                bool setReady()
                 {
                     if(_state != Pending)
                         return false;
 
                     _state = Ready;
-                    _error = error;
                     _ready.send();
                     return true;
+                }
+
+                bool setFailed(std::exception_ptr error)
+                {
+                    if(_state != Pending)
+                        return false;
+
+                    _error = error;
+                    return setReady();
+                }
+
+                bool setClosed()
+                {
+                    if(_state != Pending)
+                        return false;
+
+                    _closed = true;
+                    return setReady();
                 }
 
                 void finish()
                 {
                     _state = Idle;
+
+                    if(_closed)
+                    {
+                        _closed = false;
+                        throw IOError("WebSocket closed");
+                    }
 
                     if(_error)
                     {
@@ -158,6 +184,7 @@ class WebSocketChannel : public Channel
                 {
                     _state = Idle;
                     _error = std::exception_ptr();
+                    _closed = false;
                 }
 
                 // A ready result stays; the application may not have read it yet.
@@ -178,6 +205,7 @@ class WebSocketChannel : public Channel
                 Signal<>           _ready;
                 State              _state;
                 std::exception_ptr _error;
+                bool               _closed;
         };
 
         enum CloseState
@@ -215,7 +243,7 @@ class WebSocketChannel : public Channel
         void onInputError(std::exception_ptr error);
 
     private:
-        void enqueueData();
+        void enqueueData(bool isBegin);
 
         void enqueueControl(unsigned opcode, PendingFrame::Kind kind,
                             const char* payload, std::size_t n);
@@ -240,7 +268,7 @@ class WebSocketChannel : public Channel
 
         void discardOpenMessage();
 
-        void endStreamIfClosed();
+        void onCloseFinished();
 
         void onPassiveClose();
 
@@ -272,14 +300,12 @@ class WebSocketChannel : public Channel
         std::deque<PendingFrame> _outputQueue;
 
         bool               _inputPending;
-        bool               _messageOpen;
         Operation          _receive;
         MessageProgress    _receiveProgress;
         std::exception_ptr _inputFailure;
 
         bool               _outputPending;
         Operation          _send;
-        bool               _sendContinuation;
         MessageProgress    _sendProgress;
         std::exception_ptr _outputFailure;
 

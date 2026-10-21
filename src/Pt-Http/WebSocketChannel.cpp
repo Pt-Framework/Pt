@@ -6,9 +6,7 @@
 #include "WebSocketChannel.h"
 #include <Pt/Http/Stream.h>
 #include <Pt/Byteorder.h>
-#include <Pt/IOError.h>
 #include <Pt/System/EventLoop.h>
-#include <Pt/System/IOError.h>
 #include <cstring>
 #include <ctime>
 #include <exception>
@@ -114,12 +112,6 @@ bool isValidUtf8(const char* data, std::size_t n)
     return finishUtf8(need, error);
 }
 
-
-std::exception_ptr websocketClosedError()
-{
-    return std::make_exception_ptr( Pt::IOError("WebSocket closed") );
-}
-
 } // namespace
 
 
@@ -131,9 +123,7 @@ WebSocketChannel::WebSocketChannel()
 , _idleTimeout(0)
 , _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
 , _inputPending(false)
-, _messageOpen(false)
 , _outputPending(false)
-, _sendContinuation(false)
 , _closeState(CloseOpen)
 , _closeCode(0)
 {
@@ -157,14 +147,12 @@ void WebSocketChannel::setMaxMessageSize(std::size_t maxSize)
 void WebSocketChannel::resetState()
 {
     _inputPending = false;
-    _messageOpen = false;
     _receiveProgress = MessageProgress();
     _inputFailure = std::exception_ptr();
 
     _outputPending = false;
     _outputQueue.clear();
     _outputFailure = std::exception_ptr();
-    _sendContinuation = false;
     _sendProgress = MessageProgress();
 
     _send.cancel();
@@ -240,7 +228,9 @@ void WebSocketChannel::beginSend()
     if(_outputFailure)
         std::rethrow_exception(_outputFailure);
 
-    if( ! _sendContinuation )
+    bool isBegin = _sendProgress.finished() || ! _sendProgress.header();
+
+    if(isBegin)
     {
         WebSocketMessage::Type type = _outgoing.type();
         if(type != WebSocketMessage::Text && type != WebSocketMessage::Binary)
@@ -261,7 +251,7 @@ void WebSocketChannel::beginSend()
     _send.begin();
     _sendProgress = MessageProgress();
     _sendProgress.setHeader();
-    enqueueData();
+    enqueueData(isBegin);
 }
 
 
@@ -271,12 +261,7 @@ MessageProgress WebSocketChannel::endSend()
         throw std::logic_error("WebSocket send is not ready");
 
     _send.finish();
-
-    MessageProgress progress = _sendProgress;
-    if( progress.finished() )
-        _sendContinuation = false;
-
-    return progress;
+    return _sendProgress;
 }
 
 
@@ -290,10 +275,10 @@ void WebSocketChannel::beginReceive()
     if(_inputFailure)
         std::rethrow_exception(_inputFailure);
 
+    bool open = _receiveProgress.header() && ! _receiveProgress.finished();
     _receive.begin();
     _receiveProgress = MessageProgress();
-
-    if(_messageOpen)
+    if(open)
         _receiveProgress.setHeader();
 
     requestInput();
@@ -399,15 +384,11 @@ unsigned WebSocketChannel::echoableCloseCode(unsigned code) const
 
 void WebSocketChannel::discardOpenMessage()
 {
-    if( ! _messageOpen )
-        return;
-
     _incoming.discard();
-    _messageOpen = false;
 }
 
 
-void WebSocketChannel::endStreamIfClosed()
+void WebSocketChannel::onCloseFinished()
 {
     if(_closeState != CloseFinished)
         return;
@@ -415,7 +396,7 @@ void WebSocketChannel::endStreamIfClosed()
     if( ! _outputQueue.empty() || _outputPending )
         return;
 
-    _shutdown.complete( std::exception_ptr() );
+    _shutdown.setReady();
 
     if( isOpen() )
         Channel::close();
@@ -430,8 +411,8 @@ void WebSocketChannel::onPassiveClose()
     if(_closeCode == 0)
         setCloseCode(1006, std::string());
 
-    _receive.complete( websocketClosedError() );
-    _shutdown.complete( websocketClosedError() );
+    _receive.setClosed();
+    _shutdown.setClosed();
     Channel::close();
 }
 
@@ -494,7 +475,7 @@ void WebSocketChannel::onIdleTimeout()
 }
 
 
-void WebSocketChannel::enqueueData()
+void WebSocketChannel::enqueueData(bool isBegin)
 {
     // One fragment per send, so a queued control frame waits at most this long.
     PendingFrame frame;
@@ -503,9 +484,9 @@ void WebSocketChannel::enqueueData()
     frame.size = _outgoing.sendSize();
     if(frame.size > MaxFramePayload)
         frame.size = MaxFramePayload;
-    frame.opcode = _sendContinuation
-                 ? 0
-                 : ((_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02);
+    frame.opcode = isBegin
+                 ? ((_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02)
+                 : 0;
 
     _outputQueue.push_back(frame);
     requestOutput();
@@ -687,18 +668,11 @@ WebSocketChannel::InputAction WebSocketChannel::onPeerClose(const Frame& frame)
     discardOpenMessage();
 
     if(_closeState == CloseOpen)
-    {
-        _closeState = CloseFinished;
         enqueueClose( echoableCloseCode(_closeCode), std::string() );
-    }
-    else if(_closeState == CloseSent)
-    {
-        _closeState = CloseFinished;
-    }
 
-    _receive.complete( websocketClosedError() );
-
-    endStreamIfClosed();
+    _closeState = CloseFinished;
+    _receive.setClosed();
+    onCloseFinished();
     return Stop;
 }
 
@@ -718,21 +692,17 @@ WebSocketChannel::InputAction WebSocketChannel::onData(const Frame& frame)
                                     ? WebSocketMessage::Text
                                     : WebSocketMessage::Binary;
         _incoming.setTypeFromEngine(type);
-        _messageOpen = true;
     }
 
     _receiveProgress.setHeader();
 
     if( frame.fin() && frame.remaining() == 0 )
-    {
         _receiveProgress.setFinished();
-        _messageOpen = false;
-    }
 
     if(_wsbuf.in_avail() > 0)
         _receiveProgress.setBody();
 
-    if( _receive.complete( std::exception_ptr() ) )
+    if( _receive.setReady() )
         restartIdleTimer();
 
     return Stop;
@@ -746,7 +716,7 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
 
     setCloseCode(code, std::string());
     _inputFailure = error;
-    _receive.complete(error);
+    _receive.setFailed(error);
 
     _closeState = CloseFinished;
     enqueueClose(code, std::string());
@@ -759,8 +729,8 @@ void WebSocketChannel::onInputError(std::exception_ptr error)
         return;
 
     _inputFailure = error;
-    _receive.complete(error);
-    _shutdown.complete(error);
+    _receive.setFailed(error);
+    _shutdown.setFailed(error);
 }
 
 
@@ -809,7 +779,7 @@ void WebSocketChannel::onOutput()
         onFrameWritten(frame);
 
         requestOutput();
-        endStreamIfClosed();
+        onCloseFinished();
     }
     catch(...)
     {
@@ -824,16 +794,15 @@ void WebSocketChannel::onFrameWritten(const PendingFrame& frame)
     {
         case PendingFrame::Data:
             _outgoing.consume(frame.size);
-            _sendContinuation = true;
             _sendProgress.setBody();
             if(frame.fin && _outgoing.sendSize() == 0)
                 _sendProgress.setFinished();
-            if( _send.complete( std::exception_ptr() ) )
+            if( _send.setReady() )
                 restartIdleTimer();
             break;
 
         case PendingFrame::Ping:
-            _ping.complete( std::exception_ptr() );
+            _ping.setReady();
             break;
 
         case PendingFrame::Pong:
@@ -863,15 +832,15 @@ void WebSocketChannel::onOutputError(std::exception_ptr error)
     switch(frame.kind)
     {
         case PendingFrame::Data:
-            _send.complete(error);
+            _send.setFailed(error);
             break;
 
         case PendingFrame::Ping:
-            _ping.complete(error);
+            _ping.setFailed(error);
             break;
 
         case PendingFrame::Close:
-            _shutdown.complete(error);
+            _shutdown.setFailed(error);
             break;
 
         case PendingFrame::Pong:
