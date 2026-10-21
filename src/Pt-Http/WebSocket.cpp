@@ -219,7 +219,6 @@ void WebSocket::onReply(Client& client)
         _channel->pingReady() += Pt::slot(*this, &WebSocket::onPingReady);
         _channel->shutdownReady() += Pt::slot(*this, &WebSocket::onShutdownReady);
         _channel->pong() += Pt::slot(*this, &WebSocket::onPong);
-        _channel->closed() += Pt::slot(*this, &WebSocket::onClosed);
         finishHandshake(false);
     }
     catch(const std::exception&)
@@ -355,12 +354,6 @@ void WebSocket::onShutdownReady()
 void WebSocket::onPong(const std::string& payload)
 {
     _pong.send(*this, payload);
-}
-
-
-void WebSocket::onClosed()
-{
-    _closed.send(*this);
 }
 
 

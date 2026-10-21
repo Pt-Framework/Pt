@@ -6,6 +6,7 @@
 #include "WebSocketChannel.h"
 #include <Pt/Http/Stream.h>
 #include <Pt/Byteorder.h>
+#include <Pt/IOError.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/IOError.h>
 #include <cstring>
@@ -111,6 +112,12 @@ bool isValidUtf8(const char* data, std::size_t n)
         return false;
 
     return finishUtf8(need, error);
+}
+
+
+std::exception_ptr websocketClosedError()
+{
+    return std::make_exception_ptr( Pt::IOError("WebSocket closed") );
 }
 
 } // namespace
@@ -402,14 +409,16 @@ void WebSocketChannel::discardOpenMessage()
 
 void WebSocketChannel::endStreamIfClosed()
 {
-    if(_closeState != CloseExchanged)
+    if(_closeState != CloseFinished)
         return;
 
     if( ! _outputQueue.empty() || _outputPending )
         return;
 
     _shutdown.complete( std::exception_ptr() );
-    onPassiveClose();
+
+    if( isOpen() )
+        Channel::close();
 }
 
 
@@ -418,14 +427,18 @@ void WebSocketChannel::onPassiveClose()
     if( ! isOpen() )
         return;
 
+    if(_closeCode == 0)
+        setCloseCode(1006, std::string());
+
+    _receive.complete( websocketClosedError() );
+    _shutdown.complete( websocketClosedError() );
     Channel::close();
-    _closed.send();
 }
 
 
 void WebSocketChannel::onClose()
 {
-    if(_closeState != CloseExchanged)
+    if(_closeState != CloseFinished)
         setCloseCode(1006, std::string());
 
     resetState();
@@ -563,7 +576,7 @@ void WebSocketChannel::onInput()
         if(n == 0)
         {
             _inputPending = false;
-            onPeerEof();
+            onPassiveClose();
             return;
         }
 
@@ -675,13 +688,15 @@ WebSocketChannel::InputAction WebSocketChannel::onPeerClose(const Frame& frame)
 
     if(_closeState == CloseOpen)
     {
-        _closeState = CloseReceived;
+        _closeState = CloseFinished;
         enqueueClose( echoableCloseCode(_closeCode), std::string() );
     }
     else if(_closeState == CloseSent)
     {
-        _closeState = CloseExchanged;
+        _closeState = CloseFinished;
     }
+
+    _receive.complete( websocketClosedError() );
 
     endStreamIfClosed();
     return Stop;
@@ -733,7 +748,7 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
     _inputFailure = error;
     _receive.complete(error);
 
-    _closeState = CloseFailing;
+    _closeState = CloseFinished;
     enqueueClose(code, std::string());
 }
 
@@ -746,12 +761,6 @@ void WebSocketChannel::onInputError(std::exception_ptr error)
     _inputFailure = error;
     _receive.complete(error);
     _shutdown.complete(error);
-}
-
-
-void WebSocketChannel::onPeerEof()
-{
-    onPassiveClose();
 }
 
 
@@ -831,11 +840,7 @@ void WebSocketChannel::onFrameWritten(const PendingFrame& frame)
             break;
 
         case PendingFrame::Close:
-            if(_closeState == CloseReceived || _closeState == CloseFailing)
-                _closeState = CloseExchanged;
-
-            endStreamIfClosed();
-            break;
+             break;
     }
 }
 

@@ -70,10 +70,6 @@ class WebSocketChannel;
         socket.beginReceive();
     }
 
-    void onClosed(Pt::Http::WebSocket& socket)
-    {
-    }
-
     Pt::System::MainLoop loop;
     Pt::Net::Endpoint ep("localhost", 80);
     Pt::Http::Client client(loop, ep);
@@ -81,7 +77,6 @@ class WebSocketChannel;
     socket.connected() += Pt::slot(onConnected);
     socket.outputReady() += Pt::slot(onOutputReady);
     socket.inputReady() += Pt::slot(onInputReady);
-    socket.closed() += Pt::slot(onClosed);
     socket.beginConnect("/ws");
     loop.run();
     @endcode
@@ -133,24 +128,22 @@ class WebSocketChannel;
     is reported by %pong(). Neither is delivered through %incoming().
     %beginShutdown() enqueues a close frame with a status code and a
     reason, then keeps reading until the peer replies. %shutdownReady()
-    reports the completed handshake before %closed(); call
-    %endShutdown() from that signal to observe an error. A peer that
-    never starts a receive never replies, so %setIdleTimeout() is the
-    only bound on that wait. It is zero on this type until the
-    application sets it. A received
-    close is answered by the engine. %close() releases the stream and writes no frame. It
-    does not block. The destructor calls it. %beginSend() and
-    %beginReceive() then throw. %closed() is not emitted from the
-    destructor. %closeCode() and %closeReason() report the handshake
-    that ended the stream. No close frame leaves the code at 1006.
-    %closed() is emitted while this socket is still alive. The
-    stream has already cleared its channel pointer. Peer close, an
-    I/O end with no close frame, a close frame, a protocol violation,
-    and an idle timeout emit it. An I/O error does not: it is reported
-    to every outstanding operation, the stream stays open, and the
-    application calls %close(). Destruction of the stream detaches the
-    channel and does not emit it. It ends an outstanding send or
-    receive. The owner deletes this socket.
+    reports the completed handshake; call %endShutdown() from that
+    signal to observe an error. A peer that never starts a receive
+    never replies, so %setIdleTimeout() is the only bound on that
+    wait. It is zero on this type until the application sets it. A
+    received close is answered by the engine. The application learns
+    that the stream has ended from the outstanding operation: an
+    outstanding receive completes with an error, and an outstanding
+    shutdown completes through %shutdownReady(). Without either, a
+    peer close is not seen. A later %beginReceive() or
+    %beginShutdown() throws. %closeCode() and %closeReason() report
+    the handshake that ended the stream. No close frame leaves the
+    code at 1006. %close() releases the stream and writes no frame.
+    It does not block. The destructor calls it. %beginSend() and
+    %beginReceive() then throw. Destruction of the stream detaches
+    the channel. It ends an outstanding send or receive. The owner
+    deletes this socket.
 
     On the server the application does not construct this type. The
     server facade is %WebSocketSession, which exposes the same
@@ -254,8 +247,10 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
             @return Progress of this receive step.
 
-            @throw %std::logic_error if the receive has not completed
-            or the stream has ended.
+            @throw %std::logic_error if the receive has not completed.
+            @throw %std::exception if the stream ended or a previous
+            read failed. %closeCode() and %closeReason() report a
+            close handshake.
         */
         MessageProgress endReceive();
 
@@ -331,8 +326,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         /** @brief Returns the signal emitted when a shutdown operation completes.
 
             The stream is detached. Call %endShutdown() from the signal
-            to observe a close-handshake error. This signal is emitted
-            before %closed().
+            to observe a close-handshake error.
         */
         Pt::Signal<WebSocket&>& shutdownReady()
         { return _shutdownReady; }
@@ -345,21 +339,6 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         Pt::Signal<WebSocket&, const std::string&>& pong()
         { return _pong; }
-
-        /** @brief Returns the signal emitted when the stream ends.
-
-            Emitted while this socket is still alive, after an end
-            this socket did not start. Peer close, an idle timeout,
-            a read that returns no bytes, a protocol violation, and a
-            finished shutdown emit it. A finished shutdown emits
-            %shutdownReady() first. An I/O error does not emit it. It
-            runs %inputReady() or %outputReady() instead, the matching
-            end throws, and the stream stays open until the
-            application calls %close(). %close() and destruction do
-            not emit it.
-        */
-        Pt::Signal<WebSocket&>& closed()
-        { return _closed; }
 
         /** @brief Sets the stream timeout in milliseconds.
 
@@ -403,8 +382,6 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         void onPong(const std::string& payload);
 
-        void onClosed();
-
     private:
         Client* _client;
         WebSocketChannel* _channel;
@@ -419,7 +396,6 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         Pt::Signal<WebSocket&> _pingReady;
         Pt::Signal<WebSocket&> _shutdownReady;
         Pt::Signal<WebSocket&, const std::string&> _pong;
-        Pt::Signal<WebSocket&> _closed;
 };
 
 } // namespace Http

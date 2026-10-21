@@ -88,7 +88,6 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
     _channel->pingReady() += Pt::slot(*this, &WebSocketSession::onChannelPingReady);
     _channel->shutdownReady() += Pt::slot(*this, &WebSocketSession::onChannelShutdownReady);
     _channel->pong() += Pt::slot(*this, &WebSocketSession::onPong);
-    _channel->closed() += Pt::slot(*this, &WebSocketSession::onClosed);
 }
 
 
@@ -219,13 +218,6 @@ void WebSocketSession::onInputReady()
 void WebSocketSession::onOutputReady()
 {
     onOutput();
-}
-
-
-void WebSocketSession::onClosed()
-{
-    onClose();
-    _service->close(*this);
 }
 
 } // namespace Http

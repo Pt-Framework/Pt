@@ -40,25 +40,29 @@
         protected:
             virtual void onInput()
             {
-                Pt::Http::MessageProgress progress = endReceive();
-                if( ! progress.finished() )
+                try
                 {
-                    incoming().discard();
-                    beginReceive();
-                    return;
-                }
+                    Pt::Http::MessageProgress progress = endReceive();
+                    if( ! progress.finished() )
+                    {
+                        incoming().discard();
+                        beginReceive();
+                        return;
+                    }
 
-                incoming().clear();
-                beginReceive();
+                    incoming().clear();
+                    beginReceive();
+                }
+                catch(const std::exception&)
+                {
+                    close();
+                }
             }
 
             virtual void onOutput()
             {
                 endSend();
             }
-
-            virtual void onClose()
-            {}
     };
 
     typedef Pt::Http::BasicWebSocketService<EchoSession> EchoService;
@@ -114,11 +118,11 @@
     %beginSend(), %endSend(), %beginReceive() and %endReceive()
     directly. %onInput() runs when data bytes were received.
     %onOutput() runs when data bytes were sent. A ping or a pong
-    does not run those callbacks. %onClose() is the last look at
-    the session. Do not call %endReceive() or %endSend() from
-    %onClose(). %close() releases the stream and writes no frame.
-    The destructor calls it. The session does not own the stream or
-    the connection.
+    does not run those callbacks. The application learns that the
+    stream has ended from the outstanding receive or shutdown, and
+    calls %close() to release the session. %close() releases the
+    stream and writes no frame. The destructor calls it. The session
+    does not own the stream or the connection.
 
     %WebSocketServlet owns the live sessions of one service. The
     service owns the endpoint policy and the allocator. Construct the
@@ -162,8 +166,8 @@
     same allocator, as %onGetResponder() and %onReleaseResponder()
     must match. A pool, or any other detach, lives in the derived
     service. Return null from %onGetSession() to decline the upgrade.
-    The servlet releases a session through %releaseSession() after
-    %onClose() returns, and from its destructor for every remaining
+    The servlet releases a session through %releaseSession() when
+    %close() is called, and from its destructor for every remaining
     session it owns. The service does not keep a session list. It
     counts the sessions %getSession() returned.
 */

@@ -151,8 +151,7 @@ Failing the stream is not a close handshake. The frame stream is
 unusable from that point, so the engine completes an outstanding
 receive with that error, writes its close frame, and ends the stream
 without waiting for the peer to answer. `closeCode()` is the code of
-the violation and `closed()` reports the end. A later `beginReceive()`
-throws the same error.
+the violation. A later `beginReceive()` throws the same error.
 
 ## Control plane
 
@@ -204,7 +203,6 @@ void close();
 
 unsigned closeCode() const;
 const std::string& closeReason() const;
-Signal<WebSocket&>& closed();
 ```
 
 `shutdown()` enqueues a close frame. The code defaults to 1000. The
@@ -226,15 +224,16 @@ A received close is consumed. It does not become `incoming()` and
 does not emit `inputReady()`. If this side has not sent a close
 frame, the engine answers with `shutdown()`. A peer code that must
 not be written is not echoed. The reply is 1000. If a data message
-was open, its body is discarded and `onInput()` does not run for that
-incomplete message. After the reply has been written, the engine ends
-the stream. It does not call `close()` on the facade.
+was open, its body is discarded. After the reply has been written,
+the engine ends the stream. It does not call `close()` on the facade.
 
-`closed()` reports an end the application did not start. Peer close,
-an idle timeout, a finished shutdown, a protocol violation, and a read
-that returns no bytes emit it. An I/O error does not. `close()` and
-the destructor do not. After `closed()`, `endSend()` and
-`endReceive()` throw.
+The application learns that the stream has ended from the operation
+that is outstanding, or from the next one it starts. An outstanding
+receive completes with an error. An outstanding shutdown completes
+through its ready notification. Without either, a peer close, an idle
+timeout, and a read that returns no bytes are not seen. A later
+`beginReceive()` or `beginShutdown()` throws. `close()` and the
+destructor emit nothing.
 
 An I/O error on an outstanding receive or send stores the exception
 and leaves the stream open. The ready signal of that transfer runs,
@@ -254,19 +253,18 @@ local code was already set. No close frame leaves the code at 1006.
 `WebSocketSession` is the per-stream application object. It is a
 `Connectable`. It is not a responder.
 
-`onInput()`, `onOutput()`, and `onClose()` take no arguments. They
-do not receive the session or a socket again. `onInput()` runs when
-data bytes were received. `onOutput()` runs when data bytes were
-sent. Neither runs for a ping or a pong. `onClose()` runs while the
-session is still alive, after the stream ended without a call to
-`close()`. The service releases the session after `onClose()`
-returns.
+`onInput()` and `onOutput()` take no arguments. They do not receive
+the session or a socket again. `onInput()` runs when data bytes were
+received. `onOutput()` runs when data bytes were sent. Neither runs
+for a ping or a pong. The application learns that the stream has
+ended from the outstanding receive or shutdown, and calls `close()`
+to release the session.
 
-`WebSocketSession::close()` ends the stream and tells the service. It
-does not run `onClose()`. The destructor calls `close()`, not
-`shutdown()`, and does not release the session again. A domain object
-that holds a session reference drops it in `onClose()`, or before it
-calls `close()`.
+`WebSocketSession::close()` ends the stream and tells the service.
+The destructor calls `close()`, not `shutdown()`, and does not
+release the session again. A domain object that holds a session
+reference drops it before it calls `close()`, or when the outstanding
+operation reports the end.
 
 The session does not store the opening request or reply. Both are
 valid only for the call that creates the session. `protocol()` is the

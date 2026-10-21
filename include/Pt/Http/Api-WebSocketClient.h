@@ -33,16 +33,11 @@
         socket.beginReceive();
     }
 
-    void onClosed(Pt::Http::WebSocket& /*socket*/)
-    {
-    }
-
     Pt::System::MainLoop loop;
     Pt::Net::Endpoint ep("localhost", 80);
     Pt::Http::Client client(loop, ep);
     Pt::Http::WebSocket socket(client);
     socket.connected() += Pt::slot(onConnected);
-    socket.closed() += Pt::slot(onClosed);
     socket.setTimeout(10000);
     socket.beginConnect("/ws");
     loop.run();
@@ -67,14 +62,14 @@
     it writes.
 
     %close() releases the stream and writes no frame. The destructor
-    calls it. %closed() is not emitted from the destructor.
-    %closed() is emitted while this socket is still alive. The
-    stream has already cleared its channel pointer. Peer close, an
-    I/O end with no close frame, a close frame, and an idle timeout
-    emit it. Destruction of the stream detaches the channel and does
-    not emit it. It ends an outstanding send or receive. The owner
-    deletes this socket. %setTimeout() bounds I/O after the upgrade. The
-    handshake still uses the timeout of the client.
+    calls it. The application learns that the stream has ended from
+    the outstanding operation: an outstanding receive completes with
+    an error, and an outstanding shutdown completes through
+    %shutdownReady(). Without either, a peer close is not seen.
+    Destruction of the stream detaches the channel. It ends an
+    outstanding send or receive. The owner deletes this socket.
+    %setTimeout() bounds I/O after the upgrade. The handshake still
+    uses the timeout of the client.
 */
 
 #endif

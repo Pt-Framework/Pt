@@ -51,25 +51,29 @@ class WebSocketChannel;
         protected:
             virtual void onInput()
             {
-                Pt::Http::MessageProgress progress = endReceive();
-                if( ! progress.finished() )
+                try
                 {
-                    incoming().discard();
-                    beginReceive();
-                    return;
-                }
+                    Pt::Http::MessageProgress progress = endReceive();
+                    if( ! progress.finished() )
+                    {
+                        incoming().discard();
+                        beginReceive();
+                        return;
+                    }
 
-                incoming().clear();
-                beginReceive();
+                    incoming().clear();
+                    beginReceive();
+                }
+                catch(const std::exception&)
+                {
+                    close();
+                }
             }
 
             virtual void onOutput()
             {
                 endSend();
             }
-
-            virtual void onClose()
-            {}
     };
     @endcode
 
@@ -92,10 +96,11 @@ class WebSocketChannel;
     finished. A ping does not run %onInput(). A pong runs %onPong()
     and does not change %incoming(). %onOutput() runs when data bytes
     were sent. Call %endSend() and continue the send when progress is
-    not finished. %onClose() runs while this object is still alive,
-    after the stream has ended. Do not call %endReceive() or
-    %endSend() from %onClose(). The service releases this session
-    after %onClose() returns.
+    not finished. The application learns that the stream has ended
+    from the outstanding operation: %endReceive() throws, or
+    %onShutdownReady() runs. Call %close() from that callback to
+    release the session. The servlet also releases remaining
+    sessions when it is destroyed.
 
     %beginReceive() starts frame processing. Until then, incoming
     frames stay in the stream. Control frames are processed while a
@@ -136,9 +141,9 @@ class WebSocketChannel;
     a close frame and keeps reading until
     the peer replies. A peer that never starts a receive never replies,
     so the idle timeout copied from the %WebSocketService is the only
-    bound on that wait. %onShutdownReady() reports the completed handshake
-    before %onClose(); call %endShutdown() from that callback to observe
-    an error. %close() releases the stream and writes no frame. The destructor
+    bound on that wait. %onShutdownReady() reports the completed handshake;
+    call %endShutdown() from that callback to observe an error.
+    %close() releases the stream and writes no frame. The destructor
     calls it. %beginSend() and %beginReceive() then throw. No close
     frame leaves the code at 1006. %closeCode() and %closeReason()
     report the handshake that ended the stream.
@@ -226,8 +231,10 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             @return Progress of this receive step.
 
-            @throw %std::logic_error if the receive has not completed
-            or the stream has ended.
+            @throw %std::logic_error if the receive has not completed.
+            @throw %std::exception if the stream ended or a previous
+            read failed. %closeCode() and %closeReason() report a
+            close handshake.
         */
         MessageProgress endReceive();
 
@@ -269,8 +276,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             Does not block and emits nothing. The servlet releases
             this session. %beginSend() and %beginReceive() then throw.
-            No close frame leaves %closeCode() at 1006. %onClose()
-            does not run.
+            No close frame leaves %closeCode() at 1006.
         */
         void close();
 
@@ -300,7 +306,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Reports that the shutdown operation completed.
 
             The stream is detached. Call %endShutdown() to observe a
-            close-handshake error. This callback runs before %onClose().
+            close-handshake error.
         */
         virtual void onShutdownReady();
 
@@ -312,19 +318,6 @@ class PT_HTTP_API WebSocketSession : public Connectable
         */
         virtual void onPong(const std::string& payload);
 
-        /** @brief Called when the stream ended without %close().
-
-            This object is still alive. The service releases it after
-            this call returns. Peer close, an idle timeout, and a
-            finished shutdown run this directly, after %onShutdownReady().
-            Destruction of the
-            stream does not. An I/O error on an outstanding receive
-            or send runs %onInput() or %onOutput() first, and the
-            matching end throws, before this call. Do not call
-            %endReceive() or %endSend().
-        */
-        virtual void onClose() = 0;
-
     private:
         void onInputReady();
 
@@ -333,8 +326,6 @@ class PT_HTTP_API WebSocketSession : public Connectable
         void onChannelPingReady();
 
         void onChannelShutdownReady();
-
-        void onClosed();
 
     private:
         WebSocketService* _service;

@@ -85,9 +85,6 @@ class WebSocketChannel : public Channel
         Signal<>& shutdownReady()
         { return _shutdown.ready(); }
 
-        Signal<>& closed()
-        { return _closed; }
-
     protected:
         virtual void onClose();
 
@@ -187,9 +184,7 @@ class WebSocketChannel : public Channel
         {
             CloseOpen,
             CloseSent,
-            CloseReceived,
-            CloseFailing,
-            CloseExchanged
+            CloseFinished
         };
 
         enum InputAction
@@ -218,8 +213,6 @@ class WebSocketChannel : public Channel
         void onProtocolError(std::exception_ptr error, unsigned code);
 
         void onInputError(std::exception_ptr error);
-
-        void onPeerEof();
 
     private:
         void enqueueData();
@@ -300,7 +293,6 @@ class WebSocketChannel : public Channel
         CloseState  _closeState;
         unsigned    _closeCode;
         std::string _closeReason;
-        Signal<>    _closed;
 };
 
 } // namespace Http

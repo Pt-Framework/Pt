@@ -27,7 +27,8 @@ A received close is parsed. The channel stores the code and the
 reason, discards an open data message, and enqueues a reply close.
 The reply echoes a writable peer code. It does not always use 1000.
 After both closes have been exchanged and the output is idle, the
-channel ends the stream and emits `closed()`.
+channel completes an outstanding shutdown, completes an outstanding
+receive with an error, and ends the stream.
 
 ## WebSocket buffer {#websocket-buffer}
 
@@ -199,9 +200,8 @@ or match a pong.
 enqueues one close frame, and starts input for the peer close. It does
 not wait for `endSend` and does not cut the current data frame. A second
 shutdown throws. 1005, 1006, and 1015 throw and stay off the wire.
-Its ready signal runs after the stream detached, before `closed`. Then
-`endShutdown` returns the operation to idle or throws its stored I/O
-error. `closed` is a lifecycle notification, not shutdown completion.
+Its ready signal runs after the stream detached. Then `endShutdown`
+returns the operation to idle or throws its stored I/O error.
 
 ## Pong visible {#pong-visible}
 
@@ -217,7 +217,7 @@ A received close is consumed by the parser. It does not become
 a receive or a local shutdown holds the input. If this side has not sent a
 close frame, the engine enqueues a reply. A peer code that must not be
 written is not echoed. The reply is 1000. If a data message was open,
-its body is discarded and `onInput` does not run for that incomplete
-message. After the reply is written, the engine ends the stream. It
-does not call `close` on the facade. A peer close during shutdown
-completes that shutdown; one during receive only emits `closed`.
+its body is discarded. After the reply is written, the engine ends the
+stream. It does not call `close` on the facade. A peer close during
+shutdown completes that shutdown. A peer close during receive
+completes that receive with an error.
