@@ -825,13 +825,11 @@ class ProtocolSession : public Pt::Http::WebSocketSession
                         std::string& selected,
                         std::string& offered,
                         std::string& copied,
-                        Pt::System::EventLoop& exitLoop)
+                        Pt::System::EventLoop& /*exitLoop*/)
         : Pt::Http::WebSocketSession(service, stream, reply)
         , _selected(&selected)
-        , _exitLoop(&exitLoop)
         {
             *_selected = protocol();
-            _exitLoop->exit();
         }
 
         const std::string& copiedHeader() const
@@ -846,7 +844,6 @@ class ProtocolSession : public Pt::Http::WebSocketSession
 
     private:
         std::string* _selected;
-        Pt::System::EventLoop* _exitLoop;
         std::string _copied;
 };
 
@@ -2066,6 +2063,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onConnectedProtocol(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
+            _loop->exit();
         }
 
     protected:
