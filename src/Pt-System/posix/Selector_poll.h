@@ -165,18 +165,19 @@ class SelectorImpl : public Selector
             assert( h->isActive() );
 
             pollfd& pfds = _pollfds[h->id];
-            
-            pfds.events = 0;
 
             int flags = 0;
             if(pfds.revents & POLLIN)
               flags |= IONotifier::Read;
-            
+
             if(pfds.revents & POLLOUT)
               flags |= IONotifier::Write;
-            
+
             if(pfds.revents & POLLPRI)
               flags |= IONotifier::Except;
+
+            pfds.events = 0;
+            pfds.revents = 0;
 
             return flags;
         }
@@ -190,6 +191,7 @@ class SelectorImpl : public Selector
         {
             assert(h->id != IOHandle::InvalidId);
             _pollfds[h->id].events &= ~POLLIN;
+            _pollfds[h->id].revents &= ~POLLIN;
         }
 
         void beginWrite(IOHandle* h)
@@ -201,6 +203,7 @@ class SelectorImpl : public Selector
         {
             assert(h->id != IOHandle::InvalidId);
             _pollfds[h->id].events &= ~POLLOUT;
+            _pollfds[h->id].revents &= ~POLLOUT;
         }
 
         bool isReadable(IOHandle* h)
