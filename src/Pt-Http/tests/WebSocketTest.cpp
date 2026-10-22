@@ -825,11 +825,19 @@ class ProtocolSession : public Pt::Http::WebSocketSession
                         std::string& selected,
                         std::string& offered,
                         std::string& copied,
-                        Pt::System::EventLoop& /*exitLoop*/)
+                        bool& handshake,
+                        bool& upgraded,
+                        Pt::System::EventLoop& exitLoop)
         : Pt::Http::WebSocketSession(service, stream, reply)
         , _selected(&selected)
+        , _handshake(&handshake)
+        , _upgraded(&upgraded)
+        , _exitLoop(&exitLoop)
         {
             *_selected = protocol();
+            *_upgraded = true;
+            if(*_handshake)
+                _exitLoop->exit();
         }
 
         const std::string& copiedHeader() const
@@ -844,6 +852,9 @@ class ProtocolSession : public Pt::Http::WebSocketSession
 
     private:
         std::string* _selected;
+        bool* _handshake;
+        bool* _upgraded;
+        Pt::System::EventLoop* _exitLoop;
         std::string _copied;
 };
 
@@ -853,10 +864,14 @@ class ProtocolService : public Pt::Http::WebSocketService
         ProtocolService(std::string& selected,
                         std::string& offered,
                         std::string& copied,
+                        bool& handshake,
+                        bool& upgraded,
                         Pt::System::EventLoop& loop)
         : _selected(&selected)
         , _offered(&offered)
         , _copied(&copied)
+        , _handshake(&handshake)
+        , _upgraded(&upgraded)
         , _loop(&loop)
         , _opened(0)
         {}
@@ -876,7 +891,7 @@ class ProtocolService : public Pt::Http::WebSocketService
             *_copied = origin ? origin : "";
             ProtocolSession* session = new ProtocolSession(*this, stream, reply,
                                                            *_selected, *_offered, *_copied,
-                                                           *_loop);
+                                                           *_handshake, *_upgraded, *_loop);
             return session;
         }
 
@@ -889,6 +904,8 @@ class ProtocolService : public Pt::Http::WebSocketService
         std::string* _selected;
         std::string* _offered;
         std::string* _copied;
+        bool* _handshake;
+        bool* _upgraded;
         Pt::System::EventLoop* _loop;
         std::size_t _opened;
 };
@@ -1025,6 +1042,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _inputReady(false)
         , _pingReady(false)
         , _shutdownReady(false)
+        , _handshake(false)
+        , _upgraded(false)
         , _rejected(false)
         , _status(0)
         , _type(Pt::Http::WebSocketMessage::Unknown)
@@ -1086,6 +1105,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _inputReady = false;
             _pingReady = false;
             _shutdownReady = false;
+            _handshake = false;
+            _upgraded = false;
             _rejected = false;
             _status = 0;
             _limitSocket = 0;
@@ -2037,7 +2058,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep("127.0.0.1", 8026);
 
             Pt::Http::Server server(*_loop, ep);
-            ProtocolService service(_message, _offered, _copied, *_loop);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
             service.addProtocol("superchat");
             service.addProtocol("chat");
             Pt::Http::WebSocketServlet sockets(service);
@@ -2063,7 +2084,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onConnectedProtocol(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            _loop->exit();
+            _handshake = true;
+            if(_upgraded)
+                _loop->exit();
         }
 
     protected:
@@ -2072,7 +2095,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep("127.0.0.1", 8027);
 
             Pt::Http::Server server(*_loop, ep);
-            ProtocolService service(_message, _offered, _copied, *_loop);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
             Pt::Http::WebSocketServlet sockets(service);
 
             Pt::Http::MapUrl mapUrl("/ws", service);
@@ -2097,7 +2120,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep("127.0.0.1", 8028);
 
             Pt::Http::Server server(*_loop, ep);
-            ProtocolService service(_message, _offered, _copied, *_loop);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
             service.addProtocol("chat");
             Pt::Http::WebSocketServlet sockets(service);
 
@@ -2121,7 +2144,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep("127.0.0.1", 8029);
 
             Pt::Http::Server server(*_loop, ep);
-            ProtocolService service(_message, _offered, _copied, *_loop);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
             service.addProtocol("chat");
             Pt::Http::WebSocketServlet sockets(service);
 
@@ -2153,7 +2176,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep("127.0.0.1", 8030);
 
             Pt::Http::Server server(*_loop, ep);
-            ProtocolService service(_message, _offered, _copied, *_loop);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
             Pt::Http::WebSocketServlet sockets(service);
 
             Pt::Http::MapUrl mapUrl("/ws", service);
@@ -2435,6 +2458,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
         bool _inputReady;
         bool _pingReady;
         bool _shutdownReady;
+        bool _handshake;
+        bool _upgraded;
         bool _rejected;
         unsigned _status;
         Pt::Http::WebSocketMessage::Type _type;
