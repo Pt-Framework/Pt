@@ -1545,13 +1545,16 @@ class WebSocketTest : public Pt::Unit::TestSuite
         {
             _message = payload;
             _pong = true;
-            _loop->exit();
+            if(_pingReady)
+                _loop->exit();
         }
 
         void onPingReady(Pt::Http::WebSocket& socket)
         {
             socket.endPing();
             _pingReady = true;
+            if(_pong)
+                _loop->exit();
         }
 
         void onUnexpectedInput(Pt::Http::WebSocket&)
