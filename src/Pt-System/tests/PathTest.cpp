@@ -72,12 +72,9 @@ class PathTest : public Pt::Unit::TestSuite
             path += Pt::String("xyz\\");
             path += "123";
 
-            // all separators are normalized to native format
             std::string expected("abc");
             expected += Pt::System::Path::dirsep().narrow();
-            expected += "xyz";
-            expected += Pt::System::Path::dirsep().narrow();
-            expected += "123";
+            expected += "xyz\\123";
             PT_UNIT_ASSERT_EQUALS( path.toString(), expected.c_str() );
         }
 
