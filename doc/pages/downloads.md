@@ -22,7 +22,7 @@
 <p class="pt-download-note">
   Framework tags start with <code>v</code>.
   <code>prebuilt-*</code> archives are dependencies, not the framework.
-  Prebuilt bundles are fetched with Jam (<code>--fetch-prebuilt</code>),
+  Prebuilt bundles are fetched with Jam (<code>--with-prebuilt</code>),
   not offered as a download here.
 </p>
 

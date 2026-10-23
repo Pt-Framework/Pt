@@ -271,6 +271,27 @@ rule GetOption
 }
 
 #
+# Returns yes when an option is present in ARGV, with or without =value.
+#
+# PT_PREBUILT_LOCAL = [ HasOption --prebuilt-local ] ;
+#
+rule HasOption
+{
+    local value ;
+
+    for local arg in $(ARGV)
+    {
+        local _parts = [ SPLIT_BY_CHARACTERS $(arg) : "=" ] ;
+        if $(_parts[1]) = $(1)
+        {
+            value = yes ;
+        }
+    }
+
+    return $(value) ;
+}
+
+#
 # Replaces occurrences of a match string in a given string and returns the new
 # string. The match string can be a regex expression.
 #

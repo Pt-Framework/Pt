@@ -234,7 +234,7 @@ page is the in-site destination; GitHub Releases is not the only hop.
 
 Clone is the everyday path. Below it sits the current **framework
 release** (`v*`). Prebuilts are not offered as downloads; Jam fetches
-them with `--fetch-prebuilt`.
+them with `--with-prebuilt`.
 
 ```
 Pt  ›  Get Platinum*                                       ≡

@@ -16,8 +16,8 @@ deny = [
   "Edit(**/build/**)",
   "Read(**/tmp/**)",
   "Edit(**/tmp/**)",
-  "Read(**/deps/**)",
-  "Edit(**/deps/**)",
+  "Read(**/prebuilt/**)",
+  "Edit(**/prebuilt/**)",
   "Read(**/doc/website/htdocs/**)",
   "Edit(**/doc/website/htdocs/**)",
 

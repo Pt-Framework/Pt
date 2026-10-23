@@ -10,43 +10,38 @@ platform has its own subdirectory, for example @c prebuilt/windows-x64-msvc-md.
 Those files contain no absolute paths, so the directory can be moved or unpacked
 as a whole.
 
-Prebuilt libraries are used only when passing @c --with-prebuilt or
-@c --fetch-prebuilt. They do not replace the compiler, and they do not change
-the global compiler or linker flags. See @ref jam-usage for the rest of the
-configure and build process.
+Prebuilt libraries are used only when passing @c --with-prebuilt. They do not
+replace the compiler, and they do not change the global compiler or linker
+flags. See @ref jam-usage for the rest of the configure and build process.
 
 @section jam-prebuilt-page-Using Using Prebuilt Dependencies
 
-The usual first-time command downloads the matching bundle if needed, then
-configures the build:
+The usual command checks the matching bundle on the server, downloads it when
+the manifest changed, then configures the build:
 
 @code
-jam.bat configure --fetch-prebuilt
-./jam.sh configure --fetch-prebuilt
-@endcode
-
-If the bundle is already on disk, pass @c --with-prebuilt instead. Jam picks
-the platform folder from the current OS, CPU and toolset. The command fails if
-that folder is missing. No network access is performed.
-
-@code
+jam.bat configure --with-prebuilt
 ./jam.sh configure --with-prebuilt
 @endcode
 
-Either flag may take an explicit platform name. That pins the folder under
-@c prebuilt, still without downloading with @c --with-prebuilt:
+Jam picks the platform folder from the current OS, CPU and toolset. An explicit
+name pins the folder under @c prebuilt:
 
 @code
 ./jam.sh configure --with-prebuilt=windows-x64-msvc-md
 ./jam.sh configure --with-prebuilt=macos-arm64-clang
-./jam.sh configure --fetch-prebuilt=windows-x64-msvc-md
 @endcode
 
-@c --fetch-prebuilt already selects prebuilt libraries; @c --with-prebuilt is
-not required next to it. Do not combine @c --fetch-prebuilt with
-@c --with-prebuilt=name. Fetch always writes into the platform folder under
-@c prebuilt. A stale folder is refreshed only by @c --fetch-prebuilt;
-@c --with-prebuilt will not contact the network.
+@c --with-prebuilt always contacts the network. A dropped connection fails
+configure even when a cached folder is present. To use the tree on disk without
+checking the server, add @c --prebuilt-local. That flag does nothing on its
+own; it only modifies @c --with-prebuilt. A local-only name that is not on the
+server uses the same pair. The command fails if the folder is missing.
+
+@code
+./jam.sh configure --with-prebuilt --prebuilt-local
+./jam.sh configure --with-prebuilt=my-vendor --prebuilt-local
+@endcode
 
 The platform folder name is @c os-arch-toolset, with an extra suffix on
 Windows. Jam builds it from @c TARGET_OS, @c TARGET_OSPLAT and @c TOOLSET:
@@ -84,7 +79,7 @@ build zlib from sources, while still using the bundle for the other libraries:
 
 @code
 ./jam.sh configure --with-prebuilt -sZLIB_INCLUDES=/opt/zlib/include
-./jam.sh configure --fetch-prebuilt --with-inline-zlib
+./jam.sh configure --with-prebuilt --with-inline-zlib
 @endcode
 
 Flags such as @c --with-inline-zlib, @c --with-inline-libpng,
@@ -260,12 +255,12 @@ If any of those is set, pkg-config is skipped and the first link attempt uses
 the passed libraries. If all five are empty, pkg-config and name
 guessing run. On success the five @c *_ variables are set.
 
-@c Prebuilt-Import sets @c PREBUILT_ROOT and includes @c jam/packages.jam. It
+@c Prebuilt-Use sets @c PREBUILT_ROOT and includes @c jam/packages.jam. It
 does not touch @c C++FLAGS, @c LINKFLAGS, or @c ZLIB_*.
 
-For each package, if the bundle is loaded and sources in the tree were not
-requested, empty variables are filled from the bundle, then Configure is
-called once:
+For each package, if that package is in the bundle and sources in the tree
+were not requested, empty variables are filled from the bundle, then
+Configure is called once:
 
 @code
 Load zlib.jam ;
@@ -277,7 +272,7 @@ if --with-inline-zlib in $(ARGV)
 
 if ! $(WITH_BUILTIN_ZLIB)
 {
-    if $(PREBUILT_ROOT)
+    if [ Prebuilt-Has zlib ]
     {
         ZLIB_INCLUDES  ?= [ Prebuilt-Includes zlib ] ;
         ZLIB_C++FLAGS  ?= [ Prebuilt-CxxFlags zlib ] ;
@@ -355,12 +350,16 @@ file is @c jam/packages.jam. Toolset helpers stay in the project:
 
 - @c Prebuilt-Fetch ( url : dest ) \n
   Downloads @c url when the remote @c url.manifest differs from
-  @c dest/manifest. Replaces @c dest with the unzipped archive. The caller
-  must run @c Fetch-Configure first.
+  @c dest/manifest. Replaces @c dest with the unzipped archive. Any download
+  failure exits. The caller must run @c Fetch-Configure first.
 
-- @c Prebuilt-Import ( root ) \n
+- @c Prebuilt-Use ( dest ) \n
   Sets @c PREBUILT_ROOT, includes @c jam/packages.jam, and exits if
   @c PREBUILT_SCHEMA is not @c 1.
+
+- @c Prebuilt-Has ( package ) \n
+  Returns @c package when it is listed in @c PREBUILT_PACKAGES, empty
+  otherwise.
 
 - @c Prebuilt-Depends ( packages + ) \n
   Walks @c PREBUILT_PACKAGE_DEPENDS without duplicates. Named packages first,
@@ -433,9 +432,9 @@ redistributable. Release products use @c md. Local debug builds may place
 @section jam-prebuilt-page-Produce Creating Prebuilt Dependencies
 
 A bundle can be written by hand: fill the per-package directories, write
-@c jam/packages.jam, and point @c --with-prebuilt at the platform folder
-under @c prebuilt. Conan is not required. @c packages.jam is @c KEY = value
-assignments and is readable without running Jam.
+@c jam/packages.jam, and point @c --with-prebuilt --prebuilt-local at the
+platform folder under @c prebuilt. Conan is not required. @c packages.jam is
+@c KEY = value assignments and is readable without running Jam.
 
 A generator, including one driven by Conan in CI, writes the same layout:
 

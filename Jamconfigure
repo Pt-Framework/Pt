@@ -465,17 +465,15 @@ if ! $(WITH_ATOMICS)
 
 Load prebuilt.jam ;
 
+PT_WITH_PREBUILT = [ HasOption --with-prebuilt ] ;
 PT_PREBUILT_ID ?= [ GetOption --with-prebuilt ] ;
-PT_FETCH_PREBUILT_ID ?= [ GetOption --fetch-prebuilt ] ;
+PT_PREBUILT_LOCAL = [ HasOption --prebuilt-local ] ;
 PT_PREBUILT_RELEASE ?= prebuilt-1 ;
 
-if $(PT_FETCH_PREBUILT_ID)
-{
-    PT_PREBUILT_ID = $(PT_FETCH_PREBUILT_ID) ;
-}
+EchoOption --prebuilt-local : "Local prebuilt" : $(PT_PREBUILT_LOCAL:E="no") ;
+EchoOption --with-prebuilt=<id> : "Enable prebuilt" : $(PT_WITH_PREBUILT:E="no") ;
 
-if --with-prebuilt in $(ARGV) || $(PT_PREBUILT_ID) ||
-   --fetch-prebuilt in $(ARGV) || $(PT_FETCH_PREBUILT_ID)
+if $(PT_WITH_PREBUILT)
 {
     local abi ;
     if $(TARGET_OS:L) in nt win32 windows
@@ -489,23 +487,19 @@ if --with-prebuilt in $(ARGV) || $(PT_PREBUILT_ID) ||
 
     PT_PREBUILT_ID ?= [ Prebuilt-Tuple $(abi) ] ;
     PT_PREBUILT_ROOT = [ FDirName $(PT_TOP) prebuilt $(PT_PREBUILT_ID) ] ;
-    EchoOption --with-prebuilt : "Using prebuilt" : $(PT_PREBUILT_ID) ;
+    EchoOption PT_PREBUILT_ID : "Using prebuilt" ;
 
-    if --fetch-prebuilt in $(ARGV) || $(PT_FETCH_PREBUILT_ID)
+    if ! $(PT_PREBUILT_LOCAL)
     {
-        local prebuiltUrl = "https://github.com/Pt-Framework/Pt/releases/download/$(PT_PREBUILT_RELEASE)" ;
-        local url = [ FDirName $(prebuiltUrl) $(PT_PREBUILT_ID:S=.zip) ] ;
-        EchoOption --fetch-prebuilt : "Fetch prebuilt" : $(PT_PREBUILT_ID) ;
-
+        local base = "https://github.com/Pt-Framework/Pt/releases/download/$(PT_PREBUILT_RELEASE)" ;
+        local url = [ FDirName $(base) $(PT_PREBUILT_ID:S=.zip) ] ;
         Prebuilt-Fetch $(url) : $(PT_PREBUILT_ROOT) ;
+        EchoOption PT_PREBUILT_RELEASE : "Fetched prebuilt" ;
     }
 
     Configure PT_PREBUILT_ROOT ;
-}
 
-if $(PT_PREBUILT_ROOT)
-{
-    Prebuilt-Import $(PT_PREBUILT_ROOT) ;
+    Prebuilt-Use $(PT_PREBUILT_ROOT) ;
     local packages = [ Prebuilt-Packages ] ;
     PT_PREBUILT_BIN_FILES = [ Prebuilt-Bin $(packages) ] ;
     PT_PREBUILT_LIB_FILES = [ Prebuilt-Lib $(packages) ] ;
@@ -526,7 +520,7 @@ if --with-inline-zlib in $(ARGV)
 
 if ! $(WITH_BUILTIN_ZLIB)
 {
-    if $(PT_PREBUILT_ROOT)
+    if [ Prebuilt-Has zlib ]
     {
         ZLIB_INCLUDES  ?= [ Prebuilt-Includes zlib ] ;
         ZLIB_C++FLAGS  ?= [ Prebuilt-CxxFlags zlib ] ;
@@ -589,7 +583,7 @@ if --with-inline-libpng in $(ARGV)
 
 if ! $(WITH_BUILTIN_LIBPNG)
 {
-    if $(PT_PREBUILT_ROOT)
+    if [ Prebuilt-Has png ]
     {
         PNG_INCLUDES  ?= [ Prebuilt-Includes png ] ;
         PNG_C++FLAGS  ?= [ Prebuilt-CxxFlags png ] ;
@@ -643,7 +637,7 @@ if --with-inline-libjpeg in $(ARGV)
 
 if ! $(WITH_BUILTIN_LIBJPEG)
 {
-    if $(PT_PREBUILT_ROOT)
+    if [ Prebuilt-Has jpeg ]
     {
         JPEG_INCLUDES  ?= [ Prebuilt-Includes jpeg ] ;
         JPEG_C++FLAGS  ?= [ Prebuilt-CxxFlags jpeg ] ;
@@ -698,7 +692,7 @@ if --with-inline-freetype in $(ARGV)
 
 if ! $(WITH_BUILTIN_FREETYPE)
 {
-    if $(PT_PREBUILT_ROOT)
+    if [ Prebuilt-Has freetype ]
     {
         FREETYPE_INCLUDES  ?= [ Prebuilt-Includes freetype ] ;
         FREETYPE_C++FLAGS  ?= [ Prebuilt-CxxFlags freetype ] ;
@@ -782,7 +776,7 @@ if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
 
 if ! $(WITH_SSL)
 {
-    if $(PT_PREBUILT_ROOT)
+    if [ Prebuilt-Has openssl ]
     {
         SSL_INCLUDES  ?= [ Prebuilt-Includes openssl ] ;
         SSL_C++FLAGS  ?= [ Prebuilt-CxxFlags openssl ] ;

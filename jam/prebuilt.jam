@@ -79,14 +79,14 @@ rule Prebuilt-Fetch ( url : dest )
     return $(fetched) ;
 }
 
-# Prebuilt-Import <root>
+# Prebuilt-Use <dest>
 #
-# Sets PREBUILT_ROOT, includes <root>/jam/packages.jam, and checks
+# Sets PREBUILT_ROOT, includes <dest>/jam/packages.jam, and checks
 # PREBUILT_SCHEMA (must be 1).
 #
-rule Prebuilt-Import ( root )
+rule Prebuilt-Use ( dest )
 {
-    PREBUILT_ROOT = $(root) ;
+    PREBUILT_ROOT = $(dest) ;
 
     local jamfile = [ FDirName $(PREBUILT_ROOT) jam packages.jam ] ;
 
@@ -283,6 +283,22 @@ rule Prebuilt-LinkFlags ( packages + )
 rule Prebuilt-Packages
 {
     return $(PREBUILT_PACKAGES) ;
+}
+
+# Prebuilt-Has <package>
+#
+# Returns <package> when it is in PREBUILT_PACKAGES, empty otherwise.
+#
+rule Prebuilt-Has ( package )
+{
+    local result = ;
+
+    if $(package) in $(PREBUILT_PACKAGES)
+    {
+        result = $(package) ;
+    }
+
+    return $(result) ;
 }
 
 # Prebuilt-Files <directory>
