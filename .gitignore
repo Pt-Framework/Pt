@@ -10,8 +10,6 @@ jam*.bin
 # Documentation (generated)
 doc/html/
 doc/website/
-doc/websitev2/
-doc/websitev3/
 doc/latex/
 doxygen/
 *.tag
