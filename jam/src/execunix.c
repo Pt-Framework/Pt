@@ -109,9 +109,9 @@ void exec_init( void )
     int i;
     if ( globs.jobs > cmdtab_size )
     {
-        cmdtab = (cmdtab_t*)BJAM_REALLOC( cmdtab, globs.jobs * sizeof( *cmdtab ) );
+        cmdtab = (struct cmdtab_t *)BJAM_REALLOC( cmdtab, globs.jobs * sizeof( *cmdtab ) );
         memset( cmdtab + cmdtab_size, 0, ( globs.jobs - cmdtab_size ) * sizeof( *cmdtab ) );
-        wait_fds = (pollfd*)BJAM_REALLOC( wait_fds, WAIT_FDS_SIZE * sizeof ( *wait_fds ) );
+        wait_fds = (struct pollfd *)BJAM_REALLOC( wait_fds, WAIT_FDS_SIZE * sizeof ( *wait_fds ) );
         for ( i = cmdtab_size; i < globs.jobs; ++i )
         {
             GET_WAIT_FD( i )[ OUT ].fd = -1;

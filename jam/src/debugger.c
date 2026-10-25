@@ -1834,7 +1834,6 @@ static void debug_mi_format_breakpoint( int id )
     }
     /* fullname */
     /* times */
-    printf( "" );
     printf( "}" );
 }
 
