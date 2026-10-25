@@ -35,6 +35,7 @@
 #include "rules.h"
 #include "subst.h"
 #include "variable.h"
+#include "output.h"
 
 #ifdef OPT_HEADER_CACHE_EXT
 # include "hcache.h"
@@ -72,7 +73,7 @@ void headers( TARGET * t )
         return;
 
     if ( DEBUG_HEADER )
-        printf( "header scan %s\n", object_str( t->name ) );
+        out_printf( "header scan %s\n", object_str( t->name ) );
 
     /* Compile all regular expressions in HDRSCAN */
     iter = list_begin( hdrscan );
@@ -96,9 +97,10 @@ void headers( TARGET * t )
 
         if ( lol_get( frame->args, 1 ) )
         {
+            OBJECT * rulename = list_front( hdrrule );
             /* The third argument to HDRRULE is the bound name of $(<). */
             lol_add( frame->args, list_new( object_copy( t->boundname ) ) );
-            list_free( evaluate_rule( list_front( hdrrule ), frame ) );
+            list_free( evaluate_rule( bindrule( rulename, frame->module ), rulename, frame ) );
         }
 
         /* Clean up. */
@@ -126,8 +128,8 @@ LIST * headers1( LIST * l, OBJECT * file, int rec, regexp * re[] )
     ++count;
     if ( ( ( count == 100 ) || !( count % 1000 ) ) && DEBUG_MAKE )
     {
-        printf( "...patience...\n" );
-        fflush( stdout );
+        out_printf( "...patience...\n" );
+        out_flush();
     }
 #endif
 
@@ -137,7 +139,7 @@ LIST * headers1( LIST * l, OBJECT * file, int rec, regexp * re[] )
     if ( re_macros == 0 )
     {
         OBJECT * const re_str = object_new(
-            "^[     ]*#[    ]*include[  ]*([A-Za-z][A-Za-z0-9_]*).*$" );
+            "#[ \t]*include[ \t]*([A-Za-z][A-Za-z0-9_]*).*$" );
         re_macros = regex_compile( re_str );
         object_free( re_str );
     }
@@ -152,7 +154,7 @@ LIST * headers1( LIST * l, OBJECT * file, int rec, regexp * re[] )
             {
                 ( (char *)re[ i ]->endp[ 1 ] )[ 0 ] = '\0';
                 if ( DEBUG_HEADER )
-                    printf( "header found: %s\n", re[ i ]->startp[ 1 ] );
+                    out_printf( "header found: %s\n", re[ i ]->startp[ 1 ] );
                 l = list_push_back( l, object_new( re[ i ]->startp[ 1 ] ) );
             }
 
@@ -165,7 +167,7 @@ LIST * headers1( LIST * l, OBJECT * file, int rec, regexp * re[] )
             ( (char *)re_macros->endp[ 1 ] )[ 0 ] = '\0';
 
             if ( DEBUG_HEADER )
-                printf( "macro header found: %s", re_macros->startp[ 1 ] );
+                out_printf( "macro header found: %s", re_macros->startp[ 1 ] );
 
             macro_name = object_new( re_macros->startp[ 1 ] );
             header_filename = macro_header_get( macro_name );
@@ -173,14 +175,14 @@ LIST * headers1( LIST * l, OBJECT * file, int rec, regexp * re[] )
             if ( header_filename )
             {
                 if ( DEBUG_HEADER )
-                    printf( " resolved to '%s'\n", object_str( header_filename )
+                    out_printf( " resolved to '%s'\n", object_str( header_filename )
                         );
                 l = list_push_back( l, object_copy( header_filename ) );
             }
             else
             {
                 if ( DEBUG_HEADER )
-                    printf( " ignored !!\n" );
+                    out_printf( " ignored !!\n" );
             }
         }
     }
@@ -192,5 +194,5 @@ LIST * headers1( LIST * l, OBJECT * file, int rec, regexp * re[] )
 
 void regerror( char const * s )
 {
-    printf( "re error %s\n", s );
+    out_printf( "re error %s\n", s );
 }

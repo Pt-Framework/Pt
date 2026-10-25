@@ -10,13 +10,11 @@
 
 #include "jam.h"
 #include "lists.h"
+#include "output.h"
 
 #include <assert.h>
 
-
-struct freelist_node { struct freelist_node * next; };
-
-static struct freelist_node * freelist[ 32 ];  /* junkpile for list_dealloc() */
+static LIST * freelist[ 32 ];  /* junkpile for list_dealloc() */
 
 static unsigned get_bucket( unsigned size )
 {
@@ -30,9 +28,9 @@ static LIST * list_alloc( unsigned const size )
     unsigned const bucket = get_bucket( size );
     if ( freelist[ bucket ] )
     {
-        struct freelist_node * result = freelist[ bucket ];
-        freelist[ bucket ] = result->next;
-        return (LIST *)result;
+        LIST * result = freelist[ bucket ];
+        freelist[ bucket ] = result->impl.next;
+        return result;
     }
     return (LIST *)BJAM_MALLOC( sizeof( LIST ) + ( 1u << bucket ) *
         sizeof( OBJECT * ) );
@@ -42,7 +40,7 @@ static void list_dealloc( LIST * l )
 {
     unsigned size = list_length( l );
     unsigned bucket;
-    struct freelist_node * node = (struct freelist_node *)l;
+    LIST * node = l;
 
     if ( size == 0 ) return;
 
@@ -51,7 +49,7 @@ static void list_dealloc( LIST * l )
 #ifdef BJAM_NO_MEM_CACHE
     BJAM_FREE( node );
 #else
-    node->next = freelist[ bucket ];
+    node->impl.next = freelist[ bucket ];
     freelist[ bucket ] = node;
 #endif
 }
@@ -117,7 +115,7 @@ LIST * list_push_back( LIST * head, OBJECT * value )
     unsigned int i;
 
     if ( DEBUG_LISTS )
-        printf( "list > %s <\n", object_str( value ) );
+        out_printf( "list > %s <\n", object_str( value ) );
 
     /* If the size is a power of 2, reallocate. */
     if ( size == 0 )
@@ -321,10 +319,10 @@ void list_print( LIST * l )
     LISTITER iter = list_begin( l ), end = list_end( l );
     if ( iter != end )
     {
-        printf( "%s", object_str( list_item( iter ) ) );
+        out_printf( "%s", object_str( list_item( iter ) ) );
         iter = list_next( iter );
         for ( ; iter != end; iter = list_next( iter ) )
-            printf( " %s", object_str( list_item( iter ) ) );
+            out_printf( " %s", object_str( list_item( iter ) ) );
     }
 }
 
@@ -372,11 +370,11 @@ void list_done()
     int i;
     for ( i = 0; i < sizeof( freelist ) / sizeof( freelist[ 0 ] ); ++i )
     {
-        struct freelist_node * l = freelist[ i ];
+        LIST * l = freelist[ i ];
         while ( l )
         {
-            struct freelist_node * const tmp = l;
-            l = l->next;
+            LIST * const tmp = l;
+            l = l->impl.next;
             BJAM_FREE( tmp );
         }
     }
@@ -437,7 +435,7 @@ void lol_print( LOL * lol )
     for ( i = 0; i < lol->count; ++i )
     {
         if ( i )
-            printf( " : " );
+            out_printf( " : " );
         list_print( lol->list[ i ] );
     }
 }

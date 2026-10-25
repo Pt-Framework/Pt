@@ -10,6 +10,7 @@
 
 #include "jam.h"
 #include "execcmd.h"
+#include "output.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -117,5 +118,5 @@ int interrupted( void )
 void onintr( int disp )
 {
     ++intr;
-    printf( "...interrupted\n" );
+    out_printf( "...interrupted\n" );
 }

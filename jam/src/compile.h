@@ -17,13 +17,15 @@
 #ifndef COMPILE_DWA20011022_H
 #define COMPILE_DWA20011022_H
 
+#include "config.h"
 #include "frames.h"
 #include "lists.h"
 #include "object.h"
+#include "rules.h"
 
 void compile_builtins();
 
-LIST * evaluate_rule( OBJECT * rulename, FRAME * );
+LIST * evaluate_rule( RULE * rule, OBJECT * rulename, FRAME * );
 LIST * call_rule( OBJECT * rulename, FRAME * caller_frame, ... );
 
 /* Flags for compile_set(), etc */

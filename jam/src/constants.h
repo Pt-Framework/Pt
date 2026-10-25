@@ -11,6 +11,7 @@
 #ifndef BOOST_JAM_CONSTANTS_H
 #define BOOST_JAM_CONSTANTS_H
 
+#include "config.h"
 #include "object.h"
 
 void constants_init( void );
@@ -25,6 +26,7 @@ extern OBJECT * constant_ok;                        /* "ok" */
 extern OBJECT * constant_true;                      /* "true" */
 extern OBJECT * constant_name;                      /* "__name__" */
 extern OBJECT * constant_bases;                     /* "__bases__" */
+extern OBJECT * constant_class;                     /* "__class__" */
 extern OBJECT * constant_typecheck;                 /* ".typecheck" */
 extern OBJECT * constant_builtin;                   /* "(builtin)" */
 extern OBJECT * constant_HCACHEFILE;                /* "HCACHEFILE" */
@@ -68,5 +70,7 @@ extern OBJECT * constant_python;                    /* "__python__" */
 extern OBJECT * constant_python_interface;          /* "python_interface" */
 extern OBJECT * constant_extra_pythonpath;          /* "EXTRA_PYTHONPATH" */
 extern OBJECT * constant_MAIN_PYTHON;               /* "MAIN_PYTHON" */
+extern OBJECT * constant_FILE_ARCHIVESCAN;          /* "FILE_ARCHIVESCAN" */
+extern OBJECT * constant_BUILTIN_GLOB_ARCHIVE_BACK; /* "BUILTIN_GLOB_ARCHIVE_BACK" */
 
 #endif

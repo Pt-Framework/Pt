@@ -37,6 +37,7 @@
  */
 
 #include "jam.h"
+#include "output.h"
 #ifdef USE_EXECNT
 #include "execcmd.h"
 
@@ -97,9 +98,11 @@ static void string_new_from_argv( string * result, char const * const * argv );
 /* frees and renews the given string */
 static void string_renew( string * const );
 /* reports the last failed Windows API related error message */
-static void reportWindowsError( char const * const apiName );
+static void reportWindowsError( char const * const apiName, int slot );
 /* closes a Windows HANDLE and resets its variable to 0. */
 static void closeWinHandle( HANDLE * const handle );
+/* Adds the job index to the list of currently active jobs. */
+static void register_wait( int job_id );
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -108,6 +111,9 @@ static void closeWinHandle( HANDLE * const handle );
  * nul-terminator character.
  */
 #define MAX_RAW_COMMAND_LENGTH 32766
+
+ /* Communication buffers size */
+#define IO_BUFFER_SIZE ( 64 * 1024 )
 
 /* We hold handles for pipes used to communicate with child processes in two
  * element arrays indexed as follows.
@@ -119,7 +125,7 @@ static int intr_installed;
 
 
 /* The list of commands we run. */
-static struct
+static struct _cmdtab_t
 {
     /* Temporary command file used to execute the action when needed. */
     string command_file[ 1 ];
@@ -135,14 +141,27 @@ static struct
 
     PROCESS_INFORMATION pi;  /* running process information */
 
+    HANDLE wait_handle;
+
+    int flags;
+
     /* Function called when the command completes. */
     ExecCmdCallback func;
 
     /* Opaque data passed back to the 'func' callback. */
     void * closure;
-}
-cmdtab[ MAXJOBS ] = { { 0 } };
+} * cmdtab = NULL;
+static int cmdtab_size = 0;
 
+/* A thread-safe single element queue.  Used by the worker threads
+ * to signal the main thread that a process is completed.
+ */
+struct
+{
+    int job_index;
+    HANDLE read_okay;
+    HANDLE write_okay;
+} process_queue;
 
 /*
  * Execution unit tests.
@@ -198,6 +217,39 @@ void execnt_unit_test()
 #endif
 }
 
+/*
+ * exec_init() - global initialization
+ */
+void exec_init( void )
+{
+    if ( globs.jobs > cmdtab_size )
+    {
+        cmdtab = (struct _cmdtab_t *)BJAM_REALLOC( cmdtab, globs.jobs * sizeof( *cmdtab ) );
+        memset( cmdtab + cmdtab_size, 0, ( globs.jobs - cmdtab_size ) * sizeof( *cmdtab ) );
+        cmdtab_size = globs.jobs;
+    }
+    if ( globs.jobs > MAXIMUM_WAIT_OBJECTS && !process_queue.read_okay )
+    {
+        process_queue.read_okay = CreateEvent( NULL, FALSE, FALSE, NULL );
+        process_queue.write_okay = CreateEvent( NULL, FALSE, TRUE, NULL );
+    }
+}
+
+/*
+ * exec_done - free resources.
+ */
+void exec_done( void )
+{
+    if ( process_queue.read_okay )
+    {
+        CloseHandle( process_queue.read_okay );
+    }
+    if ( process_queue.write_okay )
+    {
+        CloseHandle( process_queue.write_okay );
+    }
+    BJAM_FREE( cmdtab );
+}
 
 /*
  * exec_check() - preprocess and validate the command
@@ -270,6 +322,7 @@ int exec_check
 void exec_cmd
 (
     string const * cmd_orig,
+    int flags,
     ExecCmdCallback func,
     void * closure,
     LIST * shell
@@ -290,12 +343,12 @@ void exec_cmd
 
     if ( DEBUG_EXECCMD )
         if ( is_raw_cmd )
-            printf( "Executing raw command directly\n" );
+            out_printf( "Executing raw command directly\n" );
         else
         {
-            printf( "Executing using a command file and the shell: " );
+            out_printf( "Executing using a command file and the shell: " );
             list_print( shell );
-            printf( "\n" );
+            out_printf( "\n" );
         }
 
     /* If we are running a raw command directly - trim its leading whitespaces
@@ -334,6 +387,8 @@ void exec_cmd
         intr_installed = 1;
         signal( SIGINT, onintr );
     }
+
+    cmdtab[ slot ].flags = flags;
 
     /* Save input data into the selected running commands table slot. */
     cmdtab[ slot ].func = func;
@@ -439,19 +494,23 @@ static void invoke_cmd( char const * const command, int const slot )
     sa.lpSecurityDescriptor = &sd;
     sa.bInheritHandle = TRUE;
 
+    /* Create output buffers. */
+    string_new( cmdtab[ slot ].buffer_out );
+    string_new( cmdtab[ slot ].buffer_err );
+
     /* Create pipes for communicating with the child process. */
     if ( !CreatePipe( &cmdtab[ slot ].pipe_out[ EXECCMD_PIPE_READ ],
-        &cmdtab[ slot ].pipe_out[ EXECCMD_PIPE_WRITE ], &sa, 0 ) )
+        &cmdtab[ slot ].pipe_out[ EXECCMD_PIPE_WRITE ], &sa, IO_BUFFER_SIZE ) )
     {
-        reportWindowsError( "CreatePipe" );
-        exit( EXITBAD );
+        reportWindowsError( "CreatePipe", slot );
+        return;
     }
     if ( globs.pipe_action && !CreatePipe( &cmdtab[ slot ].pipe_err[
         EXECCMD_PIPE_READ ], &cmdtab[ slot ].pipe_err[ EXECCMD_PIPE_WRITE ],
-        &sa, 0 ) )
+        &sa, IO_BUFFER_SIZE ) )
     {
-        reportWindowsError( "CreatePipe" );
-        exit( EXITBAD );
+        reportWindowsError( "CreatePipe", slot );
+        return;
     }
 
     /* Set handle inheritance off for the pipe ends the parent reads from. */
@@ -475,12 +534,8 @@ static void invoke_cmd( char const * const command, int const slot )
     /* Let the child inherit stdin, as some commands assume it is available. */
     si.hStdInput = GetStdHandle( STD_INPUT_HANDLE );
 
-    /* Create output buffers. */
-    string_new( cmdtab[ slot ].buffer_out );
-    string_new( cmdtab[ slot ].buffer_err );
-
     if ( DEBUG_EXECCMD )
-        printf( "Command string for CreateProcessA(): '%s'\n", command );
+        out_printf( "Command string for CreateProcessA(): '%s'\n", command );
 
     /* Run the command by creating a sub-process for it. */
     if ( !CreateProcessA(
@@ -495,9 +550,11 @@ static void invoke_cmd( char const * const command, int const slot )
         &si                     ,  /* startup info                         */
         &cmdtab[ slot ].pi ) )     /* child process info, if created       */
     {
-        reportWindowsError( "CreateProcessA" );
-        exit( EXITBAD );
+        reportWindowsError( "CreateProcessA", slot );
+        return;
     }
+
+    register_wait( slot );
 }
 
 
@@ -520,7 +577,7 @@ static int raw_maxline()
 
 static int maxline()
 {
-    static result;
+    static int result;
     if ( !result ) result = raw_maxline();
     return result;
 }
@@ -695,66 +752,62 @@ static void record_times( HANDLE const process, timing_info * const time )
 }
 
 
-#define IO_BUFFER_SIZE ( 16 * 1024 )
-
 static char ioBuffer[ IO_BUFFER_SIZE + 1 ];
 
+#define FORWARD_PIPE_NONE 0
+#define FORWARD_PIPE_STDOUT 1
+#define FORWARD_PIPE_STDERR 2
 
 static void read_pipe
 (
     HANDLE   in,  /* the pipe to read from */
-    string * out
+    string * out,
+    int      forwarding_mode
 )
 {
     DWORD bytesInBuffer = 0;
     DWORD bytesAvailable = 0;
+    int i;
 
-    do
+    for (;;)
     {
         /* check if we have any data to read */
-        if ( !PeekNamedPipe( in, ioBuffer, IO_BUFFER_SIZE, &bytesInBuffer,
-            &bytesAvailable, NULL ) )
-            bytesAvailable = 0;
+        if ( !PeekNamedPipe( in, NULL, IO_BUFFER_SIZE, NULL,
+            &bytesAvailable, NULL ) || bytesAvailable == 0 )
+            return;
 
-        /* read in the available data */
-        if ( bytesAvailable > 0 )
+        /* we only read in the available bytes, to avoid blocking */
+        if ( !ReadFile( in, ioBuffer, bytesAvailable <= IO_BUFFER_SIZE ?
+            bytesAvailable : IO_BUFFER_SIZE, &bytesInBuffer, NULL ) || bytesInBuffer == 0 )
+            return;
+
+        /* Clean up some illegal chars. */
+        for ( i = 0; i < bytesInBuffer; ++i )
         {
-            /* we only read in the available bytes, to avoid blocking */
-            if ( ReadFile( in, ioBuffer, bytesAvailable <= IO_BUFFER_SIZE ?
-                bytesAvailable : IO_BUFFER_SIZE, &bytesInBuffer, NULL ) )
-            {
-                if ( bytesInBuffer > 0 )
-                {
-                    /* Clean up some illegal chars. */
-                    int i;
-                    for ( i = 0; i < bytesInBuffer; ++i )
-                    {
-                        if ( ( (unsigned char)ioBuffer[ i ] < 1 ) )
-                            ioBuffer[ i ] = '?';
-                    }
-                    /* Null, terminate. */
-                    ioBuffer[ bytesInBuffer ] = '\0';
-                    /* Append to the output. */
-                    string_append( out, ioBuffer );
-                    /* Subtract what we read in. */
-                    bytesAvailable -= bytesInBuffer;
-                }
-                else
-                {
-                    /* Likely read a error, bail out. */
-                    bytesAvailable = 0;
-                }
-            }
-            else
-            {
-                /* Definitely read a error, bail out. */
-                bytesAvailable = 0;
-            }
+            if ( ( (unsigned char)ioBuffer[ i ] < 1 ) )
+                ioBuffer[ i ] = '?';
         }
+        /* Null, terminate. */
+        ioBuffer[ bytesInBuffer ] = '\0';
+        /* Append to the output. */
+        string_append( out, ioBuffer );
+        /* Copy it to our output if appropriate */
+        if ( forwarding_mode == FORWARD_PIPE_STDOUT )
+            out_data( ioBuffer );
+        else if ( forwarding_mode == FORWARD_PIPE_STDERR )
+            err_data( ioBuffer );
     }
-    while ( bytesAvailable > 0 );
 }
 
+#define EARLY_OUTPUT( cmd ) \
+    ( ! ( cmd.flags & EXEC_CMD_QUIET ) )
+
+#define FORWARD_STDOUT( c )                                 \
+    ( ( EARLY_OUTPUT( c ) && ( globs.pipe_action != 2 ) ) ? \
+        FORWARD_PIPE_STDOUT : FORWARD_PIPE_NONE )
+#define FORWARD_STDERR( c )                                 \
+    ( ( EARLY_OUTPUT( c ) && ( globs.pipe_action & 2 ) ) ?  \
+        FORWARD_PIPE_STDERR : FORWARD_PIPE_NONE )
 
 static void read_output()
 {
@@ -765,14 +818,48 @@ static void read_output()
             /* Read stdout data. */
             if ( cmdtab[ i ].pipe_out[ EXECCMD_PIPE_READ ] )
                 read_pipe( cmdtab[ i ].pipe_out[ EXECCMD_PIPE_READ ],
-                    cmdtab[ i ].buffer_out );
+                    cmdtab[ i ].buffer_out, FORWARD_STDOUT( cmdtab[ i ] ) );
             /* Read stderr data. */
             if ( cmdtab[ i ].pipe_err[ EXECCMD_PIPE_READ ] )
                 read_pipe( cmdtab[ i ].pipe_err[ EXECCMD_PIPE_READ ],
-                    cmdtab[ i ].buffer_err );
+                    cmdtab[ i ].buffer_err, FORWARD_STDERR( cmdtab[ i ] ) );
         }
 }
 
+static void CALLBACK try_wait_callback( void * data, BOOLEAN is_timeout )
+{
+    struct _cmdtab_t * slot = ( struct _cmdtab_t * )data;
+    WaitForSingleObject( process_queue.write_okay, INFINITE );
+    process_queue.job_index = slot - cmdtab;
+    assert( !is_timeout );
+    SetEvent( process_queue.read_okay );
+    /* Okay.  Non-blocking. */
+    UnregisterWait( slot->wait_handle );
+}
+
+static int try_wait_impl( DWORD timeout )
+{
+    int job_index;
+    int timed_out;
+    int res = WaitForSingleObject( process_queue.read_okay, timeout );
+    if ( res != WAIT_OBJECT_0 )
+        return -1;
+    job_index = process_queue.job_index;
+    SetEvent( process_queue.write_okay );
+    return job_index;
+}
+
+static void register_wait( int job_id )
+{
+    if ( globs.jobs > MAXIMUM_WAIT_OBJECTS )
+    {
+        HANDLE ignore;
+        RegisterWaitForSingleObject( &cmdtab[ job_id ].wait_handle,
+            cmdtab[ job_id ].pi.hProcess,
+            &try_wait_callback, &cmdtab[ job_id ], INFINITE,
+            WT_EXECUTEDEFAULT | WT_EXECUTEONLYONCE );
+    }
+}
 
 /*
  * Waits for a single child process command to complete, or the timeout,
@@ -782,33 +869,37 @@ static void read_output()
 
 static int try_wait( int const timeoutMillis )
 {
-    int i;
-    int num_active;
-    int wait_api_result;
-    HANDLE active_handles[ MAXJOBS ];
-    int active_procs[ MAXJOBS ];
-
-    /* Prepare a list of all active processes to wait for. */
-    for ( num_active = 0, i = 0; i < globs.jobs; ++i )
-        if ( cmdtab[ i ].pi.hProcess )
-        {
-            active_handles[ num_active ] = cmdtab[ i ].pi.hProcess;
-            active_procs[ num_active ] = i;
-            ++num_active;
-        }
-
-    /* Wait for a child to complete, or for our timeout window to expire. */
-    wait_api_result = WaitForMultipleObjects( num_active, active_handles,
-        FALSE, timeoutMillis );
-    if ( ( WAIT_OBJECT_0 <= wait_api_result ) &&
-        ( wait_api_result < WAIT_OBJECT_0 + num_active ) )
+    if ( globs.jobs <= MAXIMUM_WAIT_OBJECTS )
     {
-        /* Terminated process detected - return its index. */
-        return active_procs[ wait_api_result - WAIT_OBJECT_0 ];
+        int i;
+        HANDLE active_handles[ MAXIMUM_WAIT_OBJECTS ];
+        int job_ids[ MAXIMUM_WAIT_OBJECTS ];
+        DWORD num_handles = 0;
+        DWORD wait_api_result;
+        for ( i = 0; i < globs.jobs; ++i )
+        {
+            if( cmdtab[ i ].pi.hProcess )
+            {
+                job_ids[ num_handles ] = i;
+                active_handles[ num_handles ] = cmdtab[ i ].pi.hProcess;
+                ++num_handles;
+            }
+        }
+        wait_api_result = WaitForMultipleObjects( num_handles, active_handles, FALSE, timeoutMillis );
+        if ( WAIT_OBJECT_0 <= wait_api_result && wait_api_result < WAIT_OBJECT_0 + globs.jobs )
+        {
+            return job_ids[ wait_api_result - WAIT_OBJECT_0 ];
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        return try_wait_impl( timeoutMillis );
     }
 
-    /* Timeout. */
-    return -1;
 }
 
 
@@ -1159,7 +1250,7 @@ static char const * prepare_command_file( string const * command, int slot )
     FILE * const f = open_command_file( slot );
     if ( !f )
     {
-        printf( "failed to write command file!\n" );
+        err_printf( "failed to write command file!\n" );
         exit( EXITBAD );
     }
     fputs( command->value, f );
@@ -1175,10 +1266,10 @@ static char const * prepare_command_file( string const * command, int slot )
 static int get_free_cmdtab_slot()
 {
     int slot;
-    for ( slot = 0; slot < MAXJOBS; ++slot )
+    for ( slot = 0; slot < globs.jobs; ++slot )
         if ( !cmdtab[ slot ].pi.hProcess )
             return slot;
-    printf( "no slots for child!\n" );
+    err_printf( "no slots for child!\n" );
     exit( EXITBAD );
 }
 
@@ -1195,7 +1286,9 @@ static void string_new_from_argv( string * result, char const * const * argv )
     while ( *argv )
     {
         string_push_back( result, ' ' );
+        string_push_back( result, '"' );
         string_append( result, *(argv++) );
+        string_push_back( result, '"' );
     }
 }
 
@@ -1204,9 +1297,12 @@ static void string_new_from_argv( string * result, char const * const * argv )
  * Reports the last failed Windows API related error message.
  */
 
-static void reportWindowsError( char const * const apiName )
+static void reportWindowsError( char const * const apiName, int slot )
 {
     char * errorMessage;
+    char buf[24];
+    string * err_buf;
+    timing_info time;
     DWORD const errorCode = GetLastError();
     DWORD apiResult = FormatMessageA(
         FORMAT_MESSAGE_ALLOCATE_BUFFER |  /* __in      DWORD dwFlags       */
@@ -1218,14 +1314,49 @@ static void reportWindowsError( char const * const apiName )
         (LPSTR)&errorMessage,             /* __out     LPTSTR lpBuffer     */
         0,                                /* __in      DWORD nSize         */
         0 );                              /* __in_opt  va_list * Arguments */
+    
+    /* Build a message as if the process had written to stderr. */
+    if ( globs.pipe_action )
+        err_buf = cmdtab[ slot ].buffer_err;
+    else
+        err_buf = cmdtab[ slot ].buffer_out;
+    string_append( err_buf, apiName );
+    string_append( err_buf, "() Windows API failed: " );
+    sprintf( buf, "%d", errorCode );
+    string_append( err_buf, buf );
+
     if ( !apiResult )
-        printf( "%s() Windows API failed: %d.\n", apiName, errorCode );
+        string_append( err_buf, ".\n" );
     else
     {
-        printf( "%s() Windows API failed: %d - %s\n", apiName, errorCode,
-            errorMessage );
+        string_append( err_buf, " - " );
+        string_append( err_buf, errorMessage );
+        /* Make sure that the buffer is terminated with a newline */
+        if( err_buf->value[ err_buf->size - 1 ] != '\n' )
+            string_push_back( err_buf, '\n' );
         LocalFree( errorMessage );
     }
+
+    /* Since the process didn't actually start, use a blank timing_info. */
+    time.system = 0;
+    time.user = 0;
+    timestamp_current( &time.start );
+    timestamp_current( &time.end );
+
+    /* Invoke the callback with a failure status. */
+    (*cmdtab[ slot ].func)( cmdtab[ slot ].closure, EXEC_CMD_FAIL, &time,
+        cmdtab[ slot ].buffer_out->value, cmdtab[ slot ].buffer_err->value,
+        EXIT_OK );
+    
+    /* Clean up any handles that were opened. */
+    closeWinHandle( &cmdtab[ slot ].pi.hProcess );
+    closeWinHandle( &cmdtab[ slot ].pi.hThread );
+    closeWinHandle( &cmdtab[ slot ].pipe_out[ EXECCMD_PIPE_READ ] );
+    closeWinHandle( &cmdtab[ slot ].pipe_out[ EXECCMD_PIPE_WRITE ] );
+    closeWinHandle( &cmdtab[ slot ].pipe_err[ EXECCMD_PIPE_READ ] );
+    closeWinHandle( &cmdtab[ slot ].pipe_err[ EXECCMD_PIPE_WRITE ] );
+    string_renew( cmdtab[ slot ].buffer_out );
+    string_renew( cmdtab[ slot ].buffer_err );
 }
 
 

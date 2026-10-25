@@ -11,6 +11,7 @@
 #ifndef BOOST_JAM_HASH_H
 #define BOOST_JAM_HASH_H
 
+#include "config.h"
 #include "object.h"
 
 /*
@@ -69,6 +70,7 @@ struct hashstats {
     int tab_size;
     int item_size;
     int sets;
+    int num_hashes;
 };
 
 void hashstats_init( struct hashstats * stats );

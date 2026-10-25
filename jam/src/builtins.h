@@ -7,6 +7,7 @@
 #ifndef JAM_BUILTINS_H
 # define JAM_BUILTINS_H
 
+# include "config.h"
 # include "frames.h"
 
 /*
@@ -20,6 +21,8 @@ void init_regex();
 void init_property_set();
 void init_sequence();
 void init_order();
+
+void property_set_done();
 
 LIST *builtin_calc( FRAME * frame, int flags );
 LIST *builtin_depends( FRAME * frame, int flags );
@@ -61,33 +64,27 @@ LIST *builtin_pad( FRAME * frame, int flags );
 LIST *builtin_precious( FRAME * frame, int flags );
 LIST *builtin_self_path( FRAME * frame, int flags );
 LIST *builtin_makedir( FRAME * frame, int flags );
+LIST *builtin_readlink( FRAME * frame, int flags );
+LIST *builtin_glob_archive( FRAME * frame, int flags );
+LIST *builtin_debug_print_helper( FRAME * frame, int flags );
 
-/* Pt extension:
- */
-LIST *builtin_writefile(FRAME *args, int flags);
+/* Pt extension: */
+LIST *builtin_writefile( FRAME * frame, int flags );
 
-/* Pt extension:
- */
-LIST *builtin_readfile(FRAME *frame, int flags);
+/* Pt extension: */
+LIST *builtin_readfile( FRAME * frame, int flags );
 
-/* Pt extension:
- */
-LIST *builtin_file_is_dir(FRAME *frame, int flags);
-LIST *builtin_file_exists(FRAME *frame, int flags);
-LIST *builtin_file_remove(FRAME *frame, int flags);
-LIST *builtin_file_rename(FRAME *frame, int flags);
-LIST *builtin_file_mkdir(FRAME *frame, int flags);
-LIST *builtin_file_rmdir(FRAME *frame, int flags);
-LIST *builtin_replace(FRAME *frame, int flags);
+/* Pt extension: */
+LIST *builtin_file_is_dir( FRAME * frame, int flags );
+LIST *builtin_file_exists( FRAME * frame, int flags );
+LIST *builtin_file_remove( FRAME * frame, int flags );
+LIST *builtin_file_rename( FRAME * frame, int flags );
+LIST *builtin_file_mkdir( FRAME * frame, int flags );
+LIST *builtin_file_rmdir( FRAME * frame, int flags );
+LIST *builtin_replace( FRAME * frame, int flags );
 
-/* Pt extension: OBSOLETE
- */
-LIST *builtin_escape(FRAME *args, int flags);
-
-/* Pt extension:
- */
+/* Pt extension: */
 LIST *builtin_exec( FRAME * frame, int flags );
-
 
 void backtrace( FRAME *frame );
 extern int last_update_now_status;

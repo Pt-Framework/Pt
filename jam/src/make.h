@@ -11,12 +11,13 @@
 #ifndef MAKE_SW20111118_H
 #define MAKE_SW20111118_H
 
+#include "config.h"
 #include "lists.h"
 #include "object.h"
 #include "rules.h"
 
 int make( LIST * targets, int anyhow );
-int make1( TARGET * const t );
+int make1( LIST * t );
 
 typedef struct {
     int temp;

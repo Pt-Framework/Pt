@@ -8,6 +8,7 @@
 #ifndef STRINGS_DWA20011024_H
 #define STRINGS_DWA20011024_H
 
+#include "config.h"
 #include <stddef.h>
 
 typedef struct string
@@ -31,6 +32,7 @@ void string_reserve( string *, size_t );
 void string_truncate( string *, size_t );
 void string_pop_back( string * );
 char string_back( string * );
+void string_rtrim( string * );
 void string_unit_test();
 
 #endif

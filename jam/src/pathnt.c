@@ -16,12 +16,21 @@
  * pathnt.c - NT specific path manipulation support
  */
 
+#include "jam.h"
 #include "pathsys.h"
-
 #include "hash.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+
+#ifdef OS_CYGWIN
+# include <cygwin/version.h>
+# include <sys/cygwin.h>
+# ifdef CYGWIN_VERSION_CYGWIN_CONV
+#  include <errno.h>
+# endif
+# include <windows.h>
+#endif
 
 #include <assert.h>
 #include <stdlib.h>
@@ -36,6 +45,7 @@ typedef struct path_key_entry
 {
     OBJECT * path;
     OBJECT * key;
+    int exists;
 } path_key_entry;
 
 static struct hash * path_key_cache;
@@ -84,23 +94,24 @@ void path_get_temp_path_( string * buffer )
  *  - path_key_cache path/key mapping cache object already initialized
  */
 
-static void canonicWindowsPath( char const * const path, int const path_length,
+static int canonicWindowsPath( char const * const path, int const path_length,
     string * const out )
 {
     char const * last_element;
     unsigned long saved_size;
     char const * p;
+    int missing_parent;
 
     /* This is only called via path_key(), which initializes the cache. */
     assert( path_key_cache );
 
     if ( !path_length )
-        return;
+        return 1;
 
     if ( path_length == 1 && path[ 0 ] == '\\' )
     {
         string_push_back( out, '\\' );
-        return;
+        return 1;
     }
 
     if ( path[ 1 ] == ':' &&
@@ -110,7 +121,7 @@ static void canonicWindowsPath( char const * const path, int const path_length,
         string_push_back( out, toupper( path[ 0 ] ) );
         string_push_back( out, ':' );
         string_push_back( out, '\\' );
-        return;
+        return 1;
     }
 
     /* Find last '\\'. */
@@ -121,6 +132,8 @@ static void canonicWindowsPath( char const * const path, int const path_length,
     if ( p == path ||
         p == path + 2 && path[ 1 ] == ':' )
         ++p;
+
+    missing_parent = 0;
 
     if ( p >= path )
     {
@@ -133,7 +146,10 @@ static void canonicWindowsPath( char const * const path, int const path_length,
         if ( !found )
         {
             result->path = dir_obj;
-            canonicWindowsPath( dir, dir_length, out );
+            if ( canonicWindowsPath( dir, dir_length, out ) )
+                result->exists = 1;
+            else
+                result->exists = 0;
             result->key = object_new( out->value );
         }
         else
@@ -141,6 +157,8 @@ static void canonicWindowsPath( char const * const path, int const path_length,
             object_free( dir_obj );
             string_append( out, object_str( result->key ) );
         }
+        if ( !result->exists )
+            missing_parent = 1;
     }
 
     if ( out->size && out->value[ out->size - 1 ] != '\\' )
@@ -149,6 +167,7 @@ static void canonicWindowsPath( char const * const path, int const path_length,
     saved_size = out->size;
     string_append_range( out, last_element, path + path_length );
 
+    if ( !missing_parent )
     {
         char const * const n = last_element;
         int const n_length = path + path_length - n;
@@ -162,9 +181,15 @@ static void canonicWindowsPath( char const * const path, int const path_length,
                 string_truncate( out, saved_size );
                 string_append( out, fd.cFileName );
                 FindClose( hf );
+                return 1;
             }
         }
+        else
+        {
+            return 1;
+        }
     }
+    return 0;
 }
 
 
@@ -231,13 +256,19 @@ static path_key_entry * path_key( OBJECT * const path,
         {
             nresult->path = normalized;
             if ( known_to_be_canonic )
+            {
                 nresult->key = object_copy( path );
+                nresult->exists = 1;
+            }
             else
             {
                 string canonic_path[ 1 ];
                 string_new( canonic_path );
-                canonicWindowsPath( object_str( normalized ), normalized_size,
-                    canonic_path );
+                if ( canonicWindowsPath( object_str( normalized ), normalized_size,
+                        canonic_path ) )
+                    nresult->exists = 1;
+                else
+                    nresult->exists = 0;
                 nresult->key = object_new( canonic_path->value );
                 string_free( canonic_path );
             }
@@ -248,10 +279,103 @@ static path_key_entry * path_key( OBJECT * const path,
         {
             result->path = object_copy( path );
             result->key = object_copy( nresult->key );
+            result->exists = nresult->exists;
         }
     }
 
     return result;
+}
+
+
+/*
+ * translate_path_cyg2win() - conversion of a cygwin to a Windows path.
+ *
+ * FIXME: skip grist
+ */
+
+#ifdef OS_CYGWIN
+static int translate_path_cyg2win( string * path )
+{
+    int translated = 0;
+
+#ifdef CYGWIN_VERSION_CYGWIN_CONV
+    /* Use new Cygwin API added with Cygwin 1.7. Old one had no error
+     * handling and has been deprecated.
+     */
+    char * dynamicBuffer = 0;
+    char buffer[ MAX_PATH + 1001 ];
+    char const * result = buffer;
+    cygwin_conv_path_t const conv_type = CCP_POSIX_TO_WIN_A | CCP_RELATIVE;
+    ssize_t const apiResult = cygwin_conv_path( conv_type, path->value,
+        buffer, sizeof( buffer ) / sizeof( *buffer ) );
+    assert( apiResult == 0 || apiResult == -1 );
+    assert( apiResult || strlen( result ) < sizeof( buffer ) / sizeof(
+        *buffer ) );
+    if ( apiResult )
+    {
+        result = 0;
+        if ( errno == ENOSPC )
+        {
+            ssize_t const size = cygwin_conv_path( conv_type, path->value,
+                NULL, 0 );
+            assert( size >= -1 );
+            if ( size > 0 )
+            {
+                dynamicBuffer = (char *)BJAM_MALLOC_ATOMIC( size );
+                if ( dynamicBuffer )
+                {
+                    ssize_t const apiResult = cygwin_conv_path( conv_type,
+                        path->value, dynamicBuffer, size );
+                    assert( apiResult == 0 || apiResult == -1 );
+                    if ( !apiResult )
+                    {
+                        result = dynamicBuffer;
+                        assert( strlen( result ) < size );
+                    }
+                }
+            }
+        }
+    }
+#else  /* CYGWIN_VERSION_CYGWIN_CONV */
+    /* Use old Cygwin API deprecated with Cygwin 1.7. */
+    char result[ MAX_PATH + 1 ];
+    cygwin_conv_to_win32_path( path->value, result );
+    assert( strlen( result ) <= MAX_PATH );
+#endif  /* CYGWIN_VERSION_CYGWIN_CONV */
+
+    if ( result )
+    {
+        string_truncate( path, 0 );
+        string_append( path, result );
+        translated = 1;
+    }
+
+#ifdef CYGWIN_VERSION_CYGWIN_CONV
+    if ( dynamicBuffer )
+        BJAM_FREE( dynamicBuffer );
+#endif
+
+    return translated;
+}
+#endif  /* OS_CYGWIN */
+
+
+/*
+ * path_translate_to_os_()
+ */
+
+int path_translate_to_os_( char const * f, string * file )
+{
+    int translated = 0;
+
+    /* by default, pass on the original path */
+    string_copy( file, f );
+
+#ifdef OS_CYGWIN
+    translated = translate_path_cyg2win( file );
+#endif
+
+    return translated;
 }
 
 

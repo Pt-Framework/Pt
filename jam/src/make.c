@@ -44,6 +44,8 @@
 #include "search.h"
 #include "timestamp.h"
 #include "variable.h"
+#include "execcmd.h"
+#include "output.h"
 
 #include <assert.h>
 
@@ -82,7 +84,7 @@ static char const * target_bind[] =
     "exists",
 };
 
-#define spaces(x) ( "                    " + ( x > 20 ? 0 : 20-x ) )
+#define spaces(x) ( ((const char *)"                    ") + ( x > 20 ? 0 : 20-x ) )
 
 
 /*
@@ -99,6 +101,10 @@ int make( LIST * targets, int anyhow )
 #endif
 
     memset( (char *)counts, 0, sizeof( *counts ) );
+
+    /* Make sure that the tables are set up correctly.
+     */
+    exec_init();
 
     /* First bind all targets with LOCATE_TARGET setting. This is needed to
      * correctly handle dependencies to generated headers.
@@ -129,31 +135,27 @@ int make( LIST * targets, int anyhow )
     if ( DEBUG_MAKE )
     {
         if ( counts->targets )
-            printf( "...found %d target%s...\n", counts->targets,
+            out_printf( "...found %d target%s...\n", counts->targets,
                 counts->targets > 1 ? "s" : "" );
         if ( counts->temp )
-            printf( "...using %d temp target%s...\n", counts->temp,
+            out_printf( "...using %d temp target%s...\n", counts->temp,
                 counts->temp > 1 ? "s" : "" );
         if ( counts->updating )
-            printf( "...updating %d target%s...\n", counts->updating,
+            out_printf( "...updating %d target%s...\n", counts->updating,
                 counts->updating > 1 ? "s" : "" );
         if ( counts->cantfind )
-            printf( "...can't find %d target%s...\n", counts->cantfind,
+            out_printf( "...can't find %d target%s...\n", counts->cantfind,
                 counts->cantfind > 1 ? "s" : "" );
         if ( counts->cantmake )
-            printf( "...can't make %d target%s...\n", counts->cantmake,
+            out_printf( "...can't make %d target%s...\n", counts->cantmake,
                 counts->cantmake > 1 ? "s" : "" );
     }
 
     status = counts->cantfind || counts->cantmake;
 
     {
-        LISTITER iter;
-        LISTITER end;
         PROFILE_ENTER( MAKE_MAKE1 );
-        for ( iter = list_begin( targets ), end = list_end( targets ); iter !=
-            end; iter = list_next( iter ) )
-            status |= make1( bindtarget( list_item( iter ) ) );
+        status |= make1( targets );
         PROFILE_EXIT( MAKE_MAKE1 );
     }
 
@@ -164,6 +166,8 @@ int make( LIST * targets, int anyhow )
 /* Force any dependants of t that have already at least begun being visited by
  * make0() to be updated.
  */
+
+static void force_rebuilds( TARGET * t );
 
 static void update_dependants( TARGET * t )
 {
@@ -183,7 +187,7 @@ static void update_dependants( TARGET * t )
 
             if ( DEBUG_FATE )
             {
-                printf( "fate change  %s from %s to %s (as dependant of %s)\n",
+                out_printf( "fate change  %s from %s to %s (as dependent of %s)\n",
                         object_str( p->name ), target_fate[ (int) fate0 ], target_fate[ (int) p->fate ], object_str( t->name ) );
             }
 
@@ -194,6 +198,8 @@ static void update_dependants( TARGET * t )
                 update_dependants( p );
         }
     }
+    /* Make sure that rebuilds can be chained. */
+    force_rebuilds( t );
 }
 
 
@@ -212,7 +218,7 @@ static void force_rebuilds( TARGET * t )
         if ( r->fate < T_FATE_BUILD )
         {
             if ( DEBUG_FATE )
-                printf( "fate change  %s from %s to %s (by rebuild)\n",
+                out_printf( "fate change  %s from %s to %s (by rebuild)\n",
                         object_str( r->name ), target_fate[ (int) r->fate ], target_fate[ T_FATE_REBUILD ] );
 
             /* Force rebuild it. */
@@ -297,14 +303,14 @@ void make0
 #endif
 
     if ( DEBUG_MAKEPROG )
-        printf( "make\t--\t%s%s\n", spaces( depth ), object_str( t->name ) );
+        out_printf( "make\t--\t%s%s\n", spaces( depth ), object_str( t->name ) );
 
     /*
      * Step 1: Initialize.
      */
 
     if ( DEBUG_MAKEPROG )
-        printf( "make\t--\t%s%s\n", spaces( depth ), object_str( t->name ) );
+        out_printf( "make\t--\t%s%s\n", spaces( depth ), object_str( t->name ) );
 
     t->fate = T_FATE_MAKING;
     t->depth = depth;
@@ -377,7 +383,7 @@ void make0
     if ( DEBUG_BIND )
     {
         if ( !object_equal( t->name, t->boundname ) )
-            printf( "bind\t--\t%s%s: %s\n", spaces( depth ),
+            out_printf( "bind\t--\t%s%s: %s\n", spaces( depth ),
                 object_str( t->name ), object_str( t->boundname ) );
 
         switch ( t->binding )
@@ -385,12 +391,12 @@ void make0
         case T_BIND_UNBOUND:
         case T_BIND_MISSING:
         case T_BIND_PARENTS:
-            printf( "time\t--\t%s%s: %s\n", spaces( depth ),
+            out_printf( "time\t--\t%s%s: %s\n", spaces( depth ),
                 object_str( t->name ), target_bind[ (int)t->binding ] );
             break;
 
         case T_BIND_EXISTS:
-            printf( "time\t--\t%s%s: %s\n", spaces( depth ),
+            out_printf( "time\t--\t%s%s: %s\n", spaces( depth ),
                 object_str( t->name ), timestamp_str( &t->time ) );
             break;
         }
@@ -411,7 +417,7 @@ void make0
         if ( c->target->fate == T_FATE_INIT )
             make0( c->target, ptime, depth + 1, counts, anyhow, rescanning );
         else if ( c->target->fate == T_FATE_MAKING && !internal )
-            printf( "warning: %s depends on itself\n", object_str(
+            out_printf( "warning: %s depends on itself\n", object_str(
                 c->target->name ) );
         else if ( c->target->fate != T_FATE_MAKING && rescanning )
             make0rescan( c->target, rescanning );
@@ -505,7 +511,7 @@ void make0
 #ifdef OPT_GRAPH_DEBUG_EXT
         if ( DEBUG_FATE )
             if ( fate < c->target->fate )
-                printf( "fate change %s from %s to %s by dependency %s\n",
+                out_printf( "fate change %s from %s to %s by dependency %s\n",
                     object_str( t->name ), target_fate[ (int)fate ],
                     target_fate[ (int)c->target->fate ], object_str(
                     c->target->name ) );
@@ -534,7 +540,7 @@ void make0
 #ifdef OPT_GRAPH_DEBUG_EXT
         if ( DEBUG_FATE )
             if ( fate != T_FATE_STABLE )
-                printf( "fate change  %s back to stable, NOUPDATE.\n",
+                out_printf( "fate change  %s back to stable, NOUPDATE.\n",
                     object_str( t->name ) );
 #endif
 
@@ -632,10 +638,10 @@ void make0
     if ( DEBUG_FATE && ( fate != savedFate ) )
 	{
         if ( savedFate == T_FATE_STABLE )
-            printf( "fate change  %s set to %s%s\n", object_str( t->name ),
+            out_printf( "fate change  %s set to %s%s\n", object_str( t->name ),
                 target_fate[ fate ], oldTimeStamp ? " (by timestamp)" : "" );
         else
-            printf( "fate change  %s from %s to %s%s\n", object_str( t->name ),
+            out_printf( "fate change  %s from %s to %s%s\n", object_str( t->name ),
                 target_fate[ savedFate ], target_fate[ fate ], oldTimeStamp ?
                 " (by timestamp)" : "" );
 	}
@@ -653,7 +659,7 @@ void make0
         {
 #ifdef OPT_GRAPH_DEBUG_EXT
             if ( DEBUG_FATE )
-                printf( "fate change %s to STABLE from %s, "
+                out_printf( "fate change %s to STABLE from %s, "
                     "no actions, no dependencies and do not care\n",
                     object_str( t->name ), target_fate[ fate ] );
 #endif
@@ -661,7 +667,7 @@ void make0
         }
         else
         {
-            printf( "don't know how to make %s\n", object_str( t->name ) );
+            out_printf( "don't know how to make %s\n", object_str( t->name ) );
             fate = T_FATE_CANTFIND;
         }
     }
@@ -680,7 +686,30 @@ void make0
     else
         fate = t->fate;
 
-    /* Step 4g: If this target needs to be built, force rebuild everything in
+    /*
+     * Step 4g: If this target needs to be built, make0 all targets
+     * that are updated by the same actions used to update this target.
+     * These have already been marked as REBUILDS, and make1 has
+     * special handling for them.  We just need to make sure that
+     * they get make0ed.
+     */
+    if ( ( fate >= T_FATE_BUILD ) && ( fate < T_FATE_BROKEN ) )
+    {
+        ACTIONS * a;
+        TARGETS * c;
+        for ( a = t->actions; a; a = a->next )
+        {
+            for ( c = a->action->targets; c; c = c->next )
+            {
+                if ( c->target->fate == T_FATE_INIT )
+                {
+                    make0( c->target, ptime, depth + 1, counts, anyhow, rescanning );
+                }
+            }
+        }
+    }
+
+    /* Step 4h: If this target needs to be built, force rebuild everything in
      * its rebuilds list.
      */
     if ( ( fate >= T_FATE_BUILD ) && ( fate < T_FATE_BROKEN ) )
@@ -697,7 +726,7 @@ void make0
      * Step 6: A little harmless tabulating for tracing purposes.
      */
 
-    /* Do not count or report interal includes nodes. */
+    /* Do not count or report internal includes nodes. */
     if ( t->flags & T_FLAG_INTERNAL )
         return;
 
@@ -708,8 +737,8 @@ void make0
 #else
         if ( !( ++counts->targets % 1000 ) && DEBUG_MAKE )
         {
-            printf( "...patience...\n" );
-            fflush(stdout);
+            out_printf( "...patience...\n" );
+            out_flush();
         }
 #endif
 
@@ -731,7 +760,7 @@ void make0
         flag = "*";
 
     if ( DEBUG_MAKEPROG )
-        printf( "made%s\t%s\t%s%s\n", flag, target_fate[ (int)t->fate ],
+        out_printf( "made%s\t%s\t%s%s\n", flag, target_fate[ (int)t->fate ],
             spaces( depth ), object_str( t->name ) );
 }
 
@@ -769,76 +798,76 @@ static void dependGraphOutput( TARGET * t, int depth )
         case T_FATE_MISSING:
         case T_FATE_OUTDATED:
         case T_FATE_UPDATE:
-            printf( "->%s%2d Name: %s\n", spaces( depth ), depth, target_name( t
+            out_printf( "->%s%2d Name: %s\n", spaces( depth ), depth, target_name( t
                 ) );
             break;
         default:
-            printf( "  %s%2d Name: %s\n", spaces( depth ), depth, target_name( t
+            out_printf( "  %s%2d Name: %s\n", spaces( depth ), depth, target_name( t
                 ) );
             break;
     }
 
     if ( !object_equal( t->name, t->boundname ) )
-        printf( "  %s    Loc: %s\n", spaces( depth ), object_str( t->boundname )
+        out_printf( "  %s    Loc: %s\n", spaces( depth ), object_str( t->boundname )
             );
 
     switch ( t->fate )
     {
     case T_FATE_STABLE:
-        printf( "  %s       : Stable\n", spaces( depth ) );
+        out_printf( "  %s       : Stable\n", spaces( depth ) );
         break;
     case T_FATE_NEWER:
-        printf( "  %s       : Newer\n", spaces( depth ) );
+        out_printf( "  %s       : Newer\n", spaces( depth ) );
         break;
     case T_FATE_ISTMP:
-        printf( "  %s       : Up to date temp file\n", spaces( depth ) );
+        out_printf( "  %s       : Up to date temp file\n", spaces( depth ) );
         break;
     case T_FATE_NEEDTMP:
-        printf( "  %s       : Temporary file, to be updated\n", spaces( depth )
+        out_printf( "  %s       : Temporary file, to be updated\n", spaces( depth )
             );
         break;
     case T_FATE_TOUCHED:
-        printf( "  %s       : Been touched, updating it\n", spaces( depth ) );
+        out_printf( "  %s       : Been touched, updating it\n", spaces( depth ) );
         break;
     case T_FATE_MISSING:
-        printf( "  %s       : Missing, creating it\n", spaces( depth ) );
+        out_printf( "  %s       : Missing, creating it\n", spaces( depth ) );
         break;
     case T_FATE_OUTDATED:
-        printf( "  %s       : Outdated, updating it\n", spaces( depth ) );
+        out_printf( "  %s       : Outdated, updating it\n", spaces( depth ) );
         break;
     case T_FATE_REBUILD:
-        printf( "  %s       : Rebuild, updating it\n", spaces( depth ) );
+        out_printf( "  %s       : Rebuild, updating it\n", spaces( depth ) );
         break;
     case T_FATE_UPDATE:
-        printf( "  %s       : Updating it\n", spaces( depth ) );
+        out_printf( "  %s       : Updating it\n", spaces( depth ) );
         break;
     case T_FATE_CANTFIND:
-        printf( "  %s       : Can not find it\n", spaces( depth ) );
+        out_printf( "  %s       : Can not find it\n", spaces( depth ) );
         break;
     case T_FATE_CANTMAKE:
-        printf( "  %s       : Can make it\n", spaces( depth ) );
+        out_printf( "  %s       : Can make it\n", spaces( depth ) );
         break;
     }
 
     if ( t->flags & ~T_FLAG_VISITED )
     {
-        printf( "  %s       : ", spaces( depth ) );
-        if ( t->flags & T_FLAG_TEMP     ) printf( "TEMPORARY " );
-        if ( t->flags & T_FLAG_NOCARE   ) printf( "NOCARE "    );
-        if ( t->flags & T_FLAG_NOTFILE  ) printf( "NOTFILE "   );
-        if ( t->flags & T_FLAG_TOUCHED  ) printf( "TOUCHED "   );
-        if ( t->flags & T_FLAG_LEAVES   ) printf( "LEAVES "    );
-        if ( t->flags & T_FLAG_NOUPDATE ) printf( "NOUPDATE "  );
-        printf( "\n" );
+        out_printf( "  %s       : ", spaces( depth ) );
+        if ( t->flags & T_FLAG_TEMP     ) out_printf( "TEMPORARY " );
+        if ( t->flags & T_FLAG_NOCARE   ) out_printf( "NOCARE "    );
+        if ( t->flags & T_FLAG_NOTFILE  ) out_printf( "NOTFILE "   );
+        if ( t->flags & T_FLAG_TOUCHED  ) out_printf( "TOUCHED "   );
+        if ( t->flags & T_FLAG_LEAVES   ) out_printf( "LEAVES "    );
+        if ( t->flags & T_FLAG_NOUPDATE ) out_printf( "NOUPDATE "  );
+        out_printf( "\n" );
     }
 
     for ( c = t->depends; c; c = c->next )
     {
-        printf( "  %s       : Depends on %s (%s)", spaces( depth ),
+        out_printf( "  %s       : Depends on %s (%s)", spaces( depth ),
            target_name( c->target ), target_fate[ (int)c->target->fate ] );
         if ( !timestamp_cmp( &c->target->time, &t->time ) )
-            printf( " (max time)");
-        printf( "\n" );
+            out_printf( " (max time)");
+        out_printf( "\n" );
     }
 
     for ( c = t->depends; c; c = c->next )

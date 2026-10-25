@@ -15,6 +15,7 @@
 #include "rules.h"
 #include "strings.h"
 #include "variable.h"
+#include "output.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +32,7 @@ static void check_defined( LIST * class_names )
     {
         if ( !hash_find( classes, list_item( iter ) ) )
         {
-            printf( "Class %s is not defined\n", object_str( list_item( iter ) )
+            out_printf( "Class %s is not defined\n", object_str( list_item( iter ) )
                 );
             abort();
         }
@@ -141,13 +142,24 @@ OBJECT * make_class_module( LIST * xname, LIST * bases, FRAME * frame )
     }
     else
     {
-        printf( "Class %s already defined\n", object_str( list_front( xname ) )
+        out_printf( "Class %s already defined\n", object_str( list_front( xname ) )
             );
         abort();
     }
     check_defined( bases );
 
     class_module = bindmodule( name );
+
+    {
+        /*
+            Initialize variables that Boost.Build inserts in every object.
+            We want to avoid creating the object's hash if it isn't needed.
+         */
+        int num = class_module->num_fixed_variables;
+        module_add_fixed_var( class_module, constant_name, &num );
+        module_add_fixed_var( class_module, constant_class, &num );
+        module_set_fixed_variables( class_module, num );
+    }
 
     var_set( class_module, constant_name, xname, VAR_SET );
     var_set( class_module, constant_bases, bases, VAR_SET );

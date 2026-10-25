@@ -41,6 +41,7 @@
 #ifndef LISTS_DWA20011022_H
 #define LISTS_DWA20011022_H
 
+#include "config.h"
 #include "object.h"
 
 #ifdef HAVE_PYTHON
@@ -54,6 +55,7 @@
 typedef struct _list {
     union {
         int size;
+        struct _list * next;
         OBJECT * align;
     } impl;
 } LIST;

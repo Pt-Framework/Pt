@@ -7,6 +7,7 @@
 #ifndef FUNCTION_SW20111123_H
 #define FUNCTION_SW20111123_H
 
+#include "config.h"
 #include "object.h"
 #include "frames.h"
 #include "lists.h"
@@ -34,6 +35,8 @@ void function_run_actions( FUNCTION * function, FRAME * frame, STACK * s, string
 
 FUNCTION * function_bind_variables( FUNCTION * f, module_t * module, int * counter );
 FUNCTION * function_unbind_variables( FUNCTION * f );
+
+LIST * function_get_variables( FUNCTION * f );
 
 void function_done( void );
 

@@ -8,6 +8,7 @@
 #ifndef FRAMES_DWA20011021_H
 #define FRAMES_DWA20011021_H
 
+#include "config.h"
 #include "lists.h"
 #include "modules.h"
 #include "object.h"
@@ -25,6 +26,9 @@ struct frame
     OBJECT     * file;
     int          line;
     char const * rulename;
+#ifdef JAM_DEBUGGER
+    void       * function;
+#endif
 };
 
 

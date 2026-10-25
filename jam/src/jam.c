@@ -14,6 +14,7 @@
 
 /* This file is ALSO:
  * Copyright 2001-2004 David Abrahams.
+ * Copyright 2018 Rene Rivera
  * Distributed under the Boost Software License, Version 1.0.
  * (See accompanying file LICENSE_1_0.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt)
@@ -98,12 +99,24 @@
 
 
 #include "jam.h"
+
 #include "patchlevel.h"
+
+/* Keep JAMVERSYM in sync with VERSION. */
+/* It can be accessed as $(JAMVERSION) in the Jamfile. */
+#define JAM_STRINGIZE(X) JAM_DO_STRINGIZE(X)
+#define JAM_DO_STRINGIZE(X) #X
+#define VERSION_MAJOR_SYM JAM_STRINGIZE(VERSION_MAJOR)
+#define VERSION_MINOR_SYM JAM_STRINGIZE(VERSION_MINOR)
+#define VERSION_PATCH_SYM JAM_STRINGIZE(VERSION_PATCH)
+#define VERSION VERSION_MAJOR_SYM "." VERSION_MINOR_SYM
+#define JAMVERSYM "JAMVERSION=" VERSION
 
 #include "builtins.h"
 #include "class.h"
 #include "compile.h"
 #include "constants.h"
+#include "debugger.h"
 #include "filesys.h"
 #include "function.h"
 #include "hcache.h"
@@ -120,6 +133,7 @@
 #include "strings.h"
 #include "timestamp.h"
 #include "variable.h"
+#include "execcmd.h"
 
 /* Macintosh is "special" */
 #ifdef OS_MAC
@@ -150,7 +164,7 @@ struct globs globs =
 };
 
 /* Symbols to be defined as true for use in Jambase. */
-static char * othersyms[] = { OSMAJOR, OSMINOR, OSPLAT, JAMVERSYM, 0 };
+static const char * othersyms[] = { OSMAJOR, OSMINOR, OSPLAT, JAMVERSYM, 0 };
 
 
 /* Known for sure:
@@ -164,6 +178,12 @@ static char * othersyms[] = { OSMAJOR, OSMINOR, OSPLAT, JAMVERSYM, 0 };
     QDGlobals qd;
 # endif
 #endif
+
+
+#ifdef OS_VMS
+# define use_environ arg_environ
+#endif
+
 
 /* on Win32-LCC */
 #if defined( OS_NT ) && defined( __LCC__ )
@@ -206,11 +226,38 @@ int anyhow = 0;
     extern PyObject * bjam_variable     ( PyObject * self, PyObject * args );
     extern PyObject * bjam_backtrace    ( PyObject * self, PyObject * args );
     extern PyObject * bjam_caller       ( PyObject * self, PyObject * args );
+    int python_optimize = 1;  /* Set Python optimzation on by default */
 #endif
 
 void regex_done();
 
 char const * saved_argv0;
+
+static void usage( const char * progname )
+{
+	err_printf("\nusage: %s [ options ] targets...\n\n", progname);
+
+	err_printf("-a      Build all targets, even if they are current.\n");
+	err_printf("-dx     Set the debug level to x (0-13,console,mi).\n");
+	err_printf("-fx     Read x instead of Jambase.\n");
+	/* err_printf( "-g      Build from newest sources first.\n" ); */
+	err_printf("-jx     Run up to x shell commands concurrently.\n");
+	err_printf("-lx     Limit actions to x number of seconds after which they are stopped.\n");
+	err_printf("-mx     Maximum target output saved (kb), default is to save all output.\n");
+	err_printf("-n      Don't actually execute the updating actions.\n");
+	err_printf("-ox     Mirror all output to file x.\n");
+	err_printf("-px     x=0, pipes action stdout and stderr merged into action output.\n");
+	err_printf("-q      Quit quickly as soon as a target fails.\n");
+	err_printf("-sx=y   Set variable x=y, overriding environment.\n");
+	err_printf("-tx     Rebuild x, even if it is up-to-date.\n");
+	err_printf("-v      Print the version of jam and exit.\n");
+#ifdef HAVE_PYTHON
+	err_printf("-z      Disable Python Optimization and enable asserts\n");
+#endif
+	err_printf("--x     Option is ignored.\n\n");
+
+    exit( EXITBAD );
+}
 
 int main( int argc, char * * argv, char * * arg_environ )
 {
@@ -223,6 +270,7 @@ int main( int argc, char * * argv, char * * arg_environ )
     char          *       * arg_v = argv;
     char            const * progname = argv[ 0 ];
     module_t              * environ_module;
+    int                     is_debugger;
 
     saved_argv0 = argv[ 0 ];
 
@@ -232,42 +280,96 @@ int main( int argc, char * * argv, char * * arg_environ )
     InitGraf( &qd.thePort );
 #endif
 
+    cwd_init();
+    constants_init();
+
+#ifdef JAM_DEBUGGER
+
+    is_debugger = 0;
+
+    if ( getoptions( argc - 1, argv + 1, "-:l:m:d:j:p:f:gs:t:ano:qv", optv ) < 0 )
+        usage( progname );
+
+    if ( ( s = getoptval( optv, 'd', 0 ) ) )
+    {
+        if ( strcmp( s, "mi" ) == 0 )
+        {
+            debug_interface = DEBUG_INTERFACE_MI;
+            is_debugger = 1;
+        }
+        else if ( strcmp( s, "console" ) == 0 )
+        {
+            debug_interface = DEBUG_INTERFACE_CONSOLE;
+            is_debugger = 1;
+        }
+    }
+
+#if NT
+
+    if ( argc >= 3 )
+    {
+        /* Check whether this instance is being run by the debugger. */
+        size_t opt_len = strlen( debugger_opt );
+        if ( strncmp( argv[ 1 ], debugger_opt, opt_len ) == 0 &&
+            strncmp( argv[ 2 ], debugger_opt, opt_len ) == 0 )
+        {
+            debug_init_handles( argv[ 1 ] + opt_len, argv[ 2 ] + opt_len );
+            /* Fix up argc/argv to hide the internal options */
+            arg_c = argc = (argc - 2);
+            argv[ 2 ] = argv[ 0 ];
+            arg_v = argv = (argv + 2);
+            debug_interface = DEBUG_INTERFACE_CHILD;
+        }
+    }
+
+    if ( is_debugger )
+    {
+        return debugger();
+    }
+
+#else
+
+    if ( is_debugger )
+    {
+        if ( setjmp( debug_child_data.jmp ) != 0 )
+        {
+            arg_c = argc = debug_child_data.argc;
+            arg_v = argv = (char * *)debug_child_data.argv;
+            debug_interface = DEBUG_INTERFACE_CHILD;
+        }
+        else
+        {
+            return debugger();
+        }
+    }
+
+#endif
+
+#endif
+
     --argc;
     ++argv;
 
-    if ( getoptions( argc, argv, "-:l:m:d:j:p:f:gs:t:ano:qv", optv ) < 0 )
+    #ifdef HAVE_PYTHON
+    #define OPTSTRING "-:l:m:d:j:p:f:gs:t:ano:qvz"
+    #else
+    #define OPTSTRING "-:l:m:d:j:p:f:gs:t:ano:qv"
+    #endif
+
+    if ( getoptions( argc, argv, OPTSTRING, optv ) < 0 )
     {
-        printf( "\nusage: %s [ options ] targets...\n\n", progname );
-
-        printf( "-a      Build all targets, even if they are current.\n" );
-        printf( "-dx     Set the debug level to x (0-9).\n" );
-        printf( "-fx     Read x instead of Jambase.\n" );
-        /* printf( "-g      Build from newest sources first.\n" ); */
-        printf( "-jx     Run up to x shell commands concurrently.\n" );
-        printf( "-lx     Limit actions to x number of seconds after which they are stopped.\n" );
-        printf( "-mx     Maximum target output saved (kb), default is to save all output.\n" );
-        printf( "-n      Don't actually execute the updating actions.\n" );
-        printf( "-ox     Write the updating actions to file x.\n" );
-        printf( "-px     x=0, pipes action stdout and stderr merged into action output.\n" );
-        printf( "-q      Quit quickly as soon as a target fails.\n" );
-        printf( "-sx=y   Set variable x=y, overriding environment.\n" );
-        printf( "-tx     Rebuild x, even if it is up-to-date.\n" );
-        printf( "-v      Print the version of jam and exit.\n" );
-        printf( "--x     Option is ignored.\n\n" );
-
-        exit( EXITBAD );
+        usage( progname );
     }
 
     /* Version info. */
     if ( ( s = getoptval( optv, 'v', 0 ) ) )
     {
-        printf( "Boost.Jam  Version %s. %s.\n", VERSION, OSMINOR );
-        printf( "   Copyright 1993-2002 Christopher Seiwald and Perforce "
-            "Software, Inc.\n" );
-        printf( "   Copyright 2001 David Turner.\n" );
-        printf( "   Copyright 2001-2004 David Abrahams.\n" );
-        printf( "   Copyright 2002-2008 Rene Rivera.\n" );
-        printf( "   Copyright 2003-2008 Vladimir Prus.\n" );
+        out_printf( "B2 Version %s. %s.\n", VERSION, OSMINOR );
+        out_printf( "   Copyright 1993-2002 Christopher Seiwald and Perforce Software, Inc.\n" );
+        out_printf( "   Copyright 2001 David Turner.\n" );
+        out_printf( "   Copyright 2001-2004 David Abrahams.\n" );
+        out_printf( "   Copyright 2002-2019 Rene Rivera.\n" );
+        out_printf( "   Copyright 2003-2015 Vladimir Prus.\n" );
         return EXITOK;
     }
 
@@ -286,7 +388,7 @@ int main( int argc, char * * argv, char * * arg_environ )
         globs.pipe_action = atoi( s );
         if ( globs.pipe_action < 0 || 3 < globs.pipe_action )
         {
-            printf( "Invalid pipe descriptor '%d', valid values are -p[0..3]."
+            err_printf( "Invalid pipe descriptor '%d', valid values are -p[0..3]."
                 "\n", globs.pipe_action );
             exit( EXITBAD );
         }
@@ -301,10 +403,9 @@ int main( int argc, char * * argv, char * * arg_environ )
     if ( ( s = getoptval( optv, 'j', 0 ) ) )
     {
         globs.jobs = atoi( s );
-        if ( globs.jobs < 1 || globs.jobs > MAXJOBS )
+        if ( globs.jobs < 1 )
         {
-            printf( "Invalid value for the '-j' option, valid values are 1 "
-                "through %d.\n", MAXJOBS );
+            err_printf( "Invalid value for the '-j' option.\n" );
             exit( EXITBAD );
         }
     }
@@ -317,6 +418,11 @@ int main( int argc, char * * argv, char * * arg_environ )
 
     if ( ( s = getoptval( optv, 'm', 0 ) ) )
         globs.max_buf = atoi( s ) * 1024;  /* convert to kb */
+
+    #ifdef HAVE_PYTHON
+    if ( ( s = getoptval( optv, 'z', 0 ) ) )
+        python_optimize = 0;  /* disable python optimization */
+    #endif
 
     /* Turn on/off debugging */
     for ( n = 0; ( s = getoptval( optv, 'd', n ) ); ++n )
@@ -332,7 +438,7 @@ int main( int argc, char * * argv, char * * arg_environ )
 
         if ( ( i < 0 ) || ( i >= DEBUG_MAX ) )
         {
-            printf( "Invalid debug level '%s'.\n", s );
+            out_printf( "Invalid debug level '%s'.\n", s );
             continue;
         }
 
@@ -344,8 +450,16 @@ int main( int argc, char * * argv, char * * arg_environ )
             globs.debug[ i-- ] = 1;
     }
 
-    constants_init();
-    cwd_init();
+    /* If an output file is specified, set globs.out to that. */
+    if ( ( s = getoptval( optv, 'o', 0 ) ) )
+    {
+        if ( !( globs.out = fopen( s, "w" ) ) )
+        {
+            err_printf( "Failed to write to '%s'\n", s );
+            exit( EXITBAD );
+        }
+        /* ++globs.noexec; */
+    }
 
     {
         PROFILE_ENTER( MAIN );
@@ -353,6 +467,7 @@ int main( int argc, char * * argv, char * * arg_environ )
 #ifdef HAVE_PYTHON
         {
             PROFILE_ENTER( MAIN_PYTHON );
+            Py_OptimizeFlag = python_optimize;
             Py_Initialize();
             {
                 static PyMethodDef BjamMethods[] = {
@@ -473,9 +588,9 @@ int main( int argc, char * * argv, char * * arg_environ )
         {
             if ( arg_v[ n ][ 0 ] == '-' )
             {
-                char * f = "-:l:d:j:f:gs:t:ano:qv";
+                const char * f = "-:l:d:j:f:gs:t:ano:qv";
                 for ( ; *f; ++f ) if ( *f == arg_v[ n ][ 1 ] ) break;
-                if ( ( f[ 1 ] == ':' ) && ( arg_v[ n ][ 2 ] == '\0' ) ) ++n;
+                if ( f[0] && f[1] && ( f[ 1 ] == ':' ) && ( arg_v[ n ][ 2 ] == '\0' ) ) ++n;
             }
             else
             {
@@ -484,6 +599,30 @@ int main( int argc, char * * argv, char * * arg_environ )
                 object_free( target );
             }
         }
+
+        /* The build system may set the PARALLELISM variable to override -j
+         * options.
+         */
+        {
+            LIST * const p = var_get( root_module(), constant_PARALLELISM );
+            if ( !list_empty( p ) )
+            {
+                int const j = atoi( object_str( list_front( p ) ) );
+                if ( j < 1 )
+                    out_printf( "Invalid value of PARALLELISM: %s.\n",
+                        object_str( list_front( p ) ) );
+                else
+                    globs.jobs = j;
+            }
+        }
+
+        /* KEEP_GOING overrides -q option. */
+        {
+            LIST * const p = var_get( root_module(), constant_KEEP_GOING );
+            if ( !list_empty( p ) )
+                globs.quitquick = atoi( object_str( list_front( p ) ) ) ? 0 : 1;
+        }
+
 
         if ( list_empty( targets_to_update() ) )
             mark_target_for_updating( constant_all );
@@ -499,17 +638,17 @@ int main( int argc, char * * argv, char * * arg_environ )
                 object_free( filename );
             }
 
-            if ( ! n )
+            if ( !n )
             {
                 /* Pt extension:
                  * if no Jambase is explicitly specified with '-f', try to open a Jambase
                  * file in the current dir, otherwise use the built in Jambase
                  */
-                OBJECT* filename = NULL;
-                FILE* fp_jambase = fopen( "Jambase" , "r" );
-                if( fp_jambase != NULL )
+                OBJECT * filename = NULL;
+                FILE * fp_jambase = fopen( "Jambase", "r" );
+                if ( fp_jambase != NULL )
                 {
-                    fclose(fp_jambase);
+                    fclose( fp_jambase );
                     filename = object_new( "Jambase" );
                 }
                 else
@@ -520,7 +659,7 @@ int main( int argc, char * * argv, char * * arg_environ )
                 parse_file( filename, frame );
                 object_free( filename );
             }
-         }
+        }
 
         status = yyanyerrors();
 
@@ -532,40 +671,6 @@ int main( int argc, char * * argv, char * * arg_environ )
             object_free( target );
         }
 
-        /* If an output file is specified, set globs.cmdout to that. */
-        if ( ( s = getoptval( optv, 'o', 0 ) ) )
-        {
-            if ( !( globs.cmdout = fopen( s, "w" ) ) )
-            {
-                printf( "Failed to write to '%s'\n", s );
-                exit( EXITBAD );
-            }
-            ++globs.noexec;
-        }
-
-        /* The build system may set the PARALLELISM variable to override -j
-         * options.
-         */
-        {
-            LIST * const p = var_get( root_module(), constant_PARALLELISM );
-            if ( !list_empty( p ) )
-            {
-                int const j = atoi( object_str( list_front( p ) ) );
-                if ( j < 1 || j > MAXJOBS )
-                    printf( "Invalid value of PARALLELISM: %s. Valid values "
-                        "are 1 through %d.\n", object_str( list_front( p ) ),
-                        MAXJOBS );
-                else
-                    globs.jobs = j;
-            }
-        }
-
-        /* KEEP_GOING overrides -q option. */
-        {
-            LIST * const p = var_get( root_module(), constant_KEEP_GOING );
-            if ( !list_empty( p ) )
-                globs.quitquick = atoi( object_str( list_front( p ) ) ) ? 0 : 1;
-        }
 
         /* Now make target. */
         {
@@ -592,6 +697,8 @@ int main( int argc, char * * argv, char * * arg_environ )
     clear_targets_to_update();
 
     /* Widely scattered cleanup. */
+    property_set_done();
+    exec_done();
     file_done();
     rules_done();
     timestamp_done();
@@ -606,9 +713,9 @@ int main( int argc, char * * argv, char * * arg_environ )
     constants_done();
     object_done();
 
-    /* Close cmdout. */
-    if ( globs.cmdout )
-        fclose( globs.cmdout );
+    /* Close log out. */
+    if ( globs.out )
+        fclose( globs.out );
 
 #ifdef HAVE_PYTHON
     Py_Finalize();
@@ -645,11 +752,10 @@ char *executable_path( char const * argv0 )
 # include <stdlib.h>
 char * executable_path( char const * argv0 )
 {
-    return strdup( getexecname() );
+    const char * execname = getexecname();
+    return execname ? strdup( execname ) : NULL;
 }
 #elif defined(__FreeBSD__)
-# include <stdlib.h>
-# include <string.h>
 # include <sys/sysctl.h>
 char * executable_path( char const * argv0 )
 {
@@ -657,45 +763,33 @@ char * executable_path( char const * argv0 )
     char buf[ 1024 ];
     size_t size = sizeof( buf );
     sysctl( mib, 4, buf, &size, NULL, 0 );
-    if ( size && size != sizeof( buf ) )
-    {
-        /* Using strndup() here might not work with older glibc installations as
-         * their headers do not declare that function unless certain symbols are
-         * defined. We could work around this issue by defining appropriate
-         * symbols but they depend on the exact glibc version used so simply
-         * using malloc()/strncpy() seems like a cleaner solution.
-         *
-         * Note: such old glibc installations have so far only been found on
-         * Linux and not Free-BSD installations but using the same logic on
-         * Free-BSD seems like something that could not hurt.
-         */
-        char * const result = (char *)malloc( size );
-        if ( result )
-            return strncpy( result, buf, size );
-    }
-    return NULL;
+    return ( !size || size == sizeof( buf ) ) ? NULL : strndup( buf, size );
 }
 #elif defined(__linux__)
-# include <stdlib.h>
-# include <string.h>
 # include <unistd.h>
 char * executable_path( char const * argv0 )
 {
     char buf[ 1024 ];
-    ssize_t const size = readlink( "/proc/self/exe", buf, sizeof( buf ) );
-    if ( size && size != sizeof( buf ) )
-    {
-        /* Using strndup() here might not work with older glibc installations as
-         * their headers do not declare that function unless certain symbols are
-         * defined. We could work around this issue by defining appropriate
-         * symbols but they depend on the exact glibc version used so simply
-         * using malloc()/strncpy() seems like a cleaner solution.
-         */
-        char * const result = (char *)malloc( size );
-        if ( result )
-            return strncpy( result, buf, size );
-    }
-    return NULL;
+    ssize_t const ret = readlink( "/proc/self/exe", buf, sizeof( buf ) );
+    return ( !ret || ret == sizeof( buf ) ) ? NULL : strndup( buf, ret );
+}
+#elif defined(OS_VMS)
+# include <unixlib.h>
+char * executable_path( char const * argv0 )
+{
+    char * vms_path = NULL;
+    char * posix_path = NULL;
+    char * p;
+
+    /* On VMS argv[0] shows absolute path to the image file.
+     * So, just remove VMS file version and translate path to POSIX-style.
+     */
+    vms_path = strdup( argv0 );
+    if ( vms_path && ( p = strchr( vms_path, ';') ) ) *p = '\0';
+    posix_path = decc$translate_vms( vms_path );
+    if ( vms_path ) free( vms_path );
+
+    return posix_path > 0 ? strdup( posix_path ) : NULL;
 }
 #else
 char * executable_path( char const * argv0 )

@@ -7,15 +7,13 @@
 # possibly add /I c:\Programme\PSDK2003Server\Include
 # set LIB environment var
 # nmake /f Makefile.win32
-#
-# use /DPT_MCHECK for memory usage statistics
 
 CC = cl /nologo
-CFLAGS = -DNT -DOPT_SEMAPHORE /MT /O2 -wd4996 kernel32.lib advapi32.lib user32.lib
+CFLAGS = -DNT /MT /O2 -wd4996 kernel32.lib advapi32.lib user32.lib
 TARGET = /Fejam
 
 SOURCES = \
-	builtins.c class.c command.c compile.c constants.c debug.c execcmd.c execnt.c \
+	builtins.c class.c command.c compile.c constants.c debug.c debugger.c execcmd.c execnt.c \
 	filent.c filesys.c function.c frames.c glob.c hash.c hcache.c hdrmacro.c \
 	headers.c jam.c jambase.c jamgram.c lists.c make.c make1.c md5.c mem.c modules.c \
 	native.c object.c option.c output.c parse.c pathnt.c pathsys.c cwd.c regexp.c rules.c scan.c \

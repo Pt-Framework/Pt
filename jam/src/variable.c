@@ -39,6 +39,7 @@
 #include "parse.h"
 #include "pathsys.h"
 #include "strings.h"
+#include "output.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,7 +58,7 @@ struct _variable
 };
 
 static LIST * * var_enter( struct module_t *, OBJECT * symbol );
-static void var_dump( OBJECT * symbol, LIST * value, char * what );
+static void var_dump( OBJECT * symbol, LIST * value, const char * what );
 
 
 /*
@@ -70,7 +71,7 @@ static void var_dump( OBJECT * symbol, LIST * value, char * what );
  * Otherwise, split the value at blanks.
  */
 
-void var_defines( struct module_t * module, char * const * e, int preprocess )
+void var_defines( struct module_t * module, const char * const * e, int preprocess )
 {
     string buf[ 1 ];
 
@@ -78,7 +79,7 @@ void var_defines( struct module_t * module, char * const * e, int preprocess )
 
     for ( ; *e; ++e )
     {
-        char * val;
+        const char * val;
 
         if ( ( val = strchr( *e, '=' ) )
 #if defined( OS_MAC )
@@ -101,8 +102,8 @@ void var_defines( struct module_t * module, char * const * e, int preprocess )
             }
             else
             {
-                char * p;
-                char * pp;
+                const char * p;
+                const char * pp;
                 char split =
 #if defined( OPT_NO_EXTERNAL_VARIABLE_SPLIT )
                     '\0'
@@ -211,6 +212,53 @@ LIST * var_get( struct module_t * module, OBJECT * symbol )
                 var_dump( v->symbol, v->value, "get" );
             result = v->value;
         }
+
+#ifdef OS_VMS
+        else if ( ( module->name && object_equal( module->name, constant_ENVIRON ) )
+                  || root_module() == module )
+        {
+            /* On VMS, when a variable from root or ENVIRON module is not found,
+             * explicitly request it from the process.
+             * By design, process variables (and logicals) are not made available
+             * to C main(), and thus will not get loaded in bulk to root/ENVRON.
+             * So we get around it by getting any such variable on first request.
+             */
+            const char * val = getenv( object_str( symbol ) );
+
+            if ( val )
+            {
+                struct module_t * environ_module = module;
+                char * environ[ 2 ] = { 0 }; /* NULL-terminated */
+                string buf[ 1 ];
+
+                if ( root_module() == module )
+                {
+                    environ_module = bindmodule( constant_ENVIRON );
+                }
+
+                string_copy( buf, object_str( symbol ) );
+                string_append( buf, "=" );
+                string_append( buf, val );
+
+                environ[ 0 ] = buf->value;
+
+                /* Load variable to global module, with splitting, for backward
+                 * compatibility. Then to .ENVIRON, without splitting.
+                 */
+                var_defines( root_module(), environ, 1 );
+                var_defines( environ_module, environ, 0 );
+                string_free( buf );
+
+                if ( module->variables && ( v = (VARIABLE *)hash_find(
+                    module->variables, symbol ) ) )
+                {
+                    if ( DEBUG_VARGET )
+                        var_dump( v->symbol, v->value, "get" );
+                    result = v->value;
+                }
+            }
+        }
+#endif
     }
     return result;
 }
@@ -317,11 +365,11 @@ static LIST * * var_enter( struct module_t * module, OBJECT * symbol )
  * var_dump() - dump a variable to stdout
  */
 
-static void var_dump( OBJECT * symbol, LIST * value, char * what )
+static void var_dump( OBJECT * symbol, LIST * value, const char * what )
 {
-    printf( "%s %s = ", what, object_str( symbol ) );
+    out_printf( "%s %s = ", what, object_str( symbol ) );
     list_print( value );
-    printf( "\n" );
+    out_printf( "\n" );
 }
 
 

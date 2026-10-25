@@ -32,6 +32,7 @@
 #include "object.h"
 #include "pathsys.h"
 #include "strings.h"
+#include "output.h"
 
 
 /*
@@ -62,7 +63,7 @@ static struct hash * bindhash = 0;
 static void time_enter( void *, OBJECT *, int const found,
     timestamp const * const );
 
-static char * time_progress[] =
+static const char * time_progress[] =
 {
     "INIT",
     "NOENTRY",
@@ -131,6 +132,16 @@ void timestamp_current( timestamp * const t )
     FILETIME ft;
     GetSystemTimeAsFileTime( &ft );
     timestamp_from_filetime( t, &ft );
+#elif defined(_POSIX_TIMERS) && defined(CLOCK_REALTIME) && \
+    (!defined(__GLIBC__) || (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 17))
+    /* Some older versions of XCode define _POSIX_TIMERS, but don't actually
+     * have clock_gettime.  Check CLOCK_REALTIME as well.  Prior to glibc 2.17,
+     * clock_gettime requires -lrt.  This is a non-critical feature, so
+     * we just disable it to keep bootstrapping simple.
+     */
+    struct timespec ts;
+    clock_gettime( CLOCK_REALTIME, &ts );
+    timestamp_init( t, ts.tv_sec, ts.tv_nsec );
 #else  /* OS_NT */
     timestamp_init( t, time( 0 ), 0 );
 #endif  /* OS_NT */
@@ -157,108 +168,9 @@ void timestamp_from_path( timestamp * const time, OBJECT * const path )
     BINDING * b;
     string buf[ 1 ];
 
-    OBJECT * const normalized_path = path_as_key( path );
 
-    string_new( buf );
-
-    if ( !bindhash )
-        bindhash = hashinit( sizeof( BINDING ), "bindings" );
-
-    /* Quick path - is it there? */
-
-    b = (BINDING *)hash_insert( bindhash, normalized_path, &found );
-    if ( !found )
-    {
-        b->name = object_copy( normalized_path );
-        b->flags = 0;
-        b->progress = BIND_INIT;
-        timestamp_clear( &b->time );
-    }
-
-    if ( b->progress == BIND_INIT )
-    {
-        b->progress = BIND_NOENTRY;
-
-        /* Not found - have to scan for it. */
-        path_parse( object_str( normalized_path ), &f1 );
-
-        /* Scan directory if not already done so. */
-        {
-            int found;
-            BINDING * b;
-            OBJECT * name;
-
-            f2 = f1;
-            f2.f_grist.len = 0;
-            path_parent( &f2 );
-            path_build( &f2, buf );
-
-            name = object_new( buf->value );
-
-            b = (BINDING *)hash_insert( bindhash, name, &found );
-            if ( !found )
-            {
-                b->name = object_copy( name );
-                b->flags = 0;
-                b->progress = BIND_INIT;
-                timestamp_clear( &b->time );
-            }
-
-            if ( !( b->flags & BIND_SCANNED ) )
-            {
-                file_dirscan( name, time_enter, bindhash );
-                b->flags |= BIND_SCANNED;
-            }
-
-            object_free( name );
-        }
-
-        /* Scan archive if not already done so. */
-        if ( f1.f_member.len )
-        {
-            int found;
-            BINDING * b;
-            OBJECT * name;
-
-            f2 = f1;
-            f2.f_grist.len = 0;
-            f2.f_member.len = 0;
-            string_truncate( buf, 0 );
-            path_build( &f2, buf );
-
-            name = object_new( buf->value );
-
-            b = (BINDING *)hash_insert( bindhash, name, &found );
-            if ( !found )
-            {
-                b->name = object_copy( name );
-                b->flags = 0;
-                b->progress = BIND_INIT;
-                timestamp_clear( &b->time );
-            }
-
-            if ( !( b->flags & BIND_SCANNED ) )
-            {
-                file_archscan( buf->value, time_enter, bindhash );
-                b->flags |= BIND_SCANNED;
-            }
-
-            object_free( name );
-        }
-    }
-
-    if ( b->progress == BIND_SPOTTED )
-        b->progress = file_time( b->name, &b->time ) < 0
-            ? BIND_MISSING
-            : BIND_FOUND;
-
-    if ( b->progress == BIND_FOUND )
-        timestamp_copy( time, &b->time );
-    else
+    if ( file_time( path, time ) < 0 )
         timestamp_clear( time );
-
-    string_free( buf );
-    object_free( normalized_path );
 
     PROFILE_EXIT( timestamp );
 }
@@ -330,7 +242,7 @@ static void time_enter( void * closure, OBJECT * target, int const found,
     b->progress = found ? BIND_FOUND : BIND_SPOTTED;
 
     if ( DEBUG_BINDSCAN )
-        printf( "time ( %s ) : %s\n", object_str( target ), time_progress[
+        out_printf( "time ( %s ) : %s\n", object_str( target ), time_progress[
             b->progress ] );
 
     object_free( target );
@@ -358,4 +270,12 @@ void timestamp_done()
         hashenumerate( bindhash, free_timestamps, 0 );
         hashdone( bindhash );
     }
+}
+
+/*
+ * timestamp_delta_seconds() - seconds from time a to b.
+ */
+double timestamp_delta_seconds( timestamp const * const a , timestamp const * const b )
+{
+	return ((b->secs*1000000.0+b->nsecs)-(a->secs*1000000.0+a->nsecs))/1000000.0;
 }

@@ -6,9 +6,10 @@ description: "Jam build tool internals — C implementation in jam/src/ and Jam 
 # Jam Internals
 
 The Pt project ships a customized jam executable based on Boost.Jam (b2)
-v2011.12. The implementation spans two layers: a C core (`jam/src/`) and a
-Jam-script layer (`jam/` and `jam/Jambase`). Extensions should follow existing
-patterns and be marked with `/* Pt extension */` comments in C code.
+v4.0.0, compiled as C. The implementation spans two layers: a C core
+(`jam/src/`) and a Jam-script layer (`jam/` and `jam/Jambase`). Extensions
+should follow existing patterns and be marked with `/* Pt extension */`
+comments in C code.
 
 ## Directory Layout
 
@@ -27,6 +28,8 @@ jam/
 └── src/                 # C source for the jam executable
     ├── jam.c            # Entry point, option parsing, main()
     ├── jam.h            # Platform detection, OS macros, global config
+    ├── config.h         # OPT_* feature flags and JAM_DEBUGGER
+    ├── debugger.c/.h    # Optional jam debugger (C)
     ├── builtins.c/.h    # Built-in rules (ECHO, DEPENDS, GLOB… + Pt extensions)
     ├── compile.c/.h     # Statement evaluation, evaluate_rule()
     ├── function.c/.h    # Rule body compilation and execution
@@ -47,10 +50,10 @@ jam/
     ├── jamgram.c/.y     # Yacc grammar → parse tree
     ├── strings.c/.h     # Dynamic string buffer (string)
     ├── hash.c/.h        # Hash table
-    ├── mem.c/.h         # Memory allocation (+ Pt PT_MCHECK extension)
-    ├── Makefile.win32   # nmake build for Windows
-    ├── Makefile.macos   # make build for macOS
-    ├── build.bat/.sh    # Bootstrap build scripts
+    ├── mem.c/.h         # Memory allocation
+    ├── Makefile.win32   # nmake C build for Windows (active)
+    ├── Makefile.macos   # make C build for macOS (active)
+    ├── build.bat/.sh/.jam  # Boost bootstrap scripts (C++ reference, not the C build)
     └── modules/         # Native rule implementations for Boost.Build modules
         ├── set.c        #   set.difference
         ├── path.c       #   path operations
@@ -78,20 +81,28 @@ actions Cc { $(CC) -c -o $(<) $(CCFLAGS) $(>) }
 
 ### Pt-Specific Extensions (C)
 
-The following builtins were added by the Pt project:
+The following builtins were added by the Pt project. Every block copied
+from Pt into the Boost.Jam engine is marked with `/* Pt extension */`.
 
 | Builtin | Purpose |
 |---------|---------|
-| `EXEC` | Run a command synchronously, return exit code + stdout lines |
-| `WriteFile` | Append a line to a file (used heavily in configure) |
+| `EXEC` | Run a command synchronously; `[1]` exit code, `[2-]` stdout lines |
+| `WriteFile` / `FILE_WRITE` | Append a line to a file (used heavily in configure) |
+| `FILE_GET_CONTENTS` | Read a file as a list of lines |
+| `FILE_IS_FILE` | Alias of `CHECK_IF_FILE` |
+| `FILE_IS_DIR` | `"true"` if path is a directory |
+| `FILE_EXISTS` | `"true"` if path exists |
+| `FILE_REMOVE` / `FILE_RENAME` / `FILE_MKDIR` / `FILE_RMDIR` | File ops; invalidate the file cache |
+| `REPLACE` | Literal string replace (`SUBST` is regex) |
 
-These are marked with `/* Pt extension */` comments.
+`jam.c` without `-f` opens `./Jambase` in the current directory, then falls
+back to the compiled-in default (`+`).
 
 ### Pt-Specific Extension (Jam Script)
 
 The `Jambase` has a Pt-specific modification: when no `-f` flag is given, it
 looks for a `Jambase` file in the current directory before falling back to the
-compiled-in default (`jam/src/jam.c` around line 504).
+compiled-in default (`jam/src/jam.c`).
 
 ## How to Add a New C Builtin Rule
 
@@ -277,8 +288,11 @@ local output = $(result[2-]) ;
 
 ## Building the Jam Executable
 
+The engine is compiled as C (`cl` / `cc`), not as C++.
+
 - **Windows**: `cd jam\src && nmake /f Makefile.win32` (requires MSVC `cl` in PATH)
-- **Unix**: `cd jam/src && ./build.sh <toolset>` (gcc, clang, etc.)
-- Pre-built binaries: `jam/jam.exe` and `jam/jam-x86.exe`
-- New `.c` files must be added to `SOURCES` in `Makefile.win32`
-- Debug memory: compile with `/DPT_MCHECK` for allocation tracking
+- **macOS**: `cd jam/src && make -f Makefile.macos`
+- **Unix bootstrap**: `jam.sh` compiles with `cc` into `jam100.bin` on first use
+- Pre-built binary: `jam/jam.exe` (Windows)
+- New `.c` files must be added to `SOURCES` in `Makefile.win32` and `Makefile.macos`
+- `jam/src/build.bat`, `build.sh`, and `build.jam` are Boost's C++ bootstrap and are kept as a reference for a later Pt bootstrap. Do not use them to build `jam.exe`.
