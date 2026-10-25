@@ -2,7 +2,6 @@
 build/
 tmp/
 deploy/
-boostjam-20190404/
 /prebuilt/
 Jamrules*
 jam*.bin
