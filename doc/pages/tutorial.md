@@ -28,10 +28,9 @@ directory includes the implementation details of the jam-based build system and
 the jam sources used for bootstrapping the build tool. To provide a completely 
 self-contained build system, we also have to make the jam tool available.
 For Windows hosts, there is a precompiled jam binary in the jam directory
-named jam.exe, which is called from jam.bat. For Unix hosts we add a simple
-wrapper shell script named jam.sh. This script bootstraps and runs the jam
-program on unix systems, so we don't have to include all possible jam binaries
-with our project, but rather build them on demand.
+named jam.exe, which is called from jam.bat and rebuilt with cl if it is
+missing. For Unix hosts, jam.sh builds jam/jam from jam/src with cc on first
+use, so we don't have to include all possible jam binaries with our project.
 
 All examples in this tutorial will use the script jam.sh, when commands are
 shown. If you want to take this tutorial on a Windows build host, simply

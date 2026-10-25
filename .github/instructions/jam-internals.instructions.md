@@ -24,7 +24,7 @@ jam/
 ├── unittest.jam         # RunUnitTest rule and PtUnitTestAction
 ├── pt.jam               # ConfigurePt — Pt-specific library detection
 ├── vc*.jam / gcc.jam …  # Toolset-specific compiler flags and rules
-├── jam.exe              # Pre-built Windows executable
+├── jam.exe              # Pre-built Windows executable (checked in)
 └── src/                 # C source for the jam executable
     ├── jam.c            # Entry point, option parsing, main()
     ├── jam.h            # Platform detection, OS macros, global config
@@ -51,8 +51,6 @@ jam/
     ├── strings.c/.h     # Dynamic string buffer (string)
     ├── hash.c/.h        # Hash table
     ├── mem.c/.h         # Memory allocation
-    ├── Makefile.win32   # nmake C build for Windows (active)
-    ├── Makefile.macos   # make C build for macOS (active)
     ├── build.bat/.sh/.jam  # Boost bootstrap scripts (C++ reference, not the C build)
     └── modules/         # Native rule implementations for Boost.Build modules
         ├── set.c        #   set.difference
@@ -153,11 +151,11 @@ LIST *builtin_myrule(FRAME *frame, int flags)
 }
 ```
 
-### 4. Add to the platform Makefiles
+### 4. Add to the bootstrap scripts
 
-If you created a new `.c` file, add it to the `SOURCES` variable in
-`jam/src/Makefile.win32` and `jam/src/Makefile.macos`. For a new builtin in
-the existing `builtins.c`, no build file changes are needed.
+If you created a new `.c` file, add it to the source lists in `jam.bat` and
+`jam.sh`. For a new builtin in the existing `builtins.c`, no build file
+changes are needed.
 
 ## Key C API Patterns
 
@@ -290,9 +288,14 @@ local output = $(result[2-]) ;
 
 The engine is compiled as C (`cl` / `cc`), not as C++.
 
-- **Windows**: `cd jam\src && nmake /f Makefile.win32` (requires MSVC `cl` in PATH)
-- **macOS**: `cd jam/src && make -f Makefile.macos`
-- **Unix bootstrap**: `jam.sh` compiles with `cc` into `jam100.bin` on first use
-- Pre-built binary: `jam/jam.exe` (Windows)
-- New `.c` files must be added to `SOURCES` in `Makefile.win32` and `Makefile.macos`
-- `jam/src/build.bat`, `build.sh`, and `build.jam` are Boost's C++ bootstrap and are kept as a reference for a later Pt bootstrap. Do not use them to build `jam.exe`.
+- `jam.bat` and `jam.sh` bootstrap the host jam binary when it is missing.
+- Windows: `jam/jam.exe` is checked in. If it is absent, `jam.bat` builds it
+  with `cl` (MSVC Developer Command Prompt).
+- Unix: `jam.sh` builds `jam/jam` with `cc` (`CC` overrides the compiler). On
+  macOS the binary is a universal x86_64/arm64 image with
+  `-mmacosx-version-min=11.0`.
+- New `.c` files must be added to the source lists in both `jam.bat` and
+  `jam.sh`.
+- `jam/src/build.bat`, `build.sh`, and `build.jam` are Boost's C++ bootstrap
+  and are kept as a reference for a later Pt bootstrap. Do not use them to
+  build `jam.exe`.

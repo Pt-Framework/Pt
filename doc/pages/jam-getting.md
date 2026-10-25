@@ -28,6 +28,6 @@ build process. One script named jam.sh runs on posix compatible build
 hosts, the other one named jam.bat runs on windows based build hosts.
 These scripts bootstrap and run the jam executable, so that jam executables
 do not have to be included for all possible build hosts, but rather built
-on demand. A precompiled version for windows hosts is distributed with
-the scripts named jam.exe. Other hosts build jam from jam/src with cc
-on first use.
+on demand. A precompiled jam.exe for Windows hosts is checked in under jam/.
+jam.bat rebuilds it with cl if it is missing. Other hosts build jam/jam from
+jam/src with cc on first use.

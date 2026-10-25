@@ -5,6 +5,7 @@ deploy/
 /prebuilt/
 Jamrules*
 jam*.bin
+/jam/jam
 .agents
 
 # Documentation (generated)
