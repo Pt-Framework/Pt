@@ -245,8 +245,8 @@ LIST * var_get( struct module_t * module, OBJECT * symbol )
                 /* Load variable to global module, with splitting, for backward
                  * compatibility. Then to .ENVIRON, without splitting.
                  */
-                var_defines( root_module(), environ, 1 );
-                var_defines( environ_module, environ, 0 );
+                var_defines( root_module(), (const char * const *)environ, 1 );
+                var_defines( environ_module, (const char * const *)environ, 0 );
                 string_free( buf );
 
                 if ( module->variables && ( v = (VARIABLE *)hash_find(

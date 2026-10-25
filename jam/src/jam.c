@@ -551,11 +551,11 @@ int main( int argc, char * * argv, char * * arg_environ )
         /* First into the global module, with splitting, for backward
          * compatibility.
          */
-        var_defines( root_module(), use_environ, 1 );
+        var_defines( root_module(), (const char * const *)use_environ, 1 );
 
         environ_module = bindmodule( constant_ENVIRON );
         /* Then into .ENVIRON, without splitting. */
-        var_defines( environ_module, use_environ, 0 );
+        var_defines( environ_module, (const char * const *)use_environ, 0 );
 
         /*
          * Jam defined variables OS & OSPLAT. We load them after environment, so
@@ -567,9 +567,7 @@ int main( int argc, char * * argv, char * * arg_environ )
         /* Load up variables set on command line. */
         for ( n = 0; ( s = getoptval( optv, 's', n ) ); ++n )
         {
-            char * symv[ 2 ];
-            symv[ 0 ] = s;
-            symv[ 1 ] = 0;
+            const char * const symv[ 2 ] = { s, 0 };
             var_defines( root_module(), symv, 1 );
             var_defines( environ_module, symv, 0 );
         }
