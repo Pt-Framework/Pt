@@ -203,18 +203,6 @@ void WebSocketChannel::requireOpen() const
 }
 
 
-bool WebSocketChannel::wantsInput() const
-{
-    if( ! isOpen() )
-        return false;
-
-    if(_closeState == CloseSent)
-        return true;
-
-    return _closeState == CloseOpen && _receive.isPending();
-}
-
-
 void WebSocketChannel::beginSend(bool finished)
 {
     requireOpen();
@@ -533,7 +521,8 @@ void WebSocketChannel::requestInput()
     if( ! isOpen() || _inputPending )
         return;
 
-    if( ! wantsInput() )
+    if(_closeState != CloseSent
+       && (_closeState != CloseOpen || ! _receive.isPending()))
         return;
 
     Stream* stream = this->stream();

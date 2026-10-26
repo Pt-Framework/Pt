@@ -216,8 +216,6 @@ class WebSocketChannel : public Channel
         };
 
     private:
-        bool wantsInput() const;
-
         void requestInput();
 
         void onInput();
