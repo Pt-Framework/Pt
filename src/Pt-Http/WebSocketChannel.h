@@ -90,23 +90,6 @@ class WebSocketChannel : public Channel
         virtual void onClose();
 
     private:
-        struct PendingFrame
-        {
-            enum Kind
-            {
-                Data,
-                Ping,
-                Pong,
-                Close
-            };
-
-            unsigned opcode;
-            bool fin;
-            Kind kind;
-            char payload[125];
-            std::size_t size;
-        };
-
         class Operation
         {
             public:
@@ -208,6 +191,35 @@ class WebSocketChannel : public Channel
                 bool               _closed;
         };
 
+        class Output : public Operation
+        {
+            public:
+                Output();
+
+                unsigned opcode() const
+                { return _opcode; }
+
+                bool fin() const
+                { return _fin; }
+
+                const char* data() const
+                { return _data; }
+
+                std::size_t size() const
+                { return _size; }
+
+                void setControl(unsigned opcode, const char* data, std::size_t n);
+
+                void setData(unsigned opcode, bool fin, const char* data, std::size_t n);
+
+            private:
+                unsigned    _opcode;
+                bool        _fin;
+                const char* _data;
+                std::size_t _size;
+                char        _payload[125];
+        };
+
         enum CloseState
         {
             CloseOpen,
@@ -235,18 +247,13 @@ class WebSocketChannel : public Channel
         void onInputError(std::exception_ptr error);
 
     private:
-        void enqueueData(bool isBegin, bool finished);
-
-        void enqueueControl(unsigned opcode, PendingFrame::Kind kind,
-                            const char* payload, std::size_t n);
+        void enqueue(Output* out);
 
         void enqueueClose(unsigned code, const std::string& reason);
 
         void requestOutput();
 
         void onOutput();
-
-        void onFrameWritten(const PendingFrame& frame);
 
         void onOutputError(std::exception_ptr error);
 
@@ -257,8 +264,6 @@ class WebSocketChannel : public Channel
         void takeClosePayload(const Frame& frame);
 
         unsigned echoableCloseCode(unsigned code) const;
-
-        void discardOpenMessage();
 
         void onCloseFinished();
 
@@ -289,7 +294,7 @@ class WebSocketChannel : public Channel
         WebSocketMessage _outgoing;
         WebSocketBuffer  _wsbuf;
 
-        std::deque<PendingFrame> _outputQueue;
+        std::deque<Output*> _outputQueue;
 
         bool               _inputPending;
         Operation          _receive;
@@ -297,15 +302,17 @@ class WebSocketChannel : public Channel
         std::exception_ptr _inputFailure;
 
         bool               _outputPending;
-        Operation          _send;
+        Output             _send;
         MessageProgress    _sendProgress;
         std::exception_ptr _outputFailure;
 
-        Operation _ping;
+        Output             _ping;
 
-        std::string _pongPayload;
+        Output                     _pongOut;
+        std::string                _pongPayload;
         Signal<const std::string&> _pong;
 
+        Output    _closeOut;
         Operation _shutdown;
 
         CloseState  _closeState;

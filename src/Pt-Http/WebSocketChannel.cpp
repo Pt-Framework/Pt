@@ -114,6 +114,42 @@ bool isValidUtf8(const char* data, std::size_t n)
 
 } // namespace
 
+///////////////////////////////////////////////////////////////////////
+// WebSocketChannel::Output
+///////////////////////////////////////////////////////////////////////
+
+WebSocketChannel::Output::Output()
+: _opcode(0)
+, _fin(true)
+, _data(0)
+, _size(0)
+{
+}
+
+
+void WebSocketChannel::Output::setControl(unsigned opcode, const char* data, std::size_t n)
+{
+    if(n != 0 && data)
+        std::memcpy(_payload, data, n);
+
+    _opcode = opcode;
+    _fin = true;
+    _size = n;
+    _data = n != 0 ? _payload : 0;
+}
+
+
+void WebSocketChannel::Output::setData(unsigned opcode, bool fin, const char* data, std::size_t n)
+{
+    _opcode = opcode;
+    _fin = fin;
+    _data = data;
+    _size = n;
+}
+
+///////////////////////////////////////////////////////////////////////
+// WebSocketChannel
+///////////////////////////////////////////////////////////////////////
 
 WebSocketChannel::WebSocketChannel()
 : Channel()
@@ -158,6 +194,8 @@ void WebSocketChannel::resetState()
     _send.cancel();
     _receive.cancel();
     _ping.cancel();
+    _pongOut.cancel();
+    _closeOut.cancel();
     _shutdown.cancel();
 
     _idleTimer.stop();
@@ -178,6 +216,8 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
     _send.reset();
     _receive.reset();
     _ping.reset();
+    _pongOut.reset();
+    _closeOut.reset();
     _shutdown.reset();
     resetState();
 
@@ -241,7 +281,16 @@ void WebSocketChannel::beginSend(bool finished)
     if(isBegin)
         _sendProgress.setHeader();
 
-    enqueueData(isBegin, finished);
+    unsigned opcode = isBegin
+                    ? ((_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02)
+                    : 0;
+    std::size_t n = _outgoing.sendSize();
+    if(n > MaxFramePayload)
+        n = MaxFramePayload;
+    bool fin = finished && _outgoing.sendSize() <= MaxFramePayload;
+
+    _send.setData(opcode, fin, _outgoing.sendData(), n);
+    enqueue(&_send);
 }
 
 
@@ -251,6 +300,13 @@ MessageProgress WebSocketChannel::endSend()
         throw std::logic_error("WebSocket send is not ready");
 
     _send.finish();
+
+    _outgoing.consume(_send.size());
+    _sendProgress.setBody();
+    if( _send.fin() && _outgoing.sendSize() == 0 )
+        _sendProgress.setFinished();
+
+    restartIdleTimer();
 
     MessageProgress progress = _sendProgress;
     if( progress.finished() )
@@ -303,7 +359,8 @@ void WebSocketChannel::beginPing(const char* payload, std::size_t n)
         std::rethrow_exception(_outputFailure);
 
     _ping.begin();
-    enqueueControl(0x09, PendingFrame::Ping, payload, n);
+    _ping.setControl(0x09, payload, n);
+    enqueue(&_ping);
 }
 
 
@@ -353,9 +410,10 @@ void WebSocketChannel::endShutdown()
 }
 
 
-// The first code decides; later ones only describe the consequence.
 void WebSocketChannel::setCloseCode(unsigned code, const std::string& reason)
 {
+    // The first code decides; later ones only describe the consequence.
+
     if(_closeCode != 0)
         return;
 
@@ -370,12 +428,6 @@ unsigned WebSocketChannel::echoableCloseCode(unsigned code) const
         return 1000;
 
     return code;
-}
-
-
-void WebSocketChannel::discardOpenMessage()
-{
-    _incoming.discard();
 }
 
 
@@ -466,36 +518,9 @@ void WebSocketChannel::onIdleTimeout()
 }
 
 
-void WebSocketChannel::enqueueData(bool isBegin, bool finished)
+void WebSocketChannel::enqueue(Output* out)
 {
-    // One fragment per send, so a queued control frame waits at most this long.
-    PendingFrame frame;
-    frame.fin = finished && _outgoing.sendSize() <= MaxFramePayload;
-    frame.kind = PendingFrame::Data;
-    frame.size = _outgoing.sendSize();
-    if(frame.size > MaxFramePayload)
-        frame.size = MaxFramePayload;
-    frame.opcode = isBegin
-                 ? ((_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02)
-                 : 0;
-
-    _outputQueue.push_back(frame);
-    requestOutput();
-}
-
-
-void WebSocketChannel::enqueueControl(unsigned opcode, PendingFrame::Kind kind,
-                                      const char* payload, std::size_t n)
-{
-    PendingFrame frame;
-    frame.opcode = opcode;
-    frame.fin = true;
-    frame.kind = kind;
-    frame.size = n;
-    if(n != 0 && payload)
-        std::memcpy(frame.payload, payload, n);
-
-    _outputQueue.push_back(frame);
+    _outputQueue.push_back(out);
     requestOutput();
 }
 
@@ -512,7 +537,16 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
         n += reason.size();
     }
 
-    enqueueControl(0x08, PendingFrame::Close, payload, n);
+    if( _closeOut.isPending() )
+    {
+        _closeOut.setControl(0x08, payload, n);
+        return;
+    }
+
+    _closeOut.reset();
+    _closeOut.begin();
+    _closeOut.setControl(0x08, payload, n);
+    enqueue(&_closeOut);
 }
 
 
@@ -607,9 +641,22 @@ bool WebSocketChannel::onPing(const Frame& frame)
 {
     restartIdleTimer();
 
-    if(_closeState == CloseOpen)
-        enqueueControl(0x0A, PendingFrame::Pong, frame.data(), frame.size());
+    if(_closeState != CloseOpen)
+        return true;
 
+    if( _pongOut.isPending() )
+    {
+        if(_outputPending && ! _outputQueue.empty() && _outputQueue.front() == &_pongOut)
+            return true;
+
+        _pongOut.setControl(0x0A, frame.data(), frame.size());
+        return true;
+    }
+
+    _pongOut.reset();
+    _pongOut.begin();
+    _pongOut.setControl(0x0A, frame.data(), frame.size());
+    enqueue(&_pongOut);
     return true;
 }
 
@@ -653,7 +700,8 @@ void WebSocketChannel::takeClosePayload(const Frame& frame)
 bool WebSocketChannel::onPeerClose(const Frame& frame)
 {
     takeClosePayload(frame);
-    discardOpenMessage();
+
+    _incoming.discard();
 
     if(_closeState == CloseOpen)
         enqueueClose( echoableCloseCode(_closeCode), std::string() );
@@ -733,11 +781,8 @@ void WebSocketChannel::requestOutput()
     if(_outputQueue.empty())
         return;
 
-    const PendingFrame& frame = _outputQueue.front();
-    const char* payload = frame.kind == PendingFrame::Data
-                        ? (frame.size != 0 ? _outgoing.sendData() : 0)
-                        : frame.payload;
-    writeFrame(frame.opcode, frame.fin, payload, frame.size);
+    Output* out = _outputQueue.front();
+    writeFrame(out->opcode(), out->fin(), out->data(), out->size());
 
     _outputPending = true;
     stream->beginOutput();
@@ -761,9 +806,9 @@ void WebSocketChannel::onOutput()
         if( _outputQueue.empty() )
             return;
 
-        PendingFrame frame = _outputQueue.front();
+        Output* out = _outputQueue.front();
         _outputQueue.pop_front();
-        onFrameWritten(frame);
+        out->setReady();
 
         requestOutput();
         onCloseFinished();
@@ -771,32 +816,6 @@ void WebSocketChannel::onOutput()
     catch(...)
     {
         onOutputError( std::current_exception() );
-    }
-}
-
-
-void WebSocketChannel::onFrameWritten(const PendingFrame& frame)
-{
-    switch(frame.kind)
-    {
-        case PendingFrame::Data:
-            _outgoing.consume(frame.size);
-            _sendProgress.setBody();
-            if(frame.fin && _outgoing.sendSize() == 0)
-                _sendProgress.setFinished();
-            if( _send.setReady() )
-                restartIdleTimer();
-            break;
-
-        case PendingFrame::Ping:
-            _ping.setReady();
-            break;
-
-        case PendingFrame::Pong:
-            break;
-
-        case PendingFrame::Close:
-             break;
     }
 }
 
@@ -813,26 +832,10 @@ void WebSocketChannel::onOutputError(std::exception_ptr error)
     if( _outputQueue.empty() )
         return;
 
-    PendingFrame frame = _outputQueue.front();
+    Output* out = _outputQueue.front();
     _outputQueue.pop_front();
-
-    switch(frame.kind)
-    {
-        case PendingFrame::Data:
-            _send.setFailed(error);
-            break;
-
-        case PendingFrame::Ping:
-            _ping.setFailed(error);
-            break;
-
-        case PendingFrame::Close:
-            _shutdown.setFailed(error);
-            break;
-
-        case PendingFrame::Pong:
-            break;
-    }
+    out->setFailed(error);
+    _shutdown.setFailed(error);
 }
 
 
