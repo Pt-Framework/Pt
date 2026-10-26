@@ -30,7 +30,7 @@ must serve many applications, platforms, and user requirements.
   could make a relative path ambiguous.
 - In multi-root workspaces, identify the workspace folder explicitly before
   resolving relative paths.
-- Do not search `build/`, `tmp/`, `deps/`, `doc/website/`, or large
+- Do not search `build/`, `tmp/`, `prebuilt/`, `doc/website/`, or large
   vendored trees (`src/skia`, `src/openssl`, …) unless the task requires it.
 - Use ASCII characters in authored source files, source comments, documentation
   source, and file names unless the task requires non-ASCII text. This does not
