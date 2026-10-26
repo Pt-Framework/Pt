@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2012 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -44,7 +44,7 @@ namespace Http {
 */
 class ChunkParser
 {
-    public: 
+    public:
         ChunkParser();
 
         void reset();
@@ -57,7 +57,7 @@ class ChunkParser
         std::size_t chunkSize() const
         { return _chunkSize; }
 
-        bool end() const  
+        bool end() const
         { return _state == 0; }
 
     private:
@@ -91,7 +91,7 @@ class HttpBuffer : public std::streambuf
 
         ~HttpBuffer()
         { }
-        
+
         void attach(std::streambuf& sbuf)
         { _sbuf = &sbuf; }
 
@@ -100,7 +100,7 @@ class HttpBuffer : public std::streambuf
 
         // TODO: same reset semantics as XmlReader
         void reset()
-        { 
+        {
             _contentLength = 0;
             _chunked = false;
             _keepAlive = false;
