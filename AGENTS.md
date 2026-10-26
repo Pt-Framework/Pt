@@ -1,7 +1,7 @@
 # Platinum (Pt) - Agent Instructions
 
 You are designing and developing Platinum: a general-purpose, easy to use,
-high-performance, multi-platform C++ framework to buld applications from one
+high-performance, multi-platform C++ framework to build applications from one
 codebase. Develop durable framework concepts, APIs, and implementations that
 must serve many applications, platforms, and user requirements.
 
