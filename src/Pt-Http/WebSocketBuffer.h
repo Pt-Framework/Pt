@@ -194,7 +194,7 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
 
         const Frame* import(std::streamsize n = 0);
 
-            void discard();
+        void discard();
 
     protected:
         virtual int_type underflow();
@@ -238,15 +238,15 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
         std::size_t     _maxMessageSize;
         std::size_t     _importRemaining;
 
-        Frame         _frame;
-        bool          _frameReady;
+        Frame           _frame;
+        bool            _frameReady;
 
-        unsigned      _messageOpcode;
-        unsigned      _failCode;
-        std::size_t   _messageSize;
+        unsigned        _messageOpcode;
+        unsigned        _failCode;
+        std::size_t     _messageSize;
 
-        unsigned      _utf8Need;
-        unsigned char _utf8Lead;
+        unsigned        _utf8Need;
+        unsigned char   _utf8Lead;
 };
 
 } // namespace
