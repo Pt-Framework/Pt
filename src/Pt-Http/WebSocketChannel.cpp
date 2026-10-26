@@ -121,30 +121,36 @@ bool isValidUtf8(const char* data, std::size_t n)
 WebSocketChannel::Output::Output()
 : _opcode(0)
 , _fin(true)
-, _data(0)
 , _size(0)
 {
 }
 
 
-void WebSocketChannel::Output::setControl(unsigned opcode, const char* data, std::size_t n)
+void WebSocketChannel::Output::set(unsigned opcode, bool fin)
 {
-    if(n != 0 && data)
-        std::memcpy(_payload, data, n);
+    std::size_t n = _message.pending();
+    if(n > MaxFramePayload)
+        n = MaxFramePayload;
 
     _opcode = opcode;
-    _fin = true;
+    _fin = fin;
     _size = n;
-    _data = n != 0 ? _payload : 0;
 }
 
 
-void WebSocketChannel::Output::setData(unsigned opcode, bool fin, const char* data, std::size_t n)
+void WebSocketChannel::Output::set(unsigned opcode, const char* data, std::size_t n)
 {
-    _opcode = opcode;
-    _fin = fin;
-    _data = data;
-    _size = n;
+    _message.discard();
+    if(n != 0 && data)
+        _message.body().write(data, n);
+
+    set(opcode, true);
+}
+
+
+void WebSocketChannel::Output::discard()
+{
+    _message.discard(_size);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -201,7 +207,10 @@ void WebSocketChannel::resetState()
     _idleTimer.stop();
 
     _incoming.clear();
-    _outgoing.clear();
+    _send.message().clear();
+    _ping.message().clear();
+    _pongOut.message().clear();
+    _closeOut.message().clear();
 }
 
 
@@ -260,17 +269,18 @@ void WebSocketChannel::beginSend(bool finished)
 
     if(isBegin)
     {
-        WebSocketMessage::Type type = _outgoing.type();
+        WebSocketMessage& msg = _send.message();
+        WebSocketMessage::Type type = msg.type();
         if(type != WebSocketMessage::Text && type != WebSocketMessage::Binary)
             throw std::invalid_argument("WebSocket message type");
 
-        std::size_t n = _outgoing.sendSize();
+        std::size_t n = msg.pending();
         if(_maxMessageSize != 0 && n > _maxMessageSize)
             throw std::invalid_argument("WebSocket message too large");
 
         if(finished && type == WebSocketMessage::Text)
         {
-            const char* data = _outgoing.sendData();
+            const char* data = msg.buffer().data();
             if( ! isValidUtf8(data, n) )
                 throw std::invalid_argument("WebSocket text is not UTF-8");
         }
@@ -282,14 +292,11 @@ void WebSocketChannel::beginSend(bool finished)
         _sendProgress.setHeader();
 
     unsigned opcode = isBegin
-                    ? ((_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02)
+                    ? ((_send.message().type() == WebSocketMessage::Text) ? 0x01 : 0x02)
                     : 0;
-    std::size_t n = _outgoing.sendSize();
-    if(n > MaxFramePayload)
-        n = MaxFramePayload;
-    bool fin = finished && _outgoing.sendSize() <= MaxFramePayload;
+    bool fin = finished && _send.message().pending() <= MaxFramePayload;
 
-    _send.setData(opcode, fin, _outgoing.sendData(), n);
+    _send.set(opcode, fin);
     enqueue(&_send);
 }
 
@@ -301,9 +308,8 @@ MessageProgress WebSocketChannel::endSend()
 
     _send.finish();
 
-    _outgoing.consume(_send.size());
     _sendProgress.setBody();
-    if( _send.fin() && _outgoing.sendSize() == 0 )
+    if( _send.fin() && _send.message().pending() == 0 )
         _sendProgress.setFinished();
 
     restartIdleTimer();
@@ -359,7 +365,7 @@ void WebSocketChannel::beginPing(const char* payload, std::size_t n)
         std::rethrow_exception(_outputFailure);
 
     _ping.begin();
-    _ping.setControl(0x09, payload, n);
+    _ping.set(0x09, payload, n);
     enqueue(&_ping);
 }
 
@@ -539,13 +545,13 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
 
     if( _closeOut.isPending() )
     {
-        _closeOut.setControl(0x08, payload, n);
+        _closeOut.set(0x08, payload, n);
         return;
     }
 
     _closeOut.reset();
     _closeOut.begin();
-    _closeOut.setControl(0x08, payload, n);
+    _closeOut.set(0x08, payload, n);
     enqueue(&_closeOut);
 }
 
@@ -649,13 +655,13 @@ bool WebSocketChannel::onPing(const Frame& frame)
         if(_outputPending && ! _outputQueue.empty() && _outputQueue.front() == &_pongOut)
             return true;
 
-        _pongOut.setControl(0x0A, frame.data(), frame.size());
+        _pongOut.set(0x0A, frame.data(), frame.size());
         return true;
     }
 
     _pongOut.reset();
     _pongOut.begin();
-    _pongOut.setControl(0x0A, frame.data(), frame.size());
+    _pongOut.set(0x0A, frame.data(), frame.size());
     enqueue(&_pongOut);
     return true;
 }
@@ -782,7 +788,8 @@ void WebSocketChannel::requestOutput()
         return;
 
     Output* out = _outputQueue.front();
-    writeFrame(out->opcode(), out->fin(), out->data(), out->size());
+    writeFrame(out->opcode(), out->fin(),
+               out->message().buffer().data(), out->size());
 
     _outputPending = true;
     stream->beginOutput();
@@ -808,6 +815,7 @@ void WebSocketChannel::onOutput()
 
         Output* out = _outputQueue.front();
         _outputQueue.pop_front();
+        out->discard();
         out->setReady();
 
         requestOutput();

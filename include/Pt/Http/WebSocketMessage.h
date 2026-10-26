@@ -9,6 +9,7 @@
 #include <Pt/NonCopyable.h>
 #include <iostream>
 #include <streambuf>
+#include <vector>
 #include <cstddef>
 
 namespace Pt {
@@ -16,6 +17,43 @@ namespace Pt {
 namespace Http {
 
 class WebSocketChannel;
+
+
+/** @internal
+    @brief Output buffer for WebSocket messages.
+*/
+class WebSocketMessageBuffer : public std::streambuf
+{
+    public:
+        //! @brief Constructs an empty buffer.
+        WebSocketMessageBuffer();
+
+        //! @brief Destructor.
+        ~WebSocketMessageBuffer();
+
+        //! @brief Discards the buffered data.
+        void discard();
+
+        //! @brief Discards up to @a n buffered bytes.
+        void discard(std::size_t n);
+
+        //! @brief Returns the size of the buffered data.
+        std::size_t size() const;
+
+        //! @brief Returns a pointer to the buffered data.
+        const char* data() const;
+
+    protected:
+        virtual int_type overflow(int_type ch);
+
+        virtual std::streamsize xsputn(const char* data, std::streamsize n);
+
+        virtual int_type underflow();
+
+    private:
+        std::vector<char> _payload;
+};
+
 
 /** @brief Payload of one text or binary WebSocket message.
 
@@ -73,6 +111,14 @@ class PT_HTTP_API WebSocketMessage : private NonCopyable
     friend class WebSocketChannel;
 
     public:
+        /** @brief Creates an empty message.
+        */
+        WebSocketMessage();
+
+        /** @brief Destroys the message.
+        */
+        ~WebSocketMessage();
+
         /** @brief Data type of a WebSocket message.
         */
         enum Type
@@ -110,32 +156,31 @@ class PT_HTTP_API WebSocketMessage : private NonCopyable
         */
         void discard();
 
+        /** @brief Drops up to @a n buffered body bytes and leaves the type.
+
+            Discards up to @a n readable input bytes and up to @a n pending
+            output bytes.
+        */
+        void discard(std::size_t n);
+
         /** @brief Drops the buffered body and sets the type to %Unknown.
         */
         void clear();
 
+        //! @internal
+        WebSocketMessageBuffer& buffer()
+        { return _buf; }
+
     private:
-        class PayloadBuffer;
-
-        WebSocketMessage();
-
-        ~WebSocketMessage();
-
         void setTypeFromEngine(Type type);
 
         //! @internal
         void setBuffer(std::streambuf& sb);
 
-        const char* sendData() const;
-
-        std::size_t sendSize() const;
-
-        void consume(std::size_t n);
-
     private:
-        Type           _type;
-        PayloadBuffer* _buffer;
-        std::iostream  _body;
+        Type                   _type;
+        WebSocketMessageBuffer _buf;
+        std::iostream          _body;
 };
 
 } // namespace Http

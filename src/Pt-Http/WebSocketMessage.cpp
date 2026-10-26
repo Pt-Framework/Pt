@@ -3,129 +3,113 @@
 */
 
 #include <Pt/Http/WebSocketMessage.h>
-#include <vector>
 #include <stdexcept>
 
 namespace Pt {
 
 namespace Http {
 
-class WebSocketMessage::PayloadBuffer : public std::streambuf
+WebSocketMessageBuffer::WebSocketMessageBuffer()
 {
-    public:
-        PayloadBuffer()
-        {
-        }
+}
 
-        void reset()
-        {
-            _payload.clear();
-            setp(0, 0);
-            setg(0, 0, 0);
-        }
 
-        void append(const char* data, std::size_t n)
-        {
-            if(n == 0)
-                return;
+WebSocketMessageBuffer::~WebSocketMessageBuffer()
+{
+}
 
-            _payload.insert(_payload.end(), data, data + n);
-        }
 
-        void prepareRead()
-        {
-            if( _payload.empty() )
-            {
-                setg(0, 0, 0);
-                return;
-            }
+void WebSocketMessageBuffer::discard()
+{
+    _payload.clear();
+    setp(0, 0);
+    setg(0, 0, 0);
+}
 
-            setg(&_payload[0], &_payload[0], &_payload[0] + _payload.size());
-        }
 
-        const char* sendData() const
-        {
-            if( _payload.empty() )
-                return 0;
+void WebSocketMessageBuffer::discard(std::size_t n)
+{
+    if(gptr() && egptr() && gptr() < egptr())
+    {
+        std::size_t avail = static_cast<std::size_t>(egptr() - gptr());
+        std::size_t take = n < avail ? n : avail;
+        gbump( static_cast<int>(take) );
+    }
 
-            return &_payload[0];
-        }
+    std::size_t pend = size();
+    std::size_t take = n < pend ? n : pend;
+    if(take == 0)
+        return;
 
-        std::size_t sendSize() const
-        {
-            PayloadBuffer* self = const_cast<PayloadBuffer*>(this);
-            if( self->pptr() && self->pbase() )
-                return static_cast<std::size_t>(self->pptr() - self->pbase());
+    if(take >= _payload.size())
+    {
+        discard();
+        return;
+    }
 
-            return _payload.size();
-        }
+    _payload.erase(_payload.begin(),
+                   _payload.begin() + static_cast<std::ptrdiff_t>(take));
+    setp(0, 0);
+    setg(0, 0, 0);
+}
 
-        void consume(std::size_t n)
-        {
-            if(n == 0)
-                return;
 
-            if(n >= _payload.size())
-            {
-                reset();
-                return;
-            }
+std::size_t WebSocketMessageBuffer::size() const
+{
+    WebSocketMessageBuffer* self = const_cast<WebSocketMessageBuffer*>(this);
+    if( self->pptr() && self->pbase() )
+        return static_cast<std::size_t>(self->pptr() - self->pbase());
 
-            _payload.erase(_payload.begin(), _payload.begin() + static_cast<std::ptrdiff_t>(n));
-            setp(0, 0);
-            setg(0, 0, 0);
-        }
+    return _payload.size();
+}
 
-        std::size_t available() const
-        {
-            PayloadBuffer* self = const_cast<PayloadBuffer*>(this);
-            if( ! self->gptr() || ! self->egptr() || self->gptr() >= self->egptr() )
-                return 0;
 
-            return static_cast<std::size_t>(self->egptr() - self->gptr());
-        }
+const char* WebSocketMessageBuffer::data() const
+{
+    if( _payload.empty() )
+        return 0;
 
-    protected:
-        virtual int_type overflow(int_type ch)
-        {
-            if( ch == traits_type::eof() )
-                return traits_type::not_eof(ch);
+    return &_payload[0];
+}
 
-            std::size_t off = pptr() ? static_cast<std::size_t>(pptr() - pbase())
-                                     : _payload.size();
-            _payload.push_back( static_cast<char>(ch) );
-            setp(&_payload[0], &_payload[0] + _payload.size());
-            pbump( static_cast<int>(off + 1) );
-            return ch;
-        }
 
-        virtual std::streamsize xsputn(const char* data, std::streamsize n)
-        {
-            std::size_t off = pptr() ? static_cast<std::size_t>(pptr() - pbase())
-                                     : _payload.size();
-            _payload.insert(_payload.end(), data, data + n);
-            setp(&_payload[0], &_payload[0] + _payload.size());
-            pbump( static_cast<int>(off + static_cast<std::size_t>(n)) );
-            return n;
-        }
+WebSocketMessageBuffer::int_type WebSocketMessageBuffer::overflow(int_type ch)
+{
+    if( ch == traits_type::eof() )
+        return traits_type::not_eof(ch);
 
-        virtual int_type underflow()
-        {
-            if(gptr() && gptr() < egptr())
-                return traits_type::to_int_type(*gptr());
+    std::size_t off = pptr() ? static_cast<std::size_t>(pptr() - pbase())
+                             : _payload.size();
+    _payload.push_back( static_cast<char>(ch) );
+    setp(&_payload[0], &_payload[0] + _payload.size());
+    pbump( static_cast<int>(off + 1) );
+    return ch;
+}
 
-            return traits_type::eof();
-        }
 
-    private:
-        std::vector<char> _payload;
-};
+std::streamsize WebSocketMessageBuffer::xsputn(const char* data, std::streamsize n)
+{
+    std::size_t off = pptr() ? static_cast<std::size_t>(pptr() - pbase())
+                             : _payload.size();
+    _payload.insert(_payload.end(), data, data + n);
+    setp(&_payload[0], &_payload[0] + _payload.size());
+    pbump( static_cast<int>(off + static_cast<std::size_t>(n)) );
+    return n;
+}
+
+
+WebSocketMessageBuffer::int_type WebSocketMessageBuffer::underflow()
+{
+    if(gptr() && gptr() < egptr())
+        return traits_type::to_int_type(*gptr());
+
+    return traits_type::eof();
+}
 
 
 WebSocketMessage::WebSocketMessage()
 : _type(Unknown)
-, _buffer(new PayloadBuffer())
-, _body(_buffer)
+, _body(&_buf)
 {
 }
 
@@ -133,7 +117,6 @@ WebSocketMessage::WebSocketMessage()
 WebSocketMessage::~WebSocketMessage()
 {
     _body.rdbuf(0);
-    delete _buffer;
 }
 
 
@@ -161,22 +144,39 @@ std::size_t WebSocketMessage::available() const
 
 std::size_t WebSocketMessage::pending() const
 {
-    return _buffer->sendSize();
+    return _buf.size();
 }
 
 
 void WebSocketMessage::discard()
 {
     std::streambuf* sb = _body.rdbuf();
-    if(sb && sb != _buffer)
+    if(sb && sb != &_buf)
     {
         std::streamsize avail = sb->in_avail();
         while(avail-- > 0)
             sb->sbumpc();
     }
 
-    _buffer->reset();
+    _buf.discard();
     _body.clear();
+}
+
+
+void WebSocketMessage::discard(std::size_t n)
+{
+    std::streambuf* sb = _body.rdbuf();
+    if(sb && sb != &_buf)
+    {
+        std::streamsize avail = sb->in_avail();
+        std::streamsize take = avail < static_cast<std::streamsize>(n)
+                             ? avail
+                             : static_cast<std::streamsize>(n);
+        while(take-- > 0)
+            sb->sbumpc();
+    }
+
+    _buf.discard(n);
 }
 
 
@@ -190,24 +190,6 @@ void WebSocketMessage::clear()
 void WebSocketMessage::setBuffer(std::streambuf& sb)
 {
     _body.rdbuf(&sb);
-}
-
-
-const char* WebSocketMessage::sendData() const
-{
-    return _buffer->sendData();
-}
-
-
-std::size_t WebSocketMessage::sendSize() const
-{
-    return _buffer->sendSize();
-}
-
-
-void WebSocketMessage::consume(std::size_t n)
-{
-    _buffer->consume(n);
 }
 
 } // namespace Http

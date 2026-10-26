@@ -47,7 +47,7 @@ class WebSocketChannel : public Channel
         { return _incoming; }
 
         WebSocketMessage& outgoing()
-        { return _outgoing; }
+        { return _send.message(); }
 
         void beginSend(bool finished);
 
@@ -196,28 +196,29 @@ class WebSocketChannel : public Channel
             public:
                 Output();
 
+                WebSocketMessage& message()
+                { return _message; }
+
                 unsigned opcode() const
                 { return _opcode; }
 
                 bool fin() const
                 { return _fin; }
 
-                const char* data() const
-                { return _data; }
-
                 std::size_t size() const
                 { return _size; }
 
-                void setControl(unsigned opcode, const char* data, std::size_t n);
+                void set(unsigned opcode, bool fin);
 
-                void setData(unsigned opcode, bool fin, const char* data, std::size_t n);
+                void set(unsigned opcode, const char* data, std::size_t n);
+
+                void discard();
 
             private:
-                unsigned    _opcode;
-                bool        _fin;
-                const char* _data;
-                std::size_t _size;
-                char        _payload[125];
+                WebSocketMessage _message;
+                unsigned         _opcode;
+                bool             _fin;
+                std::size_t      _size;
         };
 
         enum CloseState
@@ -291,7 +292,6 @@ class WebSocketChannel : public Channel
         Pt::uint32_t  _maskSeed;
 
         WebSocketMessage _incoming;
-        WebSocketMessage _outgoing;
         WebSocketBuffer  _wsbuf;
 
         std::deque<Output*> _outputQueue;
