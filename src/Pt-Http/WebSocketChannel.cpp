@@ -186,34 +186,6 @@ void WebSocketChannel::setMaxMessageSize(std::size_t maxSize)
 }
 
 
-void WebSocketChannel::resetState()
-{
-    _inputPending = false;
-    _receiveProgress = MessageProgress();
-    _inputFailure = std::exception_ptr();
-
-    _outputPending = false;
-    _outputQueue.clear();
-    _outputFailure = std::exception_ptr();
-    _sendProgress = MessageProgress();
-
-    _send.cancel();
-    _receive.cancel();
-    _ping.cancel();
-    _pongOut.cancel();
-    _closeOut.cancel();
-    _shutdown.cancel();
-
-    _idleTimer.stop();
-
-    _incoming.clear();
-    _send.message().clear();
-    _ping.message().clear();
-    _pongOut.message().clear();
-    _closeOut.message().clear();
-}
-
-
 void WebSocketChannel::open(Stream& stream, bool clientMask)
 {
     Channel::open(stream);
@@ -222,13 +194,13 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
     _closeState = CloseOpen;
     _closeCode = 0;
     _closeReason.clear();
-    _send.reset();
-    _receive.reset();
-    _ping.reset();
-    _pongOut.reset();
-    _closeOut.reset();
-    _shutdown.reset();
-    resetState();
+
+    _receive.open();
+    _send.open();
+    _ping.open();
+    _pongOut.open();
+    _closeOut.open();
+    _shutdown.open();
 
     stream.setTimeout(_timeout);
     stream.inputReady() += Pt::slot(*this, &WebSocketChannel::onInput);
@@ -340,6 +312,9 @@ void WebSocketChannel::beginReceive()
 
 MessageProgress WebSocketChannel::endReceive()
 {
+    if( _receive.isClosed() )
+        throw IOError("WebSocket closed");
+
     if( ! _receive.isReady() )
         throw std::logic_error("WebSocket receive is not ready");
 
@@ -409,6 +384,9 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
 
 void WebSocketChannel::endShutdown()
 {
+    if( _shutdown.isClosed() )
+        throw IOError("WebSocket closed");
+
     if( ! _shutdown.isReady() )
         throw std::logic_error("WebSocket shutdown is not ready");
 
@@ -439,39 +417,78 @@ unsigned WebSocketChannel::echoableCloseCode(unsigned code) const
 
 void WebSocketChannel::onCloseFinished()
 {
+    // Close handshake done and the close frame written.
+    // Shutdown succeeds, then the stream detaches.
+
     if(_closeState != CloseFinished)
         return;
 
     if( ! _outputQueue.empty() || _outputPending )
         return;
 
+    const bool receivePending = _receive.isPending();
+
     _shutdown.setReady();
 
     if( isOpen() )
         Channel::close();
+
+    notifyClosed(_receive, receivePending);
 }
 
 
 void WebSocketChannel::onPassiveClose()
 {
+    // Unexpected stream end. Tear down first, then complete
+    // outstanding receive/shutdown.
+
     if( ! isOpen() )
         return;
 
     if(_closeCode == 0)
         setCloseCode(1006, std::string());
 
-    _receive.setClosed();
-    _shutdown.setClosed();
+    const bool receivePending = _receive.isPending();
+    const bool shutdownPending = _shutdown.isPending();
+
     Channel::close();
+
+    notifyClosed(_receive, receivePending);
+    notifyClosed(_shutdown, shutdownPending);
+}
+
+
+void WebSocketChannel::notifyClosed(Operation& op, bool pending)
+{
+    if(pending)
+        op.notify();
 }
 
 
 void WebSocketChannel::onClose()
 {
+    // Stream is gone. Every operation becomes Closed. No signals.
+
     if(_closeState != CloseFinished)
         setCloseCode(1006, std::string());
 
-    resetState();
+    _inputPending = false;
+    _receiveProgress = MessageProgress();
+    _inputFailure = std::exception_ptr();
+    _receive.close();
+
+    _outputPending = false;
+    _outputQueue.clear();
+    _outputFailure = std::exception_ptr();
+    _sendProgress = MessageProgress();
+    _send.close();
+    _ping.close();
+    _pongOut.close();
+    _closeOut.close();
+    _shutdown.close();
+
+    _idleTimer.stop();
+    _incoming.clear();
 }
 
 
@@ -705,6 +722,8 @@ void WebSocketChannel::takeClosePayload(const Frame& frame)
 
 bool WebSocketChannel::onPeerClose(const Frame& frame)
 {
+    // Peer close frame. Echo a close if we have not sent one.
+
     takeClosePayload(frame);
 
     _incoming.discard();
@@ -713,7 +732,6 @@ bool WebSocketChannel::onPeerClose(const Frame& frame)
         enqueueClose( echoableCloseCode(_closeCode), std::string() );
 
     _closeState = CloseFinished;
-    _receive.setClosed();
     onCloseFinished();
     return false;
 }

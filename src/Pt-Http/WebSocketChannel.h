@@ -94,8 +94,7 @@ class WebSocketChannel : public Channel
         {
             public:
                 Operation()
-                : _state(Idle)
-                , _closed(false)
+                : _state(Closed)
                 { }
 
                 bool isIdle() const
@@ -107,14 +106,39 @@ class WebSocketChannel : public Channel
                 bool isReady() const
                 { return _state == Ready; }
 
+                bool isClosed() const
+                { return _state == Closed; }
+
                 Signal<>& ready()
                 { return _ready; }
+
+                void open()
+                {
+                    _state = Idle;
+                    _error = std::exception_ptr();
+                }
+
+                void reset()
+                {
+                    _state = Idle;
+                    _error = std::exception_ptr();
+                }
+
+                void close()
+                {
+                    _state = Closed;
+                    _error = std::exception_ptr();
+                }
+
+                void notify()
+                {
+                    _ready.send();
+                }
 
                 void begin()
                 {
                     _state = Pending;
                     _error = std::exception_ptr();
-                    _closed = false;
                 }
 
                 bool setReady()
@@ -136,24 +160,9 @@ class WebSocketChannel : public Channel
                     return setReady();
                 }
 
-                bool setClosed()
-                {
-                    if(_state != Pending)
-                        return false;
-
-                    _closed = true;
-                    return setReady();
-                }
-
                 void finish()
                 {
                     _state = Idle;
-
-                    if(_closed)
-                    {
-                        _closed = false;
-                        throw IOError("WebSocket closed");
-                    }
 
                     if(_error)
                     {
@@ -163,23 +172,10 @@ class WebSocketChannel : public Channel
                     }
                 }
 
-                void reset()
-                {
-                    _state = Idle;
-                    _error = std::exception_ptr();
-                    _closed = false;
-                }
-
-                // A ready result stays; the application may not have read it yet.
-                void cancel()
-                {
-                    if(_state == Pending)
-                        reset();
-                }
-
             private:
                 enum State
                 {
+                    Closed,
                     Idle,
                     Pending,
                     Ready
@@ -188,7 +184,6 @@ class WebSocketChannel : public Channel
                 Signal<>           _ready;
                 State              _state;
                 std::exception_ptr _error;
-                bool               _closed;
         };
 
         class Output : public Operation
@@ -213,6 +208,24 @@ class WebSocketChannel : public Channel
                 void set(unsigned opcode, const char* data, std::size_t n);
 
                 void discard();
+
+                void reset()
+                {
+                    Operation::reset();
+                    _message.clear();
+                    _opcode = 0;
+                    _fin = true;
+                    _size = 0;
+                }
+
+                void close()
+                {
+                    Operation::close();
+                    _message.clear();
+                    _opcode = 0;
+                    _fin = true;
+                    _size = 0;
+                }
 
             private:
                 WebSocketMessage _message;
@@ -270,11 +283,11 @@ class WebSocketChannel : public Channel
 
         void onPassiveClose();
 
+        void notifyClosed(Operation& op, bool pending);
+
         void setCloseCode(unsigned code, const std::string& reason);
 
     private:
-        void resetState();
-
         void armIdleTimer();
 
         void restartIdleTimer();
