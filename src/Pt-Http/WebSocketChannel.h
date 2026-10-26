@@ -215,12 +215,6 @@ class WebSocketChannel : public Channel
             CloseFinished
         };
 
-        enum InputAction
-        {
-            NextFrame,
-            Stop
-        };
-
     private:
         bool wantsInput() const;
 
@@ -228,15 +222,15 @@ class WebSocketChannel : public Channel
 
         void onInput();
 
-        InputAction onFrame(const Frame& frame);
+        bool onFrame(const Frame& frame);
 
-        InputAction onPing(const Frame& frame);
+        bool onPing(const Frame& frame);
 
-        InputAction onPong(const Frame& frame);
+        bool onPong(const Frame& frame);
 
-        InputAction onPeerClose(const Frame& frame);
+        bool onPeerClose(const Frame& frame);
 
-        InputAction onData(const Frame& frame);
+        bool onData(const Frame& frame);
 
         void onProtocolError(std::exception_ptr error, unsigned code);
 

@@ -574,20 +574,16 @@ void WebSocketChannel::onInput()
                 return;
             }
 
-            if( onFrame(*frame) == NextFrame )
-                continue;
-
-            if( wantsInput() && _wsbuf.in_avail() == 0 )
-                continue;
-
-            if( wantsInput() && ! _receive.isPending() )
+            bool nextFrame = onFrame(*frame);
+            if( ! nextFrame )
             {
-                _wsbuf.discard();
-                continue;
-            }
+                _inputPending = false;
 
-            _inputPending = false;
-            return;
+                if(_wsbuf.in_avail() == 0)
+                    requestInput();
+
+                return;
+            }
         }
     }
     catch(const WebSocketError& e)
@@ -603,7 +599,7 @@ void WebSocketChannel::onInput()
 }
 
 
-WebSocketChannel::InputAction WebSocketChannel::onFrame(const Frame& frame)
+bool WebSocketChannel::onFrame(const Frame& frame)
 {
     switch( frame.opcode() )
     {
@@ -618,24 +614,24 @@ WebSocketChannel::InputAction WebSocketChannel::onFrame(const Frame& frame)
 }
 
 
-WebSocketChannel::InputAction WebSocketChannel::onPing(const Frame& frame)
+bool WebSocketChannel::onPing(const Frame& frame)
 {
     restartIdleTimer();
 
     if(_closeState == CloseOpen)
         enqueueControl(0x0A, PendingFrame::Pong, frame.data(), frame.size());
 
-    return NextFrame;
+    return true;
 }
 
 
-WebSocketChannel::InputAction WebSocketChannel::onPong(const Frame& frame)
+bool WebSocketChannel::onPong(const Frame& frame)
 {
     const char* data = frame.data();
     _pongPayload.assign(data ? data : "", frame.size());
     restartIdleTimer();
     _pong.send(_pongPayload);
-    return NextFrame;
+    return true;
 }
 
 
@@ -665,7 +661,7 @@ void WebSocketChannel::takeClosePayload(const Frame& frame)
 }
 
 
-WebSocketChannel::InputAction WebSocketChannel::onPeerClose(const Frame& frame)
+bool WebSocketChannel::onPeerClose(const Frame& frame)
 {
     takeClosePayload(frame);
     discardOpenMessage();
@@ -676,16 +672,16 @@ WebSocketChannel::InputAction WebSocketChannel::onPeerClose(const Frame& frame)
     _closeState = CloseFinished;
     _receive.setClosed();
     onCloseFinished();
-    return Stop;
+    return false;
 }
 
 
-WebSocketChannel::InputAction WebSocketChannel::onData(const Frame& frame)
+bool WebSocketChannel::onData(const Frame& frame)
 {
     if( ! _receive.isPending() )
     {
         _wsbuf.discard();
-        return NextFrame;
+        return true;
     }
 
     unsigned opcode = frame.opcode();
@@ -707,7 +703,7 @@ WebSocketChannel::InputAction WebSocketChannel::onData(const Frame& frame)
     if( _receive.setReady() )
         restartIdleTimer();
 
-    return Stop;
+    return ! _receive.isReady();
 }
 
 
