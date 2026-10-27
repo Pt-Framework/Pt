@@ -78,7 +78,7 @@ class WebSocketChannel : public Channel
         { return _send.ready(); }
 
         Signal<const std::string&>& pong()
-        { return _pong; }
+        { return _pongReceived; }
 
         Signal<>& pingReady()
         { return _ping.ready(); }
@@ -232,12 +232,13 @@ class WebSocketChannel : public Channel
                 std::size_t      _size;
         };
 
-        enum CloseState
+        enum State
         {
-            CloseOpen,
-            CloseSent,
-            CloseEnding,
-            CloseEnded
+            Open,
+            Closing,
+            Ending,
+            Ended,
+            Closed
         };
 
     private:
@@ -286,8 +287,6 @@ class WebSocketChannel : public Channel
     private:
         void setCloseCode(unsigned code, const std::string& reason);
 
-        void requireOpen() const;
-
     private:
         bool          _clientMask;
         std::size_t   _timeout;
@@ -311,16 +310,15 @@ class WebSocketChannel : public Channel
         MessageProgress    _sendProgress;
         std::exception_ptr _outputFailure;
 
-        Output             _ping;
-
-        Output                     _pongOut;
-        std::string                _pongPayload;
-        Signal<const std::string&> _pong;
+        Output                     _ping;
+        Output                     _pong;
+        std::string                _pongData;
+        Signal<const std::string&> _pongReceived;
 
         Output    _closeOut;
         Operation _shutdown;
 
-        CloseState  _closeState;
+        State       _state;
         unsigned    _closeCode;
         std::string _closeReason;
         Signal<>    _closed;

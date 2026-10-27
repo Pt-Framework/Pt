@@ -166,7 +166,7 @@ WebSocketChannel::WebSocketChannel()
 , _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
 , _inputPending(false)
 , _outputPending(false)
-, _closeState(CloseOpen)
+, _state(Closed)
 , _closeCode(0)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onIdleTimeout);
@@ -192,14 +192,14 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
     Channel::open(stream);
 
     _clientMask = clientMask;
-    _closeState = CloseOpen;
+    _state = Open;
     _closeCode = 0;
     _closeReason.clear();
 
     _receive.open();
     _send.open();
     _ping.open();
-    _pongOut.open();
+    _pong.open();
     _closeOut.open();
     _shutdown.open();
 
@@ -218,21 +218,15 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
 }
 
 
-void WebSocketChannel::requireOpen() const
-{
-    if( ! isOpen() )
-        throw std::logic_error("WebSocket is not open");
-}
-
-
 void WebSocketChannel::beginSend(bool finished)
 {
-    requireOpen();
+    if(_state == Closed)
+        throw std::logic_error("WebSocket is not open");
 
     if( ! _send.isIdle() )
         throw std::logic_error("WebSocket send is outstanding");
 
-    if(_closeState != CloseOpen)
+    if(_state != Open)
         throw std::logic_error("WebSocket is closing");
 
     if(_outputFailure)
@@ -297,12 +291,13 @@ MessageProgress WebSocketChannel::endSend()
 
 void WebSocketChannel::beginReceive()
 {
-    requireOpen();
+    if(_state == Closed)
+        throw std::logic_error("WebSocket is not open");
 
     if( ! _receive.isIdle() )
         throw std::logic_error("WebSocket receive is outstanding");
 
-    if(_closeState >= CloseEnding)
+    if(_state >= Ending)
         throw std::logic_error("WebSocket is closing");
 
     if(_inputFailure)
@@ -326,12 +321,13 @@ MessageProgress WebSocketChannel::endReceive()
 
 void WebSocketChannel::beginPing(const char* payload, std::size_t n)
 {
-    requireOpen();
+    if(_state == Closed)
+        throw std::logic_error("WebSocket is not open");
 
     if( ! _ping.isIdle() )
         throw std::logic_error("WebSocket ping is outstanding");
 
-    if(_closeState != CloseOpen)
+    if(_state != Open)
         throw std::logic_error("WebSocket is closing");
 
     if(n > 125 || (n != 0 && ! payload))
@@ -357,12 +353,13 @@ void WebSocketChannel::endPing()
 
 void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
 {
-    requireOpen();
+    if(_state == Closed)
+        throw std::logic_error("WebSocket is not open");
 
     if( ! _shutdown.isIdle() )
         throw std::logic_error("WebSocket shutdown is outstanding");
 
-    if(_closeState != CloseOpen)
+    if(_state != Open)
         throw std::logic_error("WebSocket already closing");
 
     if(code == 1005 || code == 1006 || code == 1015)
@@ -377,7 +374,7 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
     _shutdown.begin();
 
     setCloseCode(code, reason);
-    _closeState = CloseSent;
+    _state = Closing;
     enqueueClose(code, reason);
     onBeginInput();
 }
@@ -406,7 +403,7 @@ void WebSocketChannel::setCloseCode(unsigned code, const std::string& reason)
 
 void WebSocketChannel::onProtocolFinished()
 {
-    _closeState = CloseEnding;
+    _state = Ending;
     _idleTimer.stop();
 
     if(_outputQueue.empty())
@@ -426,16 +423,13 @@ void WebSocketChannel::onProtocolFinished()
 
 void WebSocketChannel::onProtocolClosed()
 {
-    if(_closeState != CloseEnding)
-        return;
-
-    if( ! isOpen() )
+    if(_state != Ending)
         return;
 
     if( ! _outputQueue.empty() || _outputPending )
         return;
 
-    _closeState = CloseEnded;
+    _state = Ended;
 
     if( _shutdown.isPending() )
     {
@@ -449,7 +443,7 @@ void WebSocketChannel::onProtocolClosed()
 
 void WebSocketChannel::onProtocolAborted()
 {
-    if( ! isOpen() || _closeState >= CloseEnding )
+    if(_state >= Ending)
         return;
 
     if(_closeCode == 0)
@@ -459,7 +453,7 @@ void WebSocketChannel::onProtocolAborted()
 
     if( _shutdown.isPending() )
     {
-        _closeState = CloseEnded;
+        _state = Ended;
         _shutdown.setFailed(
             std::make_exception_ptr( IOError("WebSocket closed") ) );
         return;
@@ -473,7 +467,7 @@ void WebSocketChannel::onClose()
 {
     // Stream is gone. Every operation becomes Closed. No signals.
 
-    if(_closeState < CloseEnding)
+    if(_state < Ending)
         setCloseCode(1006, std::string());
 
     _inputPending = false;
@@ -487,12 +481,13 @@ void WebSocketChannel::onClose()
     _sendProgress = MessageProgress();
     _send.close();
     _ping.close();
-    _pongOut.close();
+    _pong.close();
     _closeOut.close();
     _shutdown.close();
 
     _idleTimer.stop();
     _incoming.clear();
+    _state = Closed;
 }
 
 
@@ -592,11 +587,12 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
 
 void WebSocketChannel::onBeginInput()
 {
-    if( ! isOpen() || _inputPending )
+    if(_inputPending)
         return;
 
-    if(_closeState != CloseSent
-       && (_closeState != CloseOpen || ! _receive.isPending()))
+    bool want = _state == Closing
+             || (_state == Open && _receive.isPending());
+    if( ! want )
         return;
 
     Stream* stream = this->stream();
@@ -621,7 +617,7 @@ void WebSocketChannel::onInput()
     {
         std::size_t n = stream->endInput();
 
-        if( ! isOpen() || _closeState >= CloseEnding )
+        if(_state >= Ending)
         {
             _inputPending = false;
             return;
@@ -677,22 +673,22 @@ bool WebSocketChannel::onPing(const Frame& frame)
 {
     restartIdleTimer();
 
-    if(_closeState != CloseOpen)
+    if(_state != Open)
         return true;
 
-    if( _pongOut.isPending() )
+    if( _pong.isPending() )
     {
-        if(_outputPending && ! _outputQueue.empty() && _outputQueue.front() == &_pongOut)
+        if(_outputPending && ! _outputQueue.empty() && _outputQueue.front() == &_pong)
             return true;
 
-        _pongOut.set(0x0A, frame.data(), frame.size());
+        _pong.set(0x0A, frame.data(), frame.size());
         return true;
     }
 
-    _pongOut.reset();
-    _pongOut.begin();
-    _pongOut.set(0x0A, frame.data(), frame.size());
-    enqueue(&_pongOut);
+    _pong.reset();
+    _pong.begin();
+    _pong.set(0x0A, frame.data(), frame.size());
+    enqueue(&_pong);
     return true;
 }
 
@@ -700,9 +696,9 @@ bool WebSocketChannel::onPing(const Frame& frame)
 bool WebSocketChannel::onPong(const Frame& frame)
 {
     const char* data = frame.data();
-    _pongPayload.assign(data ? data : "", frame.size());
+    _pongData.assign(data ? data : "", frame.size());
     restartIdleTimer();
-    _pong.send(_pongPayload);
+    _pongReceived.send(_pongData);
     return true;
 }
 
@@ -736,7 +732,7 @@ bool WebSocketChannel::onPeerClose(const Frame& frame)
 
     _incoming.discard();
 
-    const bool reply = (_closeState == CloseOpen);
+    const bool reply = (_state == Open);
     onProtocolFinished();
 
     if(reply)
@@ -781,7 +777,7 @@ bool WebSocketChannel::onData(const Frame& frame)
 
 void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
 {
-    if( ! isOpen() || _closeState != CloseOpen )
+    if(_state != Open)
         return;
 
     setCloseCode(code, std::string());
@@ -793,7 +789,7 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
 
     if(receivePending)
     {
-        _closeState = CloseEnded;
+        _state = Ended;
         _receive.setFailed(error);
         return;
     }
@@ -804,7 +800,7 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
 
 void WebSocketChannel::onInputError(std::exception_ptr error)
 {
-    if( ! isOpen() )
+    if(_state == Closed)
         return;
 
     _inputFailure = error;
@@ -901,7 +897,7 @@ void WebSocketChannel::onOutput()
         stream->endOutput();
         _outputPending = false;
 
-        if( ! isOpen() )
+        if(_state == Closed)
             return;
 
         if( _outputQueue.empty() )
@@ -925,7 +921,7 @@ void WebSocketChannel::onOutput()
 
 void WebSocketChannel::onOutputError(std::exception_ptr error)
 {
-    if( ! isOpen() )
+    if(_state == Closed)
         return;
 
     _outputFailure = error;
