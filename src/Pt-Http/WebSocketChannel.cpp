@@ -310,7 +310,7 @@ void WebSocketChannel::beginReceive()
 
     _receive.begin();
     _receiveProgress = MessageProgress();
-    requestInput();
+    onBeginInput();
 }
 
 
@@ -379,7 +379,7 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
     setCloseCode(code, reason);
     _closeState = CloseSent;
     enqueueClose(code, reason);
-    requestInput();
+    onBeginInput();
 }
 
 
@@ -551,14 +551,13 @@ void WebSocketChannel::enqueue(Output* out)
     for(it = _outputQueue.begin(); it != _outputQueue.end(); ++it)
     {
         if(*it == out)
-        {
-            requestOutput();
             return;
-        }
     }
 
     _outputQueue.push_back(out);
-    requestOutput();
+
+    if( ! _outputPending && ! _outputFailure )
+        onBeginOutput(*out);
 }
 
 
@@ -591,7 +590,7 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
 }
 
 
-void WebSocketChannel::requestInput()
+void WebSocketChannel::onBeginInput()
 {
     if( ! isOpen() || _inputPending )
         return;
@@ -640,7 +639,7 @@ void WebSocketChannel::onInput()
             if( ! frame )
             {
                 _inputPending = false;
-                requestInput();
+                onBeginInput();
                 return;
             }
 
@@ -817,82 +816,17 @@ void WebSocketChannel::onInputError(std::exception_ptr error)
 }
 
 
-void WebSocketChannel::requestOutput()
-{
-    if( ! isOpen() || _outputPending || _outputFailure )
-        return;
-
-    Stream* stream = this->stream();
-    if( ! stream )
-        return;
-
-    if(_outputQueue.empty())
-        return;
-
-    Output* out = _outputQueue.front();
-    writeFrame(out->opcode(), out->fin(),
-               out->message().buffer().data(), out->size());
-
-    _outputPending = true;
-    stream->beginOutput();
-}
-
-
-void WebSocketChannel::onOutput()
-{
-    Stream* stream = this->stream();
-    if( ! stream )
-        return;
-
-    try
-    {
-        stream->endOutput();
-        _outputPending = false;
-
-        if( ! isOpen() )
-            return;
-
-        if( _outputQueue.empty() )
-            return;
-
-        Output* out = _outputQueue.front();
-        _outputQueue.pop_front();
-        out->discard();
-        requestOutput();
-        out->setReady();
-    }
-    catch(...)
-    {
-        onOutputError( std::current_exception() );
-    }
-}
-
-
-void WebSocketChannel::onOutputError(std::exception_ptr error)
-{
-    if( ! isOpen() )
-        return;
-
-    _outputFailure = error;
-    _outputPending = false;
-    setCloseCode(1006, std::string());
-
-    if( _outputQueue.empty() )
-        return;
-
-    Output* out = _outputQueue.front();
-    _outputQueue.pop_front();
-    out->setFailed(error);
-}
-
-
-void WebSocketChannel::writeFrame(unsigned opcode, bool fin,
-                                  const char* payload, std::size_t n)
+void WebSocketChannel::onBeginOutput(Output& out)
 {
     Stream* stream = this->stream();
     std::streambuf* buf = stream ? stream->buffer() : 0;
     if( ! buf )
         throw std::logic_error("WebSocket has no stream");
+
+    unsigned opcode = out.opcode();
+    bool fin = out.fin();
+    const char* payload = out.message().buffer().data();
+    std::size_t n = out.size();
 
     char header[14];
     std::size_t headerLen = 2;
@@ -935,21 +869,77 @@ void WebSocketChannel::writeFrame(unsigned opcode, bool fin,
 
     buf->sputn(header, static_cast<std::streamsize>(headerLen));
 
-    if(n == 0 || ! payload)
-        return;
-
-    if( ! _clientMask )
+    if(n != 0 && payload)
     {
-        buf->sputn(payload, static_cast<std::streamsize>(n));
-        return;
+        if( ! _clientMask )
+        {
+            buf->sputn(payload, static_cast<std::streamsize>(n));
+        }
+        else
+        {
+            for(std::size_t i = 0; i < n; ++i)
+            {
+                char masked = static_cast<char>(payload[i] ^ maskBytes[i % 4]);
+                buf->sputc(masked);
+            }
+        }
     }
 
-    for(std::size_t i = 0; i < n; ++i)
+    _outputPending = true;
+    stream->beginOutput();
+}
+
+
+void WebSocketChannel::onOutput()
+{
+    Stream* stream = this->stream();
+    if( ! stream )
+        return;
+
+    try
     {
-        char masked = static_cast<char>(payload[i] ^ maskBytes[i % 4]);
-        buf->sputc(masked);
+        stream->endOutput();
+        _outputPending = false;
+
+        if( ! isOpen() )
+            return;
+
+        if( _outputQueue.empty() )
+            return;
+
+        Output* out = _outputQueue.front();
+        _outputQueue.pop_front();
+        out->discard();
+
+        if( ! _outputQueue.empty() )
+            onBeginOutput( *_outputQueue.front() );
+
+        out->setReady();
+    }
+    catch(...)
+    {
+        onOutputError( std::current_exception() );
     }
 }
+
+
+void WebSocketChannel::onOutputError(std::exception_ptr error)
+{
+    if( ! isOpen() )
+        return;
+
+    _outputFailure = error;
+    _outputPending = false;
+    setCloseCode(1006, std::string());
+
+    if( _outputQueue.empty() )
+        return;
+
+    Output* out = _outputQueue.front();
+    _outputQueue.pop_front();
+    out->setFailed(error);
+}
+
 
 } // namespace Http
 

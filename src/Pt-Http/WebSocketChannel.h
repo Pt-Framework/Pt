@@ -241,7 +241,7 @@ class WebSocketChannel : public Channel
         };
 
     private:
-        void requestInput();
+        void onBeginInput();
 
         void onInput();
 
@@ -270,14 +270,11 @@ class WebSocketChannel : public Channel
 
         void enqueueClose(unsigned code, const std::string& reason);
 
-        void requestOutput();
+        void onBeginOutput(Output& out);
 
         void onOutput();
 
         void onOutputError(std::exception_ptr error);
-
-        void writeFrame(unsigned opcode, bool fin,
-                        const char* payload, std::size_t n);
 
     private:
         void armIdleTimer();
