@@ -264,7 +264,7 @@ void WebSocketChannel::beginSend(bool finished)
     bool fin = finished && _send.message().pending() <= MaxFramePayload;
 
     _send.set(opcode, fin);
-    enqueue(&_send);
+    enqueue(_send);
 }
 
 
@@ -338,7 +338,7 @@ void WebSocketChannel::beginPing(const char* payload, std::size_t n)
 
     _ping.begin();
     _ping.set(0x09, payload, n);
-    enqueue(&_ping);
+    enqueue(_ping);
 }
 
 
@@ -540,24 +540,36 @@ void WebSocketChannel::onIdleTimeout()
 }
 
 
-void WebSocketChannel::enqueue(Output* out)
+void WebSocketChannel::enqueue(Output& out)
 {
+    if(_outputFailure)
+        return;
+
     std::deque<Output*>::iterator it;
     for(it = _outputQueue.begin(); it != _outputQueue.end(); ++it)
     {
-        if(*it == out)
+        if(*it == &out)
             return;
     }
 
-    _outputQueue.push_back(out);
+    _outputQueue.push_back(&out);
 
-    if( ! _outputPending && ! _outputFailure )
-        onBeginOutput(*out);
+    if( ! _outputPending )
+        onBeginOutput( *_outputQueue.front() );
 }
 
 
 void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
 {
+    if(_outputFailure)
+        return;
+
+    if( _closeOut.isReady() || _closeOut.isClosed() )
+        return;
+
+    if(_outputPending && ! _outputQueue.empty() && _outputQueue.front() == &_closeOut)
+        return;
+
     if(code == 1005 || code == 1006 || code == 1015 || code == 0)
         code = 1000;
 
@@ -565,14 +577,16 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
     Pt::uint16_t be = Pt::hostToBe( static_cast<Pt::uint16_t>(code) );
     std::memcpy(payload, &be, 2);
     std::size_t n = 2;
-    if( ! reason.empty() )
-    {
-        std::memcpy(payload + 2, reason.data(), reason.size());
-        n += reason.size();
-    }
 
-    if( _closeOut.isReady() || _closeOut.isClosed() )
-        return;
+    std::size_t rlen = reason.size();
+    if(rlen > 123)
+        rlen = 123;
+
+    if(rlen != 0)
+    {
+        std::memcpy(payload + 2, reason.data(), rlen);
+        n += rlen;
+    }
 
     if( ! _closeOut.isPending() )
     {
@@ -581,7 +595,7 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
     }
 
     _closeOut.set(0x08, payload, n);
-    enqueue(&_closeOut);
+    enqueue(_closeOut);
 }
 
 
@@ -688,7 +702,7 @@ bool WebSocketChannel::onPing(const Frame& frame)
     _pong.reset();
     _pong.begin();
     _pong.set(0x0A, frame.data(), frame.size());
-    enqueue(&_pong);
+    enqueue(_pong);
     return true;
 }
 

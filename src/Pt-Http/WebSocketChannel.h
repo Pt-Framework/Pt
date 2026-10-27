@@ -267,7 +267,7 @@ class WebSocketChannel : public Channel
         void onProtocolAborted();
 
     private:
-        void enqueue(Output* out);
+        void enqueue(Output& out);
 
         void enqueueClose(unsigned code, const std::string& reason);
 
