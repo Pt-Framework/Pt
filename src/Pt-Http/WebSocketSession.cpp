@@ -87,6 +87,7 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
     _channel->outputReady() += Pt::slot(*this, &WebSocketSession::onOutputReady);
     _channel->pingReady() += Pt::slot(*this, &WebSocketSession::onChannelPingReady);
     _channel->shutdownReady() += Pt::slot(*this, &WebSocketSession::onChannelShutdownReady);
+    _channel->closed() += Pt::slot(*this, &WebSocketSession::onChannelClosed);
     _channel->pong() += Pt::slot(*this, &WebSocketSession::onPong);
 }
 
@@ -197,6 +198,11 @@ void WebSocketSession::onShutdownReady()
 }
 
 
+void WebSocketSession::onClosed()
+{
+}
+
+
 void WebSocketSession::onChannelPingReady()
 {
     onPingReady();
@@ -206,6 +212,12 @@ void WebSocketSession::onChannelPingReady()
 void WebSocketSession::onChannelShutdownReady()
 {
     onShutdownReady();
+}
+
+
+void WebSocketSession::onChannelClosed()
+{
+    onClosed();
 }
 
 

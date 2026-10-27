@@ -134,17 +134,16 @@ class WebSocketChannel;
     signal to observe an error. A peer that never starts a receive
     never replies, so %setIdleTimeout() is the only bound on that
     wait. It is zero on this type until the application sets it. A
-    received close is answered by the engine. The application learns
-    that the stream has ended from the outstanding operation: an
-    outstanding receive completes with an error, and an outstanding
-    shutdown completes through %shutdownReady(). Without either, a
-    peer close is not seen. A later %beginReceive() or
-    %beginShutdown() throws. %closeCode() and %closeReason() report
-    the handshake that ended the stream. No close frame leaves the
-    code at 1006. %close() releases the stream and writes no frame.
-    It does not block. The destructor calls it. %beginSend() and
-    %beginReceive() then throw. Destruction of the stream detaches
-    the channel. It ends an outstanding send or receive. The owner
+    received close is answered by the engine. When no local shutdown
+    is outstanding, %closed() reports that the protocol has ended.
+    The stream stays bound. Call %close() from that signal. An
+    outstanding shutdown completes through %shutdownReady(); call
+    %endShutdown() and then %close(). %beginReceive() and
+    %beginShutdown() then throw. %closeCode() and %closeReason()
+    report the handshake that ended the stream. No close frame leaves
+    the code at 1006. %close() releases the stream and writes no
+    frame. It does not block and emits nothing. The destructor calls
+    it. Destruction of the stream detaches the channel. The owner
     deletes this socket.
 
     On the server the application does not construct this type. The
@@ -259,9 +258,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             @return Progress of this receive step.
 
             @throw %std::logic_error if the receive has not completed.
-            @throw %std::exception if the stream ended or a previous
-            read failed. %closeCode() and %closeReason() report a
-            close handshake.
+            @throw %std::exception if a protocol violation ended the
+            frame stream, or a previous read failed.
         */
         MessageProgress endReceive();
 
@@ -336,11 +334,19 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         /** @brief Returns the signal emitted when a shutdown operation completes.
 
-            The stream is detached. Call %endShutdown() from the signal
-            to observe a close-handshake error.
+            The stream stays bound. Call %endShutdown() from the signal
+            to observe a close-handshake error, then %close().
         */
         Pt::Signal<WebSocket&>& shutdownReady()
         { return _shutdownReady; }
+
+        /** @brief Returns the signal emitted when the engine has ended the protocol.
+
+            No local shutdown is outstanding. The stream stays bound.
+            Call %close() from the signal.
+        */
+        Pt::Signal<WebSocket&>& closed()
+        { return _closed; }
 
         /** @brief Returns the signal emitted for a received pong.
 
@@ -391,6 +397,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         void onShutdownReady();
 
+        void onClosed();
+
         void onPong(const std::string& payload);
 
     private:
@@ -406,6 +414,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         Pt::Signal<WebSocket&> _outputReady;
         Pt::Signal<WebSocket&> _pingReady;
         Pt::Signal<WebSocket&> _shutdownReady;
+        Pt::Signal<WebSocket&> _closed;
         Pt::Signal<WebSocket&, const std::string&> _pong;
 };
 

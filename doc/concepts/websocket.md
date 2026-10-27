@@ -67,7 +67,7 @@ The matching ready notification completes a step. `endSend()` and
 `endReceive()` are valid only after `outputReady()` or `inputReady()`,
 respectively, or after the corresponding I/O failure notification.
 They throw `std::logic_error` while the operation is still pending or
-after the stream has ended.
+after a local `close()`.
 
 ```cpp
 void beginSend(bool finished = true);
@@ -151,9 +151,11 @@ is visible.
 
 Failing the stream is not a close handshake. The frame stream is
 unusable from that point, so the engine completes an outstanding
-receive with that error, writes its close frame, and ends the stream
-without waiting for the peer to answer. `closeCode()` is the code of
-the violation. A later `beginReceive()` throws the same error.
+receive with that error, writes its close frame, and does not wait
+for the peer to answer. The stream stays bound. `closeCode()` is the
+code of the violation. A later `beginReceive()` throws the same
+error. When no receive is outstanding, `closed()` runs. The
+application calls `close()`.
 
 ## Control plane
 
@@ -194,13 +196,14 @@ The idle timeout remains the limit without a finished transfer.
 
 ## Close
 
-Ending a WebSocket is not one operation. `shutdown()` announces the
-end with a close frame and leaves the stream open. `close()` ends the
-stream, writes no frame, and emits nothing.
+Ending a WebSocket is three events. `shutdown()` is the close
+handshake the application starts. `closed()` is the lifetime event
+when the engine ends the protocol. `close()` unbinds the stream.
 
 ```cpp
 void shutdown(unsigned code = 1000,
               const std::string& reason = std::string());
+Signal<WebSocket&>& closed();
 void close();
 
 unsigned closeCode() const;
@@ -221,21 +224,32 @@ that timeout is the only bound on the wait, and the application owns
 it. During that close-only phase it discards data frames and
 continues to process control frames. When a receive is outstanding,
 data that arrives before the peer close is still delivered normally.
+The handshake completes through `shutdownReady()`. `endShutdown()`
+returns that operation to idle or throws. The application then calls
+`close()`. `closed()` does not run for this handshake.
 
 A received close is consumed. It does not become `incoming()` and
 does not emit `inputReady()`. If this side has not sent a close
-frame, the engine answers with `shutdown()`. A peer code that must
+frame, the engine answers with a close frame. A peer code that must
 not be written is not echoed. The reply is 1000. If a data message
 was open, its body is discarded. After the reply has been written,
-the engine ends the stream. It does not call `close()` on the facade.
+the protocol has ended. The engine does not call `close()` on the
+facade and does not unbind the stream. Send, receive, and ping that
+are still outstanding stay pending. `beginSend()`, `beginReceive()`,
+`beginPing()`, and `beginShutdown()` throw. `closeCode()` and
+`closeReason()` are already set.
 
-The application learns that the stream has ended from the operation
-that is outstanding, or from the next one it starts. An outstanding
-receive completes with an error. An outstanding shutdown completes
-through its ready notification. Without either, a peer close, an idle
-timeout, and a read that returns no bytes are not seen. A later
-`beginReceive()` or `beginShutdown()` throws. `close()` and the
-destructor emit nothing.
+When no local shutdown is outstanding, that protocol end is
+`closed()` on the client and `onClosed()` on the session. The
+application calls `close()` there. `close()` unbinds the stream,
+cancels pending operations without their ready signals, and emits
+nothing. The destructor calls it. An idle timeout and a read that
+returns no bytes take the same path, with close code 1006.
+
+One event has one reporter. An outstanding shutdown reports the
+handshake. An I/O or protocol error on an outstanding receive
+reports that receive. `closed()` runs when neither of those
+operations reports the end.
 
 An I/O error on an outstanding receive or send stores the exception
 and leaves the stream open. The ready signal of that transfer runs,
@@ -258,15 +272,16 @@ local code was already set. No close frame leaves the code at 1006.
 `onInput()` and `onOutput()` take no arguments. They do not receive
 the session or a socket again. `onInput()` runs when data bytes were
 received. `onOutput()` runs when data bytes were sent. Neither runs
-for a ping or a pong. The application learns that the stream has
-ended from the outstanding receive or shutdown, and calls `close()`
-to release the session.
+for a ping, a pong, or the end of the stream. `onClosed()` runs when
+the engine has ended the protocol and no local shutdown is
+outstanding. The application calls `close()` from `onClosed()`, or
+from `onShutdownReady()` after `endShutdown()`.
 
 `WebSocketSession::close()` ends the stream and tells the service.
-The destructor calls `close()`, not `shutdown()`, and does not
-release the session again. A domain object that holds a session
-reference drops it before it calls `close()`, or when the outstanding
-operation reports the end.
+The destructor unbinds the stream and does not release the session
+again. A domain object that holds a session reference drops it
+before it calls `close()`. `close()` from `onClosed()` destroys the
+session before `onClosed()` returns.
 
 The session does not store the opening request or reply. Both are
 valid only for the call that creates the session. `protocol()` is the

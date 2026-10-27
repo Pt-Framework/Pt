@@ -218,6 +218,7 @@ void WebSocket::onReply(Client& client)
         _channel->outputReady() += Pt::slot(*this, &WebSocket::onOutputReady);
         _channel->pingReady() += Pt::slot(*this, &WebSocket::onPingReady);
         _channel->shutdownReady() += Pt::slot(*this, &WebSocket::onShutdownReady);
+        _channel->closed() += Pt::slot(*this, &WebSocket::onClosed);
         _channel->pong() += Pt::slot(*this, &WebSocket::onPong);
         finishHandshake(false);
     }
@@ -348,6 +349,12 @@ void WebSocket::onPingReady()
 void WebSocket::onShutdownReady()
 {
     _shutdownReady.send(*this);
+}
+
+
+void WebSocket::onClosed()
+{
+    _closed.send(*this);
 }
 
 

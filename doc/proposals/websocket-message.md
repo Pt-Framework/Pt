@@ -27,8 +27,8 @@ A received close is parsed. The channel stores the code and the
 reason, discards an open data message, and enqueues a reply close.
 The reply echoes a writable peer code. It does not always use 1000.
 After both closes have been exchanged and the output is idle, the
-channel completes an outstanding shutdown, completes an outstanding
-receive with an error, and ends the stream.
+channel completes an outstanding shutdown, or emits `closed()` when
+no shutdown is outstanding. It does not unbind the stream.
 
 ## WebSocket buffer {#websocket-buffer}
 
@@ -172,8 +172,8 @@ locally initiated shutdown waiting for the peer close. No input is
 started from `open`. A receive delivers data frames through `incoming`.
 It also handles ping, pong, and close internally. Ping enqueues a pong.
 Pong runs the pong notification. Neither becomes `incoming` or emits
-`inputReady`. A received close ends the receive without delivering an
-incomplete data message.
+`inputReady`. A received close does not complete the receive and does not
+deliver an incomplete data message.
 
 `beginShutdown` keeps input running until the peer close arrives. It
 does not require the receive to be idle, and `beginReceive` does not
@@ -200,8 +200,10 @@ or match a pong.
 enqueues one close frame, and starts input for the peer close. It does
 not wait for `endSend` and does not cut the current data frame. A second
 shutdown throws. 1005, 1006, and 1015 throw and stay off the wire.
-Its ready signal runs after the stream detached. Then `endShutdown`
-returns the operation to idle or throws its stored I/O error.
+Its ready signal runs after the peer close has arrived and the local
+close frame has been written. The stream stays bound. Then
+`endShutdown` returns the operation to idle or throws its stored I/O
+error. The application calls `close()`.
 
 ## Pong visible {#pong-visible}
 
@@ -217,7 +219,7 @@ A received close is consumed by the parser. It does not become
 a receive or a local shutdown holds the input. If this side has not sent a
 close frame, the engine enqueues a reply. A peer code that must not be
 written is not echoed. The reply is 1000. If a data message was open,
-its body is discarded. After the reply is written, the engine ends the
-stream. It does not call `close` on the facade. A peer close during
-shutdown completes that shutdown. A peer close during receive
-completes that receive with an error.
+its body is discarded. After the reply is written, the protocol has ended. The engine does
+not call `close` on the facade and does not unbind the stream. A peer
+close during shutdown completes that shutdown. When no shutdown is
+outstanding, `closed()` runs. The application calls `close()`.

@@ -149,8 +149,9 @@
     writes no frame. It does not block. The destructor calls it.
     A pending transfer is cancelled and the buffer is discarded.
     The framed stream is not resumed. %beginSend() and
-    %beginReceive() then throw. The application learns that the
-    stream has ended from the outstanding receive or shutdown.
+    %beginReceive() then throw. When the engine ends the protocol,
+    %closed() runs on the client and %onClosed() on the session.
+    The application calls %close() there, or after %endShutdown().
     %closeCode() and %closeReason() report the handshake that ended
     the stream. No close frame leaves the code at 1006.
     A data message larger than the configured limit, or an idle

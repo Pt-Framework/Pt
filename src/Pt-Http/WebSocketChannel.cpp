@@ -170,6 +170,7 @@ WebSocketChannel::WebSocketChannel()
 , _closeCode(0)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onIdleTimeout);
+    _closeOut.ready() += Pt::slot(*this, &WebSocketChannel::finishProtocol);
 }
 
 
@@ -263,9 +264,9 @@ void WebSocketChannel::beginSend(bool finished)
     if(isBegin)
         _sendProgress.setHeader();
 
-    unsigned opcode = isBegin
-                    ? ((_send.message().type() == WebSocketMessage::Text) ? 0x01 : 0x02)
-                    : 0;
+    unsigned msgCode = _send.message().type() == WebSocketMessage::Text ? 0x01
+                                                                        : 0x02;
+    unsigned opcode = isBegin ? msgCode : 0;
     bool fin = finished && _send.message().pending() <= MaxFramePayload;
 
     _send.set(opcode, fin);
@@ -301,6 +302,9 @@ void WebSocketChannel::beginReceive()
     if( ! _receive.isIdle() )
         throw std::logic_error("WebSocket receive is outstanding");
 
+    if(_closeState >= CloseEnding)
+        throw std::logic_error("WebSocket is closing");
+
     if(_inputFailure)
         std::rethrow_exception(_inputFailure);
 
@@ -312,9 +316,6 @@ void WebSocketChannel::beginReceive()
 
 MessageProgress WebSocketChannel::endReceive()
 {
-    if( _receive.isClosed() )
-        throw IOError("WebSocket closed");
-
     if( ! _receive.isReady() )
         throw std::logic_error("WebSocket receive is not ready");
 
@@ -384,9 +385,6 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
 
 void WebSocketChannel::endShutdown()
 {
-    if( _shutdown.isClosed() )
-        throw IOError("WebSocket closed");
-
     if( ! _shutdown.isReady() )
         throw std::logic_error("WebSocket shutdown is not ready");
 
@@ -415,53 +413,68 @@ unsigned WebSocketChannel::echoableCloseCode(unsigned code) const
 }
 
 
-void WebSocketChannel::onCloseFinished()
+void WebSocketChannel::setProtocolFinished()
 {
-    // Close handshake done and the close frame written.
-    // Shutdown succeeds, then the stream detaches.
+    _closeState = CloseEnding;
+    _idleTimer.stop();
 
-    if(_closeState != CloseFinished)
+    if(_outputQueue.empty())
+        return;
+
+    if(_outputPending)
+    {
+        Output* inFlight = _outputQueue.front();
+        _outputQueue.clear();
+        _outputQueue.push_back(inFlight);
+        return;
+    }
+
+    _outputQueue.clear();
+}
+
+
+void WebSocketChannel::finishProtocol()
+{
+    if(_closeState != CloseEnding)
+        return;
+
+    if( ! isOpen() )
         return;
 
     if( ! _outputQueue.empty() || _outputPending )
         return;
 
-    const bool receivePending = _receive.isPending();
+    _closeState = CloseEnded;
 
-    _shutdown.setReady();
+    if( _shutdown.isPending() )
+    {
+        _shutdown.setReady();
+        return;
+    }
 
-    if( isOpen() )
-        Channel::close();
-
-    notifyClosed(_receive, receivePending);
+    _closed.send();
 }
 
 
 void WebSocketChannel::onPassiveClose()
 {
-    // Unexpected stream end. Tear down first, then complete
-    // outstanding receive/shutdown.
-
-    if( ! isOpen() )
+    if( ! isOpen() || _closeState >= CloseEnding )
         return;
 
     if(_closeCode == 0)
         setCloseCode(1006, std::string());
 
-    const bool receivePending = _receive.isPending();
-    const bool shutdownPending = _shutdown.isPending();
+    setProtocolFinished();
 
-    Channel::close();
+    if( _shutdown.isPending() )
+    {
+        _closeState = CloseEnded;
+        _shutdown.setFailed(
+            std::make_exception_ptr( IOError("WebSocket closed") ) );
+        return;
+    }
 
-    notifyClosed(_receive, receivePending);
-    notifyClosed(_shutdown, shutdownPending);
-}
-
-
-void WebSocketChannel::notifyClosed(Operation& op, bool pending)
-{
-    if(pending)
-        op.notify();
+    finishProtocol();
 }
 
 
@@ -469,7 +482,7 @@ void WebSocketChannel::onClose()
 {
     // Stream is gone. Every operation becomes Closed. No signals.
 
-    if(_closeState != CloseFinished)
+    if(_closeState < CloseEnding)
         setCloseCode(1006, std::string());
 
     _inputPending = false;
@@ -543,6 +556,16 @@ void WebSocketChannel::onIdleTimeout()
 
 void WebSocketChannel::enqueue(Output* out)
 {
+    std::deque<Output*>::iterator it;
+    for(it = _outputQueue.begin(); it != _outputQueue.end(); ++it)
+    {
+        if(*it == out)
+        {
+            requestOutput();
+            return;
+        }
+    }
+
     _outputQueue.push_back(out);
     requestOutput();
 }
@@ -560,14 +583,15 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
         n += reason.size();
     }
 
-    if( _closeOut.isPending() )
-    {
-        _closeOut.set(0x08, payload, n);
+    if( _closeOut.isReady() || _closeOut.isClosed() )
         return;
+
+    if( ! _closeOut.isPending() )
+    {
+        _closeOut.reset();
+        _closeOut.begin();
     }
 
-    _closeOut.reset();
-    _closeOut.begin();
     _closeOut.set(0x08, payload, n);
     enqueue(&_closeOut);
 }
@@ -603,9 +627,15 @@ void WebSocketChannel::onInput()
     try
     {
         std::size_t n = stream->endInput();
-        if(n == 0)
+
+        if( ! isOpen() || _closeState >= CloseEnding )
         {
             _inputPending = false;
+            return;
+        }
+
+        if(n == 0)
+        {
             onPassiveClose();
             return;
         }
@@ -620,26 +650,16 @@ void WebSocketChannel::onInput()
                 return;
             }
 
-            bool nextFrame = onFrame(*frame);
-            if( ! nextFrame )
-            {
-                _inputPending = false;
-
-                if(_wsbuf.in_avail() == 0)
-                    requestInput();
-
+            if( ! onFrame(*frame) )
                 return;
-            }
         }
     }
     catch(const WebSocketError& e)
     {
-        _inputPending = false;
         onProtocolError(std::current_exception(), e.code());
     }
     catch(...)
     {
-        _inputPending = false;
         onInputError( std::current_exception() );
     }
 }
@@ -728,11 +748,15 @@ bool WebSocketChannel::onPeerClose(const Frame& frame)
 
     _incoming.discard();
 
-    if(_closeState == CloseOpen)
-        enqueueClose( echoableCloseCode(_closeCode), std::string() );
+    const bool reply = (_closeState == CloseOpen);
+    setProtocolFinished();
 
-    _closeState = CloseFinished;
-    onCloseFinished();
+    if(reply)
+        enqueueClose( echoableCloseCode(_closeCode), std::string() );
+    else
+        enqueueClose(_closeCode, _closeReason);
+
+    finishProtocol();
     return false;
 }
 
@@ -761,10 +785,9 @@ bool WebSocketChannel::onData(const Frame& frame)
     if(_wsbuf.in_avail() > 0)
         _receiveProgress.setBody();
 
-    if( _receive.setReady() )
-        restartIdleTimer();
-
-    return ! _receive.isReady();
+    restartIdleTimer();
+    _receive.setReady();
+    return true;
 }
 
 
@@ -775,10 +798,19 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
 
     setCloseCode(code, std::string());
     _inputFailure = error;
-    _receive.setFailed(error);
 
-    _closeState = CloseFinished;
+    const bool receivePending = _receive.isPending();
+    setProtocolFinished();
     enqueueClose(code, std::string());
+
+    if(receivePending)
+    {
+        _closeState = CloseEnded;
+        _receive.setFailed(error);
+        return;
+    }
+
+    finishProtocol();
 }
 
 
@@ -788,8 +820,11 @@ void WebSocketChannel::onInputError(std::exception_ptr error)
         return;
 
     _inputFailure = error;
-    _receive.setFailed(error);
-    _shutdown.setFailed(error);
+
+    if( _receive.isPending() )
+        _receive.setFailed(error);
+    else
+        _shutdown.setFailed(error);
 }
 
 
@@ -834,10 +869,8 @@ void WebSocketChannel::onOutput()
         Output* out = _outputQueue.front();
         _outputQueue.pop_front();
         out->discard();
-        out->setReady();
-
         requestOutput();
-        onCloseFinished();
+        out->setReady();
     }
     catch(...)
     {
@@ -861,7 +894,6 @@ void WebSocketChannel::onOutputError(std::exception_ptr error)
     Output* out = _outputQueue.front();
     _outputQueue.pop_front();
     out->setFailed(error);
-    _shutdown.setFailed(error);
 }
 
 

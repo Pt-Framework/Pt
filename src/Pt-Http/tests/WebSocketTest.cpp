@@ -87,29 +87,28 @@ class RecordSession : public Pt::Http::WebSocketSession
     protected:
         virtual void onInput()
         {
-            try
-            {
-                endReceive();
+            endReceive();
 
-                _message->assign( std::istreambuf_iterator<char>( incoming().body() ),
-                                  std::istreambuf_iterator<char>() );
-                *_type = incoming().type();
-                *_received = true;
-                _exitLoop->exit();
-            }
-            catch(const std::exception&)
-            {
-                if(_closeCode)
-                    *_closeCode = closeCode();
-
-                *_closed = true;
-                _exitLoop->exit();
-            }
+            _message->assign( std::istreambuf_iterator<char>( incoming().body() ),
+                              std::istreambuf_iterator<char>() );
+            *_type = incoming().type();
+            *_received = true;
+            _exitLoop->exit();
         }
 
         virtual void onOutput()
         {
             endSend();
+        }
+
+        virtual void onClosed()
+        {
+            if(_closeCode)
+                *_closeCode = closeCode();
+
+            *_closed = true;
+            _exitLoop->exit();
+            close();
         }
 
     private:
@@ -355,34 +354,33 @@ class DeferredCloseSession : public Pt::Http::WebSocketSession
     protected:
         virtual void onInput()
         {
-            try
+            Pt::Http::MessageProgress progress = endReceive();
+            _message->append( std::istreambuf_iterator<char>( incoming().body() ),
+                              std::istreambuf_iterator<char>() );
+            *_type = incoming().type();
+
+            if( ! progress.finished() )
             {
-                Pt::Http::MessageProgress progress = endReceive();
-                _message->append( std::istreambuf_iterator<char>( incoming().body() ),
-                                  std::istreambuf_iterator<char>() );
-                *_type = incoming().type();
-
-                if( ! progress.finished() )
-                {
-                    incoming().discard();
-                    beginReceive();
-                    return;
-                }
-
-                *_received = true;
-                incoming().clear();
+                incoming().discard();
                 beginReceive();
+                return;
             }
-            catch(const std::exception&)
-            {
-                *_closed = true;
-                _exitLoop->exit();
-            }
+
+            *_received = true;
+            incoming().clear();
+            beginReceive();
         }
 
         virtual void onOutput()
         {
             endSend();
+        }
+
+        virtual void onClosed()
+        {
+            *_closed = true;
+            _exitLoop->exit();
+            close();
         }
 
     private:
@@ -472,31 +470,30 @@ class PartialCloseSession : public Pt::Http::WebSocketSession
     protected:
         virtual void onInput()
         {
-            try
+            Pt::Http::MessageProgress progress = endReceive();
+            if( ! progress.finished() )
             {
-                Pt::Http::MessageProgress progress = endReceive();
-                if( ! progress.finished() )
-                {
-                    *_partial = true;
-                    incoming().discard();
-                    beginReceive();
-                    return;
-                }
-
-                *_finished = true;
-                incoming().clear();
+                *_partial = true;
+                incoming().discard();
                 beginReceive();
+                return;
             }
-            catch(const std::exception&)
-            {
-                *_closed = true;
-                _exitLoop->exit();
-            }
+
+            *_finished = true;
+            incoming().clear();
+            beginReceive();
         }
 
         virtual void onOutput()
         {
             endSend();
+        }
+
+        virtual void onClosed()
+        {
+            *_closed = true;
+            _exitLoop->exit();
+            close();
         }
 
     private:
@@ -776,6 +773,7 @@ class ShutdownSession : public Pt::Http::WebSocketSession
             *_shutdownReady = true;
             *_closed = true;
             _exitLoop->exit();
+            close();
         }
 
     private:
@@ -942,6 +940,7 @@ class FailSession : public Pt::Http::WebSocketSession
                 *_code = closeCode();
                 *_closed = true;
                 _exitLoop->exit();
+                close();
             }
         }
 
@@ -1286,6 +1285,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onShutdownReady(Pt::Http::WebSocket& socket)
         {
             socket.endShutdown();
+            socket.close();
             _shutdownReady = true;
         }
 
@@ -1342,6 +1342,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onDataBeforeCloseShutdown(Pt::Http::WebSocket& socket)
         {
             socket.endShutdown();
+            socket.close();
             _closed = true;
             _loop->exit();
         }
@@ -1410,13 +1411,13 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onDeclineConnected(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onDeclineInput);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onDeclineClosed);
             socket.beginReceive();
         }
 
-        void onDeclineInput(Pt::Http::WebSocket& socket)
+        void onDeclineClosed(Pt::Http::WebSocket& socket)
         {
-            PT_UNIT_ASSERT_THROW(socket.endReceive(), std::exception);
+            socket.close();
             _declined = true;
             _loop->exit();
         }
@@ -2221,14 +2222,16 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onConnectedEndAfterClosed(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onClientEndAfterClosed);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onClientEndAfterClosed);
             socket.beginReceive();
         }
 
         void onClientEndAfterClosed(Pt::Http::WebSocket& socket)
         {
             PT_UNIT_ASSERT_THROW(socket.endSend(), std::logic_error);
-            PT_UNIT_ASSERT_THROW(socket.endReceive(), std::exception);
+            PT_UNIT_ASSERT_THROW(socket.endReceive(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
+            socket.close();
             _closed = true;
             _loop->exit();
         }
@@ -2298,7 +2301,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Http::WebSocket socket(http);
             socket.setIdleTimeout(200);
             socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIdleReceive);
-            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onIdleInput);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onIdleClosed);
             socket.beginConnect("/ws");
 
             _loop->run();
@@ -2312,9 +2315,10 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.beginReceive();
         }
 
-        void onIdleInput(Pt::Http::WebSocket& socket)
+        void onIdleClosed(Pt::Http::WebSocket& socket)
         {
-            PT_UNIT_ASSERT_THROW(socket.endReceive(), std::exception);
+            PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
+            socket.close();
             _closed = true;
             _loop->exit();
         }
@@ -2370,6 +2374,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onReceiveDuringShutdownReady(Pt::Http::WebSocket& socket)
         {
             socket.endShutdown();
+            socket.close();
             _shutdownReady = true;
             _loop->exit();
         }

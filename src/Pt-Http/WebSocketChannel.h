@@ -86,6 +86,9 @@ class WebSocketChannel : public Channel
         Signal<>& shutdownReady()
         { return _shutdown.ready(); }
 
+        Signal<>& closed()
+        { return _closed; }
+
     protected:
         virtual void onClose();
 
@@ -128,11 +131,6 @@ class WebSocketChannel : public Channel
                 {
                     _state = Closed;
                     _error = std::exception_ptr();
-                }
-
-                void notify()
-                {
-                    _ready.send();
                 }
 
                 void begin()
@@ -238,7 +236,8 @@ class WebSocketChannel : public Channel
         {
             CloseOpen,
             CloseSent,
-            CloseFinished
+            CloseEnding,
+            CloseEnded
         };
 
     private:
@@ -279,11 +278,11 @@ class WebSocketChannel : public Channel
 
         unsigned echoableCloseCode(unsigned code) const;
 
-        void onCloseFinished();
+        void setProtocolFinished();
+
+        void finishProtocol();
 
         void onPassiveClose();
-
-        void notifyClosed(Operation& op, bool pending);
 
         void setCloseCode(unsigned code, const std::string& reason);
 
@@ -331,6 +330,7 @@ class WebSocketChannel : public Channel
         CloseState  _closeState;
         unsigned    _closeCode;
         std::string _closeReason;
+        Signal<>    _closed;
 };
 
 } // namespace Http
