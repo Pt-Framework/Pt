@@ -7,6 +7,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Types.h>
+#include <Pt/Utf8.h>
 #include <streambuf>
 #include <stdexcept>
 #include <cstddef>
@@ -245,8 +246,7 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
         unsigned        _failCode;
         std::size_t     _messageSize;
 
-        unsigned        _utf8Need;
-        unsigned char   _utf8Lead;
+        Utf8Validator   _utf8;
 };
 
 } // namespace

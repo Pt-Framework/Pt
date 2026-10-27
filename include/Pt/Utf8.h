@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -80,7 +80,7 @@ class PT_API Utf8Iterator
         {
             decode();
         }
-        
+
         /** @brief Construct from UTF-8 encoded string.
         */
         explicit Utf8Iterator(const std::string& bytes)
@@ -116,10 +116,10 @@ class PT_API Utf8Iterator
                 _utf8 = 0;
             else
                 decode();
-            
+
             return *this;
         }
-        
+
         /** @brief Decodes next character.
         */
 	      Utf8Iterator operator++(int)
@@ -192,11 +192,11 @@ class PT_API Utf8Appender
         Utf8Appender(const Utf8Appender& other)
         : _str(other._str)
         { }
-        
+
         /** @brief Assignment operator.
         */
         Utf8Appender& operator=(const Utf8Appender& other)
-        { 
+        {
             _str = other._str;
             return *this;
         }
@@ -215,14 +215,14 @@ class PT_API Utf8Appender
         {
             return *this;
         }
-        
+
         /** @brief No-op.
         */
         Utf8Appender& operator++()
         {
             return *this;
         }
-        
+
         /** @brief No-op.
         */
         Utf8Appender operator++(int)
@@ -254,7 +254,7 @@ class PT_API Utf8Appender
     std::string latin1 = ...;
     std::string utf8 = conv.fromBytes(latin1);
     @endcode
-    
+
     @code
     // converter doe not delete codec
     Pt::Latin1Codec codec(1);
@@ -275,11 +275,11 @@ class PT_API Utf8Convert
         /** @brief Construct with codec.
         */
         explicit Utf8Convert(TextCodec<Char, char>* codec);
-        
+
         /** @brief Destructor.
         */
         ~Utf8Convert();
-        
+
         /** @brief Encode to external encoding.
         */
         std::string toBytes(const char* utf8, std::size_t n);
@@ -290,7 +290,7 @@ class PT_API Utf8Convert
         {
             return toBytes(bytes.data(), bytes.size());
         }
-        
+
         /** @brief Decode from external encoding.
         */
         std::string fromBytes(const char* bytes, std::size_t n);
@@ -305,16 +305,86 @@ class PT_API Utf8Convert
     private:
         Utf8Convert(const Utf8Convert&);
         Utf8Convert& operator=(const Utf8Convert&);
-    
+
     private:
         TextCodec<Char, char>*   _codec;
-        
+
         static const std::size_t _ibufSize = 16;
         Char                     _ibuf[_ibufSize];
 
         static const std::size_t _ebufSize = 32;
         char                     _ebuf[_ebufSize];
 };
+
+/** @brief Incremental UTF-8 well-formedness checker.
+
+    %Utf8Validator checks that a byte sequence is well-formed UTF-8 as
+    defined by RFC 3629. Bytes may arrive in chunks; a character may be
+    split across feeds. Overlong encodings, surrogate code points and
+    values above U+10FFFF are rejected. After an error, further feeds
+    fail until %reset().
+
+    @code
+    Pt::Utf8Validator v;
+    v.advance(part1, n1);
+    v.advance(part2, n2);
+    if( ! v.finish() )
+    {
+        // incomplete or ill-formed
+    }
+    @endcode
+
+    %isValidUtf8() checks a complete sequence in one call.
+
+    @ingroup Pt-Text
+*/
+class PT_API Utf8Validator
+{
+    public:
+        /** @brief Creates an empty validator.
+        */
+        Utf8Validator()
+        : _need(0)
+        , _lead(0)
+        , _error(false)
+        { }
+
+        /** @brief Feeds the next bytes.
+
+            @return False if the sequence is ill-formed.
+        */
+        bool advance(const char* data, std::size_t n);
+
+        /** @brief Returns true if no error occurred and no character is incomplete.
+        */
+        bool finish() const
+        { return ! _error && _need == 0; }
+
+        /** @brief Returns the validator to the empty initial state.
+        */
+        void reset()
+        {
+            _need = 0;
+            _lead = 0;
+            _error = false;
+        }
+
+    private:
+        unsigned _need;
+        unsigned char _lead;
+        bool _error;
+};
+
+/** @brief Returns true if @a data is a complete well-formed UTF-8 sequence.
+
+    @related Utf8Validator
+    @ingroup Pt-Text
+*/
+inline bool isValidUtf8(const char* data, std::size_t n)
+{
+    Utf8Validator v;
+    return v.advance(data, n) && v.finish();
+}
 
 } //namespace Pt
 

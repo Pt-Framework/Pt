@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -43,17 +43,23 @@ class Utf8Test : public Pt::Unit::TestSuite
         , _oe(0366)
         , _utf8("Hell\303\266 W\303\266rld!")
         {
-            Pt::Unit::TestSuite::registerMethod( "Utf8Iterator", 
+            Pt::Unit::TestSuite::registerMethod( "Utf8Iterator",
                                                  *this, &Utf8Test::Utf8Iterator);
 
-            Pt::Unit::TestSuite::registerMethod( "Utf8Appender", 
+            Pt::Unit::TestSuite::registerMethod( "Utf8Appender",
                                                  *this, &Utf8Test::Utf8Appender);
 
-            Pt::Unit::TestSuite::registerMethod( "Utf8ConvertFromBytes", 
+            Pt::Unit::TestSuite::registerMethod( "Utf8ConvertFromBytes",
                                                  *this, &Utf8Test::Utf8ConvertFromBytes);
-            
-            Pt::Unit::TestSuite::registerMethod( "Utf8ConvertToBytes", 
+
+            Pt::Unit::TestSuite::registerMethod( "Utf8ConvertToBytes",
                                                  *this, &Utf8Test::Utf8ConvertToBytes);
+
+            Pt::Unit::TestSuite::registerMethod( "IsValidUtf8",
+                                                 *this, &Utf8Test::IsValidUtf8);
+
+            Pt::Unit::TestSuite::registerMethod( "Utf8Validator",
+                                                 *this, &Utf8Test::Utf8Validator);
         }
 
     protected:
@@ -61,6 +67,8 @@ class Utf8Test : public Pt::Unit::TestSuite
         void Utf8Appender();
         void Utf8ConvertToBytes();
         void Utf8ConvertFromBytes();
+        void IsValidUtf8();
+        void Utf8Validator();
 
     private:
         const Pt::Char    _oe;
@@ -108,4 +116,43 @@ void Utf8Test::Utf8ConvertFromBytes()
     std::string s = conv.fromBytes(_utf8);
 
     PT_UNIT_ASSERT_EQUAL(s, _utf8);
+}
+
+
+void Utf8Test::IsValidUtf8()
+{
+    PT_UNIT_ASSERT( Pt::isValidUtf8("", 0) );
+    PT_UNIT_ASSERT( Pt::isValidUtf8("abc", 3) );
+    PT_UNIT_ASSERT( Pt::isValidUtf8("\xC3\xA9", 2) );
+    PT_UNIT_ASSERT( Pt::isValidUtf8("\xE2\x82\xAC", 3) );
+    PT_UNIT_ASSERT( Pt::isValidUtf8("\xF0\x9F\x98\x80", 4) );
+
+    PT_UNIT_ASSERT( ! Pt::isValidUtf8("\x80", 1) );
+    PT_UNIT_ASSERT( ! Pt::isValidUtf8("\xC3", 1) );
+    PT_UNIT_ASSERT( ! Pt::isValidUtf8("\xC0\x80", 2) );
+    PT_UNIT_ASSERT( ! Pt::isValidUtf8("\xE0\x9F\x80", 3) );
+    PT_UNIT_ASSERT( ! Pt::isValidUtf8("\xED\xA0\x80", 3) );
+    PT_UNIT_ASSERT( ! Pt::isValidUtf8("\xF0\x80\x80\x80", 4) );
+    PT_UNIT_ASSERT( ! Pt::isValidUtf8("\xF4\x90\x80\x80", 4) );
+    PT_UNIT_ASSERT( ! Pt::isValidUtf8("\xF5\x80\x80\x80", 4) );
+}
+
+
+void Utf8Test::Utf8Validator()
+{
+    Pt::Utf8Validator v;
+    PT_UNIT_ASSERT( v.advance("\xC3", 1) );
+    PT_UNIT_ASSERT( ! v.finish() );
+    PT_UNIT_ASSERT( v.advance("\xA9", 1) );
+    PT_UNIT_ASSERT( v.finish() );
+
+    v.reset();
+    PT_UNIT_ASSERT( ! v.advance("\x80", 1) );
+    PT_UNIT_ASSERT( ! v.advance("a", 1) );
+    PT_UNIT_ASSERT( ! v.finish() );
+
+    v.reset();
+    PT_UNIT_ASSERT( v.finish() );
+    PT_UNIT_ASSERT( v.advance("ok", 2) );
+    PT_UNIT_ASSERT( v.finish() );
 }

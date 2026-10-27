@@ -225,9 +225,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
             @throw %std::logic_error if a send is outstanding, the
             handshake is not finished, or a shutdown is queued.
-            @throw %std::invalid_argument if the type is %Unknown, the
-            body is larger than %setMaxMessageSize(), or a finished
-            text body is not valid UTF-8.
+            @throw %std::invalid_argument if the type is %Unknown, or
+            the body is larger than %setMaxMessageSize().
             @throw %std::exception if a previous write failed.
         */
         void beginSend(bool finished = true);

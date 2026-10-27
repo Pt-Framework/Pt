@@ -11,81 +11,6 @@ namespace Pt {
 
 namespace Http {
 
-namespace {
-
-bool feedUtf8(unsigned& need, unsigned char& lead, const char* data, std::size_t n)
-{
-    const unsigned char* p = reinterpret_cast<const unsigned char*>(data);
-    for(std::size_t i = 0; i < n; ++i)
-    {
-        unsigned char c = p[i];
-        if(need == 0)
-        {
-            lead = c;
-            if(c <= 0x7F)
-                continue;
-
-            if(c >= 0xC2 && c <= 0xDF)
-            {
-                need = 1;
-                continue;
-            }
-
-            if(c >= 0xE0 && c <= 0xEF)
-            {
-                need = 2;
-                continue;
-            }
-
-            if(c >= 0xF0 && c <= 0xF4)
-            {
-                need = 3;
-                continue;
-            }
-
-            return false;
-        }
-
-        if( (c & 0xC0) != 0x80 )
-        {
-            return false;
-        }
-
-        if(need == 2 && lead == 0xE0 && c < 0xA0)
-        {
-            return false;
-        }
-
-        if(need == 2 && lead == 0xED && c > 0x9F)
-        {
-            return false;
-        }
-
-        if(need == 3 && lead == 0xF0 && c < 0x90)
-        {
-            return false;
-        }
-
-        if(need == 3 && lead == 0xF4 && c > 0x8F)
-        {
-            return false;
-        }
-
-        --need;
-    }
-
-    return true;
-}
-
-
-bool finishUtf8(unsigned need)
-{
-    return need == 0;
-}
-
-} // namespace
-
-
 Frame::Frame()
 : _opcode(0)
 , _fin(false)
@@ -220,8 +145,7 @@ WebSocketBuffer::WebSocketBuffer()
 , _messageOpcode(0)
 , _failCode(0)
 , _messageSize(0)
-, _utf8Need(0)
-, _utf8Lead(0)
+, _utf8()
 {
     setg(0, 0, 0);
 }
@@ -255,8 +179,7 @@ void WebSocketBuffer::reset()
     _messageOpcode = 0;
     _failCode = 0;
     _messageSize = 0;
-    _utf8Need = 0;
-    _utf8Lead = 0;
+    _utf8.reset();
     setg(0, 0, 0);
 }
 
@@ -539,8 +462,7 @@ WebSocketBuffer::State WebSocketBuffer::onPayload()
         {
             _messageOpcode = opcode;
             _messageSize = 0;
-            _utf8Need = 0;
-            _utf8Lead = 0;
+            _utf8.reset();
         }
 
         if(_maxMessageSize != 0 &&
@@ -580,13 +502,12 @@ WebSocketBuffer::State WebSocketBuffer::onDataPayload()
         {
             if(_frame.header().fin())
             {
-                if(_messageOpcode == 0x01 && ! finishUtf8(_utf8Need) )
+                if(_messageOpcode == 0x01 && ! _utf8.finish() )
                     fail(1007);
 
                 _messageOpcode = 0;
                 _messageSize = 0;
-                _utf8Need = 0;
-                _utf8Lead = 0;
+                _utf8.reset();
             }
 
             _frame.header().clear();
@@ -612,7 +533,7 @@ WebSocketBuffer::State WebSocketBuffer::onDataPayload()
                 unmaskPayload(dst, got, _frame.pos());
 
                 bool text = _messageOpcode == 0x01;
-                if(text && ! feedUtf8(_utf8Need, _utf8Lead, dst, got) )
+                if(text && ! _utf8.advance(dst, got) )
                     fail(1007);
 
                 setg(eback(), gptr(), egptr() + static_cast<std::streamsize>(got));
@@ -652,13 +573,9 @@ WebSocketBuffer::State WebSocketBuffer::onControlPayload()
         if(size == 1)
             fail(1002);
 
-        unsigned need = 0;
-        unsigned char lead = 0;
         const char* reason = _frame.at(2);
-        if( ! feedUtf8(need, lead, reason, size - 2) || ! finishUtf8(need) )
-        {
+        if( ! isValidUtf8(reason, size - 2) )
             fail(1002);
-        }
     }
 
     _frame.setFin(true);

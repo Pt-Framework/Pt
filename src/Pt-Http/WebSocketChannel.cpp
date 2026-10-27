@@ -6,6 +6,7 @@
 #include "WebSocketChannel.h"
 #include <Pt/Http/Stream.h>
 #include <Pt/Byteorder.h>
+#include <Pt/Utf8.h>
 #include <Pt/System/EventLoop.h>
 #include <cstring>
 #include <ctime>
@@ -19,98 +20,6 @@ namespace Http {
 namespace {
 
 const std::size_t MaxFramePayload = 4096;
-
-bool feedUtf8(unsigned& need, unsigned char& lead, bool& error,
-              const char* data, std::size_t n)
-{
-    if(error)
-        return false;
-
-    const unsigned char* p = reinterpret_cast<const unsigned char*>(data);
-    for(std::size_t i = 0; i < n; ++i)
-    {
-        unsigned char c = p[i];
-        if(need == 0)
-        {
-            lead = c;
-            if(c <= 0x7F)
-                continue;
-
-            if(c >= 0xC2 && c <= 0xDF)
-            {
-                need = 1;
-                continue;
-            }
-
-            if(c >= 0xE0 && c <= 0xEF)
-            {
-                need = 2;
-                continue;
-            }
-
-            if(c >= 0xF0 && c <= 0xF4)
-            {
-                need = 3;
-                continue;
-            }
-
-            error = true;
-            return false;
-        }
-
-        if( (c & 0xC0) != 0x80 )
-        {
-            error = true;
-            return false;
-        }
-
-        if(need == 2 && lead == 0xE0 && c < 0xA0)
-        {
-            error = true;
-            return false;
-        }
-
-        if(need == 2 && lead == 0xED && c > 0x9F)
-        {
-            error = true;
-            return false;
-        }
-
-        if(need == 3 && lead == 0xF0 && c < 0x90)
-        {
-            error = true;
-            return false;
-        }
-
-        if(need == 3 && lead == 0xF4 && c > 0x8F)
-        {
-            error = true;
-            return false;
-        }
-
-        --need;
-    }
-
-    return true;
-}
-
-
-bool finishUtf8(unsigned need, bool error)
-{
-    return ! error && need == 0;
-}
-
-
-bool isValidUtf8(const char* data, std::size_t n)
-{
-    unsigned need = 0;
-    unsigned char lead = 0;
-    bool error = false;
-    if( ! feedUtf8(need, lead, error, data, n) )
-        return false;
-
-    return finishUtf8(need, error);
-}
 
 } // namespace
 
@@ -244,13 +153,6 @@ void WebSocketChannel::beginSend(bool finished)
         std::size_t n = msg.pending();
         if(_maxMessageSize != 0 && n > _maxMessageSize)
             throw std::invalid_argument("WebSocket message too large");
-
-        if(finished && type == WebSocketMessage::Text)
-        {
-            const char* data = msg.buffer().data();
-            if( ! isValidUtf8(data, n) )
-                throw std::invalid_argument("WebSocket text is not UTF-8");
-        }
     }
 
     _send.begin();
@@ -733,9 +635,6 @@ bool WebSocketChannel::onPeerClose(const Frame& frame)
         std::memcpy(&be, data, 2);
         unsigned code = Pt::beToHost(be);
         std::string reason(data + 2, n - 2);
-
-        if( ! isValidUtf8(reason.data(), reason.size()) )
-            throw WebSocketError(1002);
 
         setCloseCode(code, reason);
     }

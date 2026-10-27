@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -49,7 +49,7 @@ void Utf8Iterator::decode()
     MBState s;
     Utf8Codec::result r = _codec.in(s, from, fromEnd, fromNext,
                                         to,   toEnd,   toNext);
-            
+
     std::size_t count = fromNext - from;
     if(toEnd != toNext || count == 0 || count > _n)
     {
@@ -80,9 +80,9 @@ void Utf8Appender::encode(const Char& ch)
     char* toEnd = buf + sizeof(buf);
     char* toNext = to;
 
-    Utf8Codec::result r = _codec.out(s, from, fromEnd, fromNext, 
+    Utf8Codec::result r = _codec.out(s, from, fromEnd, fromNext,
                                         to, toEnd, toNext);
-    
+
     if (r == Utf8Codec::error)
     {
         // TODO: error handling throw ConversionError
@@ -101,8 +101,8 @@ Utf8Convert::Utf8Convert(TextCodec<Char, char>* codec)
 : _codec(codec)
 {
 }
-      
-        
+
+
 Utf8Convert::~Utf8Convert()
 {
     // _codec->refs() == 0 indicates ownership
@@ -118,7 +118,7 @@ std::string Utf8Convert::toBytes(const char* utf8, std::size_t n)
     Utf8Iterator end;
 
     Char* ibufEnd = _ibuf + _ibufSize;
-    
+
     if( ! _codec)
         return ret;
 
@@ -141,13 +141,13 @@ std::string Utf8Convert::toBytes(const char* utf8, std::size_t n)
             char* toNext  = toBegin;
 
             if(_codec)
-                r = _codec->out(s, fromBegin, fromEnd, fromNext, 
+                r = _codec->out(s, fromBegin, fromEnd, fromNext,
                                    toBegin, toEnd, toNext);
 
             if(r == CodecType::noconv)
             {
                 int n = std::min(fromEnd - fromBegin, toEnd - toBegin);
-        
+
                 // copy characters and advance fromNext and toNext
                 while(n-- > 0)
                     *toNext++ = *fromNext++;
@@ -155,13 +155,13 @@ std::string Utf8Convert::toBytes(const char* utf8, std::size_t n)
                 r = fromNext == fromEnd ? CodecType::ok
                                         : CodecType::partial;
             }
-            
+
             if(r == CodecType::error)
             {
                 // TODO: error handling throw ConversionError
                 return ret;
             }
-            
+
             ret.append(toBegin, toNext - toBegin);
         }
         while(r == CodecType::partial);
@@ -170,9 +170,9 @@ std::string Utf8Convert::toBytes(const char* utf8, std::size_t n)
     return ret;
 }
 
-        
+
 std::string Utf8Convert::fromBytes(const char* bytes, std::size_t n)
-{ 
+{
     std::string ret;
     Utf8Appender appender(ret);
 
@@ -190,14 +190,14 @@ std::string Utf8Convert::fromBytes(const char* bytes, std::size_t n)
     CodecType::result r = CodecType::noconv;
 
     do
-    { 
-        r = _codec->in(s, fromBegin, fromEnd, fromNext, 
+    {
+        r = _codec->in(s, fromBegin, fromEnd, fromNext,
                           toBegin, toEnd, toNext);
 
         if(r == CodecType::noconv)
         {
             int n = std::min(fromEnd - fromBegin, toEnd - toBegin);
-        
+
             // copy characters and advance fromNext and toNext
             while(n-- > 0)
                 *toNext++ = *fromNext++;
@@ -205,18 +205,96 @@ std::string Utf8Convert::fromBytes(const char* bytes, std::size_t n)
             r = fromNext == fromEnd ? CodecType::ok
                                     : CodecType::partial;
         }
-        
+
         if(r == CodecType::error)
         {
             // TODO: error handling throw ConversionError
             return ret;
         }
-        
+
         std::copy(toBegin, toNext, appender);
     }
     while (r == CodecType::partial);
 
-    return ret; 
+    return ret;
+}
+
+
+//
+// Utf8Validator
+//
+
+bool Utf8Validator::advance(const char* data, std::size_t n)
+{
+    if(_error)
+        return false;
+
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(data);
+    for(std::size_t i = 0; i < n; ++i)
+    {
+        unsigned char c = p[i];
+        if(_need == 0)
+        {
+            _lead = c;
+            if(c <= 0x7F)
+                continue;
+
+            if(c >= 0xC2 && c <= 0xDF)
+            {
+                _need = 1;
+                continue;
+            }
+
+            if(c >= 0xE0 && c <= 0xEF)
+            {
+                _need = 2;
+                continue;
+            }
+
+            if(c >= 0xF0 && c <= 0xF4)
+            {
+                _need = 3;
+                continue;
+            }
+
+            _error = true;
+            return false;
+        }
+
+        if( (c & 0xC0) != 0x80 )
+        {
+            _error = true;
+            return false;
+        }
+
+        if(_need == 2 && _lead == 0xE0 && c < 0xA0)
+        {
+            _error = true;
+            return false;
+        }
+
+        if(_need == 2 && _lead == 0xED && c > 0x9F)
+        {
+            _error = true;
+            return false;
+        }
+
+        if(_need == 3 && _lead == 0xF0 && c < 0x90)
+        {
+            _error = true;
+            return false;
+        }
+
+        if(_need == 3 && _lead == 0xF4 && c > 0x8F)
+        {
+            _error = true;
+            return false;
+        }
+
+        --_need;
+    }
+
+    return true;
 }
 
 } // namespace Pt

@@ -132,7 +132,7 @@ fragment can complete it. It is invalid when FIN arrives and the
 sequence is still incomplete, and it is invalid as soon as a byte
 cannot continue the sequence. `discard()` does not turn the check
 off. Invalid text from the peer fails the stream with close code
-1007. Invalid outgoing text throws. Binary is not checked.
+1007. Binary is not checked.
 
 `maxMessageSize()` limits one data message. The count runs from the
 first data opcode to FIN, including bytes the application has already

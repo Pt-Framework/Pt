@@ -8,6 +8,8 @@ description: "Text Processing"
   `include/Pt/String.h`
 - UTF-8 byte sequence helpers:
   `include/Pt/Utf8.h`
+- UTF-8 well-formedness, incremental validation, isValidUtf8:
+  `include/Pt/Utf8.h`
 - UTF-8 text codec:
   `include/Pt/Utf8Codec.h`
 - UTF-16 text codec:
