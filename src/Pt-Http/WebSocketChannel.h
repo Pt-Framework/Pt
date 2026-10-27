@@ -245,6 +245,8 @@ class WebSocketChannel : public Channel
 
         void onInput();
 
+        void onInputError(std::exception_ptr error);
+
         bool onFrame(const Frame& frame);
 
         bool onPing(const Frame& frame);
@@ -257,7 +259,11 @@ class WebSocketChannel : public Channel
 
         void onProtocolError(std::exception_ptr error, unsigned code);
 
-        void onInputError(std::exception_ptr error);
+        void onProtocolFinished();
+
+        void onProtocolClosed();
+
+        void onProtocolAborted();
 
     private:
         void enqueue(Output* out);
@@ -274,24 +280,14 @@ class WebSocketChannel : public Channel
                         const char* payload, std::size_t n);
 
     private:
-        void takeClosePayload(const Frame& frame);
-
-        unsigned echoableCloseCode(unsigned code) const;
-
-        void setProtocolFinished();
-
-        void finishProtocol();
-
-        void onPassiveClose();
-
-        void setCloseCode(unsigned code, const std::string& reason);
-
-    private:
         void armIdleTimer();
 
         void restartIdleTimer();
 
         void onIdleTimeout();
+
+    private:
+        void setCloseCode(unsigned code, const std::string& reason);
 
         void requireOpen() const;
 

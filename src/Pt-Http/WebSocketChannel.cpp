@@ -170,7 +170,7 @@ WebSocketChannel::WebSocketChannel()
 , _closeCode(0)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onIdleTimeout);
-    _closeOut.ready() += Pt::slot(*this, &WebSocketChannel::finishProtocol);
+    _closeOut.ready() += Pt::slot(*this, &WebSocketChannel::onProtocolClosed);
 }
 
 
@@ -404,16 +404,7 @@ void WebSocketChannel::setCloseCode(unsigned code, const std::string& reason)
 }
 
 
-unsigned WebSocketChannel::echoableCloseCode(unsigned code) const
-{
-    if(code == 1005 || code == 1006 || code == 1015 || code == 0)
-        return 1000;
-
-    return code;
-}
-
-
-void WebSocketChannel::setProtocolFinished()
+void WebSocketChannel::onProtocolFinished()
 {
     _closeState = CloseEnding;
     _idleTimer.stop();
@@ -433,7 +424,7 @@ void WebSocketChannel::setProtocolFinished()
 }
 
 
-void WebSocketChannel::finishProtocol()
+void WebSocketChannel::onProtocolClosed()
 {
     if(_closeState != CloseEnding)
         return;
@@ -456,7 +447,7 @@ void WebSocketChannel::finishProtocol()
 }
 
 
-void WebSocketChannel::onPassiveClose()
+void WebSocketChannel::onProtocolAborted()
 {
     if( ! isOpen() || _closeState >= CloseEnding )
         return;
@@ -464,7 +455,7 @@ void WebSocketChannel::onPassiveClose()
     if(_closeCode == 0)
         setCloseCode(1006, std::string());
 
-    setProtocolFinished();
+    onProtocolFinished();
 
     if( _shutdown.isPending() )
     {
@@ -474,7 +465,7 @@ void WebSocketChannel::onPassiveClose()
         return;
     }
 
-    finishProtocol();
+    onProtocolClosed();
 }
 
 
@@ -550,7 +541,7 @@ void WebSocketChannel::restartIdleTimer()
 
 void WebSocketChannel::onIdleTimeout()
 {
-    onPassiveClose();
+    onProtocolAborted();
 }
 
 
@@ -573,6 +564,9 @@ void WebSocketChannel::enqueue(Output* out)
 
 void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
 {
+    if(code == 1005 || code == 1006 || code == 1015 || code == 0)
+        code = 1000;
+
     char payload[125];
     Pt::uint16_t be = Pt::hostToBe( static_cast<Pt::uint16_t>(code) );
     std::memcpy(payload, &be, 2);
@@ -636,7 +630,7 @@ void WebSocketChannel::onInput()
 
         if(n == 0)
         {
-            onPassiveClose();
+            onProtocolAborted();
             return;
         }
 
@@ -714,8 +708,10 @@ bool WebSocketChannel::onPong(const Frame& frame)
 }
 
 
-void WebSocketChannel::takeClosePayload(const Frame& frame)
+bool WebSocketChannel::onPeerClose(const Frame& frame)
 {
+    // Peer close frame. Echo a close if we have not sent one.
+
     const char* data = frame.data();
     std::size_t n = frame.size();
 
@@ -733,30 +729,23 @@ void WebSocketChannel::takeClosePayload(const Frame& frame)
             throw WebSocketError(1002);
 
         setCloseCode(code, reason);
-        return;
     }
-
-    setCloseCode(1005, std::string());
-}
-
-
-bool WebSocketChannel::onPeerClose(const Frame& frame)
-{
-    // Peer close frame. Echo a close if we have not sent one.
-
-    takeClosePayload(frame);
+    else
+    {
+        setCloseCode(1005, std::string());
+    }
 
     _incoming.discard();
 
     const bool reply = (_closeState == CloseOpen);
-    setProtocolFinished();
+    onProtocolFinished();
 
     if(reply)
-        enqueueClose( echoableCloseCode(_closeCode), std::string() );
+        enqueueClose(_closeCode, std::string());
     else
         enqueueClose(_closeCode, _closeReason);
 
-    finishProtocol();
+    onProtocolClosed();
     return false;
 }
 
@@ -800,7 +789,7 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
     _inputFailure = error;
 
     const bool receivePending = _receive.isPending();
-    setProtocolFinished();
+    onProtocolFinished();
     enqueueClose(code, std::string());
 
     if(receivePending)
@@ -810,7 +799,7 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
         return;
     }
 
-    finishProtocol();
+    onProtocolClosed();
 }
 
 
