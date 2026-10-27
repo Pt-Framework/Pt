@@ -234,11 +234,11 @@ class WebSocketChannel : public Channel
 
         enum State
         {
-            Open,
-            Closing,
-            Ending,
-            Ended,
-            Closed
+            Open,       // exchanging messages
+            CloseSent,  // local close handshake, still reading
+            Finish,     // protocol over, last close may still write
+            Done,       // handshake complete, stream still bound
+            Closed      // stream unbound
         };
 
     private:
@@ -262,7 +262,7 @@ class WebSocketChannel : public Channel
 
         void onProtocolFinished();
 
-        void onProtocolClosed();
+        void onProtocolDone();
 
         void onProtocolAborted();
 

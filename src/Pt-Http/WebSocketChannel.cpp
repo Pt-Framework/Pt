@@ -170,7 +170,7 @@ WebSocketChannel::WebSocketChannel()
 , _closeCode(0)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onIdleTimeout);
-    _closeOut.ready() += Pt::slot(*this, &WebSocketChannel::onProtocolClosed);
+    _closeOut.ready() += Pt::slot(*this, &WebSocketChannel::onProtocolDone);
 }
 
 
@@ -297,7 +297,7 @@ void WebSocketChannel::beginReceive()
     if( ! _receive.isIdle() )
         throw std::logic_error("WebSocket receive is outstanding");
 
-    if(_state >= Ending)
+    if(_state >= Finish)
         throw std::logic_error("WebSocket is closing");
 
     if(_inputFailure)
@@ -374,7 +374,7 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
     _shutdown.begin();
 
     setCloseCode(code, reason);
-    _state = Closing;
+    _state = CloseSent;
     enqueueClose(code, reason);
     onBeginInput();
 }
@@ -403,7 +403,7 @@ void WebSocketChannel::setCloseCode(unsigned code, const std::string& reason)
 
 void WebSocketChannel::onProtocolFinished()
 {
-    _state = Ending;
+    _state = Finish;
     _idleTimer.stop();
 
     if(_outputQueue.empty())
@@ -421,15 +421,15 @@ void WebSocketChannel::onProtocolFinished()
 }
 
 
-void WebSocketChannel::onProtocolClosed()
+void WebSocketChannel::onProtocolDone()
 {
-    if(_state != Ending)
+    if(_state != Finish)
         return;
 
     if( ! _outputQueue.empty() || _outputPending )
         return;
 
-    _state = Ended;
+    _state = Done;
 
     if( _shutdown.isPending() )
     {
@@ -443,7 +443,7 @@ void WebSocketChannel::onProtocolClosed()
 
 void WebSocketChannel::onProtocolAborted()
 {
-    if(_state >= Ending)
+    if(_state >= Finish)
         return;
 
     if(_closeCode == 0)
@@ -453,13 +453,13 @@ void WebSocketChannel::onProtocolAborted()
 
     if( _shutdown.isPending() )
     {
-        _state = Ended;
+        _state = Done;
         _shutdown.setFailed(
             std::make_exception_ptr( IOError("WebSocket closed") ) );
         return;
     }
 
-    onProtocolClosed();
+    onProtocolDone();
 }
 
 
@@ -467,7 +467,7 @@ void WebSocketChannel::onClose()
 {
     // Stream is gone. Every operation becomes Closed. No signals.
 
-    if(_state < Ending)
+    if(_state < Finish)
         setCloseCode(1006, std::string());
 
     _inputPending = false;
@@ -590,7 +590,7 @@ void WebSocketChannel::onBeginInput()
     if(_inputPending)
         return;
 
-    bool want = _state == Closing
+    bool want = _state == CloseSent
              || (_state == Open && _receive.isPending());
     if( ! want )
         return;
@@ -617,7 +617,7 @@ void WebSocketChannel::onInput()
     {
         std::size_t n = stream->endInput();
 
-        if(_state >= Ending)
+        if(_state >= Finish)
         {
             _inputPending = false;
             return;
@@ -740,7 +740,7 @@ bool WebSocketChannel::onPeerClose(const Frame& frame)
     else
         enqueueClose(_closeCode, _closeReason);
 
-    onProtocolClosed();
+    onProtocolDone();
     return false;
 }
 
@@ -789,12 +789,12 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
 
     if(receivePending)
     {
-        _state = Ended;
+        _state = Done;
         _receive.setFailed(error);
         return;
     }
 
-    onProtocolClosed();
+    onProtocolDone();
 }
 
 
