@@ -322,6 +322,18 @@ void WebSocket::setIdleTimeout(std::size_t ms)
 }
 
 
+void WebSocket::setPingTimeout(std::size_t ms)
+{
+    _channel->setPingTimeout(ms);
+}
+
+
+void WebSocket::setCloseTimeout(std::size_t ms)
+{
+    _channel->setCloseTimeout(ms);
+}
+
+
 void WebSocket::onInputReady()
 {
     _inputReady.send(*this);

@@ -218,10 +218,10 @@ second `shutdown()` throws. After a local close is queued,
 `beginSend()` throws. The close frame is written after the current
 data frame. It does not wait for `endSend()` and does not cut a frame.
 After a local close is queued, the engine keeps reading until the
-peer close or `idleTimeout()`, even when no `beginReceive()` is
+peer close or `closeTimeout()`, even when no `beginReceive()` is
 outstanding. A peer that never starts a receive never answers, so
-that timeout is the only bound on the wait, and the application owns
-it. During that close-only phase it discards data frames and
+that timeout is the bound on the wait. Zero leaves the wait
+unbounded. The client and the service default it to ten seconds. During that close-only phase it discards data frames and
 continues to process control frames. When a receive is outstanding,
 data that arrives before the peer close is still delivered normally.
 The handshake completes through `shutdownReady()`. `endShutdown()`
@@ -305,8 +305,9 @@ allocator. A null return from `getSession()` declines the upgrade
 before any bind. `socketCount()` is that count. It is not the size of
 the servlet list.
 
-`maxSockets()`, `idleTimeout()`, and `maxMessageSize()` are endpoint
-policy. They apply before a session is constructed. No attached
+`maxSockets()`, `idleTimeout()`, `pingTimeout()`, `closeTimeout()`,
+and `maxMessageSize()` are endpoint policy. They apply before a
+session is constructed. No attached
 servlet, or a count at the limit, is 503 from the handshake. No
 stream is opened.
 
@@ -346,12 +347,24 @@ timeout. On the client that is `Client::setTimeout()`. On the server
 it is `Server::setTimeout()`, and keep-alive between requests. A
 finished 101 stops those clocks on the connection.
 
-After the upgrade the conversation is idle until a message or a
-control frame moves. `setIdleTimeout()` is that bound. Zero disables
-it. Transferred data bytes, a received ping, and a received pong
-restart it. It is also the bound on a close handshake the peer never
-answers. The client starts at zero. The server copies the service
-idle timeout onto each session.
+After the upgrade the socket has three engine clocks. Zero disables
+each one except close, which defaults to ten seconds.
+
+`setIdleTimeout()` is inbound silence while the socket is open.
+Incoming data, a received ping, and a received pong restart it.
+Sending does not. The client and the service start at zero.
+
+`setPingTimeout()` bounds an unanswered ping. It starts when
+`beginPing()` enqueues the frame. A pong or an incoming ping stops
+it.
+The client and the service start at zero. The application still
+calls `beginPing()`; the engine does not ping on its own.
+
+`setCloseTimeout()` bounds `beginShutdown()` after a local close is
+queued. The client and the service default it to ten seconds.
+
+An idle, ping, or close timeout ends the protocol with close code
+1006. The server copies all three from the service onto each session.
 
 The stream still has `setTimeout()` for a channel that bounds byte
 I/O.

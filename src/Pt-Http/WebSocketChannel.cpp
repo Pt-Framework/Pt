@@ -71,6 +71,8 @@ WebSocketChannel::WebSocketChannel()
 , _clientMask(false)
 , _maxMessageSize(1024 * 1024)
 , _idleTimeout(0)
+, _pingTimeout(0)
+, _closeTimeout(10000)
 , _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
 , _inputPending(false)
 , _outputPending(false)
@@ -78,6 +80,8 @@ WebSocketChannel::WebSocketChannel()
 , _closeCode(0)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onIdleTimeout);
+    _pingTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onPingTimeout);
+    _closeTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onCloseTimeout);
     _closeOut.ready() += Pt::slot(*this, &WebSocketChannel::onProtocolDone);
 }
 
@@ -121,7 +125,14 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
     _wsbuf.setMaxMessageSize(_maxMessageSize);
     _incoming.setBuffer(_wsbuf);
 
-    armIdleTimer();
+    if( System::EventLoop* loop = stream.loop() )
+    {
+        _idleTimer.setActive(*loop);
+        _pingTimer.setActive(*loop);
+        _closeTimer.setActive(*loop);
+    }
+
+    beginIdleTimeout();
 }
 
 
@@ -178,8 +189,6 @@ MessageProgress WebSocketChannel::endSend()
     _sendProgress.setBody();
     if( _send.fin() && _send.message().pending() == 0 )
         _sendProgress.setFinished();
-
-    armIdleTimer();
 
     MessageProgress progress = _sendProgress;
     if( progress.finished() )
@@ -239,6 +248,8 @@ void WebSocketChannel::beginPing(const char* payload, std::size_t n)
     _ping.begin();
     _ping.set(0x09, payload, n);
     enqueue(_ping);
+
+    beginPingTimeout();
 }
 
 
@@ -275,6 +286,12 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
 
     setCloseCode(code, reason);
     _state = CloseSent;
+
+    endPingTimeout();
+    endIdleTimeout();
+
+    beginCloseTimeout();
+
     enqueueClose(code, reason);
     onBeginInput();
 }
@@ -304,7 +321,10 @@ void WebSocketChannel::setCloseCode(unsigned code, const std::string& reason)
 void WebSocketChannel::onProtocolFinished()
 {
     _state = Finish;
-    _idleTimer.stop();
+
+    endPingTimeout();
+    endIdleTimeout();
+    endCloseTimeout();
 
     if(_outputQueue.empty())
         return;
@@ -385,7 +405,9 @@ void WebSocketChannel::onClose()
     _closeOut.close();
     _shutdown.close();
 
-    _idleTimer.stop();
+    _idleTimer.detach();
+    _pingTimer.detach();
+    _closeTimer.detach();
     _incoming.clear();
     _state = Closed;
 }
@@ -394,31 +416,85 @@ void WebSocketChannel::onClose()
 void WebSocketChannel::setIdleTimeout(std::size_t ms)
 {
     _idleTimeout = ms;
-    armIdleTimer();
+
+    if(_state == Open)
+        beginIdleTimeout();
 }
 
 
-void WebSocketChannel::armIdleTimer()
+void WebSocketChannel::setPingTimeout(std::size_t ms)
 {
-    if(_idleTimeout == 0)
-    {
-        _idleTimer.stop();
-        return;
-    }
+    _pingTimeout = ms;
+}
 
-    Stream* stream = this->stream();
-    System::EventLoop* loop = stream ? stream->loop() : 0;
-    if( ! loop )
-        return;
 
-    if( ! _idleTimer.loop() )
-        _idleTimer.setActive(*loop);
+void WebSocketChannel::setCloseTimeout(std::size_t ms)
+{
+    _closeTimeout = ms;
 
-    _idleTimer.start(_idleTimeout);
+    if(_state == CloseSent)
+        beginCloseTimeout();
+}
+
+
+void WebSocketChannel::beginIdleTimeout()
+{
+    _idleTimer.stop();
+
+    if(_idleTimeout != 0)
+        _idleTimer.start(_idleTimeout);
+}
+
+
+void WebSocketChannel::endIdleTimeout()
+{
+    _idleTimer.stop();
+}
+
+
+void WebSocketChannel::beginPingTimeout()
+{
+    _pingTimer.stop();
+
+    if(_pingTimeout != 0)
+        _pingTimer.start(_pingTimeout);
+}
+
+
+void WebSocketChannel::endPingTimeout()
+{
+    _pingTimer.stop();
+}
+
+
+void WebSocketChannel::beginCloseTimeout()
+{
+    _closeTimer.stop();
+
+    if(_closeTimeout != 0)
+        _closeTimer.start(_closeTimeout);
+}
+
+
+void WebSocketChannel::endCloseTimeout()
+{
+    _closeTimer.stop();
 }
 
 
 void WebSocketChannel::onIdleTimeout()
+{
+    onProtocolAborted();
+}
+
+
+void WebSocketChannel::onPingTimeout()
+{
+    onProtocolAborted();
+}
+
+
+void WebSocketChannel::onCloseTimeout()
 {
     onProtocolAborted();
 }
@@ -569,10 +645,12 @@ bool WebSocketChannel::onFrame(const Frame& frame)
 
 bool WebSocketChannel::onPing(const Frame& frame)
 {
-    armIdleTimer();
+    endPingTimeout();
 
     if(_state != Open)
         return true;
+
+    beginIdleTimeout();
 
     if( _pong.isPending() )
     {
@@ -595,7 +673,12 @@ bool WebSocketChannel::onPong(const Frame& frame)
 {
     const char* data = frame.data();
     _pongData.assign(data ? data : "", frame.size());
-    armIdleTimer();
+
+    endPingTimeout();
+
+    if(_state == Open)
+        beginIdleTimeout();
+
     _pongReceived.send(_pongData);
     return true;
 }
@@ -664,7 +747,9 @@ bool WebSocketChannel::onData(const Frame& frame)
     if(_wsbuf.in_avail() > 0)
         _receiveProgress.setBody();
 
-    armIdleTimer();
+    if(_state == Open)
+        beginIdleTimeout();
+
     _receive.setReady();
     return true;
 }

@@ -33,7 +33,9 @@ class WebSocketChannel;
     reference and does not own it, so the agent must outlive the
     socket, including a handshake that is still waiting on the loop.
     After a finished 101 the socket formats the stream the client
-    already owns, and %setIdleTimeout() bounds silence on the socket.
+    already owns. %setIdleTimeout() bounds inbound silence,
+    %setPingTimeout() an unanswered ping, and %setCloseTimeout()
+    a close handshake the peer never answers.
     The client still owns the connection.
     Closing the socket closes the stream. The socket does not own the
     stream. A client masks every frame it writes.
@@ -134,8 +136,10 @@ class WebSocketChannel;
     reason, then keeps reading until the peer replies. %shutdownReady()
     reports the completed handshake; call %endShutdown() from that
     signal to observe an error. A peer that never starts a receive
-    never replies, so %setIdleTimeout() is the only bound on that
-    wait. It is zero on this type until the application sets it. A
+    never replies, so %setCloseTimeout() bounds that wait. It
+    defaults to ten seconds. Zero leaves the wait unbounded.
+    %setPingTimeout() bounds an unanswered %beginPing(). Both ping
+    and idle default to zero on this type. A
     received close is answered by the engine. When no local shutdown
     is outstanding, %closed() reports that the protocol has ended.
     The stream stays bound. Call %close() from that signal. An
@@ -365,13 +369,26 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         void setMaxMessageSize(std::size_t maxSize);
 
-        /** @brief Closes the stream after @a ms without a transfer.
+        /** @brief Closes the stream after @a ms without an incoming frame.
 
-            Zero disables the idle timeout. Transferred data bytes, a
-            received ping, and a received pong restart it. It is also
-            the only bound on a close handshake the peer never answers.
+            Zero disables the idle timeout. Incoming data, a received
+            ping, and a received pong restart it. Sending does not.
         */
         void setIdleTimeout(std::size_t ms);
+
+        /** @brief Closes the stream if a ping is unanswered for @a ms.
+
+            Zero disables the ping timeout. The wait starts at
+            %beginPing(). A pong or an incoming ping stops it.
+        */
+        void setPingTimeout(std::size_t ms);
+
+        /** @brief Closes the stream if a close handshake is unanswered for @a ms.
+
+            Zero leaves the wait unbounded. The default is ten seconds.
+            The wait starts at %beginShutdown().
+        */
+        void setCloseTimeout(std::size_t ms);
 
     private:
         void parseUrl(const std::string& url, const std::string& origin);

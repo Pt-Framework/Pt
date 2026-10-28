@@ -69,8 +69,9 @@
     Destruction of the stream detaches the channel. It ends an
     outstanding send or receive. The owner deletes this socket.
     The handshake uses the timeout of the client. After the upgrade
-    that timeout is stopped. %setIdleTimeout() is the bound on
-    silence and on a close handshake the peer never answers.
+    that timeout is stopped. %setIdleTimeout() bounds inbound
+    silence, %setPingTimeout() an unanswered ping, and
+    %setCloseTimeout() a close handshake the peer never answers.
 */
 
 #endif

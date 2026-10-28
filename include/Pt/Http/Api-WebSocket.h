@@ -156,12 +156,11 @@
     the stream. No close frame leaves the code at 1006.
     The handshake uses the HTTP timeout of the client or the
     server. A finished 101 stops it on the connection. After that,
-    a data message larger than the configured limit, or an idle
-    period without a finished transfer, closes the stream. Zero
-    disables each limit.
-    The size count is the declared payload from the first data
-    opcode to FIN. Transferred data bytes restart the idle
-    timeout, and a received ping or pong restarts it as well.
+    a data message larger than the configured limit, inbound
+    silence, an unanswered ping, or an unanswered close handshake
+    closes the stream. Zero disables idle and ping. Close defaults
+    to ten seconds. Incoming frames restart idle. A pong or an
+    incoming ping stops a ping wait. Sending does not restart idle.
 
     The HTTP owner still owns the stream. Opening a client socket
     uses the HTTP user agent of the client chapter. Accepting a

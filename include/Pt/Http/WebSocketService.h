@@ -39,7 +39,7 @@ class WebSocketServlet;
     pointer to its one active servlet.
 
     The example is the usual server setup. The mapping servlet and
-    the session owner are different objects. The three setters are
+    the session owner are different objects. The setters are
     endpoint policy of this service. They apply before a servlet is
     constructed.
 
@@ -65,11 +65,12 @@ class WebSocketServlet;
     the upgrade and selects no name. A non-empty list selects the
     first offered name that is also accepted, and a request that
     offers none of them is answered with 400. %setMaxSockets(),
-    %setIdleTimeout() and %setMaxMessageSize() are endpoint policy
-    of this service. They apply before a servlet is constructed.
+    %setIdleTimeout(), %setPingTimeout(), %setCloseTimeout() and
+    %setMaxMessageSize() are endpoint policy of this service. They
+    apply before a servlet is constructed.
     The handshake reads the session limit here. The session base
-    copies the idle timeout and the data-message limit onto the
-    connection before the derived constructor runs. A missing
+    copies the idle, ping and close timeouts and the data-message
+    limit onto the connection before the derived constructor runs. A missing
     servlet is still 503 when %maxSockets() is zero. One service
     has one active %WebSocketServlet. Constructing a second servlet
     throws %std::logic_error.
@@ -191,13 +192,51 @@ class PT_HTTP_API WebSocketService : public Service
 
         /** @brief Sets the idle timeout in milliseconds.
 
-            An accepted socket is closed after @a ms without a finished
-            transfer. Transferred data bytes restart the timeout.
-            Zero disables it. This is endpoint policy of this service.
-            It applies before a servlet is constructed.
+            An accepted socket is closed after @a ms without an
+            incoming frame. Incoming data, a received ping, and a
+            received pong restart it. Sending does not. Zero disables
+            it. This is endpoint policy of this service. It applies
+            before a servlet is constructed.
         */
         void setIdleTimeout(std::size_t ms)
         { _idleTimeout = ms; }
+
+        /** @brief Returns the ping timeout in milliseconds.
+
+            Zero means an unanswered ping has no deadline. This is
+            endpoint policy of this service. It applies before a
+            servlet is constructed.
+        */
+        std::size_t pingTimeout() const
+        { return _pingTimeout; }
+
+        /** @brief Sets the ping timeout in milliseconds.
+
+            An accepted socket is closed if a ping is unanswered for
+            @a ms. Zero disables it. This is endpoint policy of this
+            service. It applies before a servlet is constructed.
+        */
+        void setPingTimeout(std::size_t ms)
+        { _pingTimeout = ms; }
+
+        /** @brief Returns the close timeout in milliseconds.
+
+            Zero leaves a close handshake unbounded. The default is
+            ten seconds. This is endpoint policy of this service. It
+            applies before a servlet is constructed.
+        */
+        std::size_t closeTimeout() const
+        { return _closeTimeout; }
+
+        /** @brief Sets the close timeout in milliseconds.
+
+            An accepted socket is closed if a close handshake is
+            unanswered for @a ms. Zero leaves the wait unbounded.
+            The default is ten seconds. This is endpoint policy of
+            this service. It applies before a servlet is constructed.
+        */
+        void setCloseTimeout(std::size_t ms)
+        { _closeTimeout = ms; }
 
         /** @brief Returns the maximum data message size in bytes.
 
@@ -313,6 +352,8 @@ class PT_HTTP_API WebSocketService : public Service
         std::size_t              _socketCount;
         std::size_t              _maxSockets;
         std::size_t              _idleTimeout;
+        std::size_t              _pingTimeout;
+        std::size_t              _closeTimeout;
         std::size_t              _maxMessageSize;
         std::vector<std::string> _protocols;
 };

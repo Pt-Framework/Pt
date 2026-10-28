@@ -20,7 +20,9 @@ WebSocketService::WebSocketService()
 : _servlet(0)
 , _socketCount(0)
 , _maxSockets(1024)
-, _idleTimeout(60000)
+, _idleTimeout(0)
+, _pingTimeout(0)
+, _closeTimeout(10000)
 , _maxMessageSize(1024 * 1024)
 {
 }

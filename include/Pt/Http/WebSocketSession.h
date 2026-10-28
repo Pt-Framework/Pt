@@ -79,8 +79,8 @@ class WebSocketChannel;
     the stream of this upgrade, and with the opening reply. The reply
     is valid for the constructor call. The base constructor reads the
     selected subprotocol from that reply, binds the stream, and copies
-    the service idle timeout and data-message limit onto the
-    connection. It does not store the reply. The derived constructor
+    the service idle, ping and close timeouts and the data-message
+    limit onto the connection. It does not store the reply. The derived constructor
     runs after that. Its members are initialized and the stream is
     open. Start the first %beginReceive() or %beginSend() there.
     There is no separate accept callback. By the time the derived

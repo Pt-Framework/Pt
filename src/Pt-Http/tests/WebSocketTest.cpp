@@ -1090,6 +1090,11 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("PingAfterShutdown", *this, &WebSocketTest::PingAfterShutdown);
             registerMethod("IdleBeforeConnect", *this, &WebSocketTest::IdleBeforeConnect);
             registerMethod("HttpTimeoutAfterUpgrade", *this, &WebSocketTest::HttpTimeoutAfterUpgrade);
+            registerMethod("IdleNotResetBySend", *this, &WebSocketTest::IdleNotResetBySend);
+            registerMethod("PingTimeoutNoReply", *this, &WebSocketTest::PingTimeoutNoReply);
+            registerMethod("PingTimeoutClearedByPong", *this, &WebSocketTest::PingTimeoutClearedByPong);
+            registerMethod("CloseTimeoutNoReply", *this, &WebSocketTest::CloseTimeoutNoReply);
+            registerMethod("CloseTimeoutHandshake", *this, &WebSocketTest::CloseTimeoutHandshake);
             registerMethod("ReceiveDuringShutdown", *this, &WebSocketTest::ReceiveDuringShutdown);
             registerMethod("ProtocolFailure", *this, &WebSocketTest::ProtocolFailure);
             registerMethod("IdleTimeoutTwice", *this, &WebSocketTest::IdleTimeoutTwice);
@@ -2376,6 +2381,188 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _closed = true;
             socket.close();
             _loop->exit();
+        }
+
+    protected:
+        void IdleNotResetBySend()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8049);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setIdleTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIdleSend);
+            socket.outputReady() += Pt::slot(*this, &WebSocketTest::onIdleSendOutput);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onIdleClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_closed);
+        }
+
+        void onConnectedIdleSend(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << "x";
+            socket.beginSend();
+        }
+
+        void onIdleSendOutput(Pt::Http::WebSocket& socket)
+        {
+            socket.endSend();
+        }
+
+    protected:
+        void PingTimeoutNoReply()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8050);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setPingTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedPingTimeout);
+            socket.pingReady() += Pt::slot(*this, &WebSocketTest::onPingTimeoutReady);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onIdleClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_closed);
+        }
+
+        void onConnectedPingTimeout(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginPing();
+        }
+
+        void onPingTimeoutReady(Pt::Http::WebSocket& socket)
+        {
+            socket.endPing();
+        }
+
+    protected:
+        void PingTimeoutClearedByPong()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8051);
+
+            Pt::Http::Server server(*_loop, ep);
+            bool serverClosed = false;
+            RecordService service(_message, _type, _received, serverClosed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            _limitSocket = &socket;
+            socket.setPingTimeout(50);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedPingPongWait);
+            socket.pingReady() += Pt::slot(*this, &WebSocketTest::onPingTimeoutReady);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onHttpTimeoutClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(!_closed);
+            PT_UNIT_ASSERT(_finished);
+            _limitSocket = 0;
+        }
+
+        void onConnectedPingPongWait(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+            socket.beginPing();
+            _waitTimer.setActive(*_loop);
+            _waitTimer.start(200);
+        }
+
+    protected:
+        void CloseTimeoutNoReply()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8052);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setCloseTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedCloseTimeout);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onCloseTimeoutFailed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_rejected);
+            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 1000u);
+        }
+
+        void onConnectedCloseTimeout(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginShutdown();
+        }
+
+        void onCloseTimeoutFailed(Pt::Http::WebSocket& socket)
+        {
+            try
+            {
+                socket.endShutdown();
+            }
+            catch(const std::exception&)
+            {
+                _rejected = true;
+            }
+
+            socket.close();
+            _loop->exit();
+        }
+
+    protected:
+        void CloseTimeoutHandshake()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8053);
+
+            Pt::Http::Server server(*_loop, ep);
+            RecordService service(_message, _type, _received, _closed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setCloseTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedCloseTimeout);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onShutdownReady);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_shutdownReady);
         }
 
     protected:

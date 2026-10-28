@@ -39,6 +39,10 @@ class WebSocketChannel : public Channel
 
         void setIdleTimeout(std::size_t ms);
 
+        void setPingTimeout(std::size_t ms);
+
+        void setCloseTimeout(std::size_t ms);
+
         void open(Stream& stream, bool clientMask);
 
         WebSocketMessage& incoming()
@@ -276,9 +280,23 @@ class WebSocketChannel : public Channel
         void onOutputError(std::exception_ptr error);
 
     private:
-        void armIdleTimer();
+        void beginIdleTimeout();
+
+        void endIdleTimeout();
+
+        void beginPingTimeout();
+
+        void endPingTimeout();
+
+        void beginCloseTimeout();
+
+        void endCloseTimeout();
 
         void onIdleTimeout();
+
+        void onPingTimeout();
+
+        void onCloseTimeout();
 
     private:
         void setCloseCode(unsigned code, const std::string& reason);
@@ -287,7 +305,11 @@ class WebSocketChannel : public Channel
         bool          _clientMask;
         std::size_t   _maxMessageSize;
         std::size_t   _idleTimeout;
+        std::size_t   _pingTimeout;
+        std::size_t   _closeTimeout;
         System::Timer _idleTimer;
+        System::Timer _pingTimer;
+        System::Timer _closeTimer;
         Pt::uint32_t  _maskSeed;
 
         WebSocketMessage _incoming;
