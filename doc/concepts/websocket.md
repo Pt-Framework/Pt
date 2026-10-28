@@ -339,6 +339,23 @@ several names, in order. The selected name, if the server echoes one,
 is `protocol()` after the handshake. No echo means no protocol was
 agreed.
 
+## Timeouts
+
+The handshake is an HTTP exchange, so its I/O bound is the HTTP
+timeout. On the client that is `Client::setTimeout()`. On the server
+it is `Server::setTimeout()`, and keep-alive between requests. A
+finished 101 stops those clocks on the connection.
+
+After the upgrade the conversation is idle until a message or a
+control frame moves. `setIdleTimeout()` is that bound. Zero disables
+it. Transferred data bytes, a received ping, and a received pong
+restart it. It is also the bound on a close handshake the peer never
+answers. The client starts at zero. The server copies the service
+idle timeout onto each session.
+
+The stream still has `setTimeout()` for a channel that bounds byte
+I/O.
+
 ## HTTP/2
 
 HTTP/2 uses Extended CONNECT. A successful reply has status 200. The

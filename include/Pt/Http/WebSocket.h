@@ -28,11 +28,13 @@ class WebSocketChannel;
     %WebSocket is the client side of a WebSocket upgrade. It performs
     the HTTP handshake through an HTTP user agent and then sends and
     receives payloads on the stream that handshake produces. Host,
-    port, event loop, timeout and TLS are settings of that agent. The
-    socket stores a reference and does not own it, so the agent must
-    outlive the socket, including a handshake that is still waiting
-    on the loop. After a finished 101 the socket formats the stream
-    the client already owns. The client still owns the connection.
+    port, event loop, timeout and TLS are settings of that agent.
+    The handshake uses the client's timeout. The socket stores a
+    reference and does not own it, so the agent must outlive the
+    socket, including a handshake that is still waiting on the loop.
+    After a finished 101 the socket formats the stream the client
+    already owns, and %setIdleTimeout() bounds silence on the socket.
+    The client still owns the connection.
     Closing the socket closes the stream. The socket does not own the
     stream. A client masks every frame it writes.
 
@@ -355,12 +357,6 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         Pt::Signal<WebSocket&, const std::string&>& pong()
         { return _pong; }
-
-        /** @brief Sets the stream timeout in milliseconds.
-
-            The handshake timeout is %Client::setTimeout().
-        */
-        void setTimeout(std::size_t timeout);
 
         /** @brief Closes the stream when a data message exceeds @a maxSize.
 

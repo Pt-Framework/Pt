@@ -186,7 +186,8 @@ namespace Http {
     A finished reply with status 101 switches the connection to a
     %Stream. Call %upgrade() after %endReceive() reports the reply
     finished. The client owns that stream and no longer sends
-    requests on the connection.
+    requests on the connection. That call stops the client I/O
+    timeout on the connection.
 
     @ingroup Pt-Http-Clients
 */
@@ -308,7 +309,8 @@ class PT_HTTP_API Client : public Connectable
             Call after %endReceive() reports the reply finished and
             the status is 101. The client owns the stream. A second
             call returns the same stream. The client no longer sends
-            requests on that connection.
+            requests on that connection. The call stops the I/O
+            timeout on that connection.
         */
         Stream& upgrade();
 

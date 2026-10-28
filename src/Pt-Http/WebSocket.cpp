@@ -310,12 +310,6 @@ const std::string& WebSocket::closeReason() const
 }
 
 
-void WebSocket::setTimeout(std::size_t timeout)
-{
-    _channel->setTimeout(timeout);
-}
-
-
 void WebSocket::setMaxMessageSize(std::size_t maxSize)
 {
     _channel->setMaxMessageSize(maxSize);

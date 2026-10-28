@@ -35,8 +35,6 @@ class WebSocketChannel : public Channel
 
         ~WebSocketChannel();
 
-        void setTimeout(std::size_t timeout);
-
         void setMaxMessageSize(std::size_t maxSize);
 
         void setIdleTimeout(std::size_t ms);
@@ -280,8 +278,6 @@ class WebSocketChannel : public Channel
     private:
         void armIdleTimer();
 
-        void restartIdleTimer();
-
         void onIdleTimeout();
 
     private:
@@ -289,7 +285,6 @@ class WebSocketChannel : public Channel
 
     private:
         bool          _clientMask;
-        std::size_t   _timeout;
         std::size_t   _maxMessageSize;
         std::size_t   _idleTimeout;
         System::Timer _idleTimer;

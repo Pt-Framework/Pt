@@ -36,9 +36,9 @@
     Pt::System::MainLoop loop;
     Pt::Net::Endpoint ep("localhost", 80);
     Pt::Http::Client client(loop, ep);
+    client.setTimeout(10000);
     Pt::Http::WebSocket socket(client);
     socket.connected() += Pt::slot(onConnected);
-    socket.setTimeout(10000);
     socket.beginConnect("/ws");
     loop.run();
     @endcode
@@ -68,8 +68,9 @@
     %shutdownReady(). Without either, a peer close is not seen.
     Destruction of the stream detaches the channel. It ends an
     outstanding send or receive. The owner deletes this socket.
-    %setTimeout() bounds I/O after the upgrade. The handshake still
-    uses the timeout of the client.
+    The handshake uses the timeout of the client. After the upgrade
+    that timeout is stopped. %setIdleTimeout() is the bound on
+    silence and on a close handshake the peer never answers.
 */
 
 #endif

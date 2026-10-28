@@ -154,7 +154,9 @@
     The application calls %close() there, or after %endShutdown().
     %closeCode() and %closeReason() report the handshake that ended
     the stream. No close frame leaves the code at 1006.
-    A data message larger than the configured limit, or an idle
+    The handshake uses the HTTP timeout of the client or the
+    server. A finished 101 stops it on the connection. After that,
+    a data message larger than the configured limit, or an idle
     period without a finished transfer, closes the stream. Zero
     disables each limit.
     The size count is the declared payload from the first data

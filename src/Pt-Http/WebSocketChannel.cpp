@@ -69,7 +69,6 @@ void WebSocketChannel::Output::discard()
 WebSocketChannel::WebSocketChannel()
 : Channel()
 , _clientMask(false)
-, _timeout(30000)
 , _maxMessageSize(1024 * 1024)
 , _idleTimeout(0)
 , _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
@@ -112,7 +111,6 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
     _closeOut.open();
     _shutdown.open();
 
-    stream.setTimeout(_timeout);
     stream.inputReady() += Pt::slot(*this, &WebSocketChannel::onInput);
     stream.outputReady() += Pt::slot(*this, &WebSocketChannel::onOutput);
 
@@ -181,7 +179,7 @@ MessageProgress WebSocketChannel::endSend()
     if( _send.fin() && _send.message().pending() == 0 )
         _sendProgress.setFinished();
 
-    restartIdleTimer();
+    armIdleTimer();
 
     MessageProgress progress = _sendProgress;
     if( progress.finished() )
@@ -393,15 +391,6 @@ void WebSocketChannel::onClose()
 }
 
 
-void WebSocketChannel::setTimeout(std::size_t timeout)
-{
-    _timeout = timeout;
-
-    if( Stream* stream = this->stream() )
-        stream->setTimeout(timeout);
-}
-
-
 void WebSocketChannel::setIdleTimeout(std::size_t ms)
 {
     _idleTimeout = ms;
@@ -426,13 +415,6 @@ void WebSocketChannel::armIdleTimer()
         _idleTimer.setActive(*loop);
 
     _idleTimer.start(_idleTimeout);
-}
-
-
-void WebSocketChannel::restartIdleTimer()
-{
-    if(_idleTimeout != 0)
-        _idleTimer.start(_idleTimeout);
 }
 
 
@@ -587,7 +569,7 @@ bool WebSocketChannel::onFrame(const Frame& frame)
 
 bool WebSocketChannel::onPing(const Frame& frame)
 {
-    restartIdleTimer();
+    armIdleTimer();
 
     if(_state != Open)
         return true;
@@ -613,7 +595,7 @@ bool WebSocketChannel::onPong(const Frame& frame)
 {
     const char* data = frame.data();
     _pongData.assign(data ? data : "", frame.size());
-    restartIdleTimer();
+    armIdleTimer();
     _pongReceived.send(_pongData);
     return true;
 }
@@ -682,7 +664,7 @@ bool WebSocketChannel::onData(const Frame& frame)
     if(_wsbuf.in_avail() > 0)
         _receiveProgress.setBody();
 
-    restartIdleTimer();
+    armIdleTimer();
     _receive.setReady();
     return true;
 }

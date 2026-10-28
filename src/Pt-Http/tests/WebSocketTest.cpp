@@ -1050,6 +1050,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _limitClient(0)
         , _deferredCloseService(0)
         {
+            _waitTimer.timeout() += Pt::slot(*this, &WebSocketTest::onHttpTimeoutWait);
+
             registerMethod("Text", *this, &WebSocketTest::Text);
             registerMethod("Accepted", *this, &WebSocketTest::Accepted);
             registerMethod("NoScope", *this, &WebSocketTest::NoScope);
@@ -1087,6 +1089,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("EndAfterClosed", *this, &WebSocketTest::EndAfterClosed);
             registerMethod("PingAfterShutdown", *this, &WebSocketTest::PingAfterShutdown);
             registerMethod("IdleBeforeConnect", *this, &WebSocketTest::IdleBeforeConnect);
+            registerMethod("HttpTimeoutAfterUpgrade", *this, &WebSocketTest::HttpTimeoutAfterUpgrade);
             registerMethod("ReceiveDuringShutdown", *this, &WebSocketTest::ReceiveDuringShutdown);
             registerMethod("ProtocolFailure", *this, &WebSocketTest::ProtocolFailure);
             registerMethod("IdleTimeoutTwice", *this, &WebSocketTest::IdleTimeoutTwice);
@@ -1124,6 +1127,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void tearDown()
         {
             _exitTimer.detach();
+            _waitTimer.detach();
             delete _loop;
             _loop = 0;
         }
@@ -2324,6 +2328,57 @@ class WebSocketTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void HttpTimeoutAfterUpgrade()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8048);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            http.setTimeout(50);
+            Pt::Http::WebSocket socket(http);
+            _limitSocket = &socket;
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedHttpTimeout);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onHttpTimeoutClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(!_closed);
+            PT_UNIT_ASSERT(_finished);
+            _limitSocket = 0;
+        }
+
+        void onConnectedHttpTimeout(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+            _waitTimer.setActive(*_loop);
+            _waitTimer.start(200);
+        }
+
+        void onHttpTimeoutWait()
+        {
+            if(_limitSocket)
+                _limitSocket->close();
+
+            _finished = true;
+            _loop->exit();
+        }
+
+        void onHttpTimeoutClosed(Pt::Http::WebSocket& socket)
+        {
+            _closed = true;
+            socket.close();
+            _loop->exit();
+        }
+
+    protected:
         void ReceiveDuringShutdown()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8046);
@@ -2454,6 +2509,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
     private:
         Pt::System::MainLoop* _loop;
         Pt::System::Timer _exitTimer;
+        Pt::System::Timer _waitTimer;
         std::string _message;
         std::string _offered;
         std::string _copied;

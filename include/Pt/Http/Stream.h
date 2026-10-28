@@ -67,9 +67,9 @@ class Channel;
     stream.
 
     %protocol() is the value of the request's Upgrade header.
-    %setTimeout() replaces the HTTP read and write timeout for this
-    stream. The owner has already stopped that timeout when it opened
-    the stream.
+    The owner stops the HTTP read and write timeout when it opens
+    the stream. That timeout stays stopped. %setTimeout() bounds
+    stream I/O for a channel that sets it.
 
     The example accepts the upgrade by opening a channel on
     the stream. A service that does not bind a channel declines it.
