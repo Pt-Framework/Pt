@@ -6,8 +6,9 @@ proposal: jam-init.md
 
 ## Runtime invocation
 
-After initialization, the entry script starts the binary for the current host
-from `<JAM_ROOT>/core/bin/`. It explicitly selects the installed
+After initialization, the entry script starts the selected host binary from
+`<JAM_ROOT>/core/bin/`. It selects the native `OS-ARCH` binary and, on macOS,
+may fall back to `macos-universal`. It explicitly selects the installed
 `<JAM_ROOT>/core/Jambase`. The runtime does not depend on a vendored `jam/`
 directory below the project root.
 
@@ -71,10 +72,11 @@ The Jam getting-started and usage documentation describes the phase-1
 the local module search order. It documents `JAM_DIST_ROOT` and `--update`
 when distribution initialization is implemented.
 
-Existing projects using a root `Jambase` that forwards to `jam/Jambase` remain
-compatible during migration. Newly initialized projects need only the entry
-scripts, `Jamconfigure`, and `Jamfile`; after distribution initialization they
-do not need a project-root `Jambase` or a versioned `jam/core/` directory.
+Existing projects using a project-root `Jambase` remain compatible during
+migration when that forwarder selects `jam/core/Jambase`. Newly initialized
+projects need only the entry scripts, `Jamconfigure`, and `Jamfile`; after
+distribution initialization they do not need a project-root `Jambase` or a
+versioned `jam/core/` directory.
 
 ## Baseline
 
