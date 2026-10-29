@@ -1,5 +1,10 @@
-JAMDIR  ?= jam/core/lib ;
-JAMBASE_DIR ?= jam/core ;
+if ! $(JAMBASE_DIR)
+{
+	JAMBASE_DIR = jam ;
+	JAMBASE_DIR_COMPONENT = core ;
+	JAMBASE_DIR = $(JAMBASE_DIR_COMPONENT:R=$(JAMBASE_DIR)) ;
+	JAMBASE_DIR_COMPONENT = ;
+}
 JAMBASE ?= Jambase ;
 JAMBASE = $(JAMBASE:R=$(JAMBASE_DIR)) ;
 
