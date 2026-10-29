@@ -7,10 +7,10 @@ proposal: jam-init.md
 ## Runtime invocation
 
 After initialization, the entry script starts the selected host binary from
-`<JAM_ROOT>/core/bin/`. It selects the native `OS-ARCH` binary and, on macOS,
-may fall back to `macos-universal`. It explicitly selects the installed
-`<JAM_ROOT>/core/Jambase`. The runtime does not depend on a vendored `jam/`
-directory below the project root.
+`<JAM_ROOT>/core/bin/`. It selects the platform host ID; macOS always selects
+`macos-universal`. It explicitly selects the installed `<JAM_ROOT>/core/Jambase`.
+The runtime does not depend on a vendored `jam/` directory below the project
+root.
 
 The project working directory remains the current directory of the entry
 script invocation. `Jamconfigure` and `Jamfile` are therefore found in the

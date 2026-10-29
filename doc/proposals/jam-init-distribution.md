@@ -71,7 +71,8 @@ the scalar values directly readable by POSIX shell, Windows batch, and
 PowerShell without a JSON, YAML, or INI parser.
 
 `version` contains exactly one nonempty ASCII line terminated by LF with four
-positive decimal fields separated by one ASCII space:
+decimal fields separated by one ASCII space. The major version and snapshot
+format revision are positive; the minor and patch versions are nonnegative:
 
 ```text
 4 0 0 1
@@ -95,12 +96,13 @@ whitespace:
 
 It includes `Jambase`, libraries, runtime assets such as `lib/vswhere.exe`,
 and sources. It excludes every binary below `bin/`, whether that binary was
-packaged or built locally by `--init`. `--init` validates `version` and the
-recorded file sizes before accepting a snapshot. A normal build invocation
-reads only `version` and the selected binary path; it does not rescan the
-complete snapshot. The inventory detects missing and truncated immutable
-files, but does not authenticate their contents. Distribution integrity
-validation verifies the complete package before installation.
+packaged or built locally by `--init`. An initialization that downloads a
+snapshot validates the recorded file sizes after extracting it. An
+initialization of the vendored snapshot checks only `version`; a normal build
+invocation likewise reads only `version` and the selected binary path. The
+inventory detects missing and truncated immutable files, but does not
+authenticate their contents. Distribution integrity validation verifies the
+complete package before installation.
 
 A snapshot may omit a binary for a host. It still contains the sources
 necessary to build that binary. A packaged binary and a locally built binary
@@ -109,9 +111,8 @@ a consumer installation and the input to a release worker that creates a new
 host binary for later distribution.
 
 Host IDs use the `OS-ARCH` form. The initial IDs are `windows-x64`,
-`linux-x64`, `macos-x64`, `macos-arm64`, and `macos-universal`. An entry
-script first selects the native host ID. On macOS, it then falls back to
-`macos-universal` when no native binary exists. The selected path is
+`linux-x64`, and `macos-universal`. An entry script selects the host ID for
+its platform; macOS always selects `macos-universal`. The selected path is
 `bin/<host-id>/jam[.exe]`.
 
 ## Phase 1: vendored snapshot
@@ -129,16 +130,18 @@ format, or distribution environment variable exists in this phase.
 ## Phase 1: local initialization
 
 The entry scripts own `--init` and remove it before invoking the Jam
-executable. `--init` validates the vendored `core/` snapshot and builds a
-binary for the native host when no selected host binary exists. It exits
-successfully after initialization and does not run a project build.
+executable. `--init` validates the supported snapshot format revision in the
+vendored `core/` snapshot and builds a binary for the selected host when no
+selected host binary exists. It exits successfully after initialization and
+does not run a project build. It never repairs an incomplete or invalid
+snapshot.
 
-A normal invocation requires a complete installed `core/`. If `core/` is
-present but no native or macOS-universal host binary is available, the entry
-script may build the native binary from `core/src/`. If no compiler is
-available, it fails with an error that identifies the missing host binary and
-compiler requirement. If `core/` is absent, it fails with an instruction to
-run `--init` or provide a prepared `JAM_ROOT`.
+A normal invocation requires a `core/` with a supported format revision. If
+`core/` is present but no selected host binary is available, the entry script
+may build that binary from `core/src/`. If no compiler is available, it fails
+with an error that identifies the missing host binary and compiler
+requirement. If `core/` is absent or invalid, it fails with an instruction to
+provide a prepared `JAM_ROOT`.
 
 The bootstrap scripts must report validation, compiler, and filesystem
 failures explicitly. They do not silently substitute a different installation
