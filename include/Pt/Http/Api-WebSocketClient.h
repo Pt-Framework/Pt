@@ -70,6 +70,7 @@
     outstanding send or receive. The owner deletes this socket.
     The handshake uses the timeout of the client. After the upgrade
     that timeout is stopped. %setIdleTimeout() bounds inbound
+    silence, %setPingInterval() a keepalive ping after inbound
     silence, %setPingTimeout() an unanswered ping, and
     %setCloseTimeout() a close handshake the peer never answers.
 */

@@ -79,8 +79,9 @@ class WebSocketChannel;
     the stream of this upgrade, and with the opening reply. The reply
     is valid for the constructor call. The base constructor reads the
     selected subprotocol from that reply, binds the stream, and copies
-    the service idle, ping and close timeouts and the data-message
-    limit onto the connection. It does not store the reply. The derived constructor
+    the service idle, ping-interval, ping and close timeouts and the
+    data-message limit onto the connection. It does not store the
+    reply. The derived constructor
     runs after that. Its members are initialized and the stream is
     open. Start the first %beginReceive() or %beginSend() there.
     There is no separate accept callback. By the time the derived
@@ -117,8 +118,9 @@ class WebSocketChannel;
     that is not one protocol token, fails construction. The server
     then closes the stream.
     %service() reaches state shared by every connection of this
-    endpoint. The idle timeout and the data-message limit are copied
-    from the %WebSocketService before the derived constructor runs.
+    endpoint. The idle, ping-interval, ping and close timeouts and
+    the data-message limit are copied from the %WebSocketService
+    before the derived constructor runs.
     Closing the session closes the stream. The session does not own
     the stream or the connection. The destructor closes the stream.
     A derived constructor that throws still runs this destructor, so
@@ -164,8 +166,8 @@ class PT_HTTP_API WebSocketSession : public Connectable
             call. The selected subprotocol is copied from it. The
             reply is not stored.
 
-            The idle timeout and the data-message limit are copied
-            from @a service.
+            The idle, ping-interval, ping and close timeouts and the
+            data-message limit are copied from @a service.
 
             @throw %std::runtime_error if Sec-WebSocket-Protocol is
             not one protocol token.

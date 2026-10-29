@@ -82,6 +82,7 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
     _channel->open(stream, false);
     _channel->setMaxMessageSize(_service->maxMessageSize());
     _channel->setIdleTimeout(_service->idleTimeout());
+    _channel->setPingInterval(_service->pingInterval());
     _channel->setPingTimeout(_service->pingTimeout());
     _channel->setCloseTimeout(_service->closeTimeout());
 

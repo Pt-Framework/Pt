@@ -34,6 +34,7 @@ class WebSocketChannel;
     socket, including a handshake that is still waiting on the loop.
     After a finished 101 the socket formats the stream the client
     already owns. %setIdleTimeout() bounds inbound silence,
+    %setPingInterval() a keepalive ping after inbound silence,
     %setPingTimeout() an unanswered ping, and %setCloseTimeout()
     a close handshake the peer never answers.
     The client still owns the connection.
@@ -138,8 +139,9 @@ class WebSocketChannel;
     signal to observe an error. A peer that never starts a receive
     never replies, so %setCloseTimeout() bounds that wait. It
     defaults to ten seconds. Zero leaves the wait unbounded.
-    %setPingTimeout() bounds an unanswered %beginPing(). Both ping
-    and idle default to zero on this type. A
+    %setPingInterval() writes a keepalive ping after inbound silence.
+    %setPingTimeout() bounds that ping and an unanswered %beginPing().
+    Interval, ping and idle default to zero on this type. A
     received close is answered by the engine. When no local shutdown
     is outstanding, %closed() reports that the protocol has ended.
     The stream stays bound. Call %close() from that signal. An
@@ -376,10 +378,22 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         void setIdleTimeout(std::size_t ms);
 
+        /** @brief Writes a keepalive ping after @a ms without an incoming frame.
+
+            Zero disables the interval. Incoming data, a received ping,
+            and a received pong restart it. Sending does not. The engine
+            writes an empty ping only while a receive is outstanding.
+            That ping does not emit %pingReady(). %beginPing() throws
+            while a ping is outstanding. %setPingTimeout() bounds the
+            wait.
+        */
+        void setPingInterval(std::size_t ms);
+
         /** @brief Closes the stream if a ping is unanswered for @a ms.
 
             Zero disables the ping timeout. The wait starts at
-            %beginPing(). A pong or an incoming ping stops it.
+            %beginPing() and at a keepalive ping. A pong or an incoming
+            ping stops it.
         */
         void setPingTimeout(std::size_t ms);
 

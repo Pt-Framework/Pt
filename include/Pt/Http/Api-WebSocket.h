@@ -158,9 +158,12 @@
     server. A finished 101 stops it on the connection. After that,
     a data message larger than the configured limit, inbound
     silence, an unanswered ping, or an unanswered close handshake
-    closes the stream. Zero disables idle and ping. Close defaults
-    to ten seconds. Incoming frames restart idle. A pong or an
-    incoming ping stops a ping wait. Sending does not restart idle.
+    closes the stream. Zero disables idle, the ping interval and
+    ping. Close defaults to ten seconds. Incoming frames restart
+    idle and the ping interval. After interval silence the engine
+    writes a keepalive ping while a receive is outstanding. A pong
+    or an incoming ping stops a ping wait. Sending does not restart
+    idle or the ping interval.
 
     The HTTP owner still owns the stream. Opening a client socket
     uses the HTTP user agent of the client chapter. Accepting a

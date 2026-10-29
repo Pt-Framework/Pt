@@ -65,12 +65,13 @@ class WebSocketServlet;
     the upgrade and selects no name. A non-empty list selects the
     first offered name that is also accepted, and a request that
     offers none of them is answered with 400. %setMaxSockets(),
-    %setIdleTimeout(), %setPingTimeout(), %setCloseTimeout() and
-    %setMaxMessageSize() are endpoint policy of this service. They
-    apply before a servlet is constructed.
+    %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
+    %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
+    of this service. They apply before a servlet is constructed.
     The handshake reads the session limit here. The session base
-    copies the idle, ping and close timeouts and the data-message
-    limit onto the connection before the derived constructor runs. A missing
+    copies the idle, ping-interval, ping and close timeouts and the
+    data-message limit onto the connection before the derived
+    constructor runs. A missing
     servlet is still 503 when %maxSockets() is zero. One service
     has one active %WebSocketServlet. Constructing a second servlet
     throws %std::logic_error.
@@ -201,6 +202,26 @@ class PT_HTTP_API WebSocketService : public Service
         void setIdleTimeout(std::size_t ms)
         { _idleTimeout = ms; }
 
+        /** @brief Returns the ping interval in milliseconds.
+
+            Zero means the engine does not write keepalive pings. This
+            is endpoint policy of this service. It applies before a
+            servlet is constructed.
+        */
+        std::size_t pingInterval() const
+        { return _pingInterval; }
+
+        /** @brief Sets the ping interval in milliseconds.
+
+            An accepted socket writes a keepalive ping after @a ms
+            without an incoming frame. Incoming data, a received ping,
+            and a received pong restart it. Sending does not. Zero
+            disables it. This is endpoint policy of this service. It
+            applies before a servlet is constructed.
+        */
+        void setPingInterval(std::size_t ms)
+        { _pingInterval = ms; }
+
         /** @brief Returns the ping timeout in milliseconds.
 
             Zero means an unanswered ping has no deadline. This is
@@ -213,7 +234,8 @@ class PT_HTTP_API WebSocketService : public Service
         /** @brief Sets the ping timeout in milliseconds.
 
             An accepted socket is closed if a ping is unanswered for
-            @a ms. Zero disables it. This is endpoint policy of this
+            @a ms. The wait starts at %beginPing() and at a keepalive
+            ping. Zero disables it. This is endpoint policy of this
             service. It applies before a servlet is constructed.
         */
         void setPingTimeout(std::size_t ms)
@@ -352,6 +374,7 @@ class PT_HTTP_API WebSocketService : public Service
         std::size_t              _socketCount;
         std::size_t              _maxSockets;
         std::size_t              _idleTimeout;
+        std::size_t              _pingInterval;
         std::size_t              _pingTimeout;
         std::size_t              _closeTimeout;
         std::size_t              _maxMessageSize;
