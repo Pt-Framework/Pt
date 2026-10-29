@@ -236,6 +236,84 @@ class WebSocketChannel : public Channel
                 std::size_t      _size;
         };
 
+
+        class Timeout
+        {
+            public:
+                Timeout(std::size_t ms = 0)
+                : _ms(ms)
+                { }
+
+                void setDuration(std::size_t ms)
+                { _ms = ms; }
+
+                std::size_t duration() const
+                { return _ms; }
+
+                void setActive(System::EventLoop& loop)
+                { _timer.setActive(loop); }
+
+                void detach()
+                { _timer.detach(); }
+
+                void begin()
+                {
+                    _timer.stop();
+                    if(_ms != 0)
+                        _timer.start(_ms);
+                }
+
+                void end()
+                { _timer.stop(); }
+
+                bool isStarted() const
+                { return _timer.isStarted(); }
+
+                Signal<>& timeout()
+                { return _timer.timeout(); }
+
+            private:
+                System::Timer _timer;
+                std::size_t   _ms;
+        };
+
+
+        class Timeouts
+        {
+            public:
+                Timeouts()
+                : _size(0)
+                { }
+
+                void add(Timeout& t)
+                {
+                    _items[_size] = &t;
+                    ++_size;
+                }
+
+                void setActive(System::EventLoop& loop)
+                {
+                    for(std::size_t n = 0; n < _size; ++n)
+                        _items[n]->setActive(loop);
+                }
+
+                void detach()
+                {
+                    for(std::size_t n = 0; n < _size; ++n)
+                        _items[n]->detach();
+                }
+
+                void cancel()
+                {
+                    for(std::size_t n = 0; n < _size; ++n)
+                        _items[n]->end();
+                }
+
+            private:
+                Timeout*    _items[4];
+                std::size_t _size;
+        };
+
         enum State
         {
             Open,       // exchanging messages
@@ -282,22 +360,6 @@ class WebSocketChannel : public Channel
         void onOutputError(std::exception_ptr error);
 
     private:
-        void beginIdleTimeout();
-
-        void endIdleTimeout();
-
-        void beginPingDelay();
-
-        void endPingDelay();
-
-        void beginPingTimeout();
-
-        void endPingTimeout();
-
-        void beginCloseTimeout();
-
-        void endCloseTimeout();
-
         void onIdleTimeout();
 
         void onPingDelay();
@@ -314,14 +376,11 @@ class WebSocketChannel : public Channel
     private:
         bool          _clientMask;
         std::size_t   _maxMessageSize;
-        std::size_t   _idleTimeout;
-        std::size_t   _pingInterval;
-        std::size_t   _pingTimeout;
-        std::size_t   _closeTimeout;
-        System::Timer _idleTimer;
-        System::Timer _pingDelayTimer;
-        System::Timer _pingTimer;
-        System::Timer _closeTimer;
+        Timeout       _idleTimeout;
+        Timeout       _pingDelay;
+        Timeout       _pingTimeout;
+        Timeout       _closeTimeout;
+        Timeouts      _timeouts;
         Pt::uint32_t  _maskSeed;
 
         WebSocketMessage _incoming;
