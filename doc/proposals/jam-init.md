@@ -7,9 +7,6 @@
 
 ## Open Tasks
 
-- [Local initialization](jam-init-distribution.md#phase-1-local-initialization).
-  Make `--init` validate the vendored core and build a missing host binary.
-
 - [Runtime invocation](jam-init-runtime.md#runtime-invocation).
   Start Jam from the installed core `Jambase` and libraries instead of a
   vendored `jam/` directory in the project.
@@ -28,6 +25,5 @@
 
 ## Priority
 
-The vendored snapshot layout and local initialization come before runtime
-invocation. Local modules and migration follow. Distribution initialization is
-last.
+Runtime invocation comes before local modules and migration. Distribution
+initialization is last.

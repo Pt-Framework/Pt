@@ -186,8 +186,5 @@ substitute a different Jam version, remote, or installation root.
 
 ## Baseline
 
-The current entry scripts use a vendored `jam/` directory in the project.
-`jam.bat` starts `jam/jam.exe` and builds it with MSVC when it is absent.
-`jam.sh` starts `jam/jam` and builds it with `cc` when it is absent. The
-current layout has no versioned snapshot, no explicit initialization command,
-and no separate ownership boundary for user extensions.
+The vendored snapshot and local initialization are implemented. There is no
+distribution source, `JAM_DIST_ROOT`, or `--update` command yet.
