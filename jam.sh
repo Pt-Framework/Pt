@@ -111,4 +111,5 @@ if [ -n "$INIT" ]; then
     exit 0
 fi
 
-exec "$JAM" "$@"
+export JAM_ROOT
+exec "$JAM" -f "$CORE/Jambase" "$@"

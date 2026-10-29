@@ -17,9 +17,10 @@ script invocation. `Jamconfigure` and `Jamfile` are therefore found in the
 project exactly as they are today. The installed runtime supplies the Jam
 rules; the project supplies its build configuration and targets.
 
-The exact command-line variables passed by the entry script are an
-implementation detail. They establish the core and local library directories
-before the installed `Jambase` loads a Jam module.
+The mechanism by which the entry script makes `JAM_ROOT` available to the
+installed `Jambase` is an implementation detail. Before the installed
+`Jambase` loads a Jam module, it derives the core library directory from
+`JAM_ROOT`.
 
 ## Local extensions
 
@@ -72,14 +73,13 @@ The Jam getting-started and usage documentation describes the phase-1
 the local module search order. It documents `JAM_DIST_ROOT` and `--update`
 when distribution initialization is implemented.
 
-Existing projects using a project-root `Jambase` remain compatible during
-migration when that forwarder selects `jam/core/Jambase`. Newly initialized
-projects need only the entry scripts, `Jamconfigure`, and `Jamfile`; after
-distribution initialization they do not need a project-root `Jambase` or a
-versioned `jam/core/` directory.
+Projects start Jam through their entry scripts, which select the installed
+core `Jambase`. Newly initialized projects need only the entry scripts,
+`Jamconfigure`, and `Jamfile`; after distribution initialization they do not
+need a versioned `jam/core/` directory.
 
 ## Baseline
 
-The current project-root `Jambase` redirects loading to `jam/Jambase`.
 The current `Load` rule builds one path below `JAMDIR` and does not search a
-user extension directory. There is no `core/` and `local/` ownership model.
+user extension directory. The documentation still describes the project-root
+bootstrap layout.

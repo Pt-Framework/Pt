@@ -7,10 +7,6 @@
 
 ## Open Tasks
 
-- [Runtime invocation](jam-init-runtime.md#runtime-invocation).
-  Start Jam from the installed core `Jambase` and libraries instead of a
-  vendored `jam/` directory in the project.
-
 - [Local extensions](jam-init-runtime.md#local-extensions).
   Make `Load` search the update-safe local library directory after the core
   library directory.

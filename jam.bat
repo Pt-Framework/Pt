@@ -93,7 +93,7 @@ if not exist "%JAM%" (
 
 if defined INIT exit /b 0
 
-"%JAM%" %*
+"%JAM%" -f "%CORE%\Jambase" %*
 exit /b %ERRORLEVEL%
 
 :invalid_core

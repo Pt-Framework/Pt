@@ -8,12 +8,19 @@
 
 if ! $(JAMDIR)
 {
-    JAMDIR = jam ;
-    JAMDIR_COMPONENT = core ;
-    JAMDIR = $(JAMDIR_COMPONENT:R=$(JAMDIR)) ;
-    JAMDIR_COMPONENT = lib ;
-    JAMDIR = $(JAMDIR_COMPONENT:R=$(JAMDIR)) ;
-    JAMDIR_COMPONENT = ;
+    if $(JAM_ROOT)
+    {
+        JAMDIR = $(JAM_ROOT)/core/lib ;
+    }
+    else
+    {
+        JAMDIR = jam ;
+        JAMDIR_COMPONENT = core ;
+        JAMDIR = $(JAMDIR_COMPONENT:R=$(JAMDIR)) ;
+        JAMDIR_COMPONENT = lib ;
+        JAMDIR = $(JAMDIR_COMPONENT:R=$(JAMDIR)) ;
+        JAMDIR_COMPONENT = ;
+    }
 }
 
 rule Load
