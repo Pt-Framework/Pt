@@ -87,7 +87,7 @@ class CertificateImpl
 
             std::string s;
 
-            X509_NAME* subject = X509_get_subject_name(_x509);
+            const X509_NAME* subject = X509_get_subject_name(_x509);
 
             if( 0 <= X509_NAME_get_text_by_NID(subject, NID_organizationName, buf, sizeof(buf)) )
             {
