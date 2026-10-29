@@ -1,5 +1,6 @@
-JAMDIR  ?= jam ;
+JAMDIR  ?= jam/core/lib ;
+JAMBASE_DIR ?= jam/core ;
 JAMBASE ?= Jambase ;
-JAMBASE = $(JAMBASE:R=$(JAMDIR)) ;
+JAMBASE = $(JAMBASE:R=$(JAMBASE_DIR)) ;
 
 include $(JAMBASE) ;

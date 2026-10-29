@@ -2,8 +2,8 @@
 setlocal
 
 set "ROOT=%~dp0"
-set "JAM=%ROOT%jam\jam.exe"
-set "SRC=%ROOT%jam\src"
+set "JAM=%ROOT%jam\core\bin\windows-x64\jam.exe"
+set "SRC=%ROOT%jam\core\src"
 
 if not exist "%JAM%" (
     echo Building jam.exe...

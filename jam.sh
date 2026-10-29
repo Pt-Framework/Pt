@@ -2,8 +2,20 @@
 set -e
 
 ROOT=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
-JAM="$ROOT/jam/jam"
-SRC="$ROOT/jam/src"
+case `uname -s` in
+Darwin)
+    HOST_ID=macos-universal
+    ;;
+Linux)
+    HOST_ID=linux-x64
+    ;;
+*)
+    echo "Unsupported host: `uname -s`" >&2
+    exit 1
+    ;;
+esac
+JAM="$ROOT/jam/core/bin/$HOST_ID/jam"
+SRC="$ROOT/jam/core/src"
 
 SOURCES="
 builtins.c class.c command.c compile.c constants.c debug.c debugger.c execcmd.c execunix.c
@@ -18,6 +30,7 @@ modules/order.c
 if test ! -x "$JAM"; then
     echo "Building jam..."
     CC="${CC:-cc}"
+    mkdir -p "$(dirname "$JAM")"
     case `uname -s` in
     Darwin)
         FLAGS="-O2 -arch x86_64 -arch arm64 -mmacosx-version-min=11.0"

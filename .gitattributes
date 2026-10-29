@@ -26,6 +26,8 @@
 
 *.exe      binary
 jam/jam-linux-x64 binary
+jam/core/bin/** binary
+jam/core/meta/* text eol=lf
 *.zip      binary
 *.pdf      binary
 *.pptx     binary

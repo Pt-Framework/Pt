@@ -7,9 +7,6 @@
 
 ## Open Tasks
 
-- [Vendored snapshot layout](jam-init-distribution.md#phase-1-vendored-snapshot).
-  Restructure the vendored Jam files into the `core/` and `local/` layout.
-
 - [Local initialization](jam-init-distribution.md#phase-1-local-initialization).
   Make `--init` validate the vendored core and build a missing host binary.
 
