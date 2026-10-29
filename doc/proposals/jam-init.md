@@ -14,12 +14,12 @@
   Make `--init` validate the vendored core and build a missing host binary.
 
 - [Runtime invocation](jam-init-runtime.md#runtime-invocation).
-  Start Jam from the installed core runtime instead of a vendored `jam/`
-  directory in the project.
+  Start Jam from the installed core `Jambase` and libraries instead of a
+  vendored `jam/` directory in the project.
 
-- [Local modules](jam-init-runtime.md#local-modules).
-  Make `Load` search the update-safe local extension directory after the core
-  runtime directory.
+- [Local extensions](jam-init-runtime.md#local-extensions).
+  Make `Load` search the update-safe local library directory after the core
+  library directory.
 
 - [Documentation and migration](jam-init-runtime.md#documentation-and-migration).
   Document initialization and migrate the current project-root bootstrap

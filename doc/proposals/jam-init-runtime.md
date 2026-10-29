@@ -7,9 +7,9 @@ proposal: jam-init.md
 ## Runtime invocation
 
 After initialization, the entry script starts the binary for the current host
-from `<JAM_ROOT>/core/bin/`. It explicitly selects the installed core
-`Jambase` and runtime directory. The runtime does not depend on a vendored
-`jam/` directory below the project root.
+from `<JAM_ROOT>/core/bin/`. It explicitly selects the installed
+`<JAM_ROOT>/core/Jambase`. The runtime does not depend on a vendored `jam/`
+directory below the project root.
 
 The project working directory remains the current directory of the entry
 script invocation. `Jamconfigure` and `Jamfile` are therefore found in the
@@ -17,8 +17,8 @@ project exactly as they are today. The installed runtime supplies the Jam
 rules; the project supplies its build configuration and targets.
 
 The exact command-line variables passed by the entry script are an
-implementation detail. They establish the core runtime directory as the
-runtime root before the installed `Jambase` loads any runtime module.
+implementation detail. They establish the core and local library directories
+before the installed `Jambase` loads a Jam module.
 
 ## Local extensions
 
@@ -27,34 +27,30 @@ update-managed `core/` tree and may contain:
 
 ```text
 <JAM_ROOT>/local/
-  Jambase
-  modules/
-  scripts/
-  toolsets/
+  lib/
+    *.jam
 ```
 
-The installed core `Jambase` optionally loads `local/Jambase` after its own
-base rules are available and before it loads `Jamconfigure` and `Jamfile`.
-The local entry file can load project-specific modules and establish
-project-wide Jam behavior without changing `core/`.
-
-## Local modules
-
 `Load` remains the single rule for loading Jam runtime files. A relative name
-is resolved first below `<JAM_ROOT>/core/runtime/` and, only if the core file
-does not exist, below `<JAM_ROOT>/local/`.
+is resolved first below `<JAM_ROOT>/core/lib/` and, only if the core file does
+not exist, below `<JAM_ROOT>/local/lib/`.
+
+A project loads the extensions it needs from its `Jamconfigure`. The core
+`Jambase` remains the sole owner of the runtime and configure phases. This
+keeps each project's module dependencies explicit while allowing several
+projects to use the same local extension installation.
 
 For example:
 
 ```jam
-Load modules/company-tools.jam ;
+Load company-tools.jam ;
 ```
 
 first tests:
 
 ```text
-<JAM_ROOT>/core/runtime/modules/company-tools.jam
-<JAM_ROOT>/local/modules/company-tools.jam
+<JAM_ROOT>/core/lib/company-tools.jam
+<JAM_ROOT>/local/lib/company-tools.jam
 ```
 
 The first existing file is loaded. A local file supplements the runtime but

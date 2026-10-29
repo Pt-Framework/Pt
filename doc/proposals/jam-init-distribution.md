@@ -43,9 +43,11 @@ configuration.
 
 ```text
 <JAM_ROOT>/core/
-  manifest
-  runtime/
-    Jambase
+  meta/
+    version
+    contents
+  Jambase
+  lib/
     *.jam
   src/
     *.c
@@ -56,23 +58,64 @@ configuration.
       jam[.exe]
 ```
 
-The manifest identifies the pinned Jam version and source revision and records
-the snapshot contents and available host binaries. Runtime scripts, sources,
-and binaries in a snapshot represent the same Jam revision.
+`meta/` identifies the Jam release and its bootstrap compatibility level and
+records the snapshot contents. Runtime scripts, sources, and binaries in a
+snapshot represent the same Jam release.
+
+## Snapshot metadata
+
+`meta/` is a directory rather than a compound manifest file. This keeps
+the scalar values directly readable by POSIX shell, Windows batch, and
+PowerShell without a JSON, YAML, or INI parser.
+
+`version` contains exactly one nonempty ASCII line terminated by LF with two
+fields separated by one ASCII space:
+
+```text
+2.4.0 5
+```
+
+The first field is the pinned Jam release version in SemVer format. The second
+field is a positive decimal API level without leading zeroes. The API level is
+the compatibility contract between an entry script and an installed `core/`:
+an entry script checks that it is within its supported range before relying on
+any other part of the `core/` layout, including `Jambase`, `lib/`, `src/`, and
+`bin/<host-id>/`. A `core/` with an unsupported API level is rejected before it
+is used, not silently substituted or reinterpreted. Entry scripts do not need
+to compare SemVer values.
+
+`contents` is a line-oriented SHA-256 inventory of the release-owned
+contents of `core/` outside `meta/`. Each line contains a lowercase 64-digit
+hash, two spaces, and a slash-separated relative path without whitespace,
+matching the text-mode format produced and verified by the `sha256sum`
+coreutils tool:
+
+```text
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  Jambase
+```
+
+It includes `Jambase`, libraries, sources, and every packaged binary below
+`bin/`. It does not include a binary built locally by `--init`. `--init`,
+snapshot installation, and `--update` validate `version` and the recorded
+file hashes before accepting a snapshot. A normal build invocation reads only
+`version` and the fixed `bin/<host-id>/` path; it does not rehash the complete
+snapshot. The inventory detects incomplete or corrupted snapshot content, but
+does not authenticate itself; distribution integrity validation must protect
+the `meta/` directory or its containing artifact.
 
 A snapshot may omit a binary for a host. It still contains the sources
 necessary to build that binary. This makes the same snapshot both a consumer
 installation and the input to a release worker that creates a new host binary
 for later distribution.
 
-The host-ID format and manifest encoding must let an entry script validate that
-an installed core is complete and select a binary for the current host.
+The host-ID format and the fixed `bin/<host-id>/` path let an entry script
+validate an installed core and select a packaged binary for the current host.
 
 ## Phase 1: vendored snapshot
 
 The first implementation restructures the existing vendored Jam files into
-`jam/core/`. Runtime scripts reside below `core/runtime/`, C sources reside
-below `core/src/`, and generated host binaries reside below
+`jam/core/`. `Jambase` resides at `core/Jambase`, Jam libraries reside below
+`core/lib/`, C sources reside below `core/src/`, and generated host binaries reside below
 `core/bin/<host-id>/`. `jam/local/` is created only when users add local
 extensions.
 
@@ -109,9 +152,9 @@ replace, or otherwise modify `local/`.
 
 A release worker initializes the vendored source snapshot on each supported
 host and publishes its generated binary together with the corresponding
-runtime, sources, and manifest. This phase defines archive names, host IDs,
-manifest contents, and integrity validation. It does not change the local
-runtime model.
+runtime, sources, and metadata. This phase defines archive names, host IDs,
+distribution integrity validation, and the supported metadata format. It does
+not change the local runtime model.
 
 ## Phase 3: distribution initialization
 
