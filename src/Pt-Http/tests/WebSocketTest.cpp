@@ -262,6 +262,86 @@ class CollectService : public Pt::Http::WebSocketService
         Pt::System::EventLoop* _loop;
 };
 
+class PulseSession : public Pt::Http::WebSocketSession
+{
+    public:
+        PulseSession(Pt::Http::WebSocketService& service,
+                     Pt::Http::Stream& stream,
+                     const Pt::Http::Reply& reply,
+                     Pt::System::EventLoop& loop)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        , _sending(false)
+        {
+            beginReceive();
+            outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            outgoing().body() << "x";
+            beginSend();
+            _sending = true;
+            _timer.setActive(loop);
+            _timer.timeout() += Pt::slot(*this, &PulseSession::onPulse);
+            _timer.start(40);
+        }
+
+        ~PulseSession()
+        {
+            _timer.detach();
+        }
+
+    protected:
+        virtual void onInput()
+        {
+            endReceive();
+            incoming().clear();
+            beginReceive();
+        }
+
+        virtual void onOutput()
+        {
+            endSend();
+            _sending = false;
+        }
+
+        void onPulse()
+        {
+            if(_sending)
+                return;
+
+            outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            outgoing().body() << "x";
+            beginSend();
+            _sending = true;
+        }
+
+    private:
+        Pt::System::Timer _timer;
+        bool _sending;
+};
+
+class PulseService : public Pt::Http::WebSocketService
+{
+    public:
+        explicit PulseService(Pt::System::EventLoop& loop)
+        : _loop(&loop)
+        {}
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new PulseSession(*this, stream, reply, *_loop);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+};
+
+
 class IdleSession : public Pt::Http::WebSocketSession
 {
     public:
@@ -1098,6 +1178,11 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("ReceiveDuringShutdown", *this, &WebSocketTest::ReceiveDuringShutdown);
             registerMethod("ProtocolFailure", *this, &WebSocketTest::ProtocolFailure);
             registerMethod("IdleTimeoutTwice", *this, &WebSocketTest::IdleTimeoutTwice);
+            registerMethod("PingIntervalPong", *this, &WebSocketTest::PingIntervalPong);
+            registerMethod("PingIntervalTimeoutNoReply", *this, &WebSocketTest::PingIntervalTimeoutNoReply);
+            registerMethod("PingIntervalWithoutReceive", *this, &WebSocketTest::PingIntervalWithoutReceive);
+            registerMethod("PingIntervalResetByInbound", *this, &WebSocketTest::PingIntervalResetByInbound);
+            registerMethod("PingIntervalYieldsToBeginPing", *this, &WebSocketTest::PingIntervalYieldsToBeginPing);
         }
 
         void setUp()
@@ -2691,6 +2776,212 @@ class WebSocketTest : public Pt::Unit::TestSuite
             }
 
             _loop->exit();
+        }
+
+    protected:
+        void PingIntervalPong()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8054);
+
+            Pt::Http::Server server(*_loop, ep);
+            RecordService service(_message, _type, _received, _closed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setPingInterval(50);
+            socket.setPingTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIntervalReceive);
+            socket.pong() += Pt::slot(*this, &WebSocketTest::onIntervalPong);
+            socket.pingReady() += Pt::slot(*this, &WebSocketTest::onIntervalPingReady);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onHttpTimeoutClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_pong);
+            PT_UNIT_ASSERT(!_pingReady);
+            PT_UNIT_ASSERT(!_closed);
+            PT_UNIT_ASSERT(_finished);
+        }
+
+        void onConnectedIntervalReceive(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+        }
+
+        void onIntervalPong(Pt::Http::WebSocket&, const std::string&)
+        {
+            _pong = true;
+            _waitTimer.setActive(*_loop);
+            _waitTimer.start(100);
+        }
+
+        void onIntervalPingReady(Pt::Http::WebSocket& socket)
+        {
+            socket.endPing();
+            _pingReady = true;
+        }
+
+    protected:
+        void PingIntervalTimeoutNoReply()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8055);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setPingInterval(50);
+            socket.setPingTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIntervalReceive);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onIdleClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_closed);
+            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 1006u);
+        }
+
+    protected:
+        void PingIntervalWithoutReceive()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8056);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setPingInterval(50);
+            socket.setPingTimeout(50);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIntervalNoReceive);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onHttpTimeoutClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(!_closed);
+            PT_UNIT_ASSERT(_finished);
+        }
+
+        void onConnectedIntervalNoReceive(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            _waitTimer.setActive(*_loop);
+            _waitTimer.start(200);
+        }
+
+    protected:
+        void PingIntervalResetByInbound()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8057);
+
+            Pt::Http::Server server(*_loop, ep);
+            PulseService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setPingInterval(80);
+            socket.setPingTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIntervalPulse);
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onIntervalPulseInput);
+            socket.pong() += Pt::slot(*this, &WebSocketTest::onIntervalPulsePong);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onHttpTimeoutClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(!_pong);
+            PT_UNIT_ASSERT(!_closed);
+            PT_UNIT_ASSERT(_finished);
+        }
+
+        void onConnectedIntervalPulse(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+            _waitTimer.setActive(*_loop);
+            _waitTimer.start(250);
+        }
+
+        void onIntervalPulseInput(Pt::Http::WebSocket& socket)
+        {
+            socket.endReceive();
+            socket.incoming().clear();
+            socket.beginReceive();
+        }
+
+        void onIntervalPulsePong(Pt::Http::WebSocket&, const std::string&)
+        {
+            _pong = true;
+            _loop->exit();
+        }
+
+    protected:
+        void PingIntervalYieldsToBeginPing()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8058);
+
+            Pt::Http::Server server(*_loop, ep);
+            RecordService service(_message, _type, _received, _closed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setPingInterval(50);
+            socket.setPingTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIntervalYield);
+            socket.pingReady() += Pt::slot(*this, &WebSocketTest::onPingReady);
+            socket.pong() += Pt::slot(*this, &WebSocketTest::onIntervalYieldPong);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onHttpTimeoutClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_pong);
+            PT_UNIT_ASSERT(_pingReady);
+            PT_UNIT_ASSERT_EQUALS(_message, std::string("user"));
+            PT_UNIT_ASSERT(!_closed);
+        }
+
+        void onConnectedIntervalYield(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+            socket.beginPing("user", 4);
+        }
+
+        void onIntervalYieldPong(Pt::Http::WebSocket&, const std::string& payload)
+        {
+            if(payload != "user")
+                return;
+
+            _message = payload;
+            _pong = true;
+            if(_pingReady)
+                _loop->exit();
         }
 
     private:

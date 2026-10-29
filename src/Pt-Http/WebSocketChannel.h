@@ -39,6 +39,8 @@ class WebSocketChannel : public Channel
 
         void setIdleTimeout(std::size_t ms);
 
+        void setPingInterval(std::size_t ms);
+
         void setPingTimeout(std::size_t ms);
 
         void setCloseTimeout(std::size_t ms);
@@ -83,7 +85,7 @@ class WebSocketChannel : public Channel
         { return _pongReceived; }
 
         Signal<>& pingReady()
-        { return _ping.ready(); }
+        { return _pingReady; }
 
         Signal<>& shutdownReady()
         { return _shutdown.ready(); }
@@ -284,6 +286,10 @@ class WebSocketChannel : public Channel
 
         void endIdleTimeout();
 
+        void beginPingDelay();
+
+        void endPingDelay();
+
         void beginPingTimeout();
 
         void endPingTimeout();
@@ -293,6 +299,10 @@ class WebSocketChannel : public Channel
         void endCloseTimeout();
 
         void onIdleTimeout();
+
+        void onPingDelay();
+
+        void onPingReady();
 
         void onPingTimeout();
 
@@ -305,9 +315,11 @@ class WebSocketChannel : public Channel
         bool          _clientMask;
         std::size_t   _maxMessageSize;
         std::size_t   _idleTimeout;
+        std::size_t   _pingInterval;
         std::size_t   _pingTimeout;
         std::size_t   _closeTimeout;
         System::Timer _idleTimer;
+        System::Timer _pingDelayTimer;
         System::Timer _pingTimer;
         System::Timer _closeTimer;
         Pt::uint32_t  _maskSeed;
@@ -329,8 +341,10 @@ class WebSocketChannel : public Channel
 
         Output                     _ping;
         Output                     _pong;
+        bool                       _isPingPending;
         std::string                _pongData;
         Signal<const std::string&> _pongReceived;
+        Signal<>                   _pingReady;
 
         Output    _closeOut;
         Operation _shutdown;

@@ -88,16 +88,17 @@
     the upgrade and selects no name. A non-empty list selects the
     first offered name that is also accepted, and a request that
     offers none of them is answered with 400. %setMaxSockets(),
-    %setIdleTimeout(), %setPingTimeout(), %setCloseTimeout() and
-    %setMaxMessageSize() are endpoint policy of the
-    %WebSocketService. They apply before a servlet is constructed.
+    %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
+    %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
+    of the %WebSocketService. They apply before a servlet is
+    constructed.
     The handshake reads the session limit and %socketCount() there.
     %socketCount() is the number of sessions %getSession() returned
     and %releaseSession() has not yet released. A missing servlet is
     still 503 when %maxSockets() is zero. The session base copies the
-    idle, ping and close timeouts and the data-message limit onto
-    the connection before the derived
-    constructor runs. It also copies the single
+    idle, ping-interval, ping and close timeouts and the data-message
+    limit onto the connection before the derived constructor runs.
+    It also copies the single
     Sec-WebSocket-Protocol name from the opening reply, or leaves
     that name empty when the reply selected none.
 

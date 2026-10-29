@@ -71,17 +71,21 @@ WebSocketChannel::WebSocketChannel()
 , _clientMask(false)
 , _maxMessageSize(1024 * 1024)
 , _idleTimeout(0)
+, _pingInterval(0)
 , _pingTimeout(0)
 , _closeTimeout(10000)
 , _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
 , _inputPending(false)
 , _outputPending(false)
+, _isPingPending(false)
 , _state(Closed)
 , _closeCode(0)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onIdleTimeout);
+    _pingDelayTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onPingDelay);
     _pingTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onPingTimeout);
     _closeTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onCloseTimeout);
+    _ping.ready() += Pt::slot(*this, &WebSocketChannel::onPingReady);
     _closeOut.ready() += Pt::slot(*this, &WebSocketChannel::onProtocolDone);
 }
 
@@ -128,11 +132,13 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
     if( System::EventLoop* loop = stream.loop() )
     {
         _idleTimer.setActive(*loop);
+        _pingDelayTimer.setActive(*loop);
         _pingTimer.setActive(*loop);
         _closeTimer.setActive(*loop);
     }
 
     beginIdleTimeout();
+    beginPingDelay();
 }
 
 
@@ -245,6 +251,7 @@ void WebSocketChannel::beginPing(const char* payload, std::size_t n)
     if(_outputFailure)
         std::rethrow_exception(_outputFailure);
 
+    _isPingPending = true;
     _ping.begin();
     _ping.set(0x09, payload, n);
     enqueue(_ping);
@@ -258,6 +265,7 @@ void WebSocketChannel::endPing()
     if( ! _ping.isReady() )
         throw std::logic_error("WebSocket ping is not ready");
 
+    _isPingPending = false;
     _ping.finish();
 }
 
@@ -289,6 +297,7 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
 
     endPingTimeout();
     endIdleTimeout();
+    endPingDelay();
 
     beginCloseTimeout();
 
@@ -324,6 +333,7 @@ void WebSocketChannel::onProtocolFinished()
 
     endPingTimeout();
     endIdleTimeout();
+    endPingDelay();
     endCloseTimeout();
 
     if(_outputQueue.empty())
@@ -402,10 +412,12 @@ void WebSocketChannel::onClose()
     _send.close();
     _ping.close();
     _pong.close();
+    _isPingPending = false;
     _closeOut.close();
     _shutdown.close();
 
     _idleTimer.detach();
+    _pingDelayTimer.detach();
     _pingTimer.detach();
     _closeTimer.detach();
     _incoming.clear();
@@ -419,6 +431,15 @@ void WebSocketChannel::setIdleTimeout(std::size_t ms)
 
     if(_state == Open)
         beginIdleTimeout();
+}
+
+
+void WebSocketChannel::setPingInterval(std::size_t ms)
+{
+    _pingInterval = ms;
+
+    if(_state == Open)
+        beginPingDelay();
 }
 
 
@@ -449,6 +470,21 @@ void WebSocketChannel::beginIdleTimeout()
 void WebSocketChannel::endIdleTimeout()
 {
     _idleTimer.stop();
+}
+
+
+void WebSocketChannel::beginPingDelay()
+{
+    _pingDelayTimer.stop();
+
+    if(_pingInterval != 0)
+        _pingDelayTimer.start(_pingInterval);
+}
+
+
+void WebSocketChannel::endPingDelay()
+{
+    _pingDelayTimer.stop();
 }
 
 
@@ -485,6 +521,40 @@ void WebSocketChannel::endCloseTimeout()
 void WebSocketChannel::onIdleTimeout()
 {
     onProtocolAborted();
+}
+
+
+void WebSocketChannel::onPingDelay()
+{
+    if(_state != Open)
+        return;
+
+    if( ! _receive.isPending() )
+        return;
+
+    if(_pingTimer.isStarted() || ! _ping.isIdle())
+        return;
+
+    _ping.reset();
+    _ping.begin();
+    _ping.set(0x09, true);
+    enqueue(_ping);
+    beginPingTimeout();
+
+    if(_pingTimeout != 0)
+        endPingDelay();
+}
+
+
+void WebSocketChannel::onPingReady()
+{
+    if(_isPingPending)
+    {
+        _pingReady.send();
+        return;
+    }
+
+    _ping.reset();
 }
 
 
@@ -651,6 +721,7 @@ bool WebSocketChannel::onPing(const Frame& frame)
         return true;
 
     beginIdleTimeout();
+    beginPingDelay();
 
     if( _pong.isPending() )
     {
@@ -677,7 +748,10 @@ bool WebSocketChannel::onPong(const Frame& frame)
     endPingTimeout();
 
     if(_state == Open)
+    {
         beginIdleTimeout();
+        beginPingDelay();
+    }
 
     _pongReceived.send(_pongData);
     return true;
@@ -748,7 +822,10 @@ bool WebSocketChannel::onData(const Frame& frame)
         _receiveProgress.setBody();
 
     if(_state == Open)
+    {
         beginIdleTimeout();
+        beginPingDelay();
+    }
 
     _receive.setReady();
     return true;

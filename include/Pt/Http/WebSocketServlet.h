@@ -57,14 +57,14 @@ class WebSocketSession;
     %WebSocketServlet for the same service throws %std::logic_error.
     With no servlet, the handshake answers the upgrade with 503 and
     opens no stream. The service owns %setMaxSockets(),
-    %setIdleTimeout(), %setPingTimeout(), %setCloseTimeout() and
-    %setMaxMessageSize(). The handshake reads
+    %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
+    %setCloseTimeout() and %setMaxMessageSize(). The handshake reads
     the session limit and %socketCount() from the service.
     %socketCount() is the number of sessions %getSession() returned
     and %releaseSession() has not yet released. The session base
-    copies the idle, ping and close timeouts and the data-message
-    limit from the service onto the connection before the derived
-    constructor runs.
+    copies the idle, ping-interval, ping and close timeouts and the
+    data-message limit from the service onto the connection before
+    the derived constructor runs.
 
     @ingroup Pt-Http-WebSocket-Server
 */

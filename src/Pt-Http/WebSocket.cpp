@@ -322,6 +322,12 @@ void WebSocket::setIdleTimeout(std::size_t ms)
 }
 
 
+void WebSocket::setPingInterval(std::size_t ms)
+{
+    _channel->setPingInterval(ms);
+}
+
+
 void WebSocket::setPingTimeout(std::size_t ms)
 {
     _channel->setPingTimeout(ms);

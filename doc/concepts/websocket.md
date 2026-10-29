@@ -305,9 +305,9 @@ allocator. A null return from `getSession()` declines the upgrade
 before any bind. `socketCount()` is that count. It is not the size of
 the servlet list.
 
-`maxSockets()`, `idleTimeout()`, `pingTimeout()`, `closeTimeout()`,
-and `maxMessageSize()` are endpoint policy. They apply before a
-session is constructed. No attached
+`maxSockets()`, `idleTimeout()`, `pingInterval()`, `pingTimeout()`,
+`closeTimeout()`, and `maxMessageSize()` are endpoint policy. They
+apply before a session is constructed. No attached
 servlet, or a count at the limit, is 503 from the handshake. No
 stream is opened.
 
@@ -347,24 +347,33 @@ timeout. On the client that is `Client::setTimeout()`. On the server
 it is `Server::setTimeout()`, and keep-alive between requests. A
 finished 101 stops those clocks on the connection.
 
-After the upgrade the socket has three engine clocks. Zero disables
+After the upgrade the socket has four engine clocks. Zero disables
 each one except close, which defaults to ten seconds.
 
 `setIdleTimeout()` is inbound silence while the socket is open.
 Incoming data, a received ping, and a received pong restart it.
 Sending does not. The client and the service start at zero.
 
+`setPingInterval()` is inbound silence before the engine writes a
+ping. Incoming data, a received ping, and a received pong restart
+it. Sending does not. The engine writes an empty ping only while
+the socket is open and a receive is outstanding. That ping uses the
+same output as `beginPing()` and does not emit `pingReady()`. A
+tick is skipped when a ping is outstanding or a ping wait is
+already running. `beginPing()` throws while that ping is
+outstanding. The client and the service start at zero.
+
 `setPingTimeout()` bounds an unanswered ping. It starts when
-`beginPing()` enqueues the frame. A pong or an incoming ping stops
-it.
-The client and the service start at zero. The application still
-calls `beginPing()`; the engine does not ping on its own.
+`beginPing()` enqueues the frame, and when the engine writes a
+keepalive ping. A pong or an incoming ping stops it.
+The client and the service start at zero.
 
 `setCloseTimeout()` bounds `beginShutdown()` after a local close is
 queued. The client and the service default it to ten seconds.
 
 An idle, ping, or close timeout ends the protocol with close code
-1006. The server copies all three from the service onto each session.
+1006. The server copies all four clocks from the service onto each
+session.
 
 The stream still has `setTimeout()` for a channel that bounds byte
 I/O.
