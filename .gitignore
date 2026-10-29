@@ -101,7 +101,7 @@ Thumbs.db
 Desktop.ini
 
 # Core dumps
-core
+/core
 core.*
 vgcore.*
 
