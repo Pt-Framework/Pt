@@ -47,12 +47,28 @@ jobs:
             build_type: Release
             runtime_type: Release
             runtime: MD
+            compiler: msvc
           - os: windows-2022
             profile: conan/prebuilt/profiles/windows-msvc2022-x64
             prebuilt_id: windows-x64-msvc-mdd
             build_type: Debug
             runtime_type: Debug
             runtime: MDd
+            compiler: msvc
+          - os: macos-15
+            profile: conan/prebuilt/profiles/macos-clang-arm64
+            prebuilt_id: macos-arm64-clang
+            build_type: Release
+            runtime_type: Release
+            runtime: ""
+            compiler: apple-clang
+          - os: macos-15-intel
+            profile: conan/prebuilt/profiles/macos-clang-x64
+            prebuilt_id: macos-x64-clang
+            build_type: Release
+            runtime_type: Release
+            runtime: ""
+            compiler: apple-clang
 
     runs-on: ${{ matrix.os }}
 
@@ -80,11 +96,17 @@ jobs:
       - name: Install Conan
         run: python -m pip install "conan>=2,<3"
 
-      - name: Install NASM
+      - name: Install NASM (Windows)
+        if: runner.os == 'Windows'
         run: choco install nasm --no-progress -y
 
-      - name: Setup Perl
+      - name: Setup Perl (Windows)
+        if: runner.os == 'Windows'
         run: choco install strawberryperl --no-progress -y
+
+      - name: Install build tools (macOS)
+        if: runner.os == 'macOS'
+        run: brew install nasm perl
 
       - name: Cache Conan
         uses: actions/cache@v5
@@ -132,7 +154,8 @@ jobs:
         run: |
           $out = "${{ env.PREFIX }}"
           $id = "${{ env.PREBUILT_ID }}"
-          $jamPath = Join-Path $out "jam\packages.jam"
+          $jamPath = Join-Path $out "jam" "packages.jam"
+          $isWindows = "${{ runner.os }}" -eq "Windows"
 
           foreach ($pkg in @("zlib", "png", "jpeg", "freetype", "openssl")) {
             if (-not (Test-Path (Join-Path $out $pkg))) {
@@ -141,19 +164,28 @@ jobs:
             }
           }
 
-          if (-not (Test-Path (Join-Path $out "zlib\include\zlib.h"))) {
+          if (-not (Test-Path (Join-Path $out "zlib" "include" "zlib.h"))) {
             Write-Error "Missing zlib/include/zlib.h"
             exit 1
           }
-          $zlibLibs = Get-ChildItem (Join-Path $out "zlib\lib") -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq ".lib" }
-          if (-not $zlibLibs) {
-            Write-Error "Missing .lib under zlib/lib"
-            exit 1
-          }
-          $zlibDlls = Get-ChildItem (Join-Path $out "zlib\bin") -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq ".dll" }
-          if (-not $zlibDlls) {
-            Write-Error "Missing .dll under zlib/bin"
-            exit 1
+
+          if ($isWindows) {
+            $zlibLibs = Get-ChildItem (Join-Path $out "zlib" "lib") -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq ".lib" }
+            if (-not $zlibLibs) {
+              Write-Error "Missing .lib under zlib/lib"
+              exit 1
+            }
+            $zlibDlls = Get-ChildItem (Join-Path $out "zlib" "bin") -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq ".dll" }
+            if (-not $zlibDlls) {
+              Write-Error "Missing .dll under zlib/bin"
+              exit 1
+            }
+          } else {
+            $zlibDylibs = Get-ChildItem (Join-Path $out "zlib" "lib") -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '\.dylib$' }
+            if (-not $zlibDylibs) {
+              Write-Error "Missing .dylib under zlib/lib"
+              exit 1
+            }
           }
 
           if (Test-Path (Join-Path $out "full_deploy")) {
@@ -216,7 +248,14 @@ jobs:
             foreach ($lib in $libs) {
               $found = $false
               foreach ($path in $libPaths) {
-                $libPath = Join-Path $out "$path\$lib.lib"
+                if ($isWindows) {
+                  $libPath = Join-Path $out $path "$lib.lib"
+                } else {
+                  $libPath = Join-Path $out $path "lib$lib.dylib"
+                  if (-not (Test-Path $libPath)) {
+                    $libPath = Join-Path $out $path "$lib.dylib"
+                  }
+                }
                 if (Test-Path $libPath) {
                   $found = $true
                   break
@@ -242,7 +281,7 @@ jobs:
         run: |
           $zip = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PREBUILT_ID }}.zip"
           $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
-          $jamPath = Join-Path "${{ env.PREFIX }}" "jam\packages.jam"
+          $jamPath = Join-Path "${{ env.PREFIX }}" "jam" "packages.jam"
           $text = Get-Content $jamPath -Raw
           $packages = @()
           foreach ($m in [regex]::Matches($text, 'PREBUILT_PACKAGE_VERSION\.(\S+)\s+=\s+([^;]+);')) {
@@ -254,7 +293,7 @@ jobs:
             "Sha256: $hash"
             "Date: $(Get-Date -Format 'yyyy-MM-dd')"
             "Prebuilt: ${{ env.PREBUILT_ID }}"
-            "Compiler: msvc"
+            "Compiler: ${{ matrix.compiler }}"
             "Runtime: ${{ matrix.runtime }}"
             "Shared: true"
             "Packages:"
