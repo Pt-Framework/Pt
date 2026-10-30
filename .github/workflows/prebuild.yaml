@@ -171,7 +171,7 @@ jobs:
           $out = "${{ env.PREFIX }}"
           $id = "${{ env.PREBUILT_ID }}"
           $jamPath = Join-Path $out "jam" "packages.jam"
-          $isWindows = "${{ runner.os }}" -eq "Windows"
+          $onWindows = "${{ runner.os }}" -eq "Windows"
 
           foreach ($pkg in @("zlib", "png", "jpeg", "freetype", "openssl")) {
             if (-not (Test-Path (Join-Path $out $pkg))) {
@@ -185,7 +185,7 @@ jobs:
             exit 1
           }
 
-          if ($isWindows) {
+          if ($onWindows) {
             $zlibLibs = Get-ChildItem (Join-Path $out "zlib" "lib") -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq ".lib" }
             if (-not $zlibLibs) {
               Write-Error "Missing .lib under zlib/lib"
@@ -264,7 +264,7 @@ jobs:
             foreach ($lib in $libs) {
               $found = $false
               foreach ($path in $libPaths) {
-                if ($isWindows) {
+                if ($onWindows) {
                   $libPath = Join-Path $out $path "$lib.lib"
                 } else {
                   $libPath = Join-Path $out $path "lib$lib.dylib"
