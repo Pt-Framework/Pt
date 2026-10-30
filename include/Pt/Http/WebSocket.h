@@ -392,8 +392,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         /** @brief Closes the stream if a ping is unanswered for @a ms.
 
             Zero disables the ping timeout. The wait starts at
-            %beginPing() and at a keepalive ping. A pong or an incoming
-            ping stops it.
+            %beginPing() and at a keepalive ping. A pong stops it.
+            An incoming ping does not.
         */
         void setPingTimeout(std::size_t ms);
 

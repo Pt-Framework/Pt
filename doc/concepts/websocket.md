@@ -365,7 +365,7 @@ outstanding. The client and the service start at zero.
 
 `setPingTimeout()` bounds an unanswered ping. It starts when
 `beginPing()` enqueues the frame, and when the engine writes a
-keepalive ping. A pong or an incoming ping stops it.
+keepalive ping. A pong stops it. An incoming ping does not.
 The client and the service start at zero.
 
 `setCloseTimeout()` bounds `beginShutdown()` after a local close is
