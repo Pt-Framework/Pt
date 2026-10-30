@@ -651,8 +651,6 @@ bool WebSocketChannel::onFrame(const Frame& frame)
 
 bool WebSocketChannel::onPing(const Frame& frame)
 {
-    _pingTimeout.end();
-
     if(_state != Open)
         return true;
 
