@@ -1,0 +1,82 @@
+---
+proposal: jam-packages.md
+---
+
+# Package Interface
+
+Source packages and prebuilt packages share one variable interface.
+A package name `pkg` exposes these variables:
+
+- `pkg.INCLUDES`
+- `pkg.DEFINES`
+- `pkg.LINKLIBS`
+- `pkg.LIBDIR`
+- `pkg.LINKFLAGS`
+- `pkg.TARGET`
+
+Prebuilt and system packages fill the flag variables. Source packages
+fill `pkg.TARGET` (and usually `pkg.INCLUDES`). Consumers read only
+these variables. Package-specific `*-Configure` rules stay ignorant of
+whether the values came from a user, a prebuilt bundle, a source tree,
+or a system probe.
+
+## Variables {#variables}
+
+The common variables are dotted: `$(pkg.INCLUDES)`, `$(pkg.DEFINES)`,
+`$(pkg.LINKLIBS)`, `$(pkg.LIBDIR)`, `$(pkg.LINKFLAGS)`, `$(pkg.TARGET)`.
+
+`pkg.TARGET` is the Jam target name of a source-built library. When it
+is set, linking uses that target instead of `pkg.LINKLIBS` and
+`pkg.LINKFLAGS`.
+
+The flag variables hold the same tokens that the existing
+`ZLIB_INCLUDES`, `ZLIB_LINKLIBS` and similar variables hold today.
+Empty lists are omitted.
+
+For the packages that already expose the five-tuple names
+(`ZLIB_*`, `PNG_*`, `JPEG_*`, `FREETYPE_*`, `SSL_*`) the interface
+module copies the common variables onto those names. New packages use
+only the dotted form.
+
+## Modules {#modules}
+
+Three modules own the mechanism:
+
+- `packages.jam` owns the common variable names, the priority rules,
+  and the Configure dispatch. It does not know the prebuilt layout or
+  the source-package layout.
+- `prebuilt.jam` maps a prebuilt bundle onto the common variables. It
+  loads the bundle manifest.
+- `builtin.jam` registers source-package roots under `src/`, checks
+  presence, and descends with `SubInclude` when a source package is
+  selected.
+
+`packages.jam` is included once. The other two modules are loaded on
+demand.
+
+## Configure {#configure}
+
+Resolution order for each package is fixed and admits no mixing:
+
+1. Explicit user settings (`-s pkg.INCLUDES=...` or the corresponding
+   five-tuple on the command line or in the environment).
+2. Prebuilt, when `--with-prebuilt` selected a bundle, the package is
+   listed in it, and no `--with-inline-xxx` was given.
+3. Source package, when a registered source root is present and no
+   higher source won.
+4. System probe via the package-specific `*-Configure`.
+
+A package is either user-supplied, prebuilt, source, or system. User
+values win over all other sources.
+
+When a source package is selected the package-specific `*-Configure`
+is not called. The source package has already set `pkg.INCLUDES` and
+`pkg.TARGET`.
+
+When prebuilt or system is used, `*-Configure` is called with the
+values already filled (prebuilt) or empty (system). The Configure rule
+remains unchanged: it probes only when its five arguments are empty;
+otherwise it verifies the supplied values.
+
+`WITH_BUILTIN_xxx` and `WITH_xxx` keep their current meaning for
+consumers.
