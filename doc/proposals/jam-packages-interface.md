@@ -29,14 +29,12 @@ The common variables are dotted: `$(pkg.INCLUDES)`, `$(pkg.DEFINES)`,
 is set, linking uses that target instead of `pkg.LINKLIBS` and
 `pkg.LINKFLAGS`.
 
-The flag variables hold the same tokens that the existing
-`ZLIB_INCLUDES`, `ZLIB_LINKLIBS` and similar variables hold today.
-Empty lists are omitted.
+The flag variables hold the tokens for includes, defines, link libraries,
+library directories and link flags. Empty lists are omitted.
 
-For the packages that already expose the five-tuple names
-(`ZLIB_*`, `PNG_*`, `JPEG_*`, `FREETYPE_*`, `SSL_*`) the interface
-module copies the common variables onto those names. New packages use
-only the dotted form.
+Consumers, user overrides and Configure rules use only the dotted form.
+The former five-tuple names (`ZLIB_*`, `PNG_*`, `JPEG_*`, `FREETYPE_*`,
+`SSL_*`) are not produced and are not read.
 
 ## Modules {#modules}
 
@@ -58,8 +56,8 @@ demand.
 
 Resolution order for each package is fixed and admits no mixing:
 
-1. Explicit user settings (`-s pkg.INCLUDES=...` or the corresponding
-   five-tuple on the command line or in the environment).
+1. Explicit user settings (`-s pkg.INCLUDES=...` and the other dotted
+   variables on the command line or in the environment).
 2. Prebuilt, when `--with-prebuilt` selected a bundle, the package is
    listed in it, and no `--with-inline-xxx` was given.
 3. Source package, when a registered source root is present and no
@@ -75,8 +73,8 @@ is not called. The source package has already set `pkg.INCLUDES` and
 
 When prebuilt or system is used, `*-Configure` is called with the
 values already filled (prebuilt) or empty (system). The Configure rule
-remains unchanged: it probes only when its five arguments are empty;
-otherwise it verifies the supplied values.
+probes only when its arguments are empty; otherwise it verifies the
+supplied values.
 
 `WITH_BUILTIN_xxx` and `WITH_xxx` keep their current meaning for
 consumers.
