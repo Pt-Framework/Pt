@@ -56,11 +56,17 @@ whether it was included from a parent and sets the variables only in
 that case. Its own top-level Jamconfigure continues to work when it is
 built alone.
 
-## Presence and skip
+## Presence and selection
 
-If the registered root exists and no higher-priority source (user or
-prebuilt) claimed the package, the package is source. The
-package-specific `*-Configure` is skipped and `WITH_BUILTIN_xxx` is
+A registered root must exist for the package to be usable as source.
+Selection itself depends on a configure option (for example
+`--with-inline-zlib`, `--with-inline-libpng`). Presence of the root
+alone does not select the source package.
+
+When the option is given and the root is present, the package is source.
+The package-specific `*-Configure` is skipped and `WITH_BUILTIN_xxx` is
 set.
 
-If the root is absent the package falls through to the system probe.
+When the option is not given, or the root is absent, the package falls
+through to the next source in the resolution order (prebuilt or system
+probe).
