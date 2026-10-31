@@ -2,20 +2,20 @@
 
 ## Documents
 
-- [Display List](forms-displaylist.md)
+- [Commands](forms-displaylist-commands.md)
 - [NanoVG](forms-displaylist-nanovg.md)
 
 ## Open Tasks
 
-- [commands](forms-displaylist.md#commands).
+- [commands](forms-displaylist-commands.md#commands).
   A flat sequence of drawing operations. Each command carries its
   arguments. Resources are referenced by id.
 
-- [builder](forms-displaylist.md#builder).
+- [builder](forms-displaylist-commands.md#builder).
   Appends commands. Holds the current transform, clip, and style
   until the next change.
 
-- [replay](forms-displaylist.md#replay).
+- [replay](forms-displaylist-commands.md#replay).
   Plays the sequence on a painter. The painter sees the same
   operations the builder recorded.
 
