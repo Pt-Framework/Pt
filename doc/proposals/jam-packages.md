@@ -12,7 +12,7 @@
 - [modules](jam-packages-interface.md#modules): Split into `packages.jam`, `prebuilt.jam` and `builtin.jam`.
 - [source-init](jam-packages-builtin.md#init): Add `Builtin-Use` / source package root registration and presence check.
 - [source-target](jam-packages-builtin.md#target): Source packages set their own `pkg.TARGET` in their Jamconfigure.
-- [configure-skip](jam-packages-interface.md#configure): Skip package-specific `*-Configure` when a source package is present; otherwise call it (values already set or system probe).
+- [configure-skip](jam-packages-interface.md#configure): Skip package-specific `*-Configure` when a source package is selected by configure option; otherwise call it (values already set or system probe).
 
 ## Priority
 
