@@ -36,13 +36,36 @@ Consumers, user overrides and Configure rules use only the dotted form.
 The former five-tuple names (`ZLIB_*`, `PNG_*`, `JPEG_*`, `FREETYPE_*`,
 `SSL_*`) are not produced and are not read.
 
+`packages.jam` provides accessors so callers do not spell the dotted
+names by hand:
+
+```
+Packages-Includes pkg
+Packages-Defines pkg
+Packages-LinkLibs pkg
+Packages-LibDir pkg
+Packages-LinkFlags pkg
+Packages-Target pkg
+
+Packages-SetIncludes pkg : values *
+Packages-SetDefines pkg : values *
+Packages-SetLinkLibs pkg : values *
+Packages-SetLibDir pkg : values *
+Packages-SetLinkFlags pkg : values *
+Packages-SetTarget pkg : value
+```
+
+Getters return the current list (empty if unset). Setters replace the
+list. Direct assignment to the dotted variables remains valid; the
+accessors are the preferred form.
+
 ## Modules {#modules}
 
 Three modules own the mechanism:
 
-- `packages.jam` defines the common variable interface only: the names
-  and what they mean. It knows nothing about prebuilt bundles, source
-  package roots, configure options, or resolution order.
+- `packages.jam` defines the common variable interface and its
+  accessors. It knows nothing about prebuilt bundles, source package
+  roots, configure options, or resolution order.
 - `prebuilt.jam` maps a prebuilt bundle onto the common variables. It
   loads the bundle manifest.
 - `builtin.jam` registers source-package roots under `src/`, checks
