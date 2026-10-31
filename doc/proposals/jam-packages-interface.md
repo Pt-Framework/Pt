@@ -58,14 +58,17 @@ Resolution order for each package is fixed and admits no mixing:
 
 1. Explicit user settings (`-s pkg.INCLUDES=...` and the other dotted
    variables on the command line or in the environment).
-2. Prebuilt, when `--with-prebuilt` selected a bundle, the package is
-   listed in it, and no `--with-inline-xxx` was given.
-3. Source package, when a registered source root is present and no
-   higher source won.
+2. Source package, when a configure option that selects it is given
+   (for example `--with-inline-xxx`) and a registered source root is
+   present.
+3. Prebuilt, when `--with-prebuilt` selected a bundle and the package is
+   listed in it.
 4. System probe via the package-specific `*-Configure`.
 
-A package is either user-supplied, prebuilt, source, or system. User
-values win over all other sources.
+A package is either user-supplied, source, prebuilt, or system. User
+values win over all other sources. Source selection is opt-in via
+configure options; the mere presence of a source root does not select
+it.
 
 When a source package is selected the package-specific `*-Configure`
 is not called. The source package has already set `pkg.INCLUDES` and
