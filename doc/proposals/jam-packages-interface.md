@@ -40,9 +40,9 @@ The former five-tuple names (`ZLIB_*`, `PNG_*`, `JPEG_*`, `FREETYPE_*`,
 
 Three modules own the mechanism:
 
-- `packages.jam` owns the common variable names, the priority rules,
-  and the Configure dispatch. It does not know the prebuilt layout or
-  the source-package layout.
+- `packages.jam` defines the common variable interface only: the names
+  and what they mean. It knows nothing about prebuilt bundles, source
+  package roots, configure options, or resolution order.
 - `prebuilt.jam` maps a prebuilt bundle onto the common variables. It
   loads the bundle manifest.
 - `builtin.jam` registers source-package roots under `src/`, checks
@@ -50,9 +50,13 @@ Three modules own the mechanism:
   selected.
 
 `packages.jam` is included once. The other two modules are loaded on
-demand.
+demand by `Jamconfigure`.
 
 ## Configure {#configure}
+
+Resolution order and Configure dispatch live in `Jamconfigure`. It is
+the only place that knows about user settings, configure options,
+prebuilt and builtin.
 
 Resolution order for each package is fixed and admits no mixing:
 
