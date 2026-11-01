@@ -66,10 +66,16 @@ On Linux and macOS, use `jam.sh` with the same arguments:
 ./jam.sh -q -j4
 ```
 
-Switch between existing configuration:
+Switch between existing configurations:
 
 ```sh
 jam.bat switch debug
+```
+
+Print the active configuration:
+
+```sh
+jam.bat status
 ```
 
 Run a full project build before opening a pull request.

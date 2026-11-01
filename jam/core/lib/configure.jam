@@ -78,6 +78,17 @@ rule ConfigureSwitch
     }
 }
 
+rule ConfigureStatus
+{
+    if ! [ CHECK_IF_FILE $(JAMRULES) ]
+    {
+        Exit "Build not configured. Run jam configure first." ;
+    }
+
+    include $(JAMRULES) ;
+    Exit $(CONFIG) : 0 ;
+}
+
 rule ConfigureSave
 {
     local _config = $(1) ;

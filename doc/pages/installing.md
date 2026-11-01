@@ -136,6 +136,31 @@ so objects must not be allocated on the stack across module boundaries.
 The Emscripten flags @c -sASSERTIONS=2, @c -sSAFE_HEAP=1 and
 @c -sSTACK_OVERFLOW_CHECK are only supported with static linking.
 
+A configure run can be stored under a name with @c -sCONFIG. The name becomes
+the suffix of a saved Jamrules copy, for example Jamrules.debug. That copy can
+be made active later without running the configure tests again:
+
+@code
+jam.bat configure -sCONFIG=debug --debug
+jam.bat switch debug
+@endcode
+
+@code
+./jam.sh configure -sCONFIG=debug --debug
+./jam.sh switch debug
+@endcode
+
+@c jam status prints the name of the configuration that is currently in
+Jamrules:
+
+@code
+jam.bat status
+@endcode
+
+@code
+./jam.sh status
+@endcode
+
 
 @section building Building
 

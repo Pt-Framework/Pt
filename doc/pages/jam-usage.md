@@ -197,6 +197,15 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     if all required dependencies, such as system headers and libraries are 
     present. 
 
+<DT> <P> <H3> Named Configurations </H3> <DD>
+<P>
+    A configure run can be given a name with <CODE>-sCONFIG=&lt;name&gt;</CODE>.
+    The Jambase writes the active rules to Jamrules and a named copy to
+    Jamrules.&lt;name&gt;. Later, <CODE>jam switch &lt;name&gt;</CODE> copies
+    that saved file back to Jamrules, and <CODE>jam status</CODE> prints the
+    active CONFIG value. These three words are ARGV commands handled in the
+    Jambase before any build targets are considered.
+
 <DT> <P> <H3> Building Targets </H3> <DD>
 <P>
     After sucessful build configuration, the actual build can be started. For
