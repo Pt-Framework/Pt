@@ -6,21 +6,19 @@ proposal: jam-init.md
 
 ## Purpose
 
-Jam is maintained as an independent project while remaining a vendored build
-system for its consumers. The first implementation keeps a complete Jam
-snapshot in the Pt repository. Its entry scripts prepare and start that local
-snapshot without a distribution server.
+Jam is maintained in the Pt repository. Pt versions `jam/core/` as its
+vendored snapshot and keeps using that tree. The GitHub Release exists
+so other projects can take only the entry scripts and install `core/`
+by download.
 
-The entry scripts are intentionally small shell and batch programs. Their
-bootstrap model must remain practical to implement in POSIX shell, Windows
-batch, and, where useful, PowerShell. The first implementation does not
-require a separate configuration file, an offline-mode protocol, a download
-protocol, or archive extraction.
+The entry scripts are small POSIX shell and Windows batch programs.
+Download uses `curl` or `wget`. Extraction uses `tar`. There is no
+separate configuration file and no extra bootstrap language.
 
 ## Installation root
 
-`JAM_ROOT` identifies the root of one Jam installation. It contains both the
-release-managed core and the user-owned local extensions:
+`JAM_ROOT` identifies the root of one Jam installation. It contains both
+the release-managed core and the user-owned local extensions:
 
 ```text
 <JAM_ROOT>/
@@ -28,14 +26,15 @@ release-managed core and the user-owned local extensions:
   local/
 ```
 
-When `JAM_ROOT` is unset, it defaults to `jam` below the directory containing
-the entry script. In the first implementation, an external `JAM_ROOT` must
-already contain a prepared snapshot supplied by build-server infrastructure.
+When `JAM_ROOT` is unset, it defaults to `jam` below the directory
+containing the entry script. An external `JAM_ROOT` is any directory the
+user sets. A valid `core/` there is a prepared installation. An absent
+`core/` is installed from the distribution by `--init`.
 
-The Pt repository versions `jam/core/` as its vendored snapshot. Projects
-that later initialize `jam/core/` from a distribution may ignore it, while
-`jam/local/` remains visible and may be versioned with the project's build
-configuration.
+Pt versions `jam/core/` in this repository. A consuming project that
+installs `core/` from the distribution may version that tree, leave it
+untracked, or keep it outside the project. `jam/local/` remains visible
+and may be versioned with the project's build configuration.
 
 ## Snapshot layout
 
@@ -44,6 +43,7 @@ configuration.
 ```text
 <JAM_ROOT>/core/
   meta/
+    format
     version
     contents
   Jambase
@@ -59,132 +59,254 @@ configuration.
       jam[.exe]
 ```
 
-`meta/` identifies the Jam release, the snapshot format revision, and the
-release-owned contents. Runtime scripts and sources in a snapshot represent
-the same Jam release. A host binary may be packaged with the snapshot or
-built locally from its sources.
+`meta/` identifies the snapshot layout, the snapshot release, and the
+release-owned contents. Runtime scripts and sources in a snapshot
+represent the same snapshot release. A host binary may be packaged with
+the snapshot or built locally from its sources.
+
+The engine version compiled into the host binary (`patchlevel.h`,
+`jam -v`, `JAMVERSION`) is independent of the snapshot release. The
+bootstrap never reads it.
 
 ## Snapshot metadata
 
 `meta/` is a directory rather than a compound manifest file. This keeps
-the scalar values directly readable by POSIX shell, Windows batch, and
-PowerShell without a JSON, YAML, or INI parser.
+the scalar values directly readable by POSIX shell and Windows batch
+without a JSON, YAML, or INI parser. Snapshot layout and snapshot
+release are different identities, so they are different files.
 
-`version` contains exactly one nonempty ASCII line terminated by LF with four
-decimal fields separated by one ASCII space. The major version and snapshot
-format revision are positive; the minor and patch versions are nonnegative:
+`format` contains exactly one nonempty ASCII line terminated by LF with
+one positive decimal integer and no other fields:
 
 ```text
-4 0 0 1
+1
 ```
 
-The first three fields are the pinned Jam major, minor, and patch version. The
-fourth field is the positive snapshot format revision. An entry script checks
-that it supports the format revision before relying on any other part of the
-`core/` layout, including `Jambase`, `lib/`, `src/`, and `bin/`. A `core/` with
-an unsupported format revision is rejected before it is used, not silently
-substituted or reinterpreted. Entry scripts do not compare Jam versions.
+That grammar is frozen. An entry script reads `format` before any other
+part of `core/`, including `version`, `Jambase`, `lib/`, `src/`, and
+`bin/`. A `core/` whose format revision the script does not support is
+rejected before it is used, not silently substituted or reinterpreted.
+
+`version` contains exactly one nonempty ASCII line terminated by LF with
+the dotted snapshot triple `major.minor.patch`. The major version is
+positive; the minor and patch versions are nonnegative:
+
+```text
+4.0.0
+```
+
+That line is the identity of this `core/` tree. It matches the
+entry-script pin, the release tag suffix, and the archive name.
 
 `contents` is a line-oriented size inventory of the immutable `core/`
-contents outside `meta/` and `bin/`. Each line contains a nonnegative decimal
-byte count, two spaces, and a slash-separated relative path without
-whitespace:
+contents outside `meta/` and `bin/`. Each line contains a nonnegative
+decimal byte count, two spaces, and a slash-separated relative path
+without whitespace:
 
 ```text
 12345  Jambase
 ```
 
-It includes `Jambase`, libraries, runtime assets such as `lib/vswhere.exe`,
-and sources. It excludes every binary below `bin/`, whether that binary was
-packaged or built locally by `--init`. An initialization that downloads a
-snapshot validates the recorded file sizes after extracting it. An
-initialization of the vendored snapshot checks only `version`; a normal build
-invocation likewise reads only `version` and the selected binary path. The
-inventory detects missing and truncated immutable files, but does not
-authenticate their contents. Distribution integrity validation verifies the
-complete package before installation.
+It includes `Jambase`, libraries, runtime assets such as
+`lib/vswhere.exe`, and sources. It excludes every binary below `bin/`,
+whether that binary was packaged or built locally by `--init`. An
+initialization that downloads a snapshot validates the recorded file
+sizes after extracting it. An initialization of an already present
+snapshot whose version matches the pin checks `format` and `version`; a
+normal build invocation likewise reads `format`, `version`, and the
+selected binary path. The inventory detects missing and truncated immutable files, but
+does not authenticate their contents. The SHA-256 sidecar of the
+distribution archive authenticates the complete package before
+extraction.
 
 A snapshot may omit a binary for a host. It still contains the sources
-necessary to build that binary. A packaged binary and a locally built binary
-use the same `bin/<host-id>/jam[.exe]` path. This makes the same snapshot both
-a consumer installation and the input to a release worker that creates a new
-host binary for later distribution.
+necessary to build that binary. A packaged binary and a locally built
+binary use the same `bin/<host-id>/jam[.exe]` path. This makes the same
+snapshot both a consumer installation and the input to a release worker
+that creates a new host binary for later distribution.
 
 Host IDs use the `OS-ARCH` form. The initial IDs are `windows-x64`,
-`linux-x64`, and `macos-universal`. An entry script selects the host ID for
-its platform; macOS always selects `macos-universal`. The selected path is
-`bin/<host-id>/jam[.exe]`.
+`linux-x64`, and `macos-universal`. An entry script selects the host ID
+for its platform; macOS always selects `macos-universal`. The selected
+path is `bin/<host-id>/jam[.exe]`.
 
-## Phase 1: vendored snapshot
+## Installation sources
 
-The first implementation restructures the existing vendored Jam files into
-`jam/core/`. `Jambase` resides at `core/Jambase`, Jam libraries reside below
-`core/lib/`, including `vswhere.exe`, C sources reside below `core/src/`, and
-host binaries reside below `core/bin/<host-id>/`. The existing Windows binary
-is a packaged `windows-x64` binary. `jam/local/` is created only when users
-add local extensions.
+Pt keeps a versioned snapshot in this repository. Other projects use the
+distribution: they copy `jam.sh` and `jam.bat` and run `--init`, which
+downloads `core/` when it is absent. They may then leave that tree local,
+share it through `JAM_ROOT`, or check it in.
 
-The Pt checkout is the source of the snapshot. No download source, archive
-format, or distribution environment variable exists in this phase.
+When the entry-script pin and `meta/version` name the same snapshot,
+`--init` and a normal invocation only build a missing host binary. They
+do not download, replace, or repair `core/`. That is the path Pt uses,
+and the path a consumer uses after `core/` is already present.
 
-## Phase 1: local initialization
+A prepared `JAM_ROOT` outside the project follows the same rule when the
+pin and `meta/version` match. `--init` downloads only when `core/` is
+absent or the pin does not match.
+
+## Snapshot pin
+
+The entry scripts embed the snapshot pin as the dotted triple
+`major.minor.patch`. That pin is the snapshot version they require. It
+matches `core/meta/version` and the names used in the distribution
+asset URLs.
+
+The release worker copies `core/meta/version` into both `jam.sh` and
+`jam.bat` in one step. Users do not edit the pin. A newer snapshot is
+taken by replacing both scripts with the pair from that release, then
+running `--init`.
+
+`core/meta/version` is the only snapshot-version file in the tree. The
+engine version in `patchlevel.h` is not derived from it.
+
+## Initialization
 
 The entry scripts own `--init` and remove it before invoking the Jam
-executable. `--init` validates the supported snapshot format revision in the
-vendored `core/` snapshot and builds a binary for the selected host when no
-selected host binary exists. It exits successfully after initialization and
-does not run a project build. It never repairs an incomplete or invalid
-snapshot.
+executable. `--init` exits successfully after initialization and does
+not run a project build. The scripts never create, remove, replace, or
+otherwise modify `local/`.
 
-A normal invocation requires a `core/` with a supported format revision. If
-`core/` is present but no selected host binary is available, the entry script
-may build that binary from `core/src/`. If no compiler is available, it fails
-with an error that identifies the missing host binary and compiler
-requirement. If `core/` is absent or invalid, it fails with an instruction to
-provide a prepared `JAM_ROOT`.
+`--init` reads `format` first, then compares the pin to
+`core/meta/version`.
 
-The bootstrap scripts must report validation, compiler, and filesystem
-failures explicitly. They do not silently substitute a different installation
-root or host binary.
+When `core/` is present, the version matches the pin, and the format
+revision is supported, `--init` builds the selected host binary from
+`core/src/` if that binary is missing. It does not contact the network.
+It does not replace any other file in `core/`.
 
-`--update` is not a public command in this phase. Without a distribution
-source, an update operation would either do nothing or misleadingly suggest
-that it could obtain a newer snapshot.
+When `core/` is absent, `--init` installs the snapshot named by the pin
+as specified in Distribution initialization.
 
-The entry scripts own generated binaries below `core/bin/`; they do not
-otherwise replace the vendored `core/` snapshot. They never create, remove,
-replace, or otherwise modify `local/`.
+When `core/` is present and valid but the version does not match the
+pin, `--init` downloads that snapshot and atomically replaces `core/`.
+The previous tree, including its host binaries, is gone. If the new
+snapshot has no binary for the current host, `--init` builds one from
+the new `core/src/`.
 
-## Phase 2: distribution artifacts
+When `core/` is present but invalid, `--init` fails. It does not
+download and it does not overwrite the invalid tree. Removing `core/`
+and running `--init` installs a new snapshot.
 
-A release worker initializes the vendored source snapshot on each supported
-host and publishes its generated binary together with the corresponding
-runtime, sources, and metadata. This phase defines archive names and
-integrity validation for each complete distribution package. It does not
-change the local runtime model.
+A normal invocation never downloads. It requires a `core/` whose
+snapshot version matches the pin and whose format revision is
+supported. If the selected host binary is missing, it may build it from
+`core/src/` under the same compiler rules as `--init`. If no compiler is
+available, it fails with an error that identifies the missing host
+binary and compiler requirement. If `core/` is absent, invalid, or
+names a different snapshot version than the pin, it fails with an
+instruction to run `--init`.
 
-## Phase 3: distribution initialization
+The bootstrap scripts report validation, compiler, download, extraction,
+and filesystem failures explicitly. They do not silently substitute a
+different installation root, host binary, snapshot version, or remote.
 
-After published snapshots exist, `JAM_DIST_ROOT` identifies the HTTP(S) base
-URL for pinned Jam distribution snapshots. The entry scripts use their
-embedded default when it is unset; setting it selects a release mirror.
+On a shared `JAM_ROOT`, the pin of the scripts that invoke `--init`
+selects the snapshot installed there.
 
-`--init` downloads and verifies the complete pinned package when `core/` is
-absent, stages it in a temporary directory, and installs it atomically. If
-the snapshot lacks a binary for the current host, it builds one from
-`core/src/`.
+## Host binary publication {#host-binaries}
 
-`--update` downloads and verifies the complete pinned package, stages it, and
-atomically replaces `core/`. It does not select a different Jam version. If
-the replacement lacks the current host binary, it builds that binary from the
-replacement sources. It never changes `local/`.
+A published snapshot contains a precompiled host binary for each
+initial host ID: `windows-x64`, `linux-x64`, and `macos-universal`. They
+occupy the same `bin/<host-id>/` paths as a locally built binary.
 
-An interrupted or failed initialization or update must not leave a partial
-`core/` that appears valid. Download, validation, extraction, compiler, and
-filesystem failures are reported explicitly. The scripts do not silently
-substitute a different Jam version, remote, or installation root.
+`--init` downloads that one snapshot when `core/` is absent or the pin
+does not match. After extraction the current host binary is already
+present, so a compiler is not required for the initial hosts.
+
+`--init` does not download a binary into an existing `core/` whose
+version already matches the pin. A missing binary there is built from
+`core/src/`. A project that versions `core/` may omit `bin/` from
+version control; `--init` then builds the missing binary from sources
+without a network.
+
+Sibling per-host binary archives are not part of the bootstrap. The
+snapshot layout already allows a snapshot to omit a host binary; the
+published distribution does not omit the three initial hosts.
+
+## Distribution artifacts {#distribution-artifacts}
+
+`.github/workflows/jam-build.yml` builds the host binaries and
+publishes a GitHub Release of the Jam snapshot. It is separate from the
+Pt CI workflow. Jam lives in this repository; there is no separate Jam
+project remote.
+
+Three jobs run in parallel, one per initial host. Each job checks out
+the tree, runs `--init` on that host, and uploads `core/bin/<host-id>/`
+as an artifact. A fourth job depends on all three, checks out the tree,
+downloads the artifacts, places the three host binaries into
+`core/bin/`, and publishes the release. That job is the only one that
+writes the GitHub Release. The workflow does not run on every push to
+`main`.
+The release tag is `jam-<major>.<minor>.<patch>`, next to framework
+tags (`v*`) and prebuilt-dependency tags (`prebuilt-*`). The default
+`JAM_DIST_ROOT` is the HTTPS download base of this repository:
+
+```text
+https://github.com/Pt-Framework/Pt/releases/download
+```
+
+The release publishes these assets:
+
+```text
+jam.sh
+jam.bat
+jam-<major>.<minor>.<patch>.tar.gz
+jam-<major>.<minor>.<patch>.tar.gz.sha256
+```
+
+The archive has a single top-level `core/` directory whose layout
+matches Snapshot layout, including the three initial host binaries. The
+SHA-256 sidecar authenticates the archive before extraction. After
+extraction, `--init` also checks the `contents` size inventory and that
+`meta/version` matches the pin.
+
+The entry scripts in the release already contain that pin. Asset URLs
+for the snapshot are:
+
+```text
+<JAM_DIST_ROOT>/jam-<major>.<minor>.<patch>/jam-<major>.<minor>.<patch>.tar.gz
+<JAM_DIST_ROOT>/jam-<major>.<minor>.<patch>/jam-<major>.<minor>.<patch>.tar.gz.sha256
+```
+
+The sidecar is one line of hexadecimal digest, two spaces, and the
+archive file name, terminated by LF. The scripts do not follow a
+latest-release redirect and they do not read GitHub API JSON.
+
+## Distribution initialization {#distribution-initialization}
+
+`JAM_DIST_ROOT` identifies the HTTP(S) base URL for snapshot assets.
+When it is unset, the entry scripts use their embedded default. Setting
+it selects a mirror that serves the same
+`jam-<version>/jam-<version>.tar.gz` layout.
+
+`--init` downloads and verifies the complete pinned package when
+`core/` is absent or the pin does not match `meta/version`, stages it in
+a temporary directory, and installs it atomically as `core/`. It never
+changes `local/`.
+
+POSIX `jam.sh` uses `curl` when it is present, otherwise `wget`.
+Windows `jam.bat` uses `curl.exe`. Extraction uses `tar` on every host.
+SHA-256 verification uses a tool already on the host (`sha256sum`,
+`shasum`, or `certutil`). If a required tool is missing, the script
+fails with an error that names the tool. The downloader's proxy
+environment applies. The default remote is a public GitHub Release; the
+scripts do not implement a separate authentication protocol.
+
+Download writes into a temporary directory. The archive is verified
+against the SHA-256 sidecar, then extracted, then checked for a
+supported format revision, a `meta/version` that matches the pin, and
+the `contents` inventory. Only a fully verified tree is installed as
+`core/`. An interrupted or failed operation leaves the previous `core/`
+in place when one existed, and does not leave a new `core/` that appears
+valid.
 
 ## Baseline
 
-The vendored snapshot and local initialization are implemented. There is no
-distribution source, `JAM_DIST_ROOT`, or `--update` command yet.
+The vendored snapshot and local initialization are implemented.
+`--init` requires an existing `core/` and only builds a missing host
+binary. `meta/version` still holds four space-separated fields including
+the format revision; there is no `meta/format` file. The entry scripts
+do not embed a snapshot pin. There is no GitHub Release of a Jam
+snapshot, no `JAM_DIST_ROOT`, and no download path in `--init`.

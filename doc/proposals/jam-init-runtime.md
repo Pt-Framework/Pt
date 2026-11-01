@@ -66,12 +66,13 @@ behavior rather than introducing a separate extension search mechanism.
 
 ## Documentation and migration
 
-The Jam getting-started and usage documentation describes the phase-1
-`--init` command, `JAM_ROOT`, the `core/` and `local/` ownership boundary, and
-the local module search order. It documents `JAM_DIST_ROOT` and `--update`
-when distribution initialization is implemented.
+The Jam getting-started and usage documentation describes `--init`,
+`JAM_ROOT`, the three installation sources, the snapshot pin, the
+`core/` and `local/` ownership boundary, and the local module search
+order. It documents `JAM_DIST_ROOT` and replacing the entry scripts to
+take a newer snapshot when distribution initialization is implemented.
 
-Projects start Jam through their entry scripts, which select the installed
-core `Jambase`. Newly initialized projects need only the entry scripts,
-`Jamconfigure`, and `Jamfile`; after distribution initialization they do not
-need a versioned `jam/core/` directory.
+Projects start Jam through their entry scripts, which select the
+installed core `Jambase`. Pt versions `jam/core/` in this repository.
+Other projects copy the entry scripts and install `core/` from the
+distribution.
