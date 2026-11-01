@@ -1,4 +1,4 @@
-3218  Jambase
+3870  Jambase
 538  lib/aix.jam
 1189  lib/android.jam
 14968  lib/base.jam
@@ -52,7 +52,7 @@
 13747  lib/vcbase.jam
 4595  lib/vcpkg.jam
 458872  lib/vswhere.exe
-164  lib/vswhere.jam
+188  lib/vswhere.jam
 4657  lib/wayland.jam
 3322  lib/win32.jam
 620  lib/wince.jam

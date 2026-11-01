@@ -80,6 +80,5 @@ need a versioned `jam/core/` directory.
 
 ## Baseline
 
-The current `Load` rule builds one path below `JAMDIR` and does not search a
-user extension directory. The documentation still describes the project-root
-bootstrap layout.
+`Load` does not reject absolute names or parent-directory traversal. The
+documentation still describes the project-root bootstrap layout.

@@ -6,34 +6,45 @@
 #
 ##########################################################################
 
-if ! $(JAMDIR)
+if ! $(JAM_ROOT)
 {
-    if $(JAM_ROOT)
-    {
-        JAMDIR = $(JAM_ROOT)/core/lib ;
-    }
-    else
-    {
-        JAMDIR = jam ;
-        JAMDIR_COMPONENT = core ;
-        JAMDIR = $(JAMDIR_COMPONENT:R=$(JAMDIR)) ;
-        JAMDIR_COMPONENT = lib ;
-        JAMDIR = $(JAMDIR_COMPONENT:R=$(JAMDIR)) ;
-        JAMDIR_COMPONENT = ;
-    }
+    Exit "JAM_ROOT not set" ;
 }
 
+JAM_ROOT = $(JAM_ROOT:J=" ") ;
+JAM_LIBPATH = $(JAM_ROOT)/core/lib ;
+JAM_LIBPATH += $(JAM_ROOT)/local/lib ;
+
+# Load <dir> * <name>
+#
+# Loads a Jam runtime module from JAM_LIBPATH. The arguments passed to the
+# Load rule are joined as a local path.
+#
 rule Load
 {
     local _inc = $(<[1]) ;
 
-    for local _i in $(<[2-])
+    for local _dir in $(<[2-])
     {
-        _inc = $(_i:R=$(_inc)) ;
+        _inc = $(_dir:R=$(_inc)) ;
     }
 
-    _inc = $(_inc:R=$(JAMDIR)) ;
-    include $(_inc) ;
+    local _found ;
+    for local _dir in $(JAM_LIBPATH)
+    {
+        local _file = $(_inc:R=$(_dir)) ;
+        if [ CHECK_IF_FILE $(_file) ]
+        {
+            include $(_file) ;
+            _found = true ;
+            break ;
+        }
+    }
+
+    if ! $(_found)
+    {
+        Exit "Could not load" $(_inc) "in" $(JAM_LIBPATH) ;
+    }
 }
 
 Load base.jam ;

@@ -7,10 +7,6 @@
 
 ## Open Tasks
 
-- [Local extensions](jam-init-runtime.md#local-extensions).
-  Make `Load` search the update-safe local library directory after the core
-  library directory.
-
 - [Documentation and migration](jam-init-runtime.md#documentation-and-migration).
   Document initialization and migrate the current project-root bootstrap
   layout.
@@ -21,5 +17,4 @@
 
 ## Priority
 
-Runtime invocation comes before local modules and migration. Distribution
-initialization is last.
+Documentation and migration come before distribution initialization.
