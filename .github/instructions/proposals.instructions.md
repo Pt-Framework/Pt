@@ -5,10 +5,16 @@ description: "Design proposals that lead implementation"
 # Overview
 
 A proposal is a set of proposal files with one index file. It lets
-architecture and API design run ahead of implementation and records the
-current state of that implementation. It is not API documentation and
-not a second source of truth for an implemented surface. A proposal may
-refer to one or more implementation-neutral concepts.
+architecture and API design run ahead of implementation. A proposal may
+refer to one or more implementation-neutral concepts. It is not API
+documentation and not a second source of truth for an implemented
+surface.
+
+The proposal records the current design and the implementation state
+against that design. Revise it whenever that design is no longer the
+best understanding of the model: a new insight, a gap or error in
+the design, or a problem the implementation reveals that the model
+does not yet cover.
 
 # Layout
 
@@ -77,7 +83,10 @@ Baseline and no Open Tasks section.
   files the task needs.
 - When a concept exists, prefer it over a local minimal change that
   would weaken the model.
-- Documents may be revised at any time.
+- Revise the proposal when new understanding appears or when a
+  problem in the model or the implementation becomes visible.
+  The set always records the current design and the current
+  implementation state against it.
 - When an Open task is implemented, remove the item from the index.
   Leave the model in the proposal file or fold it into the concept.
   Move a public rule into the matching class chapter, group chapter,
