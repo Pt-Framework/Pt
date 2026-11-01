@@ -22,11 +22,11 @@ process consists of the following four steps:
 <P>
 \endhtmlonly
 
-The jam tool must always be invoked in the project root, where the files 
-named 'Jamconfigure', 'Jamrules' and 'Jamfile' are located. A batch script 
-is provided for Windows platforms and a POSIX shell-script for all other 
-platforms, which builds the jam executable the first time it is excuted.
-Most examples will use the posix shell script when commands are shown. On 
+The jam tool must always be invoked in the project root, where the files
+named 'Jamconfigure', 'Jamrules' and 'Jamfile' are located. The scripts
+jam.bat on Windows and jam.sh on POSIX hosts start the installed core
+binary and may build it the first time they run.
+Most examples will use the posix shell script when commands are shown. On
 Windows hosts you can use the script 'jam.bat' with exactly the same arguments.
 
 @section configuring Configuring the Build

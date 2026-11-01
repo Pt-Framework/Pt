@@ -60,11 +60,9 @@ does not override a same-named core file. This gives versioned runtime rules
 priority and prevents an update from changing core behavior through an
 unintended local name collision.
 
-`Load` accepts only relative module names within one of these roots. It rejects
-absolute names and parent-directory traversal. If no file exists, its error
-identifies the requested name and both checked locations. Future rules that
-resolve Jam modules use the same path-resolution behavior rather than
-introducing a separate extension search mechanism.
+If no file exists, the error identifies the requested name and both checked
+locations. Future rules that resolve Jam modules use the same path-resolution
+behavior rather than introducing a separate extension search mechanism.
 
 ## Documentation and migration
 
@@ -77,8 +75,3 @@ Projects start Jam through their entry scripts, which select the installed
 core `Jambase`. Newly initialized projects need only the entry scripts,
 `Jamconfigure`, and `Jamfile`; after distribution initialization they do not
 need a versioned `jam/core/` directory.
-
-## Baseline
-
-`Load` does not reject absolute names or parent-directory traversal. The
-documentation still describes the project-root bootstrap layout.

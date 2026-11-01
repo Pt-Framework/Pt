@@ -31,6 +31,7 @@
     <ul>
       <li><a href="jam-intro.html">Introduction</a></li>
       <li><a href="jam-getting.html">Getting Jam</a></li>
+      <li><a href="jam-tutorial.html">Tutorial</a></li>
       <li><a href="jam-usage.html">Basic Usage</a></li>
       <li><a href="jam-jamfile.html">Using the Jambase</a></li>
       <li><a href="jam-prebuilt-page.html">Prebuilt Dependencies</a></li>

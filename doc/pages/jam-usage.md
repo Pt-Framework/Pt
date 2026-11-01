@@ -135,11 +135,13 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <DT> <H3> The Jambase </H3> <DD>
 <P>
     The Jambase defines rules and variables which support standard software
-    build operations, like compiling, linking, etc. When <B>jam</B> is
-    invoked, a file named Jambase will be looked for in the project root 
-    directory, that is the entry point to the Jambase. The actual Jambase 
-    resides in a directory named "jam", also located in the project root 
-    directory.
+    build operations, like compiling, linking, etc. Projects start Jam
+    through <CODE>jam.sh</CODE> or <CODE>jam.bat</CODE>. Those entry scripts
+    pass <CODE>-f</CODE> with the installed Jambase at
+    <CODE>&lt;JAM_ROOT&gt;/core/Jambase</CODE>. The project working directory
+    remains the current directory of the invocation, so Jamconfigure and
+    Jamfile are found in the project. The installed runtime supplies the
+    Jam rules; the project supplies its build configuration and targets.
     
 <DT> <P> <H3> Project Specific Jam Scripts </H3> <DD>
 <P>
@@ -156,14 +158,37 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 
 <DT> <P> <H3> Jam Executable Wrappers </H3> <DD>
 <P>
-    Two scripts come with the jam distribution that simplify boostrapping the
-    build process. One script named jam.sh runs on posix compatible build 
-    hosts, the other one named jam.bat runs on windows based build hosts.
-    These scripts bootstrap and run the jam executable, so that jam executables
-    do not have to be included for all possible build hosts, but rather built
-    on demand. A precompiled jam.exe for Windows hosts is checked in under
-    jam/. jam.bat rebuilds it with cl if it is missing. Other hosts build
-    jam/jam from jam/src with cc on first use.
+    Two scripts start the installed host binary. One script named jam.sh
+    runs on POSIX build hosts, the other one named jam.bat runs on Windows
+    build hosts. When <CODE>JAM_ROOT</CODE> is unset, it defaults to
+    <CODE>jam</CODE> below the directory that contains the entry script.
+    The scripts start
+    <CODE>&lt;JAM_ROOT&gt;/core/bin/&lt;host-id&gt;/jam</CODE> with
+    <CODE>-f &lt;JAM_ROOT&gt;/core/Jambase</CODE>. The initial host IDs
+    are <CODE>windows-x64</CODE>, <CODE>linux-x64</CODE>, and
+    <CODE>macos-universal</CODE>.
+<P>
+    <CODE>--init</CODE> is an option of the entry scripts. They remove it
+    before invoking the Jam executable. <CODE>--init</CODE> validates the
+    supported snapshot format revision in <CODE>core/</CODE> and builds a
+    binary for the selected host when that binary is missing, then exits
+    without running a project build. A normal invocation may also build a
+    missing host binary from <CODE>core/src/</CODE>. A packaged
+    <CODE>windows-x64</CODE> binary is checked in under
+    <CODE>jam/core/bin/windows-x64/</CODE>. Other hosts build the binary
+    with <CODE>cc</CODE> on first use. The <CODE>-f</CODE> flag and the
+    other options in the synopsis above are options of the Jam executable.
+<P>
+
+<DT> <P> <H3> Loading Jam Modules </H3> <DD>
+<P>
+    The Jambase loads runtime files with the <CODE>Load</CODE> rule. A
+    relative module name is resolved first below
+    <CODE>&lt;JAM_ROOT&gt;/core/lib/</CODE> and, only if the core file does
+    not exist, below <CODE>&lt;JAM_ROOT&gt;/local/lib/</CODE>. A local file
+    supplements the runtime and does not override a same-named core file.
+    A project loads the extensions it needs from its Jamconfigure. See
+    <a href="jam-getting.html">Getting Jam</a> for the snapshot layout.
 <P>
 
 <A NAME="jam_build_layout">

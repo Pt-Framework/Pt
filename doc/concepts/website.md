@@ -287,10 +287,10 @@ Pt  ›  Documentation*                                      ≡
   |# Getting Started     | |# Reference           | |# Jam Build Tool      |
   |  Installing from     | |  Class Index         | |  Introduction        |
   |    Source            | |  Namespaces          | |  Getting Jam         |
-  |  Supported Platforms | |  Modules             | |  Basic Usage         |
-  |  License             | |                      | |  Using the Jambase   |
-  |  README              | |                      | |  Prebuilt Dependencies|
-  |  Contributing        | |                      | |                      |
+  |  Supported Platforms | |  Modules             | |  Tutorial            |
+  |  License             | |                      | |  Basic Usage         |
+  |  README              | |                      | |  Using the Jambase   |
+  |  Contributing        | |                      | |  Prebuilt Dependencies|
   |  Security            | |                      | |                      |
   +----------------------+ +----------------------+ +----------------------+
 

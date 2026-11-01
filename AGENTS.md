@@ -69,7 +69,7 @@ must serve many applications, platforms, and user requirements.
 - For Jam scripts, `Jamfile`, `*.jam` (not jam C sources) read:
   `.github/instructions/jam.instructions.md`
 
-- For Jam executable internals, `jam/src`, Jambase boot, toolset `.jam` read:
+- For Jam executable internals, `jam/core/src`, Jambase boot, toolset `.jam` read:
   `.github/instructions/jam-internals.instructions.md`
 
 - For Signals, slots, delegates, events, connect, emit, observable read:
