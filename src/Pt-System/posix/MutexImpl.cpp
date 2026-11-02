@@ -38,9 +38,14 @@ MutexImpl::MutexImpl()
 {
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK  );
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
+
+    // Enable priority inheritance where supported (harmless if not).
+    // Ignores ENOSYS / ENOTSUP.
+    pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
 
     int ret = pthread_mutex_init(&_handle, &attr);
+    pthread_mutexattr_destroy(&attr);
     if (ret != 0)
         throw SystemError("pthread_mutex_init failed");
 }
@@ -50,9 +55,14 @@ MutexImpl::MutexImpl(int recursive)
 {
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE );
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+
+    // Enable priority inheritance where supported (harmless if not).
+    // Ignores ENOSYS / ENOTSUP.
+    pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
 
     int ret = pthread_mutex_init(&_handle, &attr);
+    pthread_mutexattr_destroy(&attr);
     if (ret != 0)
         throw SystemError("pthread_mutex_init failed");
 }
