@@ -12,6 +12,8 @@ description: "HTTP WebSocket"
   `include/Pt/Http/Api-WebSocketServer.h`
 - Payload of one text or binary WebSocket message:
   `include/Pt/Http/WebSocketMessage.h`
+- Progress of one WebSocket send or receive step:
+  `include/Pt/Http/WebSocketMessage.h`
 - Connect, accept, send and receive WebSocket messages:
   `include/Pt/Http/WebSocket.h`
 - Handshake service for WebSocket upgrades:

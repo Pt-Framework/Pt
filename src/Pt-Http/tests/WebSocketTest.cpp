@@ -12,7 +12,6 @@
 #include "Pt/Http/Responder.h"
 #include "Pt/Http/WebSocket.h"
 #include "Pt/Http/WebSocketMessage.h"
-#include "Pt/Http/Message.h"
 #include "Pt/Http/WebSocketService.h"
 #include "Pt/Http/WebSocketServlet.h"
 #include "Pt/Http/WebSocketSession.h"
@@ -198,12 +197,20 @@ class CollectSession : public Pt::Http::WebSocketSession
     protected:
         virtual void onInput()
         {
-            Pt::Http::MessageProgress progress = endReceive();
+            Pt::Http::WebSocketProgress progress = endReceive();
+            PT_UNIT_ASSERT(progress.header() || progress.continuation());
             std::string chunk;
             chunk.assign( std::istreambuf_iterator<char>( incoming().body() ),
                           std::istreambuf_iterator<char>() );
             *_message += chunk;
             *_type = incoming().type();
+
+            if( progress.finished() && chunk.empty() )
+            {
+                PT_UNIT_ASSERT(progress.header());
+                PT_UNIT_ASSERT( ! progress.continuation() );
+                PT_UNIT_ASSERT( ! progress.body() );
+            }
 
             if( ! progress.finished() )
             {
@@ -434,7 +441,7 @@ class DeferredCloseSession : public Pt::Http::WebSocketSession
     protected:
         virtual void onInput()
         {
-            Pt::Http::MessageProgress progress = endReceive();
+            Pt::Http::WebSocketProgress progress = endReceive();
             _message->append( std::istreambuf_iterator<char>( incoming().body() ),
                               std::istreambuf_iterator<char>() );
             *_type = incoming().type();
@@ -550,7 +557,7 @@ class PartialCloseSession : public Pt::Http::WebSocketSession
     protected:
         virtual void onInput()
         {
-            Pt::Http::MessageProgress progress = endReceive();
+            Pt::Http::WebSocketProgress progress = endReceive();
             if( ! progress.finished() )
             {
                 *_partial = true;
@@ -1117,6 +1124,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _closed(false)
         , _partial(false)
         , _finished(false)
+        , _sendOpened(false)
         , _pong(false)
         , _inputReady(false)
         , _pingReady(false)
@@ -1193,6 +1201,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _closed = false;
             _partial = false;
             _finished = false;
+            _sendOpened = false;
             _pong = false;
             _inputReady = false;
             _pingReady = false;
@@ -1422,7 +1431,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
         void onDataBeforeCloseOutput(Pt::Http::WebSocket& socket)
         {
-            Pt::Http::MessageProgress progress = socket.endSend();
+            Pt::Http::WebSocketProgress progress = socket.endSend();
             if( ! progress.finished() )
             {
                 socket.beginSend();
@@ -1476,7 +1485,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
         void onPartialCloseOutput(Pt::Http::WebSocket& socket)
         {
-            Pt::Http::MessageProgress progress = socket.endSend();
+            Pt::Http::WebSocketProgress progress = socket.endSend();
             if( ! progress.finished() )
                 socket.beginShutdown();
         }
@@ -1832,7 +1841,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep("127.0.0.1", 8020);
 
             Pt::Http::Server server(*_loop, ep);
-            RecordService service(_message, _type, _received, _closed, *_loop);
+            CollectService service(_message, _type, _received, *_loop);
             Pt::Http::WebSocketServlet sockets(service);
 
             Pt::Http::MapUrl mapUrl("/ws", service);
@@ -1894,7 +1903,18 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
         void onLargeOutput(Pt::Http::WebSocket& socket)
         {
-            Pt::Http::MessageProgress progress = socket.endSend();
+            Pt::Http::WebSocketProgress progress = socket.endSend();
+            if( ! _sendOpened )
+            {
+                PT_UNIT_ASSERT(progress.header());
+                PT_UNIT_ASSERT( ! progress.continuation() );
+                _sendOpened = true;
+            }
+            else
+            {
+                PT_UNIT_ASSERT(progress.continuation());
+                PT_UNIT_ASSERT( ! progress.header() );
+            }
             if( ! progress.finished() )
                 socket.beginSend();
         }
@@ -2685,7 +2705,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
         void onReceiveDuringShutdownInput(Pt::Http::WebSocket& socket)
         {
-            Pt::Http::MessageProgress progress = socket.endReceive();
+            Pt::Http::WebSocketProgress progress = socket.endReceive();
             _message.append( std::istreambuf_iterator<char>( socket.incoming().body() ),
                              std::istreambuf_iterator<char>() );
 
@@ -2996,6 +3016,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         bool _closed;
         bool _partial;
         bool _finished;
+        bool _sendOpened;
         bool _pong;
         bool _inputReady;
         bool _pingReady;

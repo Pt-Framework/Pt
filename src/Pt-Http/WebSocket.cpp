@@ -250,7 +250,7 @@ void WebSocket::beginSend(bool finished)
 }
 
 
-MessageProgress WebSocket::endSend()
+WebSocketProgress WebSocket::endSend()
 {
     return _channel->endSend();
 }
@@ -262,7 +262,7 @@ void WebSocket::beginReceive()
 }
 
 
-MessageProgress WebSocket::endReceive()
+WebSocketProgress WebSocket::endReceive()
 {
     return _channel->endReceive();
 }

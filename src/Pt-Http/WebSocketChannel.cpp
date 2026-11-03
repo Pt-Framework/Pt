@@ -153,9 +153,10 @@ void WebSocketChannel::beginSend(bool finished)
     if(_outputFailure)
         std::rethrow_exception(_outputFailure);
 
-    bool isBegin = ! _sendProgress.header() && ! _sendProgress.body();
+    const bool opened = _sendProgress.header()
+                        || _sendProgress.continuation();
 
-    if(isBegin)
+    if( ! opened )
     {
         WebSocketMessage& msg = _send.message();
         WebSocketMessage::Type type = msg.type();
@@ -168,21 +169,24 @@ void WebSocketChannel::beginSend(bool finished)
     }
 
     _send.begin();
-    _sendProgress = MessageProgress();
-    if(isBegin)
-        _sendProgress.setHeader();
 
     unsigned msgCode = _send.message().type() == WebSocketMessage::Text ? 0x01
                                                                         : 0x02;
-    unsigned opcode = isBegin ? msgCode : 0;
+    unsigned opcode = opened ? 0 : msgCode;
     bool fin = finished && _send.message().pending() <= MaxFramePayload;
+
+    _sendProgress = WebSocketProgress();
+    if(opened)
+        _sendProgress.setContinuation();
+    else
+        _sendProgress.setHeader();
 
     _send.set(opcode, fin);
     enqueue(_send);
 }
 
 
-MessageProgress WebSocketChannel::endSend()
+WebSocketProgress WebSocketChannel::endSend()
 {
     if( ! _send.isReady() )
         throw std::logic_error("WebSocket send is not ready");
@@ -193,9 +197,9 @@ MessageProgress WebSocketChannel::endSend()
     if( _send.fin() && _send.message().pending() == 0 )
         _sendProgress.setFinished();
 
-    MessageProgress progress = _sendProgress;
+    WebSocketProgress progress = _sendProgress;
     if( progress.finished() )
-        _sendProgress = MessageProgress();
+        _sendProgress = WebSocketProgress();
 
     return progress;
 }
@@ -216,12 +220,12 @@ void WebSocketChannel::beginReceive()
         std::rethrow_exception(_inputFailure);
 
     _receive.begin();
-    _receiveProgress = MessageProgress();
+    _receiveProgress = WebSocketProgress();
     onBeginInput();
 }
 
 
-MessageProgress WebSocketChannel::endReceive()
+WebSocketProgress WebSocketChannel::endReceive()
 {
     if( ! _receive.isReady() )
         throw std::logic_error("WebSocket receive is not ready");
@@ -392,14 +396,14 @@ void WebSocketChannel::onClose()
         setCloseCode(1006, std::string());
 
     _inputPending = false;
-    _receiveProgress = MessageProgress();
+    _receiveProgress = WebSocketProgress();
     _inputFailure = std::exception_ptr();
     _receive.close();
 
     _outputPending = false;
     _outputQueue.clear();
     _outputFailure = std::exception_ptr();
-    _sendProgress = MessageProgress();
+    _sendProgress = WebSocketProgress();
     _send.close();
     _ping.close();
     _pong.close();
@@ -739,6 +743,8 @@ bool WebSocketChannel::onData(const Frame& frame)
         _incoming.setTypeFromEngine(type);
         _receiveProgress.setHeader();
     }
+    else if(opcode == 0)
+        _receiveProgress.setContinuation();
 
     if( frame.fin() && frame.remaining() == 0 )
         _receiveProgress.setFinished();

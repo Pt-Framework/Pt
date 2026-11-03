@@ -8,7 +8,6 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/WebSocketMessage.h>
-#include <Pt/Http/Message.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <string>
@@ -47,14 +46,14 @@ class WebSocketChannel;
     @code
     void onOutputReady(Pt::Http::WebSocket& socket)
     {
-        Pt::Http::MessageProgress progress = socket.endSend();
+        Pt::Http::WebSocketProgress progress = socket.endSend();
         if( ! progress.finished() )
             socket.beginSend();
     }
 
     void onInputReady(Pt::Http::WebSocket& socket)
     {
-        Pt::Http::MessageProgress progress = socket.endReceive();
+        Pt::Http::WebSocketProgress progress = socket.endReceive();
         if( ! progress.finished() )
         {
             socket.incoming().discard();
@@ -105,7 +104,7 @@ class WebSocketChannel;
     the type, write the body, and call %beginSend(). Call
     %beginSend(false) while more body will be written, then
     %beginSend(true) for the last part. %outputReady() reports that
-    data bytes were sent. %endSend() returns %MessageProgress. If
+    data bytes were sent. %endSend() returns %WebSocketProgress. If
     the send step is not finished, %beginSend() continues it with
     the same completion flag. %beginReceive() fills %incoming().
     %inputReady() reports that data bytes were received.
@@ -246,7 +245,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             @throw %std::logic_error if the send has not completed or
             the stream has ended.
         */
-        MessageProgress endSend();
+        WebSocketProgress endSend();
 
         /** @brief Begins receiving into %incoming().
 
@@ -268,7 +267,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             @throw %std::exception if a protocol violation ended the
             frame stream, or a previous read failed.
         */
-        MessageProgress endReceive();
+        WebSocketProgress endReceive();
 
         /** @brief Begins writing a ping with an optional payload of at most 125 bytes.
 

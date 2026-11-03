@@ -42,7 +42,7 @@
             {
                 try
                 {
-                    Pt::Http::MessageProgress progress = endReceive();
+                    Pt::Http::WebSocketProgress progress = endReceive();
                     if( ! progress.finished() )
                     {
                         incoming().discard();

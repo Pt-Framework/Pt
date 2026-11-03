@@ -110,7 +110,7 @@ data message the get area ends, the way `HttpBuffer::isEnd` ends
 an HTTP body.
 
 `import` never waits for a whole frame or a whole message.
-`MessageProgress::body()` can be true in the middle of a frame.
+`WebSocketProgress::body()` can be true in the middle of a frame.
 The window is a few kilobytes, not `payloadLength`. `sgetn` may
 return fewer bytes than asked. The state and the got counters
 stay. The next `import` continues there. It never blocks.

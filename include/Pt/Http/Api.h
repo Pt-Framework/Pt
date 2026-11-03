@@ -45,6 +45,7 @@ class Stream;
 class Channel;
 class WebSocket;
 class WebSocketMessage;
+class WebSocketProgress;
 class WebSocketService;
 class WebSocketServlet;
 class WebSocketSession;

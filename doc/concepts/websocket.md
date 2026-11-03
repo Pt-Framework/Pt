@@ -71,11 +71,11 @@ after a local `close()`.
 
 ```cpp
 void beginSend(bool finished = true);
-MessageProgress endSend();
+WebSocketProgress endSend();
 Signal<WebSocket&>& outputReady();
 
 void beginReceive();
-MessageProgress endReceive();
+WebSocketProgress endReceive();
 Signal<WebSocket&>& inputReady();
 ```
 
@@ -84,20 +84,23 @@ the body, and calls `beginSend()`. `beginSend(false)` means more
 body will follow. `beginSend(true)` is the last part of the
 message. `beginSend()` throws if the type is `Unknown`.
 `outputReady()` reports that data bytes were sent. `endSend()`
-returns `MessageProgress`. The engine may still split this step
+returns `WebSocketProgress`. The engine may still split this step
 into several frames. The application does not see that split.
 
 A receive fills `incoming()`. `inputReady()` reports that data bytes
-were received. `endReceive()` returns `MessageProgress`. If the
+were received. `endReceive()` returns `WebSocketProgress`. If the
 receive is not finished, the application discards the consumed body
 and calls `beginReceive()` again. The type stays. `finished()` means
 the data message is complete.
 
-Progress follows HTTP. Either end can report body bytes before the
-message is finished. `finished()` means the message is complete, not
-that a frame was parsed. The application does not learn how many
-frames those bytes came from. Neither ready signal waits for the
-whole message.
+`header()` means this step processed the opening data opcode. It
+can be true without `body()`, when that opcode has arrived and the
+payload is empty. `continuation()` means this step processed a
+later data frame of the same message. `body()` means this step
+moved payload. `finished()` means the message is complete, not that
+a frame was parsed. Either end can report body bytes before the
+message is finished. Neither ready signal waits for the whole
+message.
 
 `beginSend()` with the default completion flag has a complete body
 before the call. Partial `outputReady()` steps still occur when the

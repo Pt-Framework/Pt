@@ -7,7 +7,6 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/WebSocketMessage.h>
-#include <Pt/Http/Message.h>
 #include <Pt/Connectable.h>
 #include <string>
 #include <cstddef>
@@ -51,7 +50,7 @@ class WebSocketChannel;
         protected:
             virtual void onInput()
             {
-                Pt::Http::MessageProgress progress = endReceive();
+                Pt::Http::WebSocketProgress progress = endReceive();
                 if( ! progress.finished() )
                 {
                     incoming().discard();
@@ -222,7 +221,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
             @throw %std::logic_error if the send has not completed or
             the stream has ended.
         */
-        MessageProgress endSend();
+        WebSocketProgress endSend();
 
         /** @brief Begins receiving into %incoming().
 
@@ -244,7 +243,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
             @throw %std::exception if a protocol violation ended the
             frame stream, or a previous read failed.
         */
-        MessageProgress endReceive();
+        WebSocketProgress endReceive();
 
         /** @brief Begins writing a ping with an optional payload of at most 125 bytes.
 

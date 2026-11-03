@@ -8,7 +8,6 @@
 
 #include <Pt/Http/Channel.h>
 #include <Pt/Http/WebSocketMessage.h>
-#include <Pt/Http/Message.h>
 #include "WebSocketBuffer.h"
 #include <Pt/Connectable.h>
 #include <Pt/IOError.h>
@@ -55,11 +54,11 @@ class WebSocketChannel : public Channel
 
         void beginSend(bool finished);
 
-        MessageProgress endSend();
+        WebSocketProgress endSend();
 
         void beginReceive();
 
-        MessageProgress endReceive();
+        WebSocketProgress endReceive();
 
         void beginPing(const char* payload, std::size_t n);
 
@@ -390,12 +389,12 @@ class WebSocketChannel : public Channel
 
         bool               _inputPending;
         Operation          _receive;
-        MessageProgress    _receiveProgress;
+        WebSocketProgress  _receiveProgress;
         std::exception_ptr _inputFailure;
 
         bool               _outputPending;
         Output             _send;
-        MessageProgress    _sendProgress;
+        WebSocketProgress  _sendProgress;
         std::exception_ptr _outputFailure;
 
         Output                     _ping;

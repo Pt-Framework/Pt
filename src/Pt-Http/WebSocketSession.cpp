@@ -122,7 +122,7 @@ void WebSocketSession::beginSend(bool finished)
 }
 
 
-MessageProgress WebSocketSession::endSend()
+WebSocketProgress WebSocketSession::endSend()
 {
     return _channel->endSend();
 }
@@ -134,7 +134,7 @@ void WebSocketSession::beginReceive()
 }
 
 
-MessageProgress WebSocketSession::endReceive()
+WebSocketProgress WebSocketSession::endReceive()
 {
     return _channel->endReceive();
 }

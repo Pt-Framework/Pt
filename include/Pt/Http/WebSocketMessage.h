@@ -55,6 +55,90 @@ class WebSocketMessageBuffer : public std::streambuf
 };
 
 
+/** @brief Progress of one WebSocket send or receive step.
+
+    %WebSocketProgress is the result of one begin/end step on a
+    %WebSocketMessage. %WebSocket::endSend(), %WebSocket::endReceive(),
+    and the same methods on %WebSocketSession return it. Ping, pong,
+    and shutdown do not; those operations complete in one step.
+
+    The flags are independent and can be combined. %header() means this
+    step processed the opening text or binary opcode, so
+    %WebSocketMessage::type() is no longer %Unknown. That is not an
+    HTTP header and not the frame header on the wire. An empty first
+    frame reports %header() without %body(). %continuation() means this
+    step processed a later data frame of the same message. %body()
+    means payload bytes were processed on this step. %finished() means
+    the data message is complete, so the caller must not begin the
+    same send or receive again.
+
+    After %finished(), the next begin starts a new message and the
+    flags start over. A later I/O step of the first frame still
+    reports %header(). A later frame reports %continuation(), not
+    %header(). The type of the message stays on %WebSocketMessage.
+
+    @ingroup Pt-Http-WebSocket
+*/
+class WebSocketProgress
+{
+    private:
+        //! @internal
+        enum Result
+        {
+            Header       = 1,
+            Body         = 2,
+            Finished     = 4,
+            Continuation = 8
+        };
+
+    public:
+        /** @brief Default Constructor.
+        */
+        WebSocketProgress()
+        : _result(0)
+        {}
+
+        /** @brief Returns true if this step processed the opening data opcode.
+        */
+        bool header() const
+        { return (_result & Header) == Header; }
+
+        /** @brief Returns true if this step processed a continuation frame.
+        */
+        bool continuation() const
+        { return (_result & Continuation) == Continuation; }
+
+        /** @brief Returns true if payload bytes were processed on this step.
+        */
+        bool body() const
+        { return (_result & Body) == Body; }
+
+        /** @brief Returns true if the data message is complete.
+        */
+        bool finished() const
+        { return (_result & Finished) == Finished; }
+
+        //! @internal
+        void setFinished()
+        { _result |= Finished; }
+
+        //! @internal
+        void setHeader()
+        { _result |= Header; }
+
+        //! @internal
+        void setContinuation()
+        { _result |= Continuation; }
+
+        //! @internal
+        void setBody()
+        { _result |= Body; }
+
+    private:
+        unsigned long _result;
+};
+
+
 /** @brief Payload of one text or binary WebSocket message.
 
     %WebSocketMessage is the payload of one WebSocket data message. It
@@ -73,7 +157,7 @@ class WebSocketMessageBuffer : public std::streambuf
     socket.outgoing().body() << "hello";
     socket.beginSend();
 
-    Pt::Http::MessageProgress progress = socket.endReceive();
+    Pt::Http::WebSocketProgress progress = socket.endReceive();
     if(progress.body())
     {
         std::string text;

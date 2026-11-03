@@ -77,14 +77,14 @@
     @code
     void onOutputReady(Pt::Http::WebSocket& socket)
     {
-        Pt::Http::MessageProgress progress = socket.endSend();
+        Pt::Http::WebSocketProgress progress = socket.endSend();
         if( ! progress.finished() )
             socket.beginSend();
     }
 
     void onInputReady(Pt::Http::WebSocket& socket)
     {
-        Pt::Http::MessageProgress progress = socket.endReceive();
+        Pt::Http::WebSocketProgress progress = socket.endReceive();
         if(progress.body())
         {
             std::string text;
@@ -115,14 +115,15 @@
     %Text or %Binary, write the body, and call %beginSend(). Call
     %beginSend(false) while more body will be written, then
     %beginSend(true) for the last part. %outputReady() reports that
-    data bytes were sent. %endSend() returns %MessageProgress. If
+    data bytes were sent. %endSend() returns %WebSocketProgress. If
     the send step is not finished, %beginSend() continues it with
     the same completion flag. %beginReceive() fills
     %incoming(). %inputReady() reports that data bytes were received.
-    %endReceive() returns progress. %header() means the data type is
-    known, which is the first data opcode of that message. %body()
-    means payload bytes were processed on this step. %finished()
-    means the data message is complete. If the receive is not
+    %endReceive() returns progress. %header() means this step
+    processed the opening data opcode, so the type is known.
+    %continuation() means this step processed a later data frame of
+    the same message. %body() means payload bytes were processed on
+    this step. %finished() means the data message is complete. If the receive is not
     finished, discard the consumed body and call %beginReceive()
     again. After %finished(), %clear() drops the body so the same
     object can carry the next message. The server session exposes
