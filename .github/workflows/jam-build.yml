@@ -39,9 +39,6 @@ jobs:
 
           if [[ "$line" =~ ^[1-9][0-9]*\.[0-9]+\.[0-9]+$ ]]; then
             version=$line
-          elif [[ "$line" =~ ^[1-9][0-9]*\ [0-9]+\ [0-9]+\ [1-9][0-9]*$ ]]; then
-            read -r major minor patch _fmt <<< "$line"
-            version="$major.$minor.$patch"
           else
             echo "Unsupported snapshot version: $line" >&2
             exit 1
@@ -146,10 +143,15 @@ jobs:
           mkdir -p dist
           tar -C jam --exclude='*.o' --exclude='*.obj' -czf "dist/jam-${JAM_VERSION}.tar.gz" core
           (cd dist && sha256sum "jam-${JAM_VERSION}.tar.gz" > "jam-${JAM_VERSION}.tar.gz.sha256")
+          sed -i "s/^JAM_PIN=.*/JAM_PIN=${JAM_VERSION}/" jam.sh
+          sed -i "s/set \"JAM_PIN=[^\"]*\"/set \"JAM_PIN=${JAM_VERSION}\"/" jam.bat
+          grep -q "^JAM_PIN=${JAM_VERSION}$" jam.sh
+          grep -q "set \"JAM_PIN=${JAM_VERSION}\"" jam.bat
           cp jam.sh jam.bat dist/
 
           list=$(tar tzf "dist/jam-${JAM_VERSION}.tar.gz")
           echo "$list" | grep -qx 'core/Jambase'
+          echo "$list" | grep -qx 'core/meta/format'
           echo "$list" | grep -qx 'core/meta/version'
           echo "$list" | grep -qx 'core/meta/contents'
           echo "$list" | grep -qx 'core/bin/windows-x64/jam.exe'

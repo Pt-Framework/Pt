@@ -295,12 +295,3 @@ is installed as `core/`. An interrupted or failed operation leaves the
 previous `core/` in place when one existed, and does not leave a new
 `core/` that appears valid.
 
-## Baseline
-
-The vendored snapshot and local initialization are implemented.
-`--init` requires an existing `core/` and only builds a missing host
-binary. `meta/version` still holds four space-separated fields including
-the format revision; there is no `meta/format` file. The entry scripts
-do not embed a snapshot pin. `.github/workflows/jam-build.yml` publishes
-the snapshot archive. There is no `JAM_DIST_ROOT` and no download path
-in `--init`.
