@@ -24,6 +24,8 @@
 *.props            text eol=crlf
 *.targets          text eol=crlf
 
+jam/core/** text eol=lf
+
 *.exe      binary
 jam/jam-linux-x64 binary
 jam/core/bin/** binary

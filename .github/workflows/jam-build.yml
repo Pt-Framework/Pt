@@ -141,6 +141,13 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
+          tmp=$(mktemp)
+          find jam/core -type f ! -path 'jam/core/meta/*' ! -path 'jam/core/bin/*' \
+            | sed 's|^jam/core/||' | LC_ALL=C sort | while read -r path; do
+              size=$(wc -c < "jam/core/$path" | tr -d ' \t')
+              printf '%s  %s\n' "$size" "$path"
+            done > "$tmp"
+          mv "$tmp" jam/core/meta/contents
           tar -C jam --exclude='*.o' --exclude='*.obj' -czf "dist/jam-${JAM_VERSION}.tar.gz" core
           (cd dist && sha256sum "jam-${JAM_VERSION}.tar.gz" > "jam-${JAM_VERSION}.tar.gz.sha256")
           sed -i "s/^JAM_PIN=.*/JAM_PIN=${JAM_VERSION}/" jam.sh
