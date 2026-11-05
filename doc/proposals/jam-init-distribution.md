@@ -110,14 +110,12 @@ without whitespace:
 It includes `Jambase`, libraries, runtime assets such as
 `lib/vswhere.exe`, and sources. It excludes every binary below `bin/`,
 whether that binary was packaged or built locally by `--init`. An
-initialization that downloads a snapshot validates the recorded file
+initialization that downloads a snapshot checks the recorded file
 sizes after extracting it. An initialization of an already present
 snapshot whose version matches the pin checks `format` and `version`; a
 normal build invocation likewise reads `format`, `version`, and the
-selected binary path. The inventory detects missing and truncated immutable files, but
-does not authenticate their contents. The SHA-256 sidecar of the
-distribution archive authenticates the complete package before
-extraction.
+selected binary path. After a download, a missing host binary is built
+from `core/src/` under the same compiler rules as a local `--init`.
 
 A snapshot may omit a binary for a host. It still contains the sources
 necessary to build that binary. A packaged binary and a locally built
@@ -257,22 +255,20 @@ jam-<major>.<minor>.<patch>.tar.gz.sha256
 ```
 
 The archive has a single top-level `core/` directory whose layout
-matches Snapshot layout, including the three initial host binaries. The
-SHA-256 sidecar authenticates the archive before extraction. After
-extraction, `--init` also checks the `contents` size inventory and that
+matches Snapshot layout, including the three initial host binaries.
+After extraction, `--init` checks the `contents` size inventory and that
 `meta/version` matches the pin.
 
-The entry scripts in the release already contain that pin. Asset URLs
-for the snapshot are:
+The entry scripts in the release already contain that pin. The bootstrap
+fetches only the archive:
 
 ```text
 <JAM_DIST_ROOT>/jam-<major>.<minor>.<patch>/jam-<major>.<minor>.<patch>.tar.gz
-<JAM_DIST_ROOT>/jam-<major>.<minor>.<patch>/jam-<major>.<minor>.<patch>.tar.gz.sha256
 ```
 
-The sidecar is one line of hexadecimal digest, two spaces, and the
-archive file name, terminated by LF. The scripts do not follow a
-latest-release redirect and they do not read GitHub API JSON.
+The SHA-256 sidecar is a release asset for manual verification. It is
+one line of hexadecimal digest, two spaces, and the archive file name,
+terminated by LF.
 
 ## Distribution initialization {#distribution-initialization}
 
@@ -281,26 +277,23 @@ When it is unset, the entry scripts use their embedded default. Setting
 it selects a mirror that serves the same
 `jam-<version>/jam-<version>.tar.gz` layout.
 
-`--init` downloads and verifies the complete pinned package when
-`core/` is absent or the pin does not match `meta/version`, stages it in
-a temporary directory, and installs it atomically as `core/`. It never
-changes `local/`.
+`--init` downloads the complete pinned package when `core/` is absent
+or the pin does not match `meta/version`, stages it in a temporary
+directory, and installs it atomically as `core/`. It never changes
+`local/`.
 
 POSIX `jam.sh` uses `curl` when it is present, otherwise `wget`.
 Windows `jam.bat` uses `curl.exe`. Extraction uses `tar` on every host.
-SHA-256 verification uses a tool already on the host (`sha256sum`,
-`shasum`, or `certutil`). If a required tool is missing, the script
-fails with an error that names the tool. The downloader's proxy
-environment applies. The default remote is a public GitHub Release; the
-scripts do not implement a separate authentication protocol.
+If a required tool is missing, the script fails with an error that names
+the tool. The downloader's proxy environment applies. The default remote
+is a public GitHub Release served over HTTPS.
 
-Download writes into a temporary directory. The archive is verified
-against the SHA-256 sidecar, then extracted, then checked for a
-supported format revision, a `meta/version` that matches the pin, and
-the `contents` inventory. Only a fully verified tree is installed as
-`core/`. An interrupted or failed operation leaves the previous `core/`
-in place when one existed, and does not leave a new `core/` that appears
-valid.
+Download writes into a temporary directory. The archive is extracted,
+then checked for a supported format revision, a `meta/version` that
+matches the pin, and the `contents` inventory. Only a fully checked tree
+is installed as `core/`. An interrupted or failed operation leaves the
+previous `core/` in place when one existed, and does not leave a new
+`core/` that appears valid.
 
 ## Baseline
 
@@ -308,5 +301,6 @@ The vendored snapshot and local initialization are implemented.
 `--init` requires an existing `core/` and only builds a missing host
 binary. `meta/version` still holds four space-separated fields including
 the format revision; there is no `meta/format` file. The entry scripts
-do not embed a snapshot pin. There is no GitHub Release of a Jam
-snapshot, no `JAM_DIST_ROOT`, and no download path in `--init`.
+do not embed a snapshot pin. `.github/workflows/jam-build.yml` publishes
+the snapshot archive. There is no `JAM_DIST_ROOT` and no download path
+in `--init`.

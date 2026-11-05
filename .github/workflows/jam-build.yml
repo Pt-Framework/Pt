@@ -1,0 +1,192 @@
+name: Build Jam snapshot
+
+on:
+  workflow_dispatch:
+    inputs:
+      replace:
+        description: 'Replace existing release'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read snapshot version
+        id: version
+        run: |
+          set -euo pipefail
+          file=jam/core/meta/version
+          if [ ! -r "$file" ]; then
+            echo "Missing $file" >&2
+            exit 1
+          fi
+
+          line=$(sed -n '1p' "$file" | tr -d '\r')
+          if sed -n '2p' "$file" | grep -q .; then
+            echo "$file must contain exactly one line" >&2
+            exit 1
+          fi
+
+          if [[ "$line" =~ ^[1-9][0-9]*\.[0-9]+\.[0-9]+$ ]]; then
+            version=$line
+          elif [[ "$line" =~ ^[1-9][0-9]*\ [0-9]+\ [0-9]+\ [1-9][0-9]*$ ]]; then
+            read -r major minor patch _fmt <<< "$line"
+            version="$major.$minor.$patch"
+          else
+            echo "Unsupported snapshot version: $line" >&2
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=jam-$version" >> "$GITHUB_OUTPUT"
+          echo "Jam snapshot version $version"
+
+      - name: Check tag does not exist
+        if: ${{ !inputs.replace }}
+        run: |
+          set -euo pipefail
+          tag="${{ steps.version.outputs.tag }}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists. Enable replace to overwrite." >&2
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    name: ${{ matrix.host_id }}
+    needs: preflight
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: windows-2022
+            host_id: windows-x64
+            init: .\jam.bat --init
+            binary: jam/core/bin/windows-x64/jam.exe
+          - os: ubuntu-24.04
+            host_id: linux-x64
+            init: ./jam.sh --init
+            binary: jam/core/bin/linux-x64/jam
+          - os: macos-15
+            host_id: macos-universal
+            init: ./jam.sh --init
+            binary: jam/core/bin/macos-universal/jam
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Remove existing host binary
+        shell: bash
+        run: rm -f "${{ matrix.binary }}"
+
+      - name: Build host binary
+        run: ${{ matrix.init }}
+
+      - name: Smoke-test host binary
+        run: ${{ matrix.binary }} -v
+
+      - name: Check universal binary
+        if: matrix.host_id == 'macos-universal'
+        run: |
+          set -euo pipefail
+          archs=$(lipo -archs "${{ matrix.binary }}")
+          echo "$archs"
+          echo "$archs" | grep -qw x86_64
+          echo "$archs" | grep -qw arm64
+
+      - name: Upload host binary
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.host_id }}
+          path: jam/core/bin/${{ matrix.host_id }}/
+          if-no-files-found: error
+
+  release:
+    needs: [preflight, build]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      JAM_VERSION: ${{ needs.preflight.outputs.version }}
+      JAM_TAG: ${{ needs.preflight.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download host binaries
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+
+      - name: Stage host binaries
+        run: |
+          set -euo pipefail
+          mkdir -p jam/core/bin/windows-x64 jam/core/bin/linux-x64 jam/core/bin/macos-universal
+          cp artifacts/windows-x64/jam.exe jam/core/bin/windows-x64/jam.exe
+          cp artifacts/linux-x64/jam jam/core/bin/linux-x64/jam
+          cp artifacts/macos-universal/jam jam/core/bin/macos-universal/jam
+          chmod +x jam/core/bin/linux-x64/jam jam/core/bin/macos-universal/jam
+          test -f jam/core/bin/windows-x64/jam.exe
+          test -x jam/core/bin/linux-x64/jam
+          test -x jam/core/bin/macos-universal/jam
+
+      - name: Pack snapshot archive
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          tar -C jam --exclude='*.o' --exclude='*.obj' -czf "dist/jam-${JAM_VERSION}.tar.gz" core
+          (cd dist && sha256sum "jam-${JAM_VERSION}.tar.gz" > "jam-${JAM_VERSION}.tar.gz.sha256")
+          cp jam.sh jam.bat dist/
+
+          list=$(tar tzf "dist/jam-${JAM_VERSION}.tar.gz")
+          echo "$list" | grep -qx 'core/Jambase'
+          echo "$list" | grep -qx 'core/meta/version'
+          echo "$list" | grep -qx 'core/meta/contents'
+          echo "$list" | grep -qx 'core/bin/windows-x64/jam.exe'
+          echo "$list" | grep -qx 'core/bin/linux-x64/jam'
+          echo "$list" | grep -qx 'core/bin/macos-universal/jam'
+          bad=$(echo "$list" | grep -v '^core/' | grep -v '^core$' || true)
+          if [ -n "$bad" ]; then
+            echo "Archive must have a single top-level core/ directory:" >&2
+            echo "$bad" >&2
+            exit 1
+          fi
+
+          sidecar="dist/jam-${JAM_VERSION}.tar.gz.sha256"
+          digest=$(awk 'NR==1 { print $1 }' "$sidecar")
+          name=$(awk 'NR==1 { print $2 }' "$sidecar")
+          extra=$(sed -n '2p' "$sidecar")
+          if [ -n "$extra" ] || [ "$name" != "jam-${JAM_VERSION}.tar.gz" ] \
+              || ! [[ "$digest" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "Invalid SHA-256 sidecar:" >&2
+            cat "$sidecar" >&2
+            exit 1
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.JAM_TAG }}
+          name: Jam ${{ env.JAM_VERSION }}
+          body: |
+            Jam snapshot ${{ env.JAM_VERSION }} with host binaries for
+            windows-x64, linux-x64, and macos-universal.
+          files: |
+            dist/jam.sh
+            dist/jam.bat
+            dist/jam-${{ env.JAM_VERSION }}.tar.gz
+            dist/jam-${{ env.JAM_VERSION }}.tar.gz.sha256
+          prerelease: false
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
