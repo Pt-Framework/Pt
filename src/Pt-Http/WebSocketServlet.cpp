@@ -22,17 +22,11 @@ WebSocketServlet::WebSocketServlet(WebSocketService& service)
 
 WebSocketServlet::~WebSocketServlet()
 {
+    while( ! _sessions.empty() )
+        onSessionClosed( *_sessions.back() );
+
     if(_service)
         _service->detach(*this);
-
-    while( ! _sessions.empty() )
-    {
-        WebSocketSession* session = _sessions.back();
-        _sessions.pop_back();
-        session->close();
-        if(_service)
-            _service->releaseSession(session);
-    }
 }
 
 
@@ -41,12 +35,20 @@ void WebSocketServlet::accept(Stream& stream,
                               const Reply& reply)
 {
     WebSocketSession* session = _service->getSession(stream, request, reply);
-    if(session)
-        _sessions.push_back(session);
+    if( ! session )
+        return;
+
+    if( ! session->isOpen() )
+    {
+        _service->releaseSession(session);
+        return;
+    }
+
+    _sessions.push_back(session);
 }
 
 
-void WebSocketServlet::close(WebSocketSession& session)
+void WebSocketServlet::onSessionClosed(WebSocketSession& session)
 {
     std::vector<WebSocketSession*>::iterator it =
         std::find(_sessions.begin(), _sessions.end(), &session);

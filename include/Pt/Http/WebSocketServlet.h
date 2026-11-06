@@ -49,7 +49,7 @@ class WebSocketSession;
     Construct it with the %WebSocketService and destroy it before
     that service. The constructor attaches this servlet, so the
     handshake can accept upgrades. The destructor detaches it and
-    releases every remaining session through %releaseSession().
+    releases every remaining session through %onSessionClosed().
     That order is required. The service destructor cannot release
     sessions, because by then the derived object is already gone.
 
@@ -102,7 +102,7 @@ class PT_HTTP_API WebSocketServlet : private NonCopyable
     private:
         void accept(Stream& stream, const Request& request, const Reply& reply);
 
-        void close(WebSocketSession& session);
+        void onSessionClosed(WebSocketSession& session);
 
     private:
         WebSocketService* _service;

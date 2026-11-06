@@ -74,12 +74,12 @@ void WebSocketService::releaseSession(WebSocketSession* session)
 }
 
 
-void WebSocketService::close(WebSocketSession& session)
+void WebSocketService::onSessionClosed(WebSocketSession& session)
 {
     if( ! _servlet )
         return;
 
-    _servlet->close(session);
+    _servlet->onSessionClosed(session);
 }
 
 

@@ -4,10 +4,15 @@
 
 - [Message](websocket-message.md)
 - [Session](websocket-session.md)
+- [Server](websocket-server.md)
 - [Keepalive](websocket-keepalive.md)
 - [Concept](../concepts/websocket.md)
 
 ## Open Tasks
+
+- [session-ready](websocket-server.md#session-ready).
+  WebSocketSession exposes the same ready signals as WebSocket.
+  I/O virtuals go away.
 
 - [client-handshake](websocket-session.md#client-handshake).
   Headers set before beginConnect are kept. endConnect checks status

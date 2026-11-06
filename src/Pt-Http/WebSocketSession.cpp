@@ -77,6 +77,7 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
 : _service(&service)
 , _channel(0)
 , _protocol(selectedProtocol(reply))
+, _inClosed(false)
 {
     _channel = new WebSocketChannel();
     _channel->open(stream, false);
@@ -97,9 +98,6 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
 
 WebSocketSession::~WebSocketSession()
 {
-    if(_channel)
-        _channel->close();
-
     delete _channel;
 }
 
@@ -166,11 +164,11 @@ void WebSocketSession::endShutdown()
 
 void WebSocketSession::close()
 {
-    if( ! _channel )
+    if(_inClosed)
         return;
 
     _channel->close();
-    _service->close(*this);
+    _service->onSessionClosed(*this);
 }
 
 
@@ -183,6 +181,12 @@ unsigned WebSocketSession::closeCode() const
 const std::string& WebSocketSession::closeReason() const
 {
     return _channel->closeReason();
+}
+
+
+bool WebSocketSession::isOpen() const
+{
+    return _channel && _channel->isOpen();
 }
 
 
@@ -220,7 +224,11 @@ void WebSocketSession::onChannelShutdownReady()
 
 void WebSocketSession::onChannelClosed()
 {
+    _inClosed = true;
     onClosed();
+    _inClosed = false;
+
+    _service->onSessionClosed(*this);
 }
 
 

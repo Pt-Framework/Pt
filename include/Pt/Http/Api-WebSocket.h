@@ -152,7 +152,9 @@
     The framed stream is not resumed. %beginSend() and
     %beginReceive() then throw. When the engine ends the protocol,
     %closed() runs on the client and %onClosed() on the session.
-    The application calls %close() there, or after %endShutdown().
+    The application calls %close() on the client, or after
+    %endShutdown(). After %onClosed() the servlet releases the
+    session.
     %closeCode() and %closeReason() report the handshake that ended
     the stream. No close frame leaves the code at 1006.
     The handshake uses the HTTP timeout of the client or the

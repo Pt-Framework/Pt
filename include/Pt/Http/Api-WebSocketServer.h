@@ -120,17 +120,19 @@
     %beginSend(), %endSend(), %beginReceive() and %endReceive()
     directly. %onInput() runs when data bytes were received.
     %onOutput() runs when data bytes were sent. A ping or a pong
-    does not run those callbacks. The application learns that the
-    stream has ended from the outstanding receive or shutdown, and
-    calls %close() to release the session. %close() releases the
-    stream and writes no frame. The destructor calls it. The session
-    does not own the stream or the connection.
+    does not run those callbacks. %onClosed() runs when the engine
+    has ended the protocol and no local shutdown is outstanding.
+    After that call the servlet releases the session. The destructor
+    unbinds the stream. Call %close() after a thrown %endReceive() or
+    %endSend(), and after %endShutdown(), to abort and release.
+    %close() from %onClosed() does not release. The session does
+    not own the stream or the connection.
 
     %WebSocketServlet owns the live sessions of one service. The
     service owns the endpoint policy and the allocator. Construct the
     servlet with the service and destroy it before the
     service. The destructor releases every session it still owns
-    through %releaseSession() while the derived service is fully
+    through %onSessionClosed() while the derived service is fully
     constructed. The derived service destructor has not run yet, so
     the virtual release call and the allocator are still there.
     Constructing a second servlet for the same service throws
@@ -168,10 +170,10 @@
     same allocator, as %onGetResponder() and %onReleaseResponder()
     must match. A pool, or any other detach, lives in the derived
     service. Return null from %onGetSession() to decline the upgrade.
-    The servlet releases a session through %releaseSession() when
-    %close() is called, and from its destructor for every remaining
-    session it owns. The service does not keep a session list. It
-    counts the sessions %getSession() returned.
+    The servlet releases a session through %onSessionClosed() after
+    %onClosed(), when %close() is called, and from its destructor
+    for every remaining session it owns. The service does not keep
+    a session list. It counts the sessions %getSession() returned.
 */
 
 #endif

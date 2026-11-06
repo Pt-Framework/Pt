@@ -208,9 +208,9 @@ error. The application calls `close()`.
 ## Pong visible {#pong-visible}
 
 A received pong is consumed by the parser. It does not become
-`incoming` and does not emit `inputReady`. The facade sees the pong:
-`pong()` on the client, `onPong()` on the session. The idle timer
-restarts on a received ping and on a received pong.
+`incoming` and does not emit `inputReady`. The facade sees the pong
+through `pong()`. The idle timer restarts on a received ping and on
+a received pong.
 
 ## Peer close {#peer-close}
 
@@ -222,4 +222,4 @@ written is not echoed. The reply is 1000. If a data message was open,
 its body is discarded. After the reply is written, the protocol has ended. The engine does
 not call `close` on the facade and does not unbind the stream. A peer
 close during shutdown completes that shutdown. When no shutdown is
-outstanding, `closed()` runs. The application calls `close()`.
+outstanding, `closed()` runs.

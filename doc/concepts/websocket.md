@@ -19,8 +19,8 @@ accepted stream. The application derives the session and holds its
 domain there. The session is the server facade. There is no socket
 beside it.
 
-Both expose the same message operations. One accepted stream is one
-bind. A second bind throws.
+Both expose the same message operations and the same ready signals.
+One accepted stream is one bind. A second bind throws.
 
 ## Message
 
@@ -78,6 +78,8 @@ void beginReceive();
 WebSocketProgress endReceive();
 Signal<WebSocket&>& inputReady();
 ```
+
+The session exposes the same signals with `WebSocketSession&`.
 
 A send writes `outgoing()`. The application sets the type, writes
 the body, and calls `beginSend()`. `beginSend(false)` means more
@@ -157,8 +159,7 @@ unusable from that point, so the engine completes an outstanding
 receive with that error, writes its close frame, and does not wait
 for the peer to answer. The stream stays bound. `closeCode()` is the
 code of the violation. A later `beginReceive()` throws the same
-error. When no receive is outstanding, `closed()` runs. The
-application calls `close()`.
+error. When no receive is outstanding, `closed()` runs.
 
 ## Control plane
 
@@ -192,10 +193,10 @@ is not answered. A signal for a received ping can be added later.
 
 A received pong is consumed. It does not become `incoming()`. If a
 `ping()` is still outstanding, the payload is compared and that ping
-is retired. An unsolicited pong is valid. The facade sees the pong:
-`pong()` on the client, `onPong()` on the session. An unanswered ping
-is facade state. The application may shut the stream down from it.
-The idle timeout remains the limit without a finished transfer.
+is retired. An unsolicited pong is valid. The facade sees the pong
+through `pong()`. An unanswered ping is facade state. The
+application may shut the stream down from it. The idle timeout
+remains the limit without a finished transfer.
 
 ## Close
 
@@ -243,11 +244,25 @@ are still outstanding stay pending. `beginSend()`, `beginReceive()`,
 `closeReason()` are already set.
 
 When no local shutdown is outstanding, that protocol end is
-`closed()` on the client and `onClosed()` on the session. The
-application calls `close()` there. `close()` unbinds the stream,
-cancels pending operations without their ready signals, and emits
-nothing. The destructor calls it. An idle timeout and a read that
-returns no bytes take the same path, with close code 1006.
+`closed()`. `closed()` is not an error. `endReceive()` and
+`endSend()` do not report it. `inputReady()` and `outputReady()`
+do not run.
+
+On the client, the application calls `close()` after `closed()`.
+The destructor calls `close()`.
+
+On the session, `closed()` notifies the application. After that
+signal returns, the session calls
+`WebSocketServlet::onSessionClosed`. That releases the session.
+The destructor unbinds the stream. A `closed()` slot need not call
+`close()`. A call to `close()` during `closed()` does not unbind
+or release.
+
+`close()` unbinds the stream, cancels pending operations without
+their ready signals, and emits nothing. On the session, `close()`
+then calls `onSessionClosed`, which releases the session.
+An idle timeout and a read that returns no bytes take the same
+protocol-end path, with close code 1006.
 
 One event has one reporter. An outstanding shutdown reports the
 handshake. An I/O or protocol error on an outstanding receive
@@ -272,19 +287,30 @@ local code was already set. No close frame leaves the code at 1006.
 `WebSocketSession` is the per-stream application object. It is a
 `Connectable`. It is not a responder.
 
-`onInput()` and `onOutput()` take no arguments. They do not receive
-the session or a socket again. `onInput()` runs when data bytes were
-received. `onOutput()` runs when data bytes were sent. Neither runs
-for a ping, a pong, or the end of the stream. `onClosed()` runs when
-the engine has ended the protocol and no local shutdown is
-outstanding. The application calls `close()` from `onClosed()`, or
-from `onShutdownReady()` after `endShutdown()`.
+The session is a concrete I/O facade. It exposes the same ready
+signals as `WebSocket`, with `WebSocketSession&`: `inputReady()`,
+`outputReady()`, `pingReady()`, `shutdownReady()`, `closed()`, and
+`pong()`. The application derives it to hold domain state, connects
+slots in the constructor after its members are initialized, and
+starts the first `beginReceive()` there.
 
-`WebSocketSession::close()` ends the stream and tells the service.
-The destructor unbinds the stream and does not release the session
-again. A domain object that holds a session reference drops it
-before it calls `close()`. `close()` from `onClosed()` destroys the
-session before `onClosed()` returns.
+The servlet owns every live session. `closed()` notifies the
+application. After that signal returns,
+`WebSocketServlet::onSessionClosed` releases the session. The
+destructor unbinds the stream. A `closed()` slot need not call
+`close()`. A call to `close()` during `closed()` does not unbind
+or release. A session that connects no `closed()` slot is still
+released.
+
+`close()` unbinds the stream and calls `onSessionClosed`. That is
+the local abort: a thrown `endReceive()`, `endSend()`, or
+`endPing()`, `endShutdown()` after `beginShutdown()`, or the
+application ending the stream. The destructor unbinds the stream
+and does not release the session again. A domain object that holds
+a session reference drops it in `closed()`, because the servlet
+releases after that signal. `close()` during construction unbinds
+the stream. The session is not listed. `accept()` releases it
+through `releaseSession()`.
 
 The session does not store the opening request or reply. Both are
 valid only for the call that creates the session. `protocol()` is the
@@ -316,7 +342,7 @@ stream is opened.
 
 `Service::onUpgrade()` stays the generic HTTP boundary. The
 application does not override it to receive WebSocket streams. It
-implements `onGetSession()` and the session callbacks.
+implements `onGetSession()`.
 
 A pooled session is released back to the pool from
 `onReleaseSession()`, not destroyed. The next upgrade opens a new

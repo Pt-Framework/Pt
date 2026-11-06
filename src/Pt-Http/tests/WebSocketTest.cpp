@@ -1112,6 +1112,69 @@ class CloseNowService : public Pt::Http::WebSocketService
         }
 };
 
+class ReceiveSession : public Pt::Http::WebSocketSession
+{
+    public:
+        ReceiveSession(Pt::Http::WebSocketService& service,
+                       Pt::Http::Stream& stream,
+                       const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            beginReceive();
+        }
+
+    protected:
+        virtual void onInput()
+        {
+            try
+            {
+                endReceive();
+                incoming().clear();
+                beginReceive();
+            }
+            catch(const std::exception&)
+            {
+                close();
+            }
+        }
+
+        virtual void onOutput()
+        {
+            endSend();
+        }
+};
+
+class ReceiveService : public Pt::Http::WebSocketService
+{
+    public:
+        ReceiveService()
+        : _opened(0)
+        , _released(0)
+        {}
+
+        std::size_t live() const
+        { return _opened - _released; }
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            ++_opened;
+            return new ReceiveSession(*this, stream, reply);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            ++_released;
+            delete session;
+        }
+
+    private:
+        std::size_t _opened;
+        std::size_t _released;
+};
+
 class WebSocketTest : public Pt::Unit::TestSuite
                     , public Pt::Connectable
 {
@@ -1146,6 +1209,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("Scope", *this, &WebSocketTest::Scope);
             registerMethod("SecondScope", *this, &WebSocketTest::SecondScope);
             registerMethod("PeerClose", *this, &WebSocketTest::PeerClose);
+            registerMethod("AutoRelease", *this, &WebSocketTest::AutoRelease);
             registerMethod("DataBeforeClose", *this, &WebSocketTest::DataBeforeClose);
             registerMethod("ClosePartialReceive", *this, &WebSocketTest::ClosePartialReceive);
             registerMethod("Decline", *this, &WebSocketTest::Decline);
@@ -1377,6 +1441,40 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(_closed);
             PT_UNIT_ASSERT(_shutdownReady);
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+        }
+
+        void AutoRelease()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8059);
+
+            Pt::Http::Server server(*_loop, ep);
+            ReceiveService service;
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedClose);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onAutoReleaseShutdown);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_shutdownReady);
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+        }
+
+        void onAutoReleaseShutdown(Pt::Http::WebSocket& socket)
+        {
+            socket.endShutdown();
+            socket.close();
+            _shutdownReady = true;
+            _loop->exit();
         }
 
         void onConnectedClose(Pt::Http::WebSocket& socket)
@@ -2331,6 +2429,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->run();
 
             PT_UNIT_ASSERT(_closed);
+            PT_UNIT_ASSERT_EQUALS(service.socketCount(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
         }
 
         void onConnectedEndAfterClosed(Pt::Http::WebSocket& socket)

@@ -66,11 +66,6 @@ class WebSocketChannel;
             {
                 endSend();
             }
-
-            virtual void onClosed()
-            {
-                close();
-            }
     };
     @endcode
 
@@ -96,11 +91,15 @@ class WebSocketChannel;
     and does not change %incoming(). %onOutput() runs when data bytes
     were sent. Call %endSend() and continue the send when progress is
     not finished. %onClosed() runs when the engine has ended the
-    protocol and no local shutdown is outstanding. Call %close()
-    from %onClosed(), or from %onShutdownReady() after
-    %endShutdown(), to release the session. %close() from %onClosed()
-    destroys the session before that call returns. The servlet also
-    releases remaining sessions when it is destroyed.
+    protocol and no local shutdown is outstanding. The stream stays
+    bound for that call. After %onClosed() returns, the servlet
+    releases the session. The destructor unbinds the stream. A
+    call to %close() from %onClosed() does not unbind or release.
+    A session that does not override %onClosed() is still released.
+    Call %close() from %onShutdownReady() after %endShutdown(), or
+    from an I/O callback after a thrown end, to abort and release.
+    The servlet also releases remaining sessions when it is
+    destroyed.
 
     %beginReceive() starts frame processing. Until then, incoming
     frames stay in the stream. Control frames are processed while a
@@ -121,10 +120,12 @@ class WebSocketChannel;
     the data-message limit are copied from the %WebSocketService
     before the derived constructor runs.
     Closing the session closes the stream. The session does not own
-    the stream or the connection. The destructor closes the stream.
-    A derived constructor that throws still runs this destructor, so
-    a failed construction does not leave an accepted stream without
-    an owner.
+    the stream or the connection. The destructor unbinds the stream
+    and does not release the session again. A derived constructor
+    that throws still runs this destructor, so a failed construction
+    does not leave an accepted stream without an owner. %close()
+    during construction unbinds the stream. The servlet does not
+    list that session and releases it after construction returns.
 
     Ping, shutdown and close stay control operations on this type.
 
@@ -144,18 +145,17 @@ class WebSocketChannel;
     so the idle timeout copied from the %WebSocketService is the only
     bound on that wait. %onShutdownReady() reports the completed handshake;
     call %endShutdown() from that callback to observe an error, then
-    %close(). %close() releases the stream and writes no frame. The
-    destructor unbinds the stream. %beginSend() and %beginReceive()
-    then throw. No close frame leaves the code at 1006.
-    %closeCode() and %closeReason() report the handshake that ended
-    the stream.
+    %close(). %close() unbinds the stream and writes no frame. The
+    servlet then releases this session. The destructor unbinds the
+    stream. %beginSend() and %beginReceive() then throw. No close
+    frame leaves the code at 1006. %closeCode() and %closeReason()
+    report the handshake that ended the stream.
 
     @ingroup Pt-Http-WebSocket-Server
 */
 class PT_HTTP_API WebSocketSession : public Connectable
 {
     friend class WebSocketService;
-    friend class WebSocketServlet;
 
     public:
         /** @brief Binds @a stream for @a service.
@@ -281,9 +281,11 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
         /** @brief Releases the stream and writes no frame.
 
-            Does not block and emits nothing. The servlet releases
-            this session. %beginSend() and %beginReceive() then throw.
-            No close frame leaves %closeCode() at 1006.
+            Does not block and emits nothing. Unbinds the stream.
+            The servlet then releases this session. A call from
+            %onClosed() does not unbind or release. %beginSend()
+            and %beginReceive() then throw. No close frame leaves
+            %closeCode() at 1006.
         */
         void close();
 
@@ -294,6 +296,12 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Returns the close reason of the handshake that ended the stream.
         */
         const std::string& closeReason() const;
+
+        /** @brief Returns true when a stream is bound.
+
+            False after %close(). True during %onClosed().
+        */
+        bool isOpen() const;
 
     protected:
         /** @brief Called when data bytes were received.
@@ -319,9 +327,10 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
         /** @brief Reports that the engine has ended the protocol.
 
-            No local shutdown is outstanding. The stream stays bound.
-            Call %close() to release the session. %close() destroys
-            the session before this call returns.
+            No local shutdown is outstanding. The stream stays bound
+            for this call. After it returns, the servlet releases the
+            session. The destructor unbinds the stream. A call to
+            %close() from this override does not unbind or release.
         */
         virtual void onClosed();
 
@@ -348,6 +357,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
         WebSocketService* _service;
         WebSocketChannel* _channel;
         std::string _protocol;
+        bool _inClosed;
 };
 
 } // namespace Http
