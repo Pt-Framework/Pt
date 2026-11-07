@@ -20,6 +20,9 @@ these variables. Package-specific `*-Configure` rules stay ignorant of
 whether the values came from a user, a prebuilt bundle, a source tree,
 or a system probe.
 
+A non-empty `pkg.TARGET` means the package is builtin (source-built).
+Prebuilt and system leave `TARGET` empty.
+
 ## Variables {#variables}
 
 The common variables are dotted: `$(pkg.INCLUDES)`, `$(pkg.DEFINES)`,
@@ -59,18 +62,27 @@ Getters return the current list (empty if unset). Setters replace the
 list. Direct assignment to the dotted variables remains valid; the
 accessors are the preferred form.
 
+`packages.jam` also provides:
+
+```
+Packages-Echo pkg
+Packages-Configure pkg
+```
+
+`Packages-Echo` always prints the six variables via `EchoOption`.
+`Packages-Configure` persists them via `Configure`. Both operate only
+on the common names.
+
 ## Modules {#modules}
 
 Three modules own the mechanism:
 
-- `packages.jam` defines the common variable interface and its
-  accessors. It knows nothing about prebuilt bundles, source package
-  roots, configure options, or resolution order.
-- `prebuilt.jam` maps a prebuilt bundle onto the common variables. It
-  loads the bundle manifest.
-- `builtin.jam` registers source-package roots under `src/`, checks
-  presence, and descends with `SubInclude` when a source package is
-  selected.
+- `packages.jam` defines the common variable interface, its accessors,
+  `Packages-Echo` and `Packages-Configure`. It knows nothing about
+  prebuilt bundles, source package roots, configure options, or
+  resolution order.
+- `prebuilt.jam` maps a prebuilt bundle onto the common variables.
+- `builtin.jam` registers source-package roots and selects them.
 
 `packages.jam` is included once. The other two modules are loaded on
 demand by `Jamconfigure`.
@@ -81,30 +93,29 @@ Resolution order and Configure dispatch live in `Jamconfigure`. It is
 the only place that knows about user settings, configure options,
 prebuilt and builtin.
 
-Resolution order for each package is fixed and admits no mixing:
+For each package the steps are independent `if`s. Each step runs only
+while `WITH_pkg` is still empty. The first success sets `WITH_pkg`.
 
-1. Explicit user settings (`-s pkg.INCLUDES=...` and the other dotted
-   variables on the command line or in the environment).
-2. Source package, when a configure option that selects it is given
-   (for example `--with-inline-xxx`) and a registered source root is
-   present.
-3. Prebuilt, when `--with-prebuilt` selected a bundle and the package is
-   listed in it.
-4. System probe via the package-specific `*-Configure`.
+1. Builtin override: `--with-inline-xxx` is given and `Builtin-Use`
+   succeeds. This overrides every other source.
+2. Prebuilt or system/custom: if `Prebuilt-Use` succeeds it fills the
+   flag variables. Then the package-specific `*-Configure` is called
+   with the current values (prebuilt paths, `-s` hints, or empty for a
+   system probe). Custom `-s` settings are hints for the system probe,
+   not a separate source.
+3. Builtin fallback: `Builtin-Use` succeeds when nothing earlier did.
 
-A package is either user-supplied, source, prebuilt, or system. User
-values win over all other sources. Source selection is opt-in via
-configure options; the mere presence of a source root does not select
-it.
+`Prebuilt-Use` and `Builtin-Use` return the package name when they
+apply, empty otherwise. The return value is assigned to `WITH_pkg`.
 
-When a source package is selected the package-specific `*-Configure`
-is not called. The source package has already set `pkg.INCLUDES` and
+`pkg.TARGET` is set only by builtin. Consumers detect a source package
+by a non-empty target. There is no separate `WITH_BUILTIN_xxx` flag.
+
+`Packages-Echo` always runs so the configure output shows the option
+and the variable values. `Packages-Configure` runs only when `WITH_pkg`
+is set, so an unfound package does not persist values for later build
+steps.
+
+When builtin is selected the package-specific `*-Configure` is not
+called. The source package has already set `pkg.INCLUDES` and
 `pkg.TARGET`.
-
-When prebuilt or system is used, `*-Configure` is called with the
-values already filled (prebuilt) or empty (system). The Configure rule
-probes only when its arguments are empty; otherwise it verifies the
-supplied values.
-
-`WITH_BUILTIN_xxx` and `WITH_xxx` keep their current meaning for
-consumers.
