@@ -6,10 +6,10 @@
 #define PT_HTTP_WEBSOCKETBUFFER_H
 
 #include <Pt/Http/Api.h>
+#include <Pt/Http/WebSocketError.h>
 #include <Pt/Types.h>
 #include <Pt/Utf8.h>
 #include <streambuf>
-#include <stdexcept>
 #include <cstddef>
 
 namespace Pt {
@@ -149,20 +149,6 @@ class PT_HTTP_API Frame
         Kind _kind;
         char _buffer[BufferSize];
         Header _header;
-};
-
-/** @internal A WebSocket protocol violation, carrying the close code to send.
-*/
-class PT_HTTP_API WebSocketError : public std::runtime_error
-{
-    public:
-        explicit WebSocketError(unsigned code);
-
-        unsigned code() const
-        { return _code; }
-
-    private:
-        unsigned _code;
 };
 
 /** @internal Pull parser for WebSocket frames.

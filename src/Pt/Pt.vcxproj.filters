@@ -2097,6 +2097,9 @@
     <ClInclude Include="..\..\include\Pt\Http\HttpError.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\WebSocketError.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Http\Protocol.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
@@ -5084,6 +5087,9 @@
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Http\HttpError.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\WebSocketError.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Http\Protocol.cpp">

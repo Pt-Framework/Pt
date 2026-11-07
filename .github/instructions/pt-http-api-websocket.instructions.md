@@ -10,6 +10,8 @@ description: "HTTP WebSocket"
   `include/Pt/Http/Api-WebSocketClient.h`
 - Server session group:
   `include/Pt/Http/Api-WebSocketServer.h`
+- Protocol error of a WebSocket stream:
+  `include/Pt/Http/WebSocketError.h`
 - Payload of one text or binary WebSocket message:
   `include/Pt/Http/WebSocketMessage.h`
 - Progress of one WebSocket send or receive step:

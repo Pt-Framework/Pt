@@ -28,6 +28,12 @@ released.
 the local abort. `closed()` does not run for it. The destructor
 unbinds and does not release again.
 
+An `IOError` from a ready slot, including `WebSocketError`, closes
+the session and does not reach the event loop. After
+`shutdownReady()` returns, the session closes. A slot calls
+`endShutdown()` to observe a handshake error. `close()` remains the
+explicit abort from the constructor, a kick, or the application.
+
 `WebSocketServlet::onSessionClosed` is the only release. It is
 idempotent: a session already gone from the list is ignored. The
 servlet destructor releases remaining sessions through it.
@@ -87,35 +93,21 @@ class EchoSession : public Pt::Http::WebSocketSession
     private:
         void onInputReady(Pt::Http::WebSocketSession&)
         {
-            try
+            Pt::Http::WebSocketProgress progress = endReceive();
+            if( ! progress.finished() )
             {
-                Pt::Http::WebSocketProgress progress = endReceive();
-                if( ! progress.finished() )
-                {
-                    incoming().discard();
-                    beginReceive();
-                    return;
-                }
-
-                incoming().clear();
+                incoming().discard();
                 beginReceive();
+                return;
             }
-            catch(const std::exception&)
-            {
-                close();
-            }
+
+            incoming().clear();
+            beginReceive();
         }
 
         void onOutputReady(Pt::Http::WebSocketSession&)
         {
-            try
-            {
-                endSend();
-            }
-            catch(const std::exception&)
-            {
-                close();
-            }
+            endSend();
         }
 };
 ```

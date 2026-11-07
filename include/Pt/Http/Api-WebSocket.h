@@ -168,6 +168,10 @@
     or an incoming ping stops a ping wait. Sending does not restart
     idle or the ping interval.
 
+    A protocol error that is specific to WebSocket is a
+    %WebSocketError, which is an I/O error. Handshake failures
+    before the framed stream opens are %HttpError.
+
     The HTTP owner still owns the stream. Opening a client socket
     uses the HTTP user agent of the client chapter. Accepting a
     server session uses the service mapping of the server chapter.

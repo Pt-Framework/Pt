@@ -52,35 +52,21 @@ class WebSocketChannel;
         private:
             void onInputReady(Pt::Http::WebSocketSession&)
             {
-                try
+                Pt::Http::WebSocketProgress progress = endReceive();
+                if( ! progress.finished() )
                 {
-                    Pt::Http::WebSocketProgress progress = endReceive();
-                    if( ! progress.finished() )
-                    {
-                        incoming().discard();
-                        beginReceive();
-                        return;
-                    }
-
-                    incoming().clear();
+                    incoming().discard();
                     beginReceive();
+                    return;
                 }
-                catch(const std::exception&)
-                {
-                    close();
-                }
+
+                incoming().clear();
+                beginReceive();
             }
 
             void onOutputReady(Pt::Http::WebSocketSession&)
             {
-                try
-                {
-                    endSend();
-                }
-                catch(const std::exception&)
-                {
-                    close();
-                }
+                endSend();
             }
     };
     @endcode
@@ -113,10 +99,11 @@ class WebSocketChannel;
     %closed() returns, the servlet releases the session. The
     destructor unbinds the stream. A call to %close() from
     %closed() does not unbind or release. A session that connects
-    no %closed() slot is still released. Call %close() from
-    %shutdownReady() after %endShutdown(), or from an I/O slot
-    after a thrown end, to abort and release. The servlet also
-    releases remaining sessions when it is destroyed.
+    no %closed() slot is still released. An %IOError from a ready
+    slot closes the session and does not reach the event loop.
+    After %shutdownReady() returns, the session closes. Call
+    %endShutdown() from that signal to observe an error. The
+    servlet also releases remaining sessions when it is destroyed.
 
     %beginReceive() starts frame processing. Until then, incoming
     frames stay in the stream. Control frames are processed while a
@@ -161,8 +148,9 @@ class WebSocketChannel;
     the peer replies. A peer that never starts a receive never replies,
     so the idle timeout copied from the %WebSocketService is the only
     bound on that wait. %shutdownReady() reports the completed handshake;
-    call %endShutdown() from that signal to observe an error, then
-    %close(). %close() unbinds the stream and writes no frame. The
+    call %endShutdown() from that signal to observe an error. After
+    the signal returns the session closes. %close() unbinds the stream
+    and writes no frame. The
     servlet then releases this session. The destructor unbinds the
     stream. %beginSend() and %beginReceive() then throw. No close
     frame leaves the code at 1006. %closeCode() and %closeReason()
@@ -185,7 +173,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
             The idle, ping-interval, ping and close timeouts and the
             data-message limit are copied from @a service.
 
-            @throw %std::runtime_error if Sec-WebSocket-Protocol is
+            @throw %HttpError if Sec-WebSocket-Protocol is
             not one protocol token.
         */
         WebSocketSession(WebSocketService& service,
@@ -237,6 +225,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             @throw %std::logic_error if the send has not completed or
             the stream has ended.
+            @throw %IOError if writing failed.
         */
         WebSocketProgress endSend();
 
@@ -247,8 +236,9 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             @throw %std::logic_error if a receive is outstanding,
             or the stream has ended.
-            @throw %std::exception if a protocol violation ended the
-            frame stream, or a previous read failed.
+            @throw %WebSocketError if a protocol violation ended the
+            frame stream.
+            @throw %IOError if a previous read failed.
         */
         void beginReceive();
 
@@ -257,8 +247,9 @@ class PT_HTTP_API WebSocketSession : public Connectable
             @return Progress of this receive step.
 
             @throw %std::logic_error if the receive has not completed.
-            @throw %std::exception if a protocol violation ended the
-            frame stream, or a previous read failed.
+            @throw %WebSocketError if a protocol violation ended the
+            frame stream.
+            @throw %IOError if a previous read failed.
         */
         WebSocketProgress endReceive();
 
@@ -274,7 +265,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Completes the ping started by %beginPing().
 
             @throw %std::logic_error if the ping is not ready.
-            @throw %std::exception if writing the ping failed.
+            @throw %IOError if writing the ping failed.
         */
         void endPing();
 
@@ -292,7 +283,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Completes the shutdown started by %beginShutdown().
 
             @throw %std::logic_error if the shutdown is not ready.
-            @throw %std::exception if the close handshake failed.
+            @throw %IOError if the close handshake failed.
         */
         void endShutdown();
 
@@ -340,7 +331,8 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Returns the signal emitted when a shutdown operation completes.
 
             The stream stays bound. Call %endShutdown() from the signal
-            to observe a close-handshake error, then %close().
+            to observe a close-handshake error. After the signal
+            returns the session closes.
         */
         Pt::Signal<WebSocketSession&>& shutdownReady()
         { return _shutdownReady; }

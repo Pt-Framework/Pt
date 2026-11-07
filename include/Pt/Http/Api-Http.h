@@ -45,8 +45,10 @@
     in the SSL module.
 
     A protocol error that is specific to HTTP is an %HttpError, which
-    is an I/O error. A local address that is already occupied still
-    throws %AddressInUse from the listen that uses it.
+    is an I/O error. A protocol error that is specific to WebSocket
+    is a %WebSocketError, which is also an I/O error. A local address
+    that is already occupied still throws %AddressInUse from the
+    listen that uses it.
 
     An HTTP connection can be upgraded. After a finished 101 the
     owner keeps the TCP connection and exposes it as a %Stream. The

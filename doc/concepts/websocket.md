@@ -229,8 +229,10 @@ unbounded. The client and the service default it to ten seconds. During that clo
 continues to process control frames. When a receive is outstanding,
 data that arrives before the peer close is still delivered normally.
 The handshake completes through `shutdownReady()`. `endShutdown()`
-returns that operation to idle or throws. The application then calls
-`close()`. `closed()` does not run for this handshake.
+returns that operation to idle or throws. On the client, the
+application then calls `close()`. On the session, the session
+closes after `shutdownReady()` returns. `closed()` does not run
+for this handshake.
 
 A received close is consumed. It does not become `incoming()` and
 does not emit `inputReady()`. If this side has not sent a close
@@ -271,11 +273,13 @@ operations reports the end.
 
 An I/O error on an outstanding receive or send stores the exception
 and leaves the stream open. The ready signal of that transfer runs,
-and the matching end throws. The other direction is unaffected. The
-application calls `close()`. The direction that failed keeps the
-reason: a later `beginSend()`, `beginPing()`, or `beginShutdown()`
-throws the write failure, and a later `beginReceive()` throws the
-read failure.
+and the matching end throws `IOError`. A protocol violation throws
+`WebSocketError`, which is an I/O error. The other direction is
+unaffected. On the client, the application calls `close()`. On the
+session, an `IOError` from a ready slot closes the session. The
+direction that failed keeps the reason: a later `beginSend()`,
+`beginPing()`, or `beginShutdown()` throws the write failure, and a
+later `beginReceive()` throws the read failure.
 
 `closeCode()` and `closeReason()` are the values from the handshake
 that ended the stream. A local `shutdown()` keeps the values passed
@@ -303,10 +307,10 @@ or release. A session that connects no `closed()` slot is still
 released.
 
 `close()` unbinds the stream and calls `onSessionClosed`. That is
-the local abort: a thrown `endReceive()`, `endSend()`, or
-`endPing()`, `endShutdown()` after `beginShutdown()`, or the
-application ending the stream. The destructor unbinds the stream
-and does not release the session again. A domain object that holds
+the local abort: an `IOError` from a ready slot, the return of
+`shutdownReady()`, or the application ending the stream. The
+destructor unbinds the stream and does not release the session
+again. A domain object that holds
 a session reference drops it in `closed()`, because the servlet
 releases after that signal. `close()` during construction unbinds
 the stream. The session is not listed. `accept()` releases it

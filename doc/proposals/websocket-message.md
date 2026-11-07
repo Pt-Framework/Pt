@@ -55,7 +55,7 @@ class Frame
         std::size_t remaining() const;
 };
 
-class WebSocketError : public std::runtime_error
+class WebSocketError : public IOError
 {
     public:
         explicit WebSocketError(unsigned code);

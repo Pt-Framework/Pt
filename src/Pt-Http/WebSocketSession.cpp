@@ -4,8 +4,10 @@
 
 #include <Pt/Http/WebSocketSession.h>
 #include <Pt/Http/WebSocketService.h>
+#include <Pt/Http/HttpError.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
+#include <Pt/System/IOError.h>
 #include "WebSocketChannel.h"
 
 #include <stdexcept>
@@ -63,7 +65,7 @@ std::string selectedProtocol(const Reply& reply)
         return std::string();
 
     if(name.find(',') != std::string::npos || ! isProtocolToken(name))
-        throw std::runtime_error("WebSocket protocol is not one token");
+        throw HttpError("WebSocket protocol is not one token");
 
     return name;
 }
@@ -192,25 +194,53 @@ bool WebSocketSession::isOpen() const
 
 void WebSocketSession::onInputReady()
 {
-    _inputReady.send(*this);
+    try
+    {
+        _inputReady.send(*this);
+    }
+    catch(const System::IOError&)
+    {
+        close();
+    }
 }
 
 
 void WebSocketSession::onOutputReady()
 {
-    _outputReady.send(*this);
+    try
+    {
+        _outputReady.send(*this);
+    }
+    catch(const System::IOError&)
+    {
+        close();
+    }
 }
 
 
 void WebSocketSession::onPingReady()
 {
-    _pingReady.send(*this);
+    try
+    {
+        _pingReady.send(*this);
+    }
+    catch(const System::IOError&)
+    {
+        close();
+    }
 }
 
 
 void WebSocketSession::onShutdownReady()
 {
-    _shutdownReady.send(*this);
+    try
+    {
+        _shutdownReady.send(*this);
+    }
+    catch(const System::IOError&)
+    {}
+
+    close();
 }
 
 
@@ -226,7 +256,14 @@ void WebSocketSession::onClosed()
 
 void WebSocketSession::onPong(const std::string& payload)
 {
-    _pong.send(*this, payload);
+    try
+    {
+        _pong.send(*this, payload);
+    }
+    catch(const System::IOError&)
+    {
+        close();
+    }
 }
 
 } // namespace Http

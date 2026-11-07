@@ -855,7 +855,6 @@ class ShutdownSession : public Pt::Http::WebSocketSession
             *_shutdownReady = true;
             *_closed = true;
             _exitLoop->exit();
-            close();
         }
 
     private:
@@ -1107,16 +1106,9 @@ class ReceiveSession : public Pt::Http::WebSocketSession
     private:
         void onInputReady(Pt::Http::WebSocketSession&)
         {
-            try
-            {
-                endReceive();
-                incoming().clear();
-                beginReceive();
-            }
-            catch(const std::exception&)
-            {
-                close();
-            }
+            endReceive();
+            incoming().clear();
+            beginReceive();
         }
 
         void onOutputReady(Pt::Http::WebSocketSession&)
@@ -1152,6 +1144,41 @@ class ReceiveService : public Pt::Http::WebSocketService
         }
 
     private:
+        std::size_t _opened;
+        std::size_t _released;
+};
+
+
+class ReadyExceptionService : public Pt::Http::WebSocketService
+{
+    public:
+        explicit ReadyExceptionService(Pt::System::EventLoop& loop)
+        : _loop(&loop)
+        , _opened(0)
+        , _released(0)
+        {}
+
+        std::size_t live() const
+        { return _opened - _released; }
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            ++_opened;
+            return new ReceiveSession(*this, stream, reply);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            ++_released;
+            delete session;
+            _loop->exit();
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
         std::size_t _opened;
         std::size_t _released;
 };
@@ -1230,6 +1257,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("CloseTimeoutHandshake", *this, &WebSocketTest::CloseTimeoutHandshake);
             registerMethod("ReceiveDuringShutdown", *this, &WebSocketTest::ReceiveDuringShutdown);
             registerMethod("ProtocolFailure", *this, &WebSocketTest::ProtocolFailure);
+            registerMethod("ReadyExceptionReleases", *this, &WebSocketTest::ReadyExceptionReleases);
             registerMethod("IdleTimeoutTwice", *this, &WebSocketTest::IdleTimeoutTwice);
             registerMethod("PingIntervalPong", *this, &WebSocketTest::PingIntervalPong);
             registerMethod("PingIntervalTimeoutNoReply", *this, &WebSocketTest::PingIntervalTimeoutNoReply);
@@ -1825,6 +1853,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(_shutdownReady);
             PT_UNIT_ASSERT(_closed);
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
         }
 
         void onConnectedSessionShutdown(Pt::Http::WebSocket& socket)
@@ -2838,6 +2867,30 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
             socket.outgoing().body() << std::string(64, 'x');
             socket.beginSend();
+        }
+
+    protected:
+        void ReadyExceptionReleases()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8060);
+
+            Pt::Http::Server server(*_loop, ep);
+            ReadyExceptionService service(*_loop);
+            service.setMaxMessageSize(16);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocolFailure);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
         }
 
     protected:

@@ -43,35 +43,21 @@
         private:
             void onInputReady(Pt::Http::WebSocketSession&)
             {
-                try
+                Pt::Http::WebSocketProgress progress = endReceive();
+                if( ! progress.finished() )
                 {
-                    Pt::Http::WebSocketProgress progress = endReceive();
-                    if( ! progress.finished() )
-                    {
-                        incoming().discard();
-                        beginReceive();
-                        return;
-                    }
-
-                    incoming().clear();
+                    incoming().discard();
                     beginReceive();
+                    return;
                 }
-                catch(const std::exception&)
-                {
-                    close();
-                }
+
+                incoming().clear();
+                beginReceive();
             }
 
             void onOutputReady(Pt::Http::WebSocketSession&)
             {
-                try
-                {
-                    endSend();
-                }
-                catch(const std::exception&)
-                {
-                    close();
-                }
+                endSend();
             }
     };
 
@@ -134,9 +120,9 @@
     does not emit those signals. %closed() runs when the engine
     has ended the protocol and no local shutdown is outstanding.
     After that signal returns the servlet releases the session. The
-    destructor unbinds the stream. Call %close() after a thrown
-    %endReceive() or %endSend(), and after %endShutdown(), to abort
-    and release. %close() from %closed() does not release. The
+    destructor unbinds the stream. An %IOError from a ready slot
+    closes the session. After %shutdownReady() returns the session
+    closes. %close() from %closed() does not release. The
     session does not own the stream or the connection.
 
     %WebSocketServlet owns the live sessions of one service. The

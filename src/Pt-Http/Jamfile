@@ -10,6 +10,7 @@ SharedLibrary Pt-Http : Authorizer.cpp
                         Connection.cpp
                         HttpBuffer.cpp
                         HttpError.cpp
+                        WebSocketError.cpp
                         Message.cpp
                         Parser.cpp
                         Reply.cpp

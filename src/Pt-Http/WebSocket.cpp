@@ -4,6 +4,7 @@
 */
 
 #include <Pt/Http/WebSocket.h>
+#include <Pt/Http/HttpError.h>
 #include <Pt/Http/Stream.h>
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Request.h>
@@ -128,7 +129,7 @@ void WebSocket::beginConnect(const std::string& url, const std::string& origin)
 void WebSocket::endConnect()
 {
     if(_error || _connecting)
-        throw std::runtime_error("WebSocket handshake failed");
+        throw HttpError("WebSocket handshake failed");
 }
 
 
@@ -178,7 +179,7 @@ void WebSocket::onReply(Client& client)
         }
 
         if( client.reply().statusCode() != 101 )
-            throw std::runtime_error("WebSocket handshake failed");
+            throw HttpError("WebSocket handshake failed");
 
         const char* echoed = client.reply().header().get("Sec-WebSocket-Protocol");
         std::string selected;
@@ -194,7 +195,7 @@ void WebSocket::onReply(Client& client)
 
             selected = field.substr(left, right - left);
             if(selected.find(',') != std::string::npos || ! isProtocolToken(selected))
-                throw std::runtime_error("WebSocket handshake failed");
+                throw HttpError("WebSocket handshake failed");
 
             bool offered = false;
             for(std::size_t i = 0; i < _protocols.size(); ++i)
@@ -207,7 +208,7 @@ void WebSocket::onReply(Client& client)
             }
 
             if( ! offered )
-                throw std::runtime_error("WebSocket handshake failed");
+                throw HttpError("WebSocket handshake failed");
         }
 
         _protocol = selected;

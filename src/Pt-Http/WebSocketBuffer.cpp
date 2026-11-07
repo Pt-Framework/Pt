@@ -23,13 +23,6 @@ Frame::Frame()
 }
 
 
-WebSocketError::WebSocketError(unsigned code)
-: std::runtime_error("WebSocket protocol error")
-, _code(code)
-{
-}
-
-
 Frame::Header::Header()
 : _size(2)
 , _avail(0)

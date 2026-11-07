@@ -208,7 +208,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         /** @brief Completes the client handshake.
 
-            @throw %std::exception if the handshake failed.
+            @throw %HttpError if the handshake failed.
         */
         void endConnect();
 
@@ -235,7 +235,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             handshake is not finished, or a shutdown is queued.
             @throw %std::invalid_argument if the type is %Unknown, or
             the body is larger than %setMaxMessageSize().
-            @throw %std::exception if a previous write failed.
+            @throw %IOError if a previous write failed.
         */
         void beginSend(bool finished = true);
 
@@ -245,6 +245,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
             @throw %std::logic_error if the send has not completed or
             the stream has ended.
+            @throw %IOError if writing failed.
         */
         WebSocketProgress endSend();
 
@@ -255,8 +256,9 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
             @throw %std::logic_error if a receive is outstanding,
             the handshake is not finished, or the stream has ended.
-            @throw %std::exception if a protocol violation ended the
-            frame stream, or a previous read failed.
+            @throw %WebSocketError if a protocol violation ended the
+            frame stream.
+            @throw %IOError if a previous read failed.
         */
         void beginReceive();
 
@@ -265,8 +267,9 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             @return Progress of this receive step.
 
             @throw %std::logic_error if the receive has not completed.
-            @throw %std::exception if a protocol violation ended the
-            frame stream, or a previous read failed.
+            @throw %WebSocketError if a protocol violation ended the
+            frame stream.
+            @throw %IOError if a previous read failed.
         */
         WebSocketProgress endReceive();
 
@@ -276,14 +279,14 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             or if @a payload is null and @a n is nonzero.
             @throw %std::logic_error if a ping is outstanding, a close is
             queued, or the handshake is not finished.
-            @throw %std::exception if a previous write failed.
+            @throw %IOError if a previous write failed.
         */
         void beginPing(const char* payload = 0, std::size_t n = 0);
 
         /** @brief Completes the ping started by %beginPing().
 
             @throw %std::logic_error if the ping is not ready.
-            @throw %std::exception if writing the ping failed.
+            @throw %IOError if writing the ping failed.
         */
         void endPing();
 
@@ -294,7 +297,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             is not valid UTF-8.
             @throw %std::logic_error if a shutdown is outstanding,
             the handshake is not finished, or a close is already queued.
-            @throw %std::exception if a previous write failed.
+            @throw %IOError if a previous write failed.
         */
         void beginShutdown(unsigned code = 1000,
                            const std::string& reason = std::string());
@@ -302,7 +305,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         /** @brief Completes the shutdown started by %beginShutdown().
 
             @throw %std::logic_error if the shutdown is not ready.
-            @throw %std::exception if the close handshake failed.
+            @throw %IOError if the close handshake failed.
         */
         void endShutdown();
 
