@@ -11,23 +11,20 @@ the common package variables.
 
 ## Init {#init}
 
-`Builtin-Use` registers the source root for a package name:
+`Builtin-Use` registers the source root for a package name and, when
+called for selection, returns whether the root is present:
 
 ```
 Builtin-Use zlib : src/zlib
 ```
 
-It checks that the directory exists and records the root. Presence is a
-directory check. There is no network access and no download.
+Presence is a directory check. There is no network access and no
+download. The rule returns the package name when the root exists,
+empty otherwise.
 
 When the package is selected, `builtin.jam` issues the `SubInclude`
 that descends into the source package's Jamfile. The descent happens
 once, after all registrations have been collected.
-
-A source package may itself depend on other source packages. Those
-dependencies are declared the same way. The priority rules prevent a
-source package from being mixed with a prebuilt package of the same
-name.
 
 ## Target {#target}
 
@@ -43,6 +40,9 @@ zlib.TARGET   = z ;
 (`z` or `libz`, whichever name the `Library` or `SharedLibrary` rule
 uses.) It does not set the flag variables.
 
+A non-empty `pkg.TARGET` is how consumers detect a builtin package.
+There is no separate `WITH_BUILTIN_xxx` flag.
+
 Consumers that see a non-empty `pkg.TARGET` link the target:
 
 ```
@@ -56,17 +56,18 @@ whether it was included from a parent and sets the variables only in
 that case. Its own top-level Jamconfigure continues to work when it is
 built alone.
 
-## Presence and selection
+## Selection {#selection}
 
-A registered root must exist for the package to be usable as source.
-Selection itself depends on a configure option (for example
-`--with-inline-zlib`, `--with-inline-libpng`). Presence of the root
-alone does not select the source package.
+Builtin is used in two cases only:
 
-When the option is given and the root is present, the package is source.
-The package-specific `*-Configure` is skipped and `WITH_BUILTIN_xxx` is
-set.
+- Override: `--with-inline-xxx` is given and `Builtin-Use` returns the
+  package name. This overrides prebuilt and system/custom.
+- Fallback: nothing earlier (prebuilt or system/custom) succeeded and
+  `Builtin-Use` returns the package name.
 
-When the option is not given, or the root is absent, the package falls
-through to the next source in the resolution order (prebuilt or system
-probe).
+Presence of the root alone does not select the package. Without the
+option and without a failed earlier step the package is not builtin.
+
+When builtin is selected the package-specific `*-Configure` is not
+called. The source package has already set `pkg.INCLUDES` and
+`pkg.TARGET`.
