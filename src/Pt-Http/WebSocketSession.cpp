@@ -89,9 +89,9 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
 
     _channel->inputReady() += Pt::slot(*this, &WebSocketSession::onInputReady);
     _channel->outputReady() += Pt::slot(*this, &WebSocketSession::onOutputReady);
-    _channel->pingReady() += Pt::slot(*this, &WebSocketSession::onChannelPingReady);
-    _channel->shutdownReady() += Pt::slot(*this, &WebSocketSession::onChannelShutdownReady);
-    _channel->closed() += Pt::slot(*this, &WebSocketSession::onChannelClosed);
+    _channel->pingReady() += Pt::slot(*this, &WebSocketSession::onPingReady);
+    _channel->shutdownReady() += Pt::slot(*this, &WebSocketSession::onShutdownReady);
+    _channel->closed() += Pt::slot(*this, &WebSocketSession::onClosed);
     _channel->pong() += Pt::slot(*this, &WebSocketSession::onPong);
 }
 
@@ -190,57 +190,43 @@ bool WebSocketSession::isOpen() const
 }
 
 
-void WebSocketSession::onPong(const std::string&)
+void WebSocketSession::onInputReady()
 {
+    _inputReady.send(*this);
+}
+
+
+void WebSocketSession::onOutputReady()
+{
+    _outputReady.send(*this);
 }
 
 
 void WebSocketSession::onPingReady()
 {
+    _pingReady.send(*this);
 }
 
 
 void WebSocketSession::onShutdownReady()
 {
+    _shutdownReady.send(*this);
 }
 
 
 void WebSocketSession::onClosed()
 {
-}
-
-
-void WebSocketSession::onChannelPingReady()
-{
-    onPingReady();
-}
-
-
-void WebSocketSession::onChannelShutdownReady()
-{
-    onShutdownReady();
-}
-
-
-void WebSocketSession::onChannelClosed()
-{
     _inClosed = true;
-    onClosed();
+    _closed.send(*this);
     _inClosed = false;
 
     _service->onSessionClosed(*this);
 }
 
 
-void WebSocketSession::onInputReady()
+void WebSocketSession::onPong(const std::string& payload)
 {
-    onInput();
-}
-
-
-void WebSocketSession::onOutputReady()
-{
-    onOutput();
+    _pong.send(*this, payload);
 }
 
 } // namespace Http

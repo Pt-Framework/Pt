@@ -8,15 +8,7 @@ The server session is the I/O facade of one accepted stream. Ready
 notification is begin / signal / end, the same contract as the
 client. The model is
 [WebSocket](../concepts/websocket.md). This file
-states the ready surface the implementation still has to follow,
-and the behavior it has today.
-
-## Baseline
-
-`WebSocketSession` forwards channel signals to virtuals. `onInput()`
-and `onOutput()` are pure. `onPingReady()`, `onShutdownReady()`,
-`onClosed()`, and `onPong()` have empty defaults. The session is a
-`Connectable` and has no public I/O signals.
+states the ready surface.
 
 ## Session close {#session-close}
 

@@ -69,22 +69,25 @@ class RecordSession : public Pt::Http::WebSocketSession
                       std::string& message,
                       Pt::Http::WebSocketMessage::Type& type,
                       bool& received,
-                      bool& closed,
+                      bool& closedFlag,
                       Pt::System::EventLoop& exitLoop,
                       unsigned* closeCode = 0)
         : Pt::Http::WebSocketSession(service, stream, reply)
         , _message(&message)
         , _type(&type)
         , _received(&received)
-        , _closed(&closed)
+        , _closed(&closedFlag)
         , _exitLoop(&exitLoop)
         , _closeCode(closeCode)
         {
+            inputReady() += Pt::slot(*this, &RecordSession::onInputReady);
+            outputReady() += Pt::slot(*this, &RecordSession::onOutputReady);
+            closed() += Pt::slot(*this, &RecordSession::onClosed);
             beginReceive();
         }
 
-    protected:
-        virtual void onInput()
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
         {
             endReceive();
 
@@ -95,12 +98,12 @@ class RecordSession : public Pt::Http::WebSocketSession
             _exitLoop->exit();
         }
 
-        virtual void onOutput()
+        void onOutputReady(Pt::Http::WebSocketSession&)
         {
             endSend();
         }
 
-        virtual void onClosed()
+        void onClosed(Pt::Http::WebSocketSession&)
         {
             if(_closeCode)
                 *_closeCode = closeCode();
@@ -191,11 +194,13 @@ class CollectSession : public Pt::Http::WebSocketSession
         , _received(&received)
         , _exitLoop(&exitLoop)
         {
+            inputReady() += Pt::slot(*this, &CollectSession::onInputReady);
+            outputReady() += Pt::slot(*this, &CollectSession::onOutputReady);
             beginReceive();
         }
 
-    protected:
-        virtual void onInput()
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
         {
             Pt::Http::WebSocketProgress progress = endReceive();
             PT_UNIT_ASSERT(progress.header() || progress.continuation());
@@ -223,7 +228,7 @@ class CollectSession : public Pt::Http::WebSocketSession
             _exitLoop->exit();
         }
 
-        virtual void onOutput()
+        void onOutputReady(Pt::Http::WebSocketSession&)
         {
             endSend();
         }
@@ -279,6 +284,8 @@ class PulseSession : public Pt::Http::WebSocketSession
         : Pt::Http::WebSocketSession(service, stream, reply)
         , _sending(false)
         {
+            inputReady() += Pt::slot(*this, &PulseSession::onInputReady);
+            outputReady() += Pt::slot(*this, &PulseSession::onOutputReady);
             beginReceive();
             outgoing().setType(Pt::Http::WebSocketMessage::Text);
             outgoing().body() << "x";
@@ -294,15 +301,15 @@ class PulseSession : public Pt::Http::WebSocketSession
             _timer.detach();
         }
 
-    protected:
-        virtual void onInput()
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
         {
             endReceive();
             incoming().clear();
             beginReceive();
         }
 
-        virtual void onOutput()
+        void onOutputReady(Pt::Http::WebSocketSession&)
         {
             endSend();
             _sending = false;
@@ -364,13 +371,6 @@ class IdleSession : public Pt::Http::WebSocketSession
                 _exitLoop->exit();
         }
 
-    protected:
-        virtual void onInput()
-        {}
-
-        virtual void onOutput()
-        {}
-
     private:
         Pt::System::EventLoop* _exitLoop;
 };
@@ -423,23 +423,27 @@ class DeferredCloseSession : public Pt::Http::WebSocketSession
                              std::string& message,
                              Pt::Http::WebSocketMessage::Type& type,
                              bool& received,
-                             bool& closed,
+                             bool& closedFlag,
                              Pt::System::EventLoop& exitLoop)
         : Pt::Http::WebSocketSession(service, stream, reply)
         , _message(&message)
         , _type(&type)
         , _received(&received)
-        , _closed(&closed)
+        , _closed(&closedFlag)
         , _exitLoop(&exitLoop)
-        {}
+        {
+            inputReady() += Pt::slot(*this, &DeferredCloseSession::onInputReady);
+            outputReady() += Pt::slot(*this, &DeferredCloseSession::onOutputReady);
+            closed() += Pt::slot(*this, &DeferredCloseSession::onClosed);
+        }
 
         void beginDeferredReceive()
         {
             beginReceive();
         }
 
-    protected:
-        virtual void onInput()
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
         {
             Pt::Http::WebSocketProgress progress = endReceive();
             _message->append( std::istreambuf_iterator<char>( incoming().body() ),
@@ -458,12 +462,12 @@ class DeferredCloseSession : public Pt::Http::WebSocketSession
             beginReceive();
         }
 
-        virtual void onOutput()
+        void onOutputReady(Pt::Http::WebSocketSession&)
         {
             endSend();
         }
 
-        virtual void onClosed()
+        void onClosed(Pt::Http::WebSocketSession&)
         {
             *_closed = true;
             _exitLoop->exit();
@@ -543,19 +547,22 @@ class PartialCloseSession : public Pt::Http::WebSocketSession
                             const Pt::Http::Reply& reply,
                             bool& partial,
                             bool& finished,
-                            bool& closed,
+                            bool& closedFlag,
                             Pt::System::EventLoop& exitLoop)
         : Pt::Http::WebSocketSession(service, stream, reply)
         , _partial(&partial)
         , _finished(&finished)
-        , _closed(&closed)
+        , _closed(&closedFlag)
         , _exitLoop(&exitLoop)
         {
+            inputReady() += Pt::slot(*this, &PartialCloseSession::onInputReady);
+            outputReady() += Pt::slot(*this, &PartialCloseSession::onOutputReady);
+            closed() += Pt::slot(*this, &PartialCloseSession::onClosed);
             beginReceive();
         }
 
-    protected:
-        virtual void onInput()
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
         {
             Pt::Http::WebSocketProgress progress = endReceive();
             if( ! progress.finished() )
@@ -571,12 +578,12 @@ class PartialCloseSession : public Pt::Http::WebSocketSession
             beginReceive();
         }
 
-        virtual void onOutput()
+        void onOutputReady(Pt::Http::WebSocketSession&)
         {
             endSend();
         }
 
-        virtual void onClosed()
+        void onClosed(Pt::Http::WebSocketSession&)
         {
             *_closed = true;
             _exitLoop->exit();
@@ -650,13 +657,6 @@ class ThrowSession : public Pt::Http::WebSocketSession
         {
             throw std::runtime_error("session construction failed");
         }
-
-    protected:
-        virtual void onInput()
-        {}
-
-        virtual void onOutput()
-        {}
 };
 
 class ThrowService : public Pt::Http::WebSocketService
@@ -683,16 +683,14 @@ class PushSession : public Pt::Http::WebSocketSession
                     const Pt::Http::Reply& reply)
         : Pt::Http::WebSocketSession(service, stream, reply)
         {
+            outputReady() += Pt::slot(*this, &PushSession::onOutputReady);
             outgoing().setType(Pt::Http::WebSocketMessage::Text);
             outgoing().body() << "feed";
             beginSend();
         }
 
-    protected:
-        virtual void onInput()
-        {}
-
-        virtual void onOutput()
+    private:
+        void onOutputReady(Pt::Http::WebSocketSession&)
         {
             endSend();
         }
@@ -709,19 +707,21 @@ class FeedSession : public Pt::Http::WebSocketSession
                     const Pt::Http::Reply& reply)
         : Pt::Http::WebSocketSession(service, stream, reply)
         {
+            inputReady() += Pt::slot(*this, &FeedSession::onInputReady);
+            outputReady() += Pt::slot(*this, &FeedSession::onOutputReady);
             outgoing().setType(Pt::Http::WebSocketMessage::Text);
             outgoing().body() << "feed";
             beginSend();
             beginReceive();
         }
 
-    protected:
-        virtual void onInput()
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
         {
             endReceive();
         }
 
-        virtual void onOutput()
+        void onOutputReady(Pt::Http::WebSocketSession&)
         {
             endSend();
         }
@@ -736,40 +736,40 @@ class PongSession : public Pt::Http::WebSocketSession
         PongSession(Pt::Http::WebSocketService& service,
                     Pt::Http::Stream& stream,
                     const Pt::Http::Reply& reply,
-                    bool& pong,
-                    bool& pingReady,
-                    bool& inputReady,
+                    bool& pongFlag,
+                    bool& pingReadyFlag,
+                    bool& inputReadyFlag,
                     std::string& payload,
                     Pt::System::EventLoop& exitLoop)
         : Pt::Http::WebSocketSession(service, stream, reply)
-        , _pong(&pong)
-        , _pingReady(&pingReady)
-        , _inputReady(&inputReady)
+        , _pong(&pongFlag)
+        , _pingReady(&pingReadyFlag)
+        , _inputReady(&inputReadyFlag)
         , _payload(&payload)
         , _exitLoop(&exitLoop)
         {
+            inputReady() += Pt::slot(*this, &PongSession::onInputReady);
+            pingReady() += Pt::slot(*this, &PongSession::onPingReady);
+            pong() += Pt::slot(*this, &PongSession::onPong);
             beginPing("session-ping", 12);
             beginReceive();
         }
 
-    protected:
-        virtual void onInput()
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
         {
             *_inputReady = true;
             _exitLoop->exit();
         }
 
-        virtual void onOutput()
-        {}
-
-        virtual void onPingReady()
+        void onPingReady(Pt::Http::WebSocketSession&)
         {
             endPing();
             *_pingReady = true;
             finish();
         }
 
-        virtual void onPong(const std::string& payload)
+        void onPong(Pt::Http::WebSocketSession&, const std::string& payload)
         {
             *_payload = payload;
             *_pong = true;
@@ -836,25 +836,20 @@ class ShutdownSession : public Pt::Http::WebSocketSession
         ShutdownSession(Pt::Http::WebSocketService& service,
                         Pt::Http::Stream& stream,
                         const Pt::Http::Reply& reply,
-                        bool& shutdownReady,
-                        bool& closed,
+                        bool& shutdownReadyFlag,
+                        bool& closedFlag,
                         Pt::System::EventLoop& exitLoop)
         : Pt::Http::WebSocketSession(service, stream, reply)
-        , _shutdownReady(&shutdownReady)
-        , _closed(&closed)
+        , _shutdownReady(&shutdownReadyFlag)
+        , _closed(&closedFlag)
         , _exitLoop(&exitLoop)
         {
+            shutdownReady() += Pt::slot(*this, &ShutdownSession::onShutdownReady);
             beginShutdown();
         }
 
-    protected:
-        virtual void onInput()
-        {}
-
-        virtual void onOutput()
-        {}
-
-        virtual void onShutdownReady()
+    private:
+        void onShutdownReady(Pt::Http::WebSocketSession&)
         {
             endShutdown();
             *_shutdownReady = true;
@@ -928,13 +923,6 @@ class ProtocolSession : public Pt::Http::WebSocketSession
         const std::string& copiedHeader() const
         { return _copied; }
 
-    protected:
-        virtual void onInput()
-        {}
-
-        virtual void onOutput()
-        {}
-
     private:
         std::string* _selected;
         bool* _handshake;
@@ -1002,20 +990,21 @@ class FailSession : public Pt::Http::WebSocketSession
                     Pt::Http::Stream& stream,
                     const Pt::Http::Reply& reply,
                     bool& failed,
-                    bool& closed,
+                    bool& closedFlag,
                     unsigned& code,
                     Pt::System::EventLoop& exitLoop)
         : Pt::Http::WebSocketSession(service, stream, reply)
         , _failed(&failed)
-        , _closed(&closed)
+        , _closed(&closedFlag)
         , _code(&code)
         , _exitLoop(&exitLoop)
         {
+            inputReady() += Pt::slot(*this, &FailSession::onInputReady);
             beginReceive();
         }
 
-    protected:
-        virtual void onInput()
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
         {
             try
             {
@@ -1030,9 +1019,6 @@ class FailSession : public Pt::Http::WebSocketSession
                 close();
             }
         }
-
-        virtual void onOutput()
-        {}
 
     private:
         bool* _failed;
@@ -1087,13 +1073,6 @@ class CloseNowSession : public Pt::Http::WebSocketSession
         {
             close();
         }
-
-    protected:
-        virtual void onInput()
-        {}
-
-        virtual void onOutput()
-        {}
 };
 
 class CloseNowService : public Pt::Http::WebSocketService
@@ -1120,11 +1099,13 @@ class ReceiveSession : public Pt::Http::WebSocketSession
                        const Pt::Http::Reply& reply)
         : Pt::Http::WebSocketSession(service, stream, reply)
         {
+            inputReady() += Pt::slot(*this, &ReceiveSession::onInputReady);
+            outputReady() += Pt::slot(*this, &ReceiveSession::onOutputReady);
             beginReceive();
         }
 
-    protected:
-        virtual void onInput()
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
         {
             try
             {
@@ -1138,7 +1119,7 @@ class ReceiveSession : public Pt::Http::WebSocketSession
             }
         }
 
-        virtual void onOutput()
+        void onOutputReady(Pt::Http::WebSocketSession&)
         {
             endSend();
         }

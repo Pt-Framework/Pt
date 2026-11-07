@@ -21,9 +21,10 @@
     the next: a subscription, a cursor, a user, or a reference into
     the application domain.
 
-    The example is one session type. The constructor starts the
-    receive. The input callback reads the payload. The mapping
-    servlet and the session owner are different objects.
+    The example is one session type. The constructor connects the
+    ready signals and starts the receive. The input slot reads the
+    payload. The mapping servlet and the session owner are different
+    objects.
 
     @code
     class EchoSession : public Pt::Http::WebSocketSession
@@ -34,11 +35,13 @@
                         const Pt::Http::Reply& reply)
             : Pt::Http::WebSocketSession(service, stream, reply)
             {
+                inputReady() += Pt::slot(*this, &EchoSession::onInputReady);
+                outputReady() += Pt::slot(*this, &EchoSession::onOutputReady);
                 beginReceive();
             }
 
-        protected:
-            virtual void onInput()
+        private:
+            void onInputReady(Pt::Http::WebSocketSession&)
             {
                 try
                 {
@@ -59,9 +62,16 @@
                 }
             }
 
-            virtual void onOutput()
+            void onOutputReady(Pt::Http::WebSocketSession&)
             {
-                endSend();
+                try
+                {
+                    endSend();
+                }
+                catch(const std::exception&)
+                {
+                    close();
+                }
             }
     };
 
@@ -118,15 +128,16 @@
 
     %WebSocketSession exposes %incoming(), %outgoing(),
     %beginSend(), %endSend(), %beginReceive() and %endReceive()
-    directly. %onInput() runs when data bytes were received.
-    %onOutput() runs when data bytes were sent. A ping or a pong
-    does not run those callbacks. %onClosed() runs when the engine
+    directly, and the same ready signals as %WebSocket.
+    %inputReady() runs when data bytes were received.
+    %outputReady() runs when data bytes were sent. A ping or a pong
+    does not emit those signals. %closed() runs when the engine
     has ended the protocol and no local shutdown is outstanding.
-    After that call the servlet releases the session. The destructor
-    unbinds the stream. Call %close() after a thrown %endReceive() or
-    %endSend(), and after %endShutdown(), to abort and release.
-    %close() from %onClosed() does not release. The session does
-    not own the stream or the connection.
+    After that signal returns the servlet releases the session. The
+    destructor unbinds the stream. Call %close() after a thrown
+    %endReceive() or %endSend(), and after %endShutdown(), to abort
+    and release. %close() from %closed() does not release. The
+    session does not own the stream or the connection.
 
     %WebSocketServlet owns the live sessions of one service. The
     service owns the endpoint policy and the allocator. Construct the
@@ -171,7 +182,7 @@
     must match. A pool, or any other detach, lives in the derived
     service. Return null from %onGetSession() to decline the upgrade.
     The servlet releases a session through %onSessionClosed() after
-    %onClosed(), when %close() is called, and from its destructor
+    %closed(), when %close() is called, and from its destructor
     for every remaining session it owns. The service does not keep
     a session list. It counts the sessions %getSession() returned.
 */

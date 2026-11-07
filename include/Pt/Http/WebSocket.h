@@ -155,7 +155,8 @@ class WebSocketChannel;
 
     On the server the application does not construct this type. The
     server facade is %WebSocketSession, which exposes the same
-    message operations without a client handshake.
+    message operations and the same ready signals without a client
+    handshake.
 
     @ingroup Pt-Http-WebSocket-Client
 */

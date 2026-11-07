@@ -10,10 +10,6 @@
 
 ## Open Tasks
 
-- [session-ready](websocket-server.md#session-ready).
-  WebSocketSession exposes the same ready signals as WebSocket.
-  I/O virtuals go away.
-
 - [client-handshake](websocket-session.md#client-handshake).
   Headers set before beginConnect are kept. endConnect checks status
   101 and Sec-WebSocket-Accept.

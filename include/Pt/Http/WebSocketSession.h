@@ -8,6 +8,7 @@
 #include <Pt/Http/Api.h>
 #include <Pt/Http/WebSocketMessage.h>
 #include <Pt/Connectable.h>
+#include <Pt/Signal.h>
 #include <string>
 #include <cstddef>
 
@@ -31,9 +32,8 @@ class WebSocketChannel;
     responder has already been released when the session begins. A
     server does not mask the frames it writes.
 
-    The example starts a receive in the constructor and reads each
-    payload from the input callback. Domain state belongs in the
-    derived session.
+    The example connects the ready signals in the constructor and
+    starts a receive. Domain state belongs in the derived session.
 
     @code
     class EchoSession : public Pt::Http::WebSocketSession
@@ -44,27 +44,43 @@ class WebSocketChannel;
                         const Pt::Http::Reply& reply)
             : Pt::Http::WebSocketSession(service, stream, reply)
             {
+                inputReady() += Pt::slot(*this, &EchoSession::onInputReady);
+                outputReady() += Pt::slot(*this, &EchoSession::onOutputReady);
                 beginReceive();
             }
 
-        protected:
-            virtual void onInput()
+        private:
+            void onInputReady(Pt::Http::WebSocketSession&)
             {
-                Pt::Http::WebSocketProgress progress = endReceive();
-                if( ! progress.finished() )
+                try
                 {
-                    incoming().discard();
-                    beginReceive();
-                    return;
-                }
+                    Pt::Http::WebSocketProgress progress = endReceive();
+                    if( ! progress.finished() )
+                    {
+                        incoming().discard();
+                        beginReceive();
+                        return;
+                    }
 
-                incoming().clear();
-                beginReceive();
+                    incoming().clear();
+                    beginReceive();
+                }
+                catch(const std::exception&)
+                {
+                    close();
+                }
             }
 
-            virtual void onOutput()
+            void onOutputReady(Pt::Http::WebSocketSession&)
             {
-                endSend();
+                try
+                {
+                    endSend();
+                }
+                catch(const std::exception&)
+                {
+                    close();
+                }
             }
     };
     @endcode
@@ -77,29 +93,30 @@ class WebSocketChannel;
     data-message limit onto the connection. It does not store the
     reply. The derived constructor
     runs after that. Its members are initialized and the stream is
-    open. Start the first %beginReceive() or %beginSend() there.
+    open. Connect ready slots there, then start the first
+    %beginReceive() or %beginSend().
     There is no separate accept callback. By the time the derived
     constructor body runs, the base has already bound the stream.
 
     %incoming() and %outgoing() are the two payloads. %beginSend()
     writes %outgoing(). Call %beginSend(false) while more body will
     be written. %beginReceive() reads into %incoming().
-    %onInput() runs when data bytes were received. Call
+    %inputReady() runs when data bytes were received. Call
     %endReceive(), read %incoming() when progress reports body
     bytes, and start the next receive if the message is not
-    finished. A ping does not run %onInput(). A pong runs %onPong()
-    and does not change %incoming(). %onOutput() runs when data bytes
-    were sent. Call %endSend() and continue the send when progress is
-    not finished. %onClosed() runs when the engine has ended the
-    protocol and no local shutdown is outstanding. The stream stays
-    bound for that call. After %onClosed() returns, the servlet
-    releases the session. The destructor unbinds the stream. A
-    call to %close() from %onClosed() does not unbind or release.
-    A session that does not override %onClosed() is still released.
-    Call %close() from %onShutdownReady() after %endShutdown(), or
-    from an I/O callback after a thrown end, to abort and release.
-    The servlet also releases remaining sessions when it is
-    destroyed.
+    finished. A ping does not emit %inputReady(). A pong runs
+    %pong() and does not change %incoming(). %outputReady() runs
+    when data bytes were sent. Call %endSend() and continue the
+    send when progress is not finished. %closed() runs when the
+    engine has ended the protocol and no local shutdown is
+    outstanding. The stream stays bound for that call. After
+    %closed() returns, the servlet releases the session. The
+    destructor unbinds the stream. A call to %close() from
+    %closed() does not unbind or release. A session that connects
+    no %closed() slot is still released. Call %close() from
+    %shutdownReady() after %endShutdown(), or from an I/O slot
+    after a thrown end, to abort and release. The servlet also
+    releases remaining sessions when it is destroyed.
 
     %beginReceive() starts frame processing. Until then, incoming
     frames stay in the stream. Control frames are processed while a
@@ -135,16 +152,16 @@ class WebSocketChannel;
     close();
     @endcode
 
-    %beginPing() enqueues a ping. %onPingReady() reports that its frame
-    was written; call %endPing() from that callback to observe a write
+    %beginPing() enqueues a ping. %pingReady() reports that its frame
+    was written; call %endPing() from that signal to observe a write
     error. A received ping is answered by the engine. After a close
     frame is queued nothing further is written, so %beginPing() throws
     and a received ping is no longer answered. %beginShutdown() enqueues
     a close frame and keeps reading until
     the peer replies. A peer that never starts a receive never replies,
     so the idle timeout copied from the %WebSocketService is the only
-    bound on that wait. %onShutdownReady() reports the completed handshake;
-    call %endShutdown() from that callback to observe an error, then
+    bound on that wait. %shutdownReady() reports the completed handshake;
+    call %endShutdown() from that signal to observe an error, then
     %close(). %close() unbinds the stream and writes no frame. The
     servlet then releases this session. The destructor unbinds the
     stream. %beginSend() and %beginReceive() then throw. No close
@@ -283,7 +300,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             Does not block and emits nothing. Unbinds the stream.
             The servlet then releases this session. A call from
-            %onClosed() does not unbind or release. %beginSend()
+            %closed() does not unbind or release. %beginSend()
             and %beginReceive() then throw. No close frame leaves
             %closeCode() at 1006.
         */
@@ -299,65 +316,78 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
         /** @brief Returns true when a stream is bound.
 
-            False after %close(). True during %onClosed().
+            False after %close(). True during %closed().
         */
         bool isOpen() const;
 
-    protected:
-        /** @brief Called when data bytes were received.
+        /** @brief Returns the signal emitted when data bytes were received.
         */
-        virtual void onInput() = 0;
+        Pt::Signal<WebSocketSession&>& inputReady()
+        { return _inputReady; }
 
-        /** @brief Called when data bytes were sent.
+        /** @brief Returns the signal emitted when data bytes were sent.
         */
-        virtual void onOutput() = 0;
+        Pt::Signal<WebSocketSession&>& outputReady()
+        { return _outputReady; }
 
-        /** @brief Reports that the ping operation completed.
+        /** @brief Returns the signal emitted when a ping operation completes.
 
-            Call %endPing() to observe a write error.
+            Call %endPing() from the signal to observe a write error.
         */
-        virtual void onPingReady();
+        Pt::Signal<WebSocketSession&>& pingReady()
+        { return _pingReady; }
 
-        /** @brief Reports that the shutdown operation completed.
+        /** @brief Returns the signal emitted when a shutdown operation completes.
 
-            The stream stays bound. Call %endShutdown() to observe a
-            close-handshake error, then %close().
+            The stream stays bound. Call %endShutdown() from the signal
+            to observe a close-handshake error, then %close().
         */
-        virtual void onShutdownReady();
+        Pt::Signal<WebSocketSession&>& shutdownReady()
+        { return _shutdownReady; }
 
-        /** @brief Reports that the engine has ended the protocol.
+        /** @brief Returns the signal emitted when the engine has ended the protocol.
 
             No local shutdown is outstanding. The stream stays bound
             for this call. After it returns, the servlet releases the
             session. The destructor unbinds the stream. A call to
-            %close() from this override does not unbind or release.
+            %close() from this signal does not unbind or release.
         */
-        virtual void onClosed();
+        Pt::Signal<WebSocketSession&>& closed()
+        { return _closed; }
 
-        /** @brief Reports a received pong.
+        /** @brief Returns the signal emitted for a received pong.
 
             The payload contains arbitrary bytes and is valid for the
-            duration of this call. A pong does not change %incoming() or
-            run %onInput().
+            duration of the signal call. A pong does not change
+            %incoming() or emit %inputReady().
         */
-        virtual void onPong(const std::string& payload);
+        Pt::Signal<WebSocketSession&, const std::string&>& pong()
+        { return _pong; }
 
     private:
         void onInputReady();
 
         void onOutputReady();
 
-        void onChannelPingReady();
+        void onPingReady();
 
-        void onChannelShutdownReady();
+        void onShutdownReady();
 
-        void onChannelClosed();
+        void onClosed();
+
+        void onPong(const std::string& payload);
 
     private:
         WebSocketService* _service;
         WebSocketChannel* _channel;
         std::string _protocol;
         bool _inClosed;
+        Pt::Signal<WebSocketSession&> _inputReady;
+        Pt::Signal<WebSocketSession&> _outputReady;
+        Pt::Signal<WebSocketSession&> _pingReady;
+        Pt::Signal<WebSocketSession&> _shutdownReady;
+        Pt::Signal<WebSocketSession&> _closed;
+        Pt::Signal<WebSocketSession&, const std::string&> _pong;
 };
 
 } // namespace Http

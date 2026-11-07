@@ -127,8 +127,8 @@
     finished, discard the consumed body and call %beginReceive()
     again. After %finished(), %clear() drops the body so the same
     object can carry the next message. The server session exposes
-    the same begin and end methods on the session object; the data
-    callbacks there take the place of the ready signals.
+    the same begin and end methods and the same ready signals, with
+    %WebSocketSession&.
 
     Heartbeats, shutdown and close are socket operations, not
     payloads.
@@ -151,9 +151,9 @@
     A pending transfer is cancelled and the buffer is discarded.
     The framed stream is not resumed. %beginSend() and
     %beginReceive() then throw. When the engine ends the protocol,
-    %closed() runs on the client and %onClosed() on the session.
+    %closed() runs on the client and on the session.
     The application calls %close() on the client, or after
-    %endShutdown(). After %onClosed() the servlet releases the
+    %endShutdown(). After %closed() the servlet releases the
     session.
     %closeCode() and %closeReason() report the handshake that ended
     the stream. No close frame leaves the code at 1006.
