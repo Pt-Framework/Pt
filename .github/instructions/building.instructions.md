@@ -98,11 +98,12 @@ its own `File`, `MakeLocate`, and `InstallFile` rules.
 # Building the Artifacts
 
 - To build the currently selected configuration:
-  - `jam.bat -q -j4`
-  - `-j4` for parallel compilation (4 parallel tasks)
+  - `jam.bat -q -j6`
+  - `-jN` for parallel compilation (N parallel tasks)
   - `-q` to stop on first error
 
-- use higher numbers for `-j` to increase build speed or omit `-j` when analyzing build errors
+- use higher numbers for `-j` for regular builds
+- omit `-j` only for serisl output when analyzing build errors
 - jam uses file timestamps to determine which files need to be rebuild
 
 # Cleaning the Build
