@@ -35,8 +35,8 @@ description: "Build system & setup"
 - Switch to release configuration:
   `jam.bat switch release`
 
-- `jam.bat configure` always creates a new build configuration
-- `jam.bat switch` changes to an existing, previously configured build configuration
+- `jam.bat configure <Options>` always creates a new build configuration
+- `jam.bat switch <Config>` changes to an existing, previously configured build configuration
 - `configure` and `switch` are arguments to the jam command
 - `-sCONFIG=<Config>` sets configuration name, determines the output subdirectory
   under `build/<Config>/` and `tmp/<Config>/`
