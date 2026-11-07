@@ -119,3 +119,47 @@ steps.
 When builtin is selected the package-specific `*-Configure` is not
 called. The source package has already set `pkg.INCLUDES` and
 `pkg.TARGET`.
+
+### zlib example
+
+```
+Load zlib.jam ;
+
+EchoOption --with-inline-zlib : "Using inline zlib"
+    : $([ HasOption --with-inline-zlib ]:E="no") ;
+
+# 1. Builtin per Option (Override)
+if ! $(WITH_ZLIB) && --with-inline-zlib in $(ARGV)
+{
+    WITH_ZLIB = [ Builtin-Use zlib ] ;
+}
+
+# 2. Prebuilt or System/Custom
+if ! $(WITH_ZLIB)
+{
+    Prebuilt-Use zlib ;
+
+    WITH_ZLIB = [ ZLib-Configure
+                    [ Packages-Includes zlib ]
+                  : [ Packages-Defines zlib ]
+                  : [ Packages-LinkLibs zlib ]
+                  : [ Packages-LibDir zlib ]
+                  : [ Packages-LinkFlags zlib ] ] ;
+}
+
+# 3. Builtin fallback
+if ! $(WITH_ZLIB)
+{
+    WITH_ZLIB = [ Builtin-Use zlib ] ;
+}
+
+Packages-Echo zlib ;
+EchoOption WITH_ZLIB : "ZLib found" : $(WITH_ZLIB:E="no") ;
+
+if $(WITH_ZLIB)
+{
+    Packages-Configure zlib ;
+}
+```
+
+The same pattern applies to png, jpeg, FreeType and OpenSSL.
