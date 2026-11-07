@@ -8,12 +8,13 @@
 
 ## Open Tasks
 
-- [variables](jam-packages-interface.md#variables): Introduce the common package variables (`pkg.INCLUDES`, `pkg.DEFINES`, `pkg.LINKLIBS`, `pkg.LIBDIR`, `pkg.LINKFLAGS`, `pkg.TARGET`).
+- [variables](jam-packages-interface.md#variables): Introduce the common package variables and accessors in `packages.jam` (`Packages-Includes` / `Packages-SetIncludes` and the rest, plus `Packages-Echo` and `Packages-Configure`).
 - [modules](jam-packages-interface.md#modules): Split into `packages.jam` (interface only), `prebuilt.jam` and `builtin.jam`.
-- [source-init](jam-packages-builtin.md#init): Add `Builtin-Use` / source package root registration and presence check.
-- [source-target](jam-packages-builtin.md#target): Source packages set their own `pkg.TARGET` in their Jamconfigure.
-- [configure-skip](jam-packages-interface.md#configure): In `Jamconfigure`, skip package-specific `*-Configure` when a source package is selected by configure option; otherwise call it (values already set or system probe).
+- [prebuilt-use](jam-packages-prebuilt.md#use): `Prebuilt-Use` fills the common flag variables via the accessors and returns the package name when the bundle contains it.
+- [source-init](jam-packages-builtin.md#init): `Builtin-Use` registers the source root and returns the package name when present.
+- [source-target](jam-packages-builtin.md#target): Source packages set `pkg.TARGET` (and usually `pkg.INCLUDES`). Consumers detect builtin by a non-empty target.
+- [configure](jam-packages-interface.md#configure): In `Jamconfigure`, resolve each package with independent steps: builtin override (`--with-inline-xxx`), then prebuilt or system/custom via `*-Configure`, then builtin fallback. `Packages-Configure` only when found.
 
 ## Priority
 
-Interface and modules first, then builtin source support.
+Interface and modules first, then prebuilt and builtin Use rules, then Jamconfigure resolution.
