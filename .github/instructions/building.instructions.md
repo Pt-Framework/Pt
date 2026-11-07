@@ -103,7 +103,7 @@ its own `File`, `MakeLocate`, and `InstallFile` rules.
   - `-q` to stop on first error
 
 - use higher numbers for `-j` for regular builds
-- omit `-j` only for serisl output when analyzing build errors
+- omit `-j` only for serial output when analyzing build errors
 - jam uses file timestamps to determine which files need to be rebuild
 
 # Cleaning the Build
