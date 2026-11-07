@@ -1,4 +1,4 @@
-name: Prebuilt Dependencies
+name: Build Prebuilt Package
 
 on:
   workflow_dispatch:

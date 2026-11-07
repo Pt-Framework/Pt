@@ -1,4 +1,4 @@
-name: Build Jam snapshot
+name: Build Jam Release
 
 on:
   workflow_dispatch:
