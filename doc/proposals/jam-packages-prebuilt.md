@@ -18,16 +18,16 @@ assigns with `?=` into `ZLIB_INCLUDES` and the other five variables
 before it calls `ZLib-Configure`. The same pattern is used for png,
 jpeg, FreeType and OpenSSL.
 
-## Mapping {#mapping}
+## Use {#use}
 
-`prebuilt.jam` provides one rule that fills the common variables for a
-package:
+`prebuilt.jam` provides:
 
 ```
-Prebuilt-Fill pkg
+Prebuilt-Use pkg
 ```
 
-sets
+It returns the package name when the loaded bundle lists the package,
+empty otherwise. On success it fills the common flag variables:
 
 - `pkg.INCLUDES` from `Prebuilt-Includes`
 - `pkg.DEFINES` from the `PREBUILT_PACKAGE_DEFINES` list (via
@@ -37,7 +37,8 @@ sets
 - `pkg.LINKFLAGS` from `Prebuilt-LinkFlags`
 - leaves `pkg.TARGET` empty
 
-The existing `Prebuilt-*` rules stay. They continue to walk
+The fill is done through the `Packages-Set*` accessors. The existing
+`Prebuilt-*` primitive rules stay. They continue to walk
 `PREBUILT_PACKAGE_DEPENDS` for include paths (always) and for link
 libraries (static linkage only).
 
