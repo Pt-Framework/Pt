@@ -9,6 +9,22 @@ or a git submodule. It is never fetched at configure time. When
 selected it is built as part of the project and exposes itself through
 the common package variables.
 
+A builtin package is also a consumer of the package interface. It may
+depend on other packages. Those dependencies are already resolved when
+the builtin is configured. The builtin does not care whether a
+dependency is itself builtin, prebuilt, or system.
+
+## Timing {#timing}
+
+Package resolution in `Jamconfigure` finishes before any builtin
+`SubInclude` runs. Dependencies are resolved before the packages that
+need them. For the current set the order is zlib, then png, jpeg,
+FreeType, then ssl and crypto.
+
+When `Builtin-Use` includes a package `Jamconfigure`, and later when
+the package `Jamfile` is entered, the six variables of every dependency
+are already final. The builtin reads them only through the accessors.
+
 ## Init {#init}
 
 `builtin.jam` provides:
@@ -30,7 +46,7 @@ download. When the root exists the rule includes the package's
 
 When the package is selected, `builtin.jam` issues the `SubInclude`
 that descends into the source package's Jamfile. The descent happens
-once, after all registrations have been collected.
+once, after all package resolutions have finished.
 
 ## Target {#target}
 
@@ -49,18 +65,46 @@ A non-empty `pkg.TARGET` is how `Builtin-Use` and consumers detect a
 builtin package. There is no separate status flag and no separate
 `WITH_BUILTIN_xxx`.
 
-Consumers that see a non-empty `pkg.TARGET` link the target:
-
-```
-LinkSharedLibraries mylib : $(zlib.TARGET) ;
-```
-
-instead of using `LinkLibs` and `LinkFlags`.
-
 A source package that is also usable as a standalone project detects
 whether it was included from a parent and sets the variables only in
 that case. Its own top-level Jamconfigure continues to work when it is
 built alone.
+
+## Dependencies {#dependencies}
+
+A builtin package reads its dependencies through the accessors. The
+variables are already set. The package applies them with the ordinary
+Jam rules.
+
+Example for png that depends on zlib:
+
+```
+# src/libpng/Jamfile
+SubDirHdrs [ Packages-Includes zlib ] ;
+SubDirCcFlags [ Packages-Defines zlib ] ;
+
+Library png : png.c ... ;
+
+if [ Packages-Target zlib ]
+{
+    LinkLibraries png : [ Packages-Target zlib ] ;
+}
+else
+{
+    LinkLibs png : [ Packages-LinkLibs zlib ] ;
+    LinkFlags png : [ Packages-LinkFlags zlib ] ;
+}
+
+MakeLocate png : $(PT_OUTPUT_TARGET) ;
+```
+
+The png Jamfile does not test how zlib was resolved. A non-empty
+target means link that target; otherwise apply the flag variables.
+The consumer of png links only png.
+
+Prebuilt packages have no Jamfile, so `Prebuilt-Use` continues to walk
+`prebuilts.<pkg>.DEPENDS` and fold the transitive flags into the
+package variables. That walk is not used for builtin packages.
 
 ## Selection {#selection}
 
