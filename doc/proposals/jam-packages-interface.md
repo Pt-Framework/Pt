@@ -98,33 +98,44 @@ while `WITH_pkg` is still empty. The first success sets `WITH_pkg`.
 
 1. Builtin override: `--with-inline-xxx` is given and `Builtin-Use`
    succeeds. This overrides every other source.
-2. Prebuilt or system/custom: if `Prebuilt-Use` succeeds it fills the
-   flag variables. Then the package-specific `*-Configure` is called
-   with the current values (prebuilt paths, `-s` hints, or empty for a
-   system probe). Custom `-s` settings are hints for the system probe,
-   not a separate source.
+2. Prebuilt or system/custom: `Prebuilt-Use` fills the flag variables
+   when the bundle contains the package (side effect only). Then the
+   package-specific `*-Configure` is called with the current values
+   (prebuilt paths, `-s` hints, or empty for a system probe). Custom
+   `-s` settings are hints for the system probe, not a separate source.
 3. Builtin fallback: `Builtin-Use` succeeds when nothing earlier did.
 
-`Prebuilt-Use` and `Builtin-Use` return the package name when they
-apply, empty otherwise. The return value is assigned to `WITH_pkg`.
+`Prebuilt-Use` returns the package name when the bundle contains it,
+empty otherwise. Its return value is not assigned to `WITH_pkg`. It
+only fills the flag variables.
 
 `Builtin-Use pkg : root` includes the source package's `Jamconfigure`.
-That file sets `pkg.TARGET` (and usually `pkg.INCLUDES`) only after its
-checks succeed. A non-empty `pkg.TARGET` is the success signal.
-A configure error in the package `Jamconfigure` calls `Exit` and aborts.
-A missing root returns empty.
+That file calls `Packages-SetIncludes` and `Packages-SetTarget` only
+after its checks succeed. A non-empty `pkg.TARGET` is the success
+signal. `Builtin-Use` returns the package name when `pkg.TARGET` is
+set, empty otherwise. A configure error in the package `Jamconfigure`
+calls `Exit` and aborts. A missing root returns empty.
 
-`pkg.TARGET` is set only by builtin. Consumers detect a source package
-by a non-empty target. There is no separate `WITH_BUILTIN_xxx` flag.
+A `*-Configure` rule receives the current flag values as hints. It does
+not know whether they came from a prebuilt bundle, a user override, or
+an empty system probe. On success it writes the final flag variables
+through the `Packages-Set*` accessors and returns the package name. On
+failure it returns empty and leaves the variables unchanged. It does
+not set `pkg.TARGET`.
+
+`pkg.TARGET` is set only by a builtin package `Jamconfigure`. Consumers
+detect a source package by a non-empty target. There is no separate
+`WITH_BUILTIN_xxx` flag.
 
 `Packages-Echo` always runs so the configure output shows the option
 and the variable values. `Packages-Configure` runs only when `WITH_pkg`
-is set, so an unfound package does not persist values for later build
-steps.
+is set. It persists the six variables that are already set; it does not
+probe and it does not decide success. An unfound package does not
+persist values for later build steps.
 
 When builtin is selected the package-specific `*-Configure` is not
-called. The source package has already set `pkg.INCLUDES` and
-`pkg.TARGET`.
+called. The source package `Jamconfigure` has already set
+`pkg.INCLUDES` and `pkg.TARGET`.
 
 ### zlib example
 
