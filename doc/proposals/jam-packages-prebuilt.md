@@ -18,10 +18,9 @@ assigns with `?=` into `ZLIB_INCLUDES` and the other five variables
 before it calls `ZLib-Configure`. The same pattern is used for png,
 jpeg, FreeType and OpenSSL.
 
-The manifest uses `PREBUILT_SCHEMA`, `PREBUILT_ID`, `PREBUILT_LINKAGE`,
-`PREBUILT_PACKAGES` and dotted names of the form
-`PREBUILT_PACKAGE_LIBS.$(pkg)`. It lives under `jam/` and has an include
-guard. Schema must be 1.
+The manifest uses `PREBUILT_SCHEMA`, `PREBUILT_ID`, `PREBUILT_PACKAGES`
+and dotted names of the form `PREBUILT_PACKAGE_LIBS.$(pkg)`. It lives
+under `jam/` and has an include guard. Schema must be 1.
 
 ## Manifest {#manifest}
 
@@ -57,6 +56,16 @@ Optional fields (ignored by Jam, available for other tools):
 - `prebuilts.<pkg>.URL` — upstream URL
 - `prebuilts.<pkg>.SHA256` — checksum of key artifacts
 - any other `prebuilts.<pkg>.*` key
+
+`DEPENDS` is the dependency graph of the bundle. `Prebuilt-Use` walks
+it only to collect include paths. Link libraries, system libraries,
+frameworks and link flags are taken as written. A shared bundle lists
+the direct libraries. A static bundle lists the full closure in link
+order. There is no linkage field and no automatic walk for `LINKLIBS`.
+
+Deployment uses the same graph. A consumer calls `Prebuilt-Depends` to
+obtain the closure, then `Prebuilt-Bin` and `Prebuilt-Lib` to collect
+the files to install. `Prebuilt-Use` does not select runtime files.
 
 Components are ordinary packages. OpenSSL appears as the two packages
 `ssl` and `crypto` (or equivalent names). Each has its own directory
@@ -117,14 +126,16 @@ empty otherwise. On success it fills the common flag variables:
   any `prebuilts.<pkg>.INCLUDES`, walking `DEPENDS`)
 - `pkg.DEFINES` from `prebuilts.<pkg>.DEFINES` (via `FDefines`)
 - `pkg.LINKLIBS` from `prebuilts.<pkg>.LIBS`, `SYSLIBS` and
-  `FRAMEWORKS` (via `FLinkLibs`; static linkage also walks `DEPENDS`)
+  `FRAMEWORKS` (via `FLinkLibs`). `DEPENDS` is not walked for link
+  libraries. The bundle author lists the complete link line for the
+  linkage of this bundle.
 - `pkg.LIBDIR` from the library paths (default `<pkg>/lib` plus any
   `prebuilts.<pkg>.LIBDIR`)
 - `pkg.LINKFLAGS` from `prebuilts.<pkg>.LINKFLAGS`
 - leaves `pkg.TARGET` empty
 
 The fill is done through the `Packages-Set*` accessors. The existing
-`Prebuilt-*` primitive rules stay and continue to walk
-`prebuilts.<pkg>.DEPENDS`.
+`Prebuilt-*` primitive rules stay. They walk `prebuilts.<pkg>.DEPENDS`
+for include paths only.
 
 `Prebuilt-Use` checks that `prebuilts.version` is 1.
