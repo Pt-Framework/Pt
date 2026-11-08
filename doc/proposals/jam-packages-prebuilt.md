@@ -120,7 +120,9 @@ Prebuilt-Use pkg
 ```
 
 It returns the package name when the loaded bundle lists the package,
-empty otherwise. On success it fills the common flag variables:
+empty otherwise. On success it fills only still-empty common flag
+variables (already set values, including `-s` overrides, are left
+unchanged):
 
 - `pkg.INCLUDES` from the include paths (default `<pkg>/include` plus
   any `prebuilts.<pkg>.INCLUDES`, walking `DEPENDS`)
@@ -134,8 +136,9 @@ empty otherwise. On success it fills the common flag variables:
 - `pkg.LINKFLAGS` from `prebuilts.<pkg>.LINKFLAGS`
 - leaves `pkg.TARGET` empty
 
-The fill is done through the `Packages-Set*` accessors. The existing
-`Prebuilt-*` primitive rules stay. They walk `prebuilts.<pkg>.DEPENDS`
-for include paths only.
+The fill is done through the `Packages-Set*` accessors, but only when
+the corresponding variable is still empty. The existing `Prebuilt-*`
+primitive rules stay. They walk `prebuilts.<pkg>.DEPENDS` for include
+paths only.
 
 `Prebuilt-Use` checks that `prebuilts.version` is 1.
