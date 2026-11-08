@@ -11,16 +11,22 @@ the common package variables.
 
 ## Init {#init}
 
-`Builtin-Use` registers the source root for a package name and, when
-called for selection, returns whether the root is present:
+`builtin.jam` provides:
 
 ```
-Builtin-Use zlib : src/zlib
+Builtin-Use pkg : root
 ```
+
+It registers the source root and returns the package name when the
+package succeeds, empty otherwise.
 
 Presence is a directory check. There is no network access and no
-download. The rule returns the package name when the root exists,
-empty otherwise.
+download. When the root exists the rule includes the package's
+`Jamconfigure`. That file performs any checks the package needs.
+
+- If the directory is missing the rule returns empty.
+- If the package `Jamconfigure` calls `Exit` the whole configure aborts.
+- If the package sets `pkg.TARGET` the rule returns the package name.
 
 When the package is selected, `builtin.jam` issues the `SubInclude`
 that descends into the source package's Jamfile. The descent happens
@@ -28,20 +34,20 @@ once, after all registrations have been collected.
 
 ## Target {#target}
 
-The source package sets the common variables itself, normally in its
-own Jamconfigure or in a small registration file that the parent
-includes:
+The source package sets the common variables itself in its own
+`Jamconfigure`, and only after its checks have succeeded:
 
 ```
-zlib.INCLUDES = $(PT_TOP)/src/zlib ;
-zlib.TARGET   = z ;
+Packages-SetIncludes zlib : $(root) ;
+Packages-SetTarget   zlib : z ;
 ```
 
 (`z` or `libz`, whichever name the `Library` or `SharedLibrary` rule
 uses.) It does not set the flag variables.
 
-A non-empty `pkg.TARGET` is how consumers detect a builtin package.
-There is no separate `WITH_BUILTIN_xxx` flag.
+A non-empty `pkg.TARGET` is how `Builtin-Use` and consumers detect a
+builtin package. There is no separate status flag and no separate
+`WITH_BUILTIN_xxx`.
 
 Consumers that see a non-empty `pkg.TARGET` link the target:
 

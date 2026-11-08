@@ -108,6 +108,12 @@ while `WITH_pkg` is still empty. The first success sets `WITH_pkg`.
 `Prebuilt-Use` and `Builtin-Use` return the package name when they
 apply, empty otherwise. The return value is assigned to `WITH_pkg`.
 
+`Builtin-Use pkg : root` includes the source package's `Jamconfigure`.
+That file sets `pkg.TARGET` (and usually `pkg.INCLUDES`) only after its
+checks succeed. A non-empty `pkg.TARGET` is the success signal.
+A configure error in the package `Jamconfigure` calls `Exit` and aborts.
+A missing root returns empty.
+
 `pkg.TARGET` is set only by builtin. Consumers detect a source package
 by a non-empty target. There is no separate `WITH_BUILTIN_xxx` flag.
 
@@ -131,7 +137,7 @@ EchoOption --with-inline-zlib : "Using inline zlib"
 # 1. Builtin per Option (Override)
 if ! $(WITH_ZLIB) && --with-inline-zlib in $(ARGV)
 {
-    WITH_ZLIB = [ Builtin-Use zlib ] ;
+    WITH_ZLIB = [ Builtin-Use zlib : src/zlib ] ;
 }
 
 # 2. Prebuilt or System/Custom
@@ -150,7 +156,7 @@ if ! $(WITH_ZLIB)
 # 3. Builtin fallback
 if ! $(WITH_ZLIB)
 {
-    WITH_ZLIB = [ Builtin-Use zlib ] ;
+    WITH_ZLIB = [ Builtin-Use zlib : src/zlib ] ;
 }
 
 Packages-Echo zlib ;
