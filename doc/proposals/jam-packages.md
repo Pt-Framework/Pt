@@ -8,7 +8,6 @@
 
 ## Open Tasks
 
-- [variables](jam-packages-interface.md#variables): Introduce the common package variables and accessors in `packages.jam` (`Packages-Includes` / `Packages-SetIncludes` and the rest, plus `Packages-Echo` and `Packages-Configure`).
 - [modules](jam-packages-interface.md#modules): Split into `packages.jam` (interface only), `prebuilt.jam` and `builtin.jam`.
 - [prebuilt-use](jam-packages-prebuilt.md#use): `Prebuilt-Use` loads `prebuilts.jam`, fills `INCLUDES` and `LIBDIR` over the `DEPENDS` closure, and takes `LINKLIBS`, `DEFINES` and `LINKFLAGS` from the package entry as complete public usage. Returns the package name when the bundle contains it.
 - [source-init](jam-packages-builtin.md#init): `Builtin-Use pkg : root` registers the source root, includes the package Jamconfigure, and returns the package name when `pkg.TARGET` is set.

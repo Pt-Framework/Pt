@@ -1,0 +1,188 @@
+if ! $(JAMBASE_PACKAGES_JAM_INCLUDED) {
+JAMBASE_PACKAGES_JAM_INCLUDED = true ;
+
+# packages.jam
+#
+# Common variable interface for source and prebuilt packages. A package
+# name pkg exposes six dotted variables: pkg.INCLUDES, pkg.DEFINES,
+# pkg.LINKLIBS, pkg.LIBDIR, pkg.LINKFLAGS and pkg.TARGET. This module
+# knows nothing about prebuilt bundles, source package roots, configure
+# options, or resolution order.
+#
+# pkg.INCLUDES is raw include directories. pkg.DEFINES is formatted
+# compiler flags (-DFOO=1 / /DFOO=1), the result of FDefines.
+# pkg.LINKLIBS is link-library flags. pkg.LIBDIR is raw library search
+# directories. pkg.LINKFLAGS is extra linker flags. pkg.TARGET is the
+# Jam target name of a source-built library; when it is set, linking
+# uses that target and pkg.LINKLIBS, pkg.LIBDIR and pkg.LINKFLAGS stay
+# unused for that consumer. Empty lists are omitted.
+#
+# Direct assignment to the dotted names remains valid. The accessors
+# are the preferred form so callers do not spell the names by hand.
+
+# Packages-Includes <pkg>
+#
+# Returns pkg.INCLUDES, the raw include directories of the package.
+# Empty if unset.
+#
+rule Packages-Includes ( pkg )
+{
+    local name = $(pkg).INCLUDES ;
+    return $($(name)) ;
+}
+
+# Packages-Defines <pkg>
+#
+# Returns pkg.DEFINES, the formatted compiler flags of the package
+# (the result of FDefines). Empty if unset.
+#
+rule Packages-Defines ( pkg )
+{
+    local name = $(pkg).DEFINES ;
+    return $($(name)) ;
+}
+
+# Packages-LinkLibs <pkg>
+#
+# Returns pkg.LINKLIBS, the link-library flags of the package. Empty
+# if unset.
+#
+rule Packages-LinkLibs ( pkg )
+{
+    local name = $(pkg).LINKLIBS ;
+    return $($(name)) ;
+}
+
+# Packages-LibDir <pkg>
+#
+# Returns pkg.LIBDIR, the raw library search directories of the
+# package. Empty if unset. The caller applies FLibPath when passing
+# the result to LinkFlags.
+#
+rule Packages-LibDir ( pkg )
+{
+    local name = $(pkg).LIBDIR ;
+    return $($(name)) ;
+}
+
+# Packages-LinkFlags <pkg>
+#
+# Returns pkg.LINKFLAGS, the extra linker flags of the package. Empty
+# if unset.
+#
+rule Packages-LinkFlags ( pkg )
+{
+    local name = $(pkg).LINKFLAGS ;
+    return $($(name)) ;
+}
+
+# Packages-Target <pkg>
+#
+# Returns pkg.TARGET, the Jam target name of a source-built library.
+# Empty if the package is prebuilt or system. A non-empty value is
+# how consumers detect a builtin package.
+#
+rule Packages-Target ( pkg )
+{
+    local name = $(pkg).TARGET ;
+    return $($(name)) ;
+}
+
+# Packages-SetIncludes <pkg> : <values>
+#
+# Replaces pkg.INCLUDES with values. values are raw include
+# directories.
+#
+rule Packages-SetIncludes ( pkg : values * )
+{
+    local name = $(pkg).INCLUDES ;
+    $(name) = $(values) ;
+}
+
+# Packages-SetDefines <pkg> : <values>
+#
+# Replaces pkg.DEFINES with values. values are formatted compiler
+# flags (the result of FDefines), not raw preprocessor tokens.
+#
+rule Packages-SetDefines ( pkg : values * )
+{
+    local name = $(pkg).DEFINES ;
+    $(name) = $(values) ;
+}
+
+# Packages-SetLinkLibs <pkg> : <values>
+#
+# Replaces pkg.LINKLIBS with values. values are link-library flags.
+#
+rule Packages-SetLinkLibs ( pkg : values * )
+{
+    local name = $(pkg).LINKLIBS ;
+    $(name) = $(values) ;
+}
+
+# Packages-SetLibDir <pkg> : <values>
+#
+# Replaces pkg.LIBDIR with values. values are raw library search
+# directories, not the result of FLibPath.
+#
+rule Packages-SetLibDir ( pkg : values * )
+{
+    local name = $(pkg).LIBDIR ;
+    $(name) = $(values) ;
+}
+
+# Packages-SetLinkFlags <pkg> : <values>
+#
+# Replaces pkg.LINKFLAGS with values. values are extra linker flags.
+#
+rule Packages-SetLinkFlags ( pkg : values * )
+{
+    local name = $(pkg).LINKFLAGS ;
+    $(name) = $(values) ;
+}
+
+# Packages-SetTarget <pkg> : <value>
+#
+# Replaces pkg.TARGET with value. value is the Jam target name of a
+# source-built library. Only a builtin package Jamconfigure sets this.
+#
+rule Packages-SetTarget ( pkg : value )
+{
+    local name = $(pkg).TARGET ;
+    $(name) = $(value) ;
+}
+
+# Packages-Echo <pkg>
+#
+# Prints the six common variables via EchoOption, including empty
+# lists. Operates only on the common names. Does not decide whether
+# the package was found.
+#
+rule Packages-Echo ( pkg )
+{
+    EchoOption $(pkg).INCLUDES  : "$(pkg) includes" ;
+    EchoOption $(pkg).DEFINES   : "$(pkg) defines" ;
+    EchoOption $(pkg).LINKLIBS  : "$(pkg) libs" ;
+    EchoOption $(pkg).LIBDIR    : "$(pkg) library dir" ;
+    EchoOption $(pkg).LINKFLAGS : "$(pkg) link flags" ;
+    EchoOption $(pkg).TARGET    : "$(pkg) target" ;
+}
+
+# Packages-Configure <pkg>
+#
+# Persists the six common variables via Configure, including empty
+# lists. Operates only on the common names. Does not probe and does
+# not decide success. The caller invokes this only when the package
+# was found.
+#
+rule Packages-Configure ( pkg )
+{
+    Configure $(pkg).INCLUDES ;
+    Configure $(pkg).DEFINES ;
+    Configure $(pkg).LINKLIBS ;
+    Configure $(pkg).LIBDIR ;
+    Configure $(pkg).LINKFLAGS ;
+    Configure $(pkg).TARGET ;
+}
+
+} # JAMBASE_PACKAGES_JAM_INCLUDED
