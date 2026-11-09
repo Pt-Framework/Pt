@@ -1,0 +1,21 @@
+if ! $(JAMBASE_BUILTIN_JAM_INCLUDED) {
+JAMBASE_BUILTIN_JAM_INCLUDED = true ;
+
+# builtin.jam
+#
+# Registers source-package roots and selects them. Loaded on demand
+# by Jamconfigure. This module knows nothing about prebuilt bundles,
+# configure option parsing, or resolution order.
+#
+# Builtin-Use pkg : root
+#
+# Returns the package name when the source package is selected, empty
+# otherwise. Selection (directory check, include of the package
+# Jamconfigure, pkg.TARGET) is filled in by later work. This stub
+# does not select.
+
+rule Builtin-Use ( pkg : root )
+{
+}
+
+} # JAMBASE_BUILTIN_JAM_INCLUDED

@@ -8,7 +8,6 @@
 
 ## Open Tasks
 
-- [modules](jam-packages-interface.md#modules): Split into `packages.jam` (interface only), `prebuilt.jam` and `builtin.jam`.
 - [prebuilt-use](jam-packages-prebuilt.md#use): `Prebuilt-Use` loads `prebuilts.jam`, fills `INCLUDES` and `LIBDIR` over the `DEPENDS` closure, and takes `LINKLIBS`, `DEFINES` and `LINKFLAGS` from the package entry as complete public usage. Returns the package name when the bundle contains it.
 - [source-init](jam-packages-builtin.md#init): `Builtin-Use pkg : root` registers the source root, includes the package Jamconfigure, and returns the package name when `pkg.TARGET` is set.
 - [source-target](jam-packages-builtin.md#target): Source packages set `pkg.TARGET` (and usually `pkg.INCLUDES`) on success. Consumers detect builtin by a non-empty target.
@@ -17,4 +16,4 @@
 
 ## Priority
 
-Interface and modules first, then prebuilt and builtin Use rules, then Jamconfigure / probes.
+Prebuilt and builtin Use rules first, then Jamconfigure / probes.

@@ -1,6 +1,13 @@
 if ! $(PREBUILT_JAM_INCLUDED) {
 PREBUILT_JAM_INCLUDED = true ;
 
+# prebuilt.jam
+#
+# Maps a prebuilt bundle onto the common package variables. Loaded on
+# demand by Jamconfigure. Fetch, identity, Prebuilt-Has, Prebuilt-Bin
+# and Prebuilt-Lib live here. Prebuilt-Use currently loads the bundle
+# jam/packages.jam manifest; filling pkg.* is later work.
+
 Load fetch.jam ;
 
 # Identity: <os>-<arch>-<toolset>[-<abi>]. Windows always has md/mdd.

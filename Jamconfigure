@@ -464,6 +464,7 @@ if ! $(WITH_ATOMICS)
 #############################################################################
 
 Load prebuilt.jam ;
+Load builtin.jam ;
 
 PT_WITH_PREBUILT = [ HasOption --with-prebuilt ] ;
 PT_PREBUILT_ID ?= [ GetOption --with-prebuilt ] ;
