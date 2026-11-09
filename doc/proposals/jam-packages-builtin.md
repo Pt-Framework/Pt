@@ -105,6 +105,9 @@ else
 MakeLocate png : $(PT_OUTPUT_TARGET) ;
 ```
 
+The png sources are C, so the example uses `SubDirCcFlags`. A C++
+consumer uses `SubDirC++Flags`.
+
 The png Jamfile does not test how zlib was resolved. A non-empty
 target means link that target; otherwise apply `LINKLIBS` together with
 `FLibPath` of `LIBDIR` and `LINKFLAGS`. The consumer of png links only

@@ -58,6 +58,8 @@ LinkFlags tgt : [ FLibPath [ Packages-LibDir pkg ] ]
                 [ Packages-LinkFlags pkg ] ;
 ```
 
+C targets use `SubDirCcFlags`. C++ targets use `SubDirC++Flags`.
+
 Consumers, user overrides and Configure rules use only the dotted form.
 The former five-tuple names (`ZLIB_*`, `PNG_*`, `JPEG_*`, `FREETYPE_*`,
 `SSL_*`) are not produced and are not read.
