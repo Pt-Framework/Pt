@@ -13,11 +13,10 @@ OUTGOING="$JAM_ROOT/core.outgoing"
 SUPPORTED_FORMAT=1
 
 INIT=
-for arg do
-    if [ "$arg" = "--init" ]; then
-        INIT=1
-    fi
-done
+if [ "$1" = "init" ]; then
+    INIT=1
+    shift
+fi
 
 case `uname -s` in
 Darwin)
@@ -48,14 +47,14 @@ modules/order.c
 need_init()
 {
     echo "Jam core is missing or does not match snapshot $JAM_PIN at \"$JAM_ROOT\"." >&2
-    echo "Run: \"$0\" --init" >&2
+    echo "Run: \"$0\" init" >&2
     exit 1
 }
 
 invalid_core()
 {
     echo "Jam core is invalid at \"$JAM_ROOT\"." >&2
-    echo "Remove core/ and run --init to install snapshot $JAM_PIN." >&2
+    echo "Remove core/ and run init to install snapshot $JAM_PIN." >&2
     exit 1
 }
 

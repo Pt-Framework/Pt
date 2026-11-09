@@ -70,15 +70,15 @@ jobs:
         include:
           - os: windows-2022
             host_id: windows-x64
-            init: .\jam.bat --init
+            init: .\jam.bat init
             binary: jam/core/bin/windows-x64/jam.exe
           - os: ubuntu-24.04
             host_id: linux-x64
-            init: ./jam.sh --init
+            init: ./jam.sh init
             binary: jam/core/bin/linux-x64/jam
           - os: macos-15
             host_id: macos-universal
-            init: ./jam.sh --init
+            init: ./jam.sh init
             binary: jam/core/bin/macos-universal/jam
     steps:
       - uses: actions/checkout@v6

@@ -8,12 +8,12 @@
 
 <PRE>
 jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
-    [ -d <I>debug</I> ] 
-    [ -f <I>jambase</I> ] 
-    [ -j <I>jobs</I> ] 
-    [ -o <I>actionsfile</I> ] 
-    [ -s <I>var</I>=<I>value</I> ] 
-    [ -t <I>target</I> ] 
+    [ -d <I>debug</I> ]
+    [ -f <I>jambase</I> ]
+    [ -j <I>jobs</I> ]
+    [ -o <I>actionsfile</I> ]
+    [ -s <I>var</I>=<I>value</I> ]
+    [ -t <I>target</I> ]
     [ <I>target</I> ... ]
 </PRE>
 
@@ -31,8 +31,8 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     language. <B>jam</B> parses the build scripts to identify targets and
     sources, examines the filesystem to determine which targets need updating,
     and issues OS commands to update targets. The build scripts consist of
-    the Jambase which is distributed with jam and provides a boilerplate 
-    dependency information and updating actions for common use. It relies 
+    the Jambase which is distributed with jam and provides a boilerplate
+    dependency information and updating actions for common use. It relies
     on the user-provided files named "Jamconfigure" and "Jamfile", to define
     the build configuration and to enumerate actual targets and sources.
     The build process is arranged in a several steps, normally consisting
@@ -41,7 +41,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
 
     The Jambase is described in the <a href="jam-jambase.html">Jambase
-    Reference</a> and the document <a href="jam-jamfile.html">Using the 
+    Reference</a> and the document <a href="jam-jamfile.html">Using the
     Jambase</A>.
 <P>
 
@@ -65,7 +65,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
         <TD> Build all targets anyway, even if they are up-to-date.
 
         <TR><TD VALIGN=TOP><CODE> -d <I>n</I>  </CODE>
-        <TD> Enable cummulative debugging levels from 1 to <I>n</I>.  
+        <TD> Enable cummulative debugging levels from 1 to <I>n</I>.
         Interesting values are:
 
         <DL COMPACT>
@@ -73,10 +73,10 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
         <DT> 2 <DD> Show "quiet" actions and display all action text, as they are executed
         <DT> 3 <DD> Show dependency analysis, and target/source timestamps/paths
         <DT> 4 <DD> Show arguments and timming of shell invocations
-        <DT> 5 <DD> Show rule invocations and variable expansions 
-        <DT> 6 <DD> Show directory/header file/archive scans, and attempts at binding to targets 
-        <DT> 7 <DD> Show variable settings 
-        <DT> 8 <DD> Show variable fetches, variable expansions, and evaluation of '"if"' expressions 
+        <DT> 5 <DD> Show rule invocations and variable expansions
+        <DT> 6 <DD> Show directory/header file/archive scans, and attempts at binding to targets
+        <DT> 7 <DD> Show variable settings
+        <DT> 8 <DD> Show variable fetches, variable expansions, and evaluation of '"if"' expressions
         <DT> 9 <DD> Show variable manipulation, scanner tokens, and memory usage
         <DT> 10 <DD> Show profile information for rules, both timing and memory
         <DT> 11 <DD> Show parsing progress of Jamfiles
@@ -99,7 +99,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
         in the order of appearance in the Jambase/Jamfiles.
 
         <TR><TD VALIGN=TOP><CODE> -j <I>n</I></CODE>
-        <TD> Run up to <I>n</I> shell commands concurrently (UNIX 
+        <TD> Run up to <I>n</I> shell commands concurrently (UNIX
         and NT only).  The default is 1.
 
         <TR><TD VALIGN=TOP><CODE> -n</CODE>
@@ -120,7 +120,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
         environment.
 
         <TR><TD VALIGN=TOP><CODE> -t <I>target</I></CODE>
-        <TD> Rebuild <I>target</I> and everything that depends on it, 
+        <TD> Rebuild <I>target</I> and everything that depends on it,
          even if it is up-to-date.
 
         <TR><TD VALIGN=TOP><CODE> -v</CODE>
@@ -142,19 +142,19 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     remains the current directory of the invocation, so Jamconfigure and
     Jamfile are found in the project. The installed runtime supplies the
     Jam rules; the project supplies its build configuration and targets.
-    
+
 <DT> <P> <H3> Project Specific Jam Scripts </H3> <DD>
 <P>
     When the Jambase is loaded, <B>jam</B> reads up to three other user-defined
-    files from the project root, the Jamconfigure script, the Jamfile and the 
-    Jamrules. All three are written in the jam script language. The file 
-    Jamconfigure is mandatory and describes the build configuration. The 
-    Jamfile describes what to do with the source files in its directory. It 
+    files from the project root, the Jamconfigure script, the Jamfile and the
+    Jamrules. All three are written in the jam script language. The file
+    Jamconfigure is mandatory and describes the build configuration. The
+    Jamfile describes what to do with the source files in its directory. It
     may also cause Jamfiles in other directories to be read. The Jamrules file
     is generated when the Jamconfigure script is executed in the configure step
     and contains a set of project-specific rule and variable definitions. The
     first Jamfile normally causes the Jamrules file to be read, when it calls
-    the SubDir rule. 
+    the SubDir rule.
 
 <DT> <P> <H3> Jam Executable Wrappers </H3> <DD>
 <P>
@@ -168,11 +168,12 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     are <CODE>windows-x64</CODE>, <CODE>linux-x64</CODE>, and
     <CODE>macos-universal</CODE>.
 <P>
-    <CODE>--init</CODE> is an option of the entry scripts. They remove it
-    before invoking the Jam executable. <CODE>--init</CODE> validates the
+    <CODE>init</CODE> is a command of the entry scripts. They consume it
+    before invoking the Jam executable. <CODE>init</CODE> validates the
     supported snapshot format revision in <CODE>core/</CODE> and builds a
     binary for the selected host when that binary is missing, then exits
-    without running a project build. A normal invocation may also build a
+    without running a project build. It ignores arguments that follow the
+    command. A normal invocation may also build a
     missing host binary from <CODE>core/src/</CODE>. A packaged
     <CODE>windows-x64</CODE> binary is checked in under
     <CODE>jam/core/bin/windows-x64/</CODE>. Other hosts build the binary
@@ -212,15 +213,15 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
     The build must be configured before any other build steps can be performed.
     Build configuration is started when jam is executed for the target named
-    "configure" and a log is written to a file named Jamrules.log. The result 
+    "configure" and a log is written to a file named Jamrules.log. The result
     of the configuration is the Jamrules file, which in turn is loaded at the
-    begin of the build step. Before the user-defined tests are executed, the 
+    begin of the build step. Before the user-defined tests are executed, the
     built-in tests are always run to detect some basic capabilities of the
     build host platform for example how to delete files or create directories.
     The Jambase will then read in a file named Jamconfigure, which describes
-    the project-specific configuration i.e. wich tests are run to determine 
-    if all required dependencies, such as system headers and libraries are 
-    present. 
+    the project-specific configuration i.e. wich tests are run to determine
+    if all required dependencies, such as system headers and libraries are
+    present.
 
 <DT> <P> <H3> Named Configurations </H3> <DD>
 <P>
@@ -235,7 +236,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
     After sucessful build configuration, the actual build can be started. For
     this, the Jamfile is read, which describes which targets are built from the
-    source files etc. The Jamrules file is read by the first Jamfile when the 
+    source files etc. The Jamrules file is read by the first Jamfile when the
     SubDir rue is called for the first time, which is usually as the first
     statement in a Jamfile. The build step is initiated when jam is executed
     for a build target (no target implies the target "all", which updates all
@@ -243,7 +244,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 
 <DT> <P> <H3> Clean Up </H3> <DD>
 <P>
-    The build can be cleaned up, i.e. all built targets can be removed by 
+    The build can be cleaned up, i.e. all built targets can be removed by
     the clean step. Running jam for the "clean" target will work without
     error even if the build has failed or not all build targets are present
     for other reasons. The Jamfile provides information what files can be
@@ -262,9 +263,9 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 </A>
     <P>
 
-    The <b>Jam</b> program has four phases of operation: start-up, parsing, 
-    binding, and updating. These phases are performed whenever the jam 
-    program is executed to perform a build step. Do not confuse the four 
+    The <b>Jam</b> program has four phases of operation: start-up, parsing,
+    binding, and updating. These phases are performed whenever the jam
+    program is executed to perform a build step. Do not confuse the four
     phases of operation with the steps of the build process.
 
 <DT> <P> <H3> Start-up </H3> <DD>
@@ -296,22 +297,22 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     In the parsing phase, <b>jam</b> reads and executes the Jambase
     file, by default the built-in one. It is written in the <b>jam</b>
     language. See <a href="jam-language.html"> Language</a> below. The
-    Jambase reads (via the "include" rule) the a user-provided files 
+    Jambase reads (via the "include" rule) the a user-provided files
     called "Jamconfigure" and "Jamfile".
 
     <P>
 
-    Collectively, the purpose of the Jambase, Jamconfigure and the 
-    Jamfile is to name built targets and source files, construct the 
+    Collectively, the purpose of the Jambase, Jamconfigure and the
+    Jamfile is to name built targets and source files, construct the
     dependency graph among them, and associate build actions with targets.
     The Jambase defines boilerplate rules and variable assignments,
-    and the Jamconfigure and Jamfile uses these to specify the actual 
+    and the Jamconfigure and Jamfile uses these to specify the actual
     relationship among the target and source files.  See the <a
     href="jam-jambase.html">Jambase Reference</a> and the document <a
     href="jam-jamfile.html">Using the Jambase</A> for information.
 
 <A NAME="binding">
-<DT> <P> <H3> Binding </H3> 
+<DT> <P> <H3> Binding </H3>
 </A> <DD>
 
     <P> <H5> Binding </H5>
@@ -385,7 +386,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     graph,  this time executing the update actions for each target
     marked for update during the binding phase.  If a  target's
     updating actions fail, then all other targets which depend on
-    that target are skipped. The updating phase is not important for 
+    that target are skipped. The updating phase is not important for
     the configure build step, where no dependency graph is set up.
 
     <P>
@@ -416,7 +417,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <PRE>
     Main myprog: main.c util.c ; #<I>WRONG!</I>
 </PRE>
-    Jam doesn't distinguish between a typo and a target called "myprog:", so 
+    Jam doesn't distinguish between a typo and a target called "myprog:", so
     if you get strange results, the first thing you should check for in your
     Jamfile is missing whitespace.
 <P>
@@ -430,7 +431,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 </PRE>
     This specifies that the C and C++ compiler should be configured. The rules
     named ConfigureCc and ConfigureC++ do not require any arguments, therefore
-    the statement consists just of the rulename followed by a semicolon. The 
+    the statement consists just of the rulename followed by a semicolon. The
     build can then be configured by executing:
 <PRE>
     jam configure
@@ -450,8 +451,8 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     the sources can be found.
     This Main rule specifies that there is a main.c and util.c file in the
     same directory as specified by the SubDir rule, and that those source
-    files should be compiled and linked into an executable called myprog. 
-    If you cd to the directory where this Jamfile lives, you can see the 
+    files should be compiled and linked into an executable called myprog.
+    If you cd to the directory where this Jamfile lives, you can see the
     exactly how <b>jam</b> would build myprog with:
 <PRE>
     jam -n
@@ -466,19 +467,19 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     Consider this Jamfile:
 <PRE>
     SubDir $(MY_TOP) ;
-    Main myprog : main.c util.c ;                   
-    LinkLibraries myprog : tree ;     
-    Library tree : treemake.c treetrav.c ;    
+    Main myprog : main.c util.c ;
+    LinkLibraries myprog : tree ;
+    Library tree : treemake.c treetrav.c ;
 </PRE>
 <P>
     The Main rule specifies that an executable called myprog will be built.
-    The compiled main.c and util.c objects will be linked to produce myprog. 
+    The compiled main.c and util.c objects will be linked to produce myprog.
     The LinkLibraries rule specifies that tree will be linked into myprog
-    as well. The Library rule specifies which source files will be compiled 
+    as well. The Library rule specifies which source files will be compiled
     and archived into the tree library.
 <P>
     The Jamfile above refers to targets like "myprog" and "tree". However,
-    depending on the platform you're building on, the actual filenames of 
+    depending on the platform you're building on, the actual filenames of
     those targets could be "myprog.exe" and "tree.lib". Most Jambase rules
     supply the actual filenames of targets, so that Jamfiles themselves need
     not make any platform-specific filename references.
@@ -491,9 +492,9 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     You can use any buildable target on the <b>jam</b> command line to build a
     subset of defined targets. In our example:
 <PRE>
-    jam libtree.a 
+    jam libtree.a
 </PRE>
-    on Unix builds the libtree library and all the compiled objects that go 
+    on Unix builds the libtree library and all the compiled objects that go
     in it.
 <P>
 
@@ -509,10 +510,10 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     Most Jambase rules that define file targets also define pseudotargets
     which are dependent on types of file targets. For example, Jambase defines
     a pseudotarget called "clean", which is dependent on all targets created in
-    the build step. So the command:  
+    the build step. So the command:
 <PRE>
         jam clean
-</PRE> 
+</PRE>
     used with the above example would cause the program myprog, the tree
     library, and all object files to be removed and thus clean the build.
     Also, there is one pseudotarget built into <b>jam</b> itself, called
@@ -528,7 +529,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     <li>Modify your Jambase and change the name of the conflicting pseudotarget.
     (Pseudotargets are defined in Jambase using the NOTFILE rule.)
 <p>
-    <li>Use grist on the conflicting target name in your Jamfile. E.g., 
+    <li>Use grist on the conflicting target name in your Jamfile. E.g.,
         instead of
     <PRE>
         File lib : libfoo.a ;
@@ -545,12 +546,12 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     Jambase rules set dependencies on targets, so that if you update a source
     file, all the file targets that depend on that source file, and only the
     ones that depend on that source file, will be updated (rebuilt) the next
-    time you run <b>jam</b>. 
+    time you run <b>jam</b>.
 <P>
     Here are some of the dependencies that get set when <b>jam</b> runs on NT
     using the example Jamfile above:
 <CENTER>
-    <TABLE> 
+    <TABLE>
         <TR><TD><B>Target</B><TD>&nbsp;&nbsp;&nbsp;<TD><B>Depends on</B></TD>
         <TR><TD>myprog.exe<TD><TD>main.obj, util.obj, libtree.lib
         <TR><TD>libtree.lib<TD><TD>treemake.obj, treetrav.obj
@@ -560,14 +561,14 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
     Furthermore, the Main and Library rules set up recursive header scanning
     on their source targets. So after <b>jam</b> has finished parsing the
-    Jamfile and setting the rule-driven dependencies, it scans the source 
+    Jamfile and setting the rule-driven dependencies, it scans the source
     files for "#include" lines. All #include files found during this scan
     become dependencies of the compiled object. E.g., all header files used
     to compile treetrav.c would be made dependencies of treetrav.obj.
 <P>
     As a result, when you run <b>jam</b>, it will rebuild targets if either
-    the source files change or the header files change. You can't tell by 
-    looking at a Jamfile which header files are dependencies, but you can 
+    the source files change or the header files change. You can't tell by
+    looking at a Jamfile which header files are dependencies, but you can
     easily display those dependencies with:
 <PRE>
     jam -nd+3
@@ -576,16 +577,16 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <DT> <P> <H3> Rule Ordering </H3> <DD>
 <P>
     Rules that define a target, like the Main, Library and SharedLibrary rule
-    must be invoked before any other rule using the same target is invoked. 
+    must be invoked before any other rule using the same target is invoked.
     For example, the LinkLibraries rule for the target myprog must be called
     after the Main rule defined the target myprog. However, do not expect the
     actions to be executed later in the order the rules were invoked, as the
-    rules only specify dependencies and <b>jam</b> figures out the order in 
+    rules only specify dependencies and <b>jam</b> figures out the order in
     which targets are built from their dependencies.
 <P>
     Some rules, set variables which are used by subsequent rule invocations,
     and their ordering is important. For example, the SubDir* rules (discussed
-    later) must be invoked in a particular order. 
+    later) must be invoked in a particular order.
 <P>
 
 <A NAME="jam_diagnostics">
@@ -671,7 +672,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     <P>
 
     With the -j flag, errors from failed commands can get staggeringly
-    mixed up.  
+    mixed up.
 
     <P>
 

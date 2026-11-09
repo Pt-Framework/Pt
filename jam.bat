@@ -15,13 +15,10 @@ set "JAM=%JAM_BINARY_DIR%\jam.exe"
 set "SRC=%CORE%\src"
 
 set "INIT="
-:parse_arguments
-if "%~1"=="" goto arguments_parsed
-if /i "%~1"=="--init" set "INIT=1"
-shift
-goto parse_arguments
-
-:arguments_parsed
+if /i "%~1"=="init" (
+    set "INIT=1"
+    shift
+)
 if defined INIT goto do_init
 
 call :classify_core "%CORE%"
@@ -309,12 +306,12 @@ exit /b 0
 
 :need_init
 echo Jam core is missing or does not match snapshot %JAM_PIN% at "%JAM_ROOT%".
-echo Run: "%~f0" --init
+echo Run: "%~f0" init
 exit /b 1
 
 :invalid_core
 echo Jam core is invalid at "%JAM_ROOT%".
-echo Remove core/ and run --init to install snapshot %JAM_PIN%.
+echo Remove core/ and run init to install snapshot %JAM_PIN%.
 exit /b 1
 
 :compiler_missing

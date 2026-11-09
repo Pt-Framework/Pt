@@ -66,7 +66,7 @@ behavior rather than introducing a separate extension search mechanism.
 
 ## Documentation and migration
 
-The Jam getting-started and usage documentation describes `--init`,
+The Jam getting-started and usage documentation describes `init`,
 `JAM_ROOT`, the three installation sources, the snapshot pin, the
 `core/` and `local/` ownership boundary, and the local module search
 order. It documents `JAM_DIST_ROOT` and replacing the entry scripts to
