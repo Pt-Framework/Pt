@@ -10,7 +10,7 @@
 
 - [variables](jam-packages-interface.md#variables): Introduce the common package variables and accessors in `packages.jam` (`Packages-Includes` / `Packages-SetIncludes` and the rest, plus `Packages-Echo` and `Packages-Configure`).
 - [modules](jam-packages-interface.md#modules): Split into `packages.jam` (interface only), `prebuilt.jam` and `builtin.jam`.
-- [prebuilt-use](jam-packages-prebuilt.md#use): `Prebuilt-Use` loads `prebuilts.jam`, fills the common flag variables via the accessors from `prebuilts.*` (`LIBDIR` over the `DEPENDS` closure) and returns the package name when the bundle contains it.
+- [prebuilt-use](jam-packages-prebuilt.md#use): `Prebuilt-Use` loads `prebuilts.jam`, fills `INCLUDES` and `LIBDIR` over the `DEPENDS` closure, and takes `LINKLIBS`, `DEFINES` and `LINKFLAGS` from the package entry as complete public usage. Returns the package name when the bundle contains it.
 - [source-init](jam-packages-builtin.md#init): `Builtin-Use pkg : root` registers the source root, includes the package Jamconfigure, and returns the package name when `pkg.TARGET` is set.
 - [source-target](jam-packages-builtin.md#target): Source packages set `pkg.TARGET` (and usually `pkg.INCLUDES`) on success. Consumers detect builtin by a non-empty target.
 - [source-deps](jam-packages-builtin.md#dependencies): Builtin packages consume already-resolved dependencies through the accessors. Consumers apply `FLibPath(LIBDIR)` and `LINKFLAGS`. Dependency packages are resolved first.

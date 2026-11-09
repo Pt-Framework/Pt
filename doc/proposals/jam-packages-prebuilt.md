@@ -61,12 +61,16 @@ Optional fields (ignored by Jam, available for other tools):
 - `prebuilts.<pkg>.SHA256` — checksum of key artifacts
 - any other `prebuilts.<pkg>.*` key
 
+Each package entry is the complete public usage of that package for
+the linkage of this bundle: `LIBS`, `SYSLIBS`, `FRAMEWORKS`, `DEFINES`
+and `LINKFLAGS`. The author copies public flags of dependencies onto
+the consumed entry when a consumer of that entry needs them. A shared
+bundle lists the public libraries. A static bundle lists the full
+closure in link order.
+
 `DEPENDS` is the dependency graph of the bundle. `Prebuilt-Use` walks
-it to collect include paths and library search directories. Link
-libraries, system libraries, frameworks and link flags are taken as
-written. A shared bundle lists the direct libraries. A static bundle
-lists the full closure in link order. There is no linkage field and no
-automatic walk for `LINKLIBS`.
+it only for include paths and library search directories. There is no
+linkage field and no walk for `LINKLIBS`, `DEFINES` or `LINKFLAGS`.
 
 Deployment uses the same graph. A consumer calls `Prebuilt-Depends` to
 obtain the closure, then `Prebuilt-Bin` and `Prebuilt-Lib` to collect
@@ -88,6 +92,8 @@ prebuilts.zlib.LIBS     = z ;
 prebuilts.zlib.VERSION  = 1.3.1 ;
 prebuilts.zlib.LICENSE  = Zlib ;
 
+# ssl.LIBS is the public link line of this shared bundle.
+# A static bundle lists ssl crypto in link order.
 prebuilts.ssl.LIBS      = ssl ;
 prebuilts.ssl.DEPENDS   = crypto ;
 prebuilts.ssl.SYSLIBS   = crypt32 ws2_32 advapi32 user32 ;
@@ -131,14 +137,15 @@ unchanged):
 
 - `pkg.INCLUDES` from the include paths (default `<pkg>/include` plus
   any `prebuilts.<pkg>.INCLUDES`, walking `DEPENDS`)
-- `pkg.DEFINES` from `prebuilts.<pkg>.DEFINES` (via `FDefines`)
+- `pkg.DEFINES` from `prebuilts.<pkg>.DEFINES` (via `FDefines`).
+  `DEPENDS` is not walked.
 - `pkg.LINKLIBS` from `prebuilts.<pkg>.LIBS`, `SYSLIBS` and
-  `FRAMEWORKS` (via `FLinkLibs`). `DEPENDS` is not walked for link
-  libraries. The bundle author lists the complete link line for the
-  linkage of this bundle.
+  `FRAMEWORKS` (via `FLinkLibs`). `DEPENDS` is not walked. The entry
+  is the complete public link line for this bundle.
 - `pkg.LIBDIR` from the library paths (default `<pkg>/lib` plus any
   `prebuilts.<pkg>.LIBDIR`, walking `DEPENDS`)
-- `pkg.LINKFLAGS` from `prebuilts.<pkg>.LINKFLAGS`
+- `pkg.LINKFLAGS` from `prebuilts.<pkg>.LINKFLAGS`. `DEPENDS` is not
+  walked.
 - leaves `pkg.TARGET` empty
 
 The fill is done through the `Packages-Set*` accessors, but only when
