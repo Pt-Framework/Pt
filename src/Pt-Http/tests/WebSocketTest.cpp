@@ -16,10 +16,12 @@
 #include "Pt/Http/WebSocketServlet.h"
 #include "Pt/Http/WebSocketSession.h"
 #include "Pt/Http/Client.h"
+#include "Pt/Http/HttpError.h"
 #include "Pt/Http/Request.h"
 #include "Pt/Http/Reply.h"
 #include "Pt/Net/Endpoint.h"
 #include "Pt/System/MainLoop.h"
+#include "Pt/System/IOError.h"
 #include "Pt/System/Timer.h"
 
 #include <iterator>
@@ -59,6 +61,67 @@ class DeclineResponder : public Pt::Http::Responder
 };
 
 typedef Pt::Http::BasicService<DeclineResponder> DeclineService;
+
+
+class SilentResponder : public Pt::Http::Responder
+{
+    public:
+        explicit SilentResponder(Pt::Http::Service& service)
+        : Pt::Http::Responder(service)
+        {}
+
+    protected:
+        virtual void onBeginRequest(Pt::Http::Request&, Pt::Http::Reply&,
+                                    Pt::System::EventLoop&)
+        {
+            setReady(false);
+        }
+
+        virtual void onReadRequest(Pt::Http::Request&, Pt::Http::Reply&,
+                                   Pt::System::EventLoop&)
+        {
+            setReady(false);
+        }
+
+        virtual void onBeginReply(const Pt::Http::Request&, Pt::Http::Reply&,
+                                  Pt::System::EventLoop&)
+        {}
+
+        virtual void onWriteReply(const Pt::Http::Request&, Pt::Http::Reply&,
+                                  Pt::System::EventLoop&)
+        {}
+};
+
+typedef Pt::Http::BasicService<SilentResponder> SilentService;
+
+
+class HandshakeObserver : public Pt::Connectable
+{
+    public:
+        explicit HandshakeObserver(Pt::System::EventLoop& loop, bool throwOnReady = false)
+        : _loop(&loop)
+        , _throwOnReady(throwOnReady)
+        , _count(0)
+        {}
+
+        std::size_t count() const
+        { return _count; }
+
+        void onConnected(Pt::Http::WebSocket&)
+        {
+            ++_count;
+            if(_throwOnReady)
+                throw std::runtime_error("connected slot failed");
+
+            _loop->exit();
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+        bool _throwOnReady;
+        std::size_t _count;
+};
+
 
 class RecordSession : public Pt::Http::WebSocketSession
 {
@@ -1241,6 +1304,11 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("EndBeforeReady", *this, &WebSocketTest::EndBeforeReady);
             registerMethod("CloseCodes", *this, &WebSocketTest::CloseCodes);
             registerMethod("HandshakeControl", *this, &WebSocketTest::HandshakeControl);
+            registerMethod("HandshakeTimeout", *this, &WebSocketTest::HandshakeTimeout);
+            registerMethod("HandshakePending", *this, &WebSocketTest::HandshakePending);
+            registerMethod("ConnectedThrows", *this, &WebSocketTest::ConnectedThrows);
+            registerMethod("FailedConnectedThrows", *this, &WebSocketTest::FailedConnectedThrows);
+            registerMethod("HandshakeRetry", *this, &WebSocketTest::HandshakeRetry);
             registerMethod("Protocol", *this, &WebSocketTest::Protocol);
             registerMethod("ProtocolNone", *this, &WebSocketTest::ProtocolNone);
             registerMethod("ProtocolRequired", *this, &WebSocketTest::ProtocolRequired);
@@ -2391,7 +2459,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
         void onConnectedProtocolFailed(Pt::Http::WebSocket& socket)
         {
-            PT_UNIT_ASSERT_THROW(socket.endConnect(), std::exception);
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
             _declined = true;
             _loop->exit();
         }
@@ -2468,6 +2536,168 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Http::WebSocket socket(http);
             PT_UNIT_ASSERT_THROW(socket.beginPing(), std::logic_error);
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(), std::logic_error);
+        }
+
+    protected:
+        void HandshakeTimeout()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8101);
+            Pt::Http::Server server(*_loop, ep);
+            SilentService service;
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            http.setTimeout(100);
+            Pt::Http::WebSocket socket(http);
+            HandshakeObserver observer(*_loop);
+            socket.connected() += Pt::slot(observer, &HandshakeObserver::onConnected);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            assertHandshakeTimeout(socket);
+            assertHandshakeTimeout(socket);
+        }
+
+        void assertHandshakeTimeout(Pt::Http::WebSocket& socket)
+        {
+            bool timedOut = false;
+            try
+            {
+                socket.endConnect();
+            }
+            catch(const Pt::Http::HttpError&)
+            {
+                throw;
+            }
+            catch(const Pt::System::IOError& error)
+            {
+                const Pt::System::IOError expected("timeout");
+                PT_UNIT_ASSERT_EQUALS(std::string(error.what()), std::string(expected.what()));
+                timedOut = true;
+            }
+
+            PT_UNIT_ASSERT(timedOut);
+        }
+
+    protected:
+        void HandshakePending()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8102);
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            HandshakeObserver observer(*_loop);
+            socket.connected() += Pt::slot(observer, &HandshakeObserver::onConnected);
+            socket.beginConnect("/ws");
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), std::logic_error);
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(0));
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            socket.endConnect();
+        }
+
+    protected:
+        void ConnectedThrows()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8103);
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            HandshakeObserver observer(*_loop, true);
+            socket.connected() += Pt::slot(observer, &HandshakeObserver::onConnected);
+            socket.beginConnect("/ws");
+
+            assertConnectedThrows();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            socket.endConnect();
+        }
+
+        void assertConnectedThrows()
+        {
+            bool thrown = false;
+            try
+            {
+                _loop->run();
+            }
+            catch(const std::runtime_error& error)
+            {
+                PT_UNIT_ASSERT_EQUALS(std::string(error.what()), "connected slot failed");
+                thrown = true;
+            }
+
+            PT_UNIT_ASSERT(thrown);
+        }
+
+    protected:
+        void FailedConnectedThrows()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8104);
+            Pt::Http::Server server(*_loop, ep);
+            SilentService service;
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            http.setTimeout(100);
+            Pt::Http::WebSocket socket(http);
+            HandshakeObserver observer(*_loop, true);
+            socket.connected() += Pt::slot(observer, &HandshakeObserver::onConnected);
+            socket.beginConnect("/ws");
+
+            assertConnectedThrows();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            assertHandshakeTimeout(socket);
+        }
+
+    protected:
+        void HandshakeRetry()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8105);
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            service.addProtocol("chat");
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.addProtocol("other");
+            HandshakeObserver observer(*_loop);
+            socket.connected() += Pt::slot(observer, &HandshakeObserver::onConnected);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
+
+            http.close();
+            socket.addProtocol("chat");
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(2));
+            socket.endConnect();
+            PT_UNIT_ASSERT_EQUALS(socket.protocol(), "chat");
         }
 
     protected:

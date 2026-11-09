@@ -58,7 +58,7 @@ WebSocket::WebSocket(Client& client)
 : _client(&client)
 , _channel(new WebSocketChannel())
 , _path("/")
-, _error(false)
+, _error()
 , _connecting(false)
 {
 }
@@ -91,7 +91,7 @@ void WebSocket::beginConnect(const std::string& url, const std::string& origin)
     if( ! _client )
         throw std::logic_error("WebSocket has no client");
 
-    _error = false;
+    _error = std::exception_ptr();
     _connecting = true;
     parseUrl(url, origin);
 
@@ -128,22 +128,11 @@ void WebSocket::beginConnect(const std::string& url, const std::string& origin)
 
 void WebSocket::endConnect()
 {
-    if(_error || _connecting)
-        throw HttpError("WebSocket handshake failed");
-}
+    if(_connecting)
+        throw std::logic_error("WebSocket handshake is still pending");
 
-
-void WebSocket::finishHandshake(bool failed)
-{
-    if(_client)
-    {
-        _client->requestSent() -= Pt::slot(*this, &WebSocket::onRequestSent);
-        _client->replyReceived() -= Pt::slot(*this, &WebSocket::onReply);
-    }
-
-    _connecting = false;
-    _error = failed;
-    _connected.send(*this);
+    if(_error)
+        std::rethrow_exception(_error);
 }
 
 
@@ -159,11 +148,14 @@ void WebSocket::onRequestSent(Client& client)
         }
 
         client.beginReceive();
+        return;
     }
-    catch(const std::exception&)
+    catch(...)
     {
-        finishHandshake(true);
+        _error = std::current_exception();
     }
+
+    onHandshakeFinished();
 }
 
 
@@ -221,15 +213,26 @@ void WebSocket::onReply(Client& client)
         _channel->shutdownReady() += Pt::slot(*this, &WebSocket::onShutdownReady);
         _channel->closed() += Pt::slot(*this, &WebSocket::onClosed);
         _channel->pong() += Pt::slot(*this, &WebSocket::onPong);
-        finishHandshake(false);
     }
-    catch(const std::exception&)
+    catch(...)
     {
-        if( ! _connecting )
-            throw;
-
-        finishHandshake(true);
+        _error = std::current_exception();
     }
+
+    onHandshakeFinished();
+}
+
+
+void WebSocket::onHandshakeFinished()
+{
+    if(_client)
+    {
+        _client->requestSent() -= Pt::slot(*this, &WebSocket::onRequestSent);
+        _client->replyReceived() -= Pt::slot(*this, &WebSocket::onReply);
+    }
+
+    _connecting = false;
+    _connected.send(*this);
 }
 
 

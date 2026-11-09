@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <cstddef>
+#include <exception>
 
 namespace Pt {
 
@@ -208,7 +209,12 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         /** @brief Completes the client handshake.
 
-            @throw %HttpError if the handshake failed.
+            Rethrows the original asynchronous handshake error. The
+            error remains available until the next %beginConnect().
+
+            @throw %std::logic_error if the handshake is still pending.
+            @throw %HttpError if the upgrade or protocol was rejected.
+            @throw %IOError if sending or receiving failed.
         */
         void endConnect();
 
@@ -412,11 +418,11 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         static std::string createKey();
 
-        void finishHandshake(bool failed);
-
         void onRequestSent(Client& client);
 
         void onReply(Client& client);
+
+        void onHandshakeFinished();
 
         void onInputReady();
 
@@ -431,19 +437,19 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         void onPong(const std::string& payload);
 
     private:
-        Client* _client;
-        WebSocketChannel* _channel;
-        std::string _path;
-        std::string _protocol;
+        Client*                  _client;
+        WebSocketChannel*        _channel;
+        std::string              _path;
+        std::string              _protocol;
         std::vector<std::string> _protocols;
-        bool _error;
-        bool _connecting;
-        Pt::Signal<WebSocket&> _connected;
-        Pt::Signal<WebSocket&> _inputReady;
-        Pt::Signal<WebSocket&> _outputReady;
-        Pt::Signal<WebSocket&> _pingReady;
-        Pt::Signal<WebSocket&> _shutdownReady;
-        Pt::Signal<WebSocket&> _closed;
+        std::exception_ptr       _error;
+        bool                     _connecting;
+        Pt::Signal<WebSocket&>   _connected;
+        Pt::Signal<WebSocket&>   _inputReady;
+        Pt::Signal<WebSocket&>   _outputReady;
+        Pt::Signal<WebSocket&>   _pingReady;
+        Pt::Signal<WebSocket&>   _shutdownReady;
+        Pt::Signal<WebSocket&>   _closed;
         Pt::Signal<WebSocket&, const std::string&> _pong;
 };
 
