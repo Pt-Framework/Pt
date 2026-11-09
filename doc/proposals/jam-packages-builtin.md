@@ -70,6 +70,12 @@ whether it was included from a parent and sets the variables only in
 that case. Its own top-level Jamconfigure continues to work when it is
 built alone.
 
+## Baseline
+
+`src/Pt/Jamfile`, `src/Pt-Gfx/Jamfile`, `src/Pt-Ssl/Jamfile` and the
+inline source Jamfiles apply `LinkLibs` and `LinkFlags` only. They do
+not apply `FLibPath` of `LIBDIR`.
+
 ## Dependencies {#dependencies}
 
 A builtin package reads its dependencies through the accessors. The
@@ -92,19 +98,21 @@ if [ Packages-Target zlib ]
 else
 {
     LinkLibs png : [ Packages-LinkLibs zlib ] ;
-    LinkFlags png : [ Packages-LinkFlags zlib ] ;
+    LinkFlags png : [ FLibPath [ Packages-LibDir zlib ] ]
+                    [ Packages-LinkFlags zlib ] ;
 }
 
 MakeLocate png : $(PT_OUTPUT_TARGET) ;
 ```
 
 The png Jamfile does not test how zlib was resolved. A non-empty
-target means link that target; otherwise apply the flag variables.
-The consumer of png links only png.
+target means link that target; otherwise apply `LINKLIBS` together with
+`FLibPath` of `LIBDIR` and `LINKFLAGS`. The consumer of png links only
+png.
 
-Prebuilt packages have no Jamfile, so `Prebuilt-Use` continues to walk
-`prebuilts.<pkg>.DEPENDS` and fold the transitive flags into the
-package variables. That walk is not used for builtin packages.
+Prebuilt packages have no Jamfile, so `Prebuilt-Use` walks
+`prebuilts.<pkg>.DEPENDS` for `INCLUDES` and `LIBDIR`. That walk is not
+used for builtin packages.
 
 ## Selection {#selection}
 

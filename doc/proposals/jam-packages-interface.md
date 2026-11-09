@@ -23,17 +23,38 @@ or a system probe.
 A non-empty `pkg.TARGET` means the package is builtin (source-built).
 Prebuilt and system leave `TARGET` empty.
 
+## Baseline
+
+`CheckDependencyLinkC++` and `CheckDependencyC++` apply `FLibPath` to
+`LIBDIR` and store the result in `*_LINKFLAGS`. `SetDependencyPath`
+exists in `configure.jam` and has no callers. `Jamconfigure` persists
+`INCLUDES`, `C++FLAGS`, `LINKLIBS` and `LINKFLAGS`; it does not persist
+`LIBDIR`. `src/Pt/Jamfile`, `src/Pt-Gfx/Jamfile` and `src/Pt-Ssl/Jamfile`
+apply `LinkLibs` and `LinkFlags` only.
+
 ## Variables {#variables}
 
 The common variables are dotted: `$(pkg.INCLUDES)`, `$(pkg.DEFINES)`,
 `$(pkg.LINKLIBS)`, `$(pkg.LIBDIR)`, `$(pkg.LINKFLAGS)`, `$(pkg.TARGET)`.
 
 `pkg.TARGET` is the Jam target name of a source-built library. When it
-is set, linking uses that target instead of `pkg.LINKLIBS` and
-`pkg.LINKFLAGS`.
+is set, linking uses that target. `pkg.LINKLIBS`, `pkg.LIBDIR` and
+`pkg.LINKFLAGS` stay unused for that consumer.
 
-The flag variables hold the tokens for includes, defines, link libraries,
-library directories and link flags. Empty lists are omitted.
+`pkg.INCLUDES` is raw include directories. `pkg.DEFINES` is preprocessor
+tokens. `pkg.LINKLIBS` is link-library flags. `pkg.LIBDIR` is raw library
+search directories. `pkg.LINKFLAGS` is extra linker flags. Empty lists
+are omitted.
+
+A consumer applies the flags with the ordinary Jam rules:
+
+```
+SubDirHdrs [ Packages-Includes pkg ] ;
+SubDirCcFlags [ Packages-Defines pkg ] ;
+LinkLibs  tgt : [ Packages-LinkLibs pkg ] ;
+LinkFlags tgt : [ FLibPath [ Packages-LibDir pkg ] ]
+                [ Packages-LinkFlags pkg ] ;
+```
 
 Consumers, user overrides and Configure rules use only the dotted form.
 The former five-tuple names (`ZLIB_*`, `PNG_*`, `JPEG_*`, `FREETYPE_*`,
@@ -120,10 +141,18 @@ calls `Exit` and aborts. A missing root returns empty.
 
 A `*-Configure` rule receives the current flag values as hints. It does
 not know whether they came from a prebuilt bundle, a user override, or
-an empty system probe. On success it writes the final flag variables
-through the `Packages-Set*` accessors and returns the package name. On
-failure it returns empty and leaves the variables unchanged. It does
-not set `pkg.TARGET`.
+an empty system probe.
+
+It probes with `CheckBuildC++`. `FIncludes` of `INCLUDES` and `FLibPath`
+of `LIBDIR` appear only on the probe line, together with `LINKLIBS` and
+`LINKFLAGS`. On success it writes the five flag variables unmerged
+through the `Packages-Set*` accessors (`LIBDIR` still raw, `LINKFLAGS`
+still extra flags) and returns the package name. On failure it returns
+empty and leaves the variables unchanged. It does not set `pkg.TARGET`.
+
+`SetDependencyPath`, `DEPS_INCLUDES`, `DEPS_LIBDIR`,
+`CheckDependencyCompileC++`, `CheckDependencyLinkC++` and
+`CheckDependencyC++` are not used.
 
 `pkg.TARGET` is set only by a builtin package `Jamconfigure`. Consumers
 detect a source package by a non-empty target. There is no separate

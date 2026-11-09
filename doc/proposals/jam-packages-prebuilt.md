@@ -22,6 +22,10 @@ The manifest uses `PREBUILT_SCHEMA`, `PREBUILT_ID`, `PREBUILT_PACKAGES`
 and dotted names of the form `PREBUILT_PACKAGE_LIBS.$(pkg)`. It lives
 under `jam/` and has an include guard. Schema must be 1.
 
+`Prebuilt-LibPath` walks `PREBUILT_PACKAGE_DEPENDS` only when
+`PREBUILT_LINKAGE` is `static`. The model has no linkage field and
+always walks `DEPENDS` for `LIBDIR`.
+
 ## Manifest {#manifest}
 
 The file `prebuilts.jam` contains only assignments. It has no rules,
@@ -58,10 +62,11 @@ Optional fields (ignored by Jam, available for other tools):
 - any other `prebuilts.<pkg>.*` key
 
 `DEPENDS` is the dependency graph of the bundle. `Prebuilt-Use` walks
-it only to collect include paths. Link libraries, system libraries,
-frameworks and link flags are taken as written. A shared bundle lists
-the direct libraries. A static bundle lists the full closure in link
-order. There is no linkage field and no automatic walk for `LINKLIBS`.
+it to collect include paths and library search directories. Link
+libraries, system libraries, frameworks and link flags are taken as
+written. A shared bundle lists the direct libraries. A static bundle
+lists the full closure in link order. There is no linkage field and no
+automatic walk for `LINKLIBS`.
 
 Deployment uses the same graph. A consumer calls `Prebuilt-Depends` to
 obtain the closure, then `Prebuilt-Bin` and `Prebuilt-Lib` to collect
@@ -132,13 +137,13 @@ unchanged):
   libraries. The bundle author lists the complete link line for the
   linkage of this bundle.
 - `pkg.LIBDIR` from the library paths (default `<pkg>/lib` plus any
-  `prebuilts.<pkg>.LIBDIR`)
+  `prebuilts.<pkg>.LIBDIR`, walking `DEPENDS`)
 - `pkg.LINKFLAGS` from `prebuilts.<pkg>.LINKFLAGS`
 - leaves `pkg.TARGET` empty
 
 The fill is done through the `Packages-Set*` accessors, but only when
 the corresponding variable is still empty. The existing `Prebuilt-*`
 primitive rules stay. They walk `prebuilts.<pkg>.DEPENDS` for include
-paths only.
+paths and library search directories.
 
 `Prebuilt-Use` checks that `prebuilts.version` is 1.
