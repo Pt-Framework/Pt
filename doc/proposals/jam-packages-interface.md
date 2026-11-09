@@ -41,10 +41,12 @@ The common variables are dotted: `$(pkg.INCLUDES)`, `$(pkg.DEFINES)`,
 is set, linking uses that target. `pkg.LINKLIBS`, `pkg.LIBDIR` and
 `pkg.LINKFLAGS` stay unused for that consumer.
 
-`pkg.INCLUDES` is raw include directories. `pkg.DEFINES` is preprocessor
-tokens. `pkg.LINKLIBS` is link-library flags. `pkg.LIBDIR` is raw library
-search directories. `pkg.LINKFLAGS` is extra linker flags. Empty lists
-are omitted.
+`pkg.INCLUDES` is raw include directories. `pkg.DEFINES` is formatted
+compiler flags (`-DFOO=1` / `/DFOO=1`), the result of `FDefines`.
+The manifest stores raw tokens (`FOO=1`); `Prebuilt-Use` converts them
+with `FDefines` when filling `pkg.DEFINES`. `pkg.LINKLIBS` is
+link-library flags. `pkg.LIBDIR` is raw library search directories.
+`pkg.LINKFLAGS` is extra linker flags. Empty lists are omitted.
 
 A consumer applies the flags with the ordinary Jam rules:
 
