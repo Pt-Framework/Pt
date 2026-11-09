@@ -210,4 +210,14 @@ if $(WITH_ZLIB)
 }
 ```
 
-The same pattern applies to png, jpeg, FreeType and OpenSSL.
+The same pattern applies to png, jpeg and FreeType.
+
+### SSL backends
+
+`Jamconfigure` selects the Pt-Ssl backend. The package is `openssl`.
+Resolution uses `Prebuilt-Use`, `OpenSsl-Configure` and
+`Builtin-Use openssl : src/openssl`. Builtin runs only for
+`--with-openssl`; there is no builtin fallback. Success sets
+`PT_SSL_IMPL` to `openssl` and `WITH_SSL`. `--with-mbedtls` is the
+other backend override. When neither backend is found, `PT_SSL_IMPL`
+is `nossl`. `Pt-Ssl` reads the accessors of `openssl` or `mbedtls`.

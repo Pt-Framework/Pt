@@ -19,7 +19,7 @@ dependency is itself builtin, prebuilt, or system.
 Package resolution in `Jamconfigure` finishes before any builtin
 `SubInclude` runs. Dependencies are resolved before the packages that
 need them. For the current set the order is zlib, then png, jpeg,
-FreeType, then ssl and crypto.
+FreeType, then openssl.
 
 When `Builtin-Use` includes a package `Jamconfigure`, and later when
 the package `Jamfile` is entered, the six variables of every dependency

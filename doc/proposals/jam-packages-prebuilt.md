@@ -76,9 +76,11 @@ Deployment uses the same graph. A consumer calls `Prebuilt-Depends` to
 obtain the closure, then `Prebuilt-Bin` and `Prebuilt-Lib` to collect
 the files to install. `Prebuilt-Use` does not select runtime files.
 
-Components are ordinary packages. OpenSSL appears as the two packages
-`ssl` and `crypto` (or equivalent names). Each has its own directory
-and its own `prebuilts.<pkg>.*` variables.
+OpenSSL is one package `openssl`. Its entry is the complete public
+usage (libraries `ssl` and `crypto`, extra include or lib paths when
+the bundle does not use `openssl/include` and `openssl/lib`). `ssl/`
+and `crypto/` may be directories of that package; they are not
+packages of their own.
 
 Example:
 
@@ -86,23 +88,16 @@ Example:
 # prebuilts.jam
 prebuilts.version  = 1 ;
 prebuilts.id       = windows-x64-msvc-md ;
-prebuilts.packages = zlib png jpeg freetype ssl crypto ;
+prebuilts.packages = zlib png jpeg freetype openssl ;
 
 prebuilts.zlib.LIBS     = z ;
 prebuilts.zlib.VERSION  = 1.3.1 ;
 prebuilts.zlib.LICENSE  = Zlib ;
 
-# ssl.LIBS is the public link line of this shared bundle.
-# A static bundle lists ssl crypto in link order.
-prebuilts.ssl.LIBS      = ssl ;
-prebuilts.ssl.DEPENDS   = crypto ;
-prebuilts.ssl.SYSLIBS   = crypt32 ws2_32 advapi32 user32 ;
-prebuilts.ssl.VERSION   = 3.3.1 ;
-prebuilts.ssl.LICENSE   = OpenSSL ;
-
-prebuilts.crypto.LIBS     = crypto ;
-prebuilts.crypto.VERSION  = 3.3.1 ;
-prebuilts.crypto.LICENSE  = OpenSSL ;
+prebuilts.openssl.LIBS     = ssl crypto ;
+prebuilts.openssl.SYSLIBS  = crypt32 ws2_32 advapi32 user32 ;
+prebuilts.openssl.VERSION  = 3.3.1 ;
+prebuilts.openssl.LICENSE  = OpenSSL ;
 ```
 
 Directory layout:
@@ -114,12 +109,10 @@ prebuilt/<id>/
     include/
     lib/
     bin/          # optional
-  ssl/
+  openssl/
     include/
     lib/
     bin/
-  crypto/
-    ...
 ```
 
 ## Use {#use}
