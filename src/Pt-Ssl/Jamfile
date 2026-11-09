@@ -4,9 +4,18 @@ SubDirC++Flags [ FDefines NOCRYPT ] ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl ;
 
-if $(SSL_INCLUDES)
+if [ Packages-Includes openssl ]
+{
+    SubDirHdrs [ Packages-Includes openssl ] ;
+}
+else if $(SSL_INCLUDES)
 {
     SubDirHdrs $(SSL_INCLUDES) ;
+}
+
+if [ Packages-Defines openssl ]
+{
+    SubDirC++Flags [ Packages-Defines openssl ] ;
 }
 
 PT_SSL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Ssl $(PT_SSL_IMPL) ] ;
@@ -25,6 +34,19 @@ LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 MakeLocate Pt-Ssl : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Ssl : $(PT_INSTALL_LIBDIR) ;
 
+if [ Packages-Target openssl ]
+{
+    LinkLibraries Pt-Ssl : [ Packages-Target openssl ] ;
+}
+else if $(WITH_MBEDTLS)
+{
+    LinkLibraries Pt-Ssl : mbedtls ;
+}
+
+LinkLibs Pt-Ssl : [ Packages-LinkLibs openssl ] ;
+LinkFlags Pt-Ssl : [ FLibPath [ Packages-LibDir openssl ] ]
+                   [ Packages-LinkFlags openssl ] ;
+
 if $(SSL_LINKLIBS)
 {
     LinkLibs Pt-Ssl : $(SSL_LINKLIBS) ;
@@ -33,19 +55,6 @@ if $(SSL_LINKLIBS)
 if $(SSL_LINKFLAGS)
 {
     LinkFlags Pt-Ssl : $(SSL_LINKFLAGS) ;
-}
-
-if [ Packages-Target openssl ]
-{
-    LinkLibraries Pt-Ssl : [ Packages-Target openssl ] ;
-}
-else if $(WITH_OPENSSL)
-{
-    LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
-}
-else if $(WITH_MBEDTLS)
-{
-    LinkLibraries Pt-Ssl : mbedtls ;
 }
 
 if $(WITH_SSL)

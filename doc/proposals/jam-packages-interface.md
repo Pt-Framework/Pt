@@ -14,11 +14,16 @@ A package name `pkg` exposes these variables:
 - `pkg.LINKFLAGS`
 - `pkg.TARGET`
 
-Prebuilt and system packages fill the flag variables. Source packages
-fill `pkg.TARGET` (and usually `pkg.INCLUDES`). Consumers read only
+The six variables are the complete public usage of the package, the
+same result a consumer would get from pkgconf. Consumers read only
 these variables. Package-specific `*-Configure` rules stay ignorant of
 whether the values came from a user, a prebuilt bundle, a source tree,
 or a system probe.
+
+Prebuilt and system packages fill the flag variables and leave
+`TARGET` empty. A source package fills `TARGET` with its Jam library
+target and usually `INCLUDES`. When it depends on other packages it
+copies their public usage onto its own variables.
 
 A non-empty `pkg.TARGET` means the package is builtin (source-built).
 Prebuilt and system leave `TARGET` empty.
@@ -29,30 +34,45 @@ Prebuilt and system leave `TARGET` empty.
 `LIBDIR` and store the result in `*_LINKFLAGS`. `SetDependencyPath`
 exists in `configure.jam` and has no callers. `Jamconfigure` persists
 `INCLUDES`, `C++FLAGS`, `LINKLIBS` and `LINKFLAGS`; it does not persist
-`LIBDIR`. `src/Pt/Jamfile`, `src/Pt-Gfx/Jamfile` and `src/Pt-Ssl/Jamfile`
-apply `LinkLibs` and `LinkFlags` only.
+`LIBDIR`.
 
 ## Variables {#variables}
 
 The common variables are dotted: `$(pkg.INCLUDES)`, `$(pkg.DEFINES)`,
 `$(pkg.LINKLIBS)`, `$(pkg.LIBDIR)`, `$(pkg.LINKFLAGS)`, `$(pkg.TARGET)`.
 
-`pkg.TARGET` is the Jam target name of a source-built library. When it
-is set, linking uses that target. `pkg.LINKLIBS`, `pkg.LIBDIR` and
-`pkg.LINKFLAGS` stay unused for that consumer.
+`pkg.TARGET` is the Jam target name of a source-built library. Empty
+when the package is prebuilt or system. Consumers call `LinkLibraries`
+with that name when it is set. They also apply `LINKLIBS`, `FLibPath`
+of `LIBDIR`, and `LINKFLAGS`.
 
 `pkg.INCLUDES` is raw include directories. `pkg.DEFINES` is formatted
 compiler flags (`-DFOO=1` / `/DFOO=1`), the result of `FDefines`.
 The manifest stores raw tokens (`FOO=1`); `Prebuilt-Use` converts them
 with `FDefines` when filling `pkg.DEFINES`. `pkg.LINKLIBS` is
 link-library flags. `pkg.LIBDIR` is raw library search directories.
-`pkg.LINKFLAGS` is extra linker flags. Empty lists are omitted.
+`pkg.LINKFLAGS` is extra linker flags. Empty lists are omitted:
+`SubDirHdrs` and `SubDirCcFlags` run only when the package supplied
+includes or defines.
 
-A consumer applies the flags with the ordinary Jam rules:
+A consumer applies the variables with the ordinary Jam rules:
 
 ```
-SubDirHdrs [ Packages-Includes pkg ] ;
-SubDirCcFlags [ Packages-Defines pkg ] ;
+if [ Packages-Includes pkg ]
+{
+    SubDirHdrs [ Packages-Includes pkg ] ;
+}
+
+if [ Packages-Defines pkg ]
+{
+    SubDirCcFlags [ Packages-Defines pkg ] ;
+}
+
+if [ Packages-Target pkg ]
+{
+    LinkLibraries tgt : [ Packages-Target pkg ] ;
+}
+
 LinkLibs  tgt : [ Packages-LinkLibs pkg ] ;
 LinkFlags tgt : [ FLibPath [ Packages-LibDir pkg ] ]
                 [ Packages-LinkFlags pkg ] ;
@@ -139,11 +159,11 @@ empty otherwise. Its return value is not assigned to `WITH_pkg`. It
 only fills still-empty flag variables.
 
 `Builtin-Use pkg : root` includes the source package's `Jamconfigure`.
-That file calls `Packages-SetIncludes` and `Packages-SetTarget` only
-after its checks succeed. A non-empty `pkg.TARGET` is the success
-signal. `Builtin-Use` returns the package name when `pkg.TARGET` is
-set, empty otherwise. A configure error in the package `Jamconfigure`
-calls `Exit` and aborts. A missing root returns empty.
+That file publishes the six variables only after its checks succeed.
+A non-empty `pkg.TARGET` is the success signal. `Builtin-Use` returns
+the package name when `pkg.TARGET` is set, empty otherwise. A configure
+error in the package `Jamconfigure` calls `Exit` and aborts. A missing
+root returns empty.
 
 A `*-Configure` rule receives the current flag values as hints. It does
 not know whether they came from a prebuilt bundle, a user override, or
@@ -171,8 +191,8 @@ probe and it does not decide success. An unfound package does not
 persist values for later build steps.
 
 When builtin is selected the package-specific `*-Configure` is not
-called. The source package `Jamconfigure` has already set
-`pkg.INCLUDES` and `pkg.TARGET`.
+called. The source package `Jamconfigure` has already published the
+six variables.
 
 ### zlib example
 

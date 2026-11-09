@@ -54,7 +54,21 @@ if $(WITH_FORMS_NANOVG)
     PT_FORMS_IMPL_SOURCES += [ GLOB $(NANOVG_DIR) : *.c ] ;
     PT_FORMS_IMPL_SOURCES += [ GLOB $(NANOVG_DIR) : *.cpp ] ;
 
-    SubDirHdrs $(FREETYPE_INCLUDES) ;
+    if [ Packages-Includes freetype ]
+    {
+        SubDirHdrs [ Packages-Includes freetype ] ;
+    }
+    else if $(FREETYPE_INCLUDES)
+    {
+        SubDirHdrs $(FREETYPE_INCLUDES) ;
+    }
+
+    if [ Packages-Defines freetype ]
+    {
+        SubDirCcFlags [ Packages-Defines freetype ] ;
+        SubDirC++Flags [ Packages-Defines freetype ] ;
+    }
+
     SubDirHdrs [ FDirName $(PT_TOP) src Pt-Gfx freetype ] ;
     SubDirCcFlags [ FDefines FONS_USE_FREETYPE ] ;
 }
@@ -172,6 +186,10 @@ if $(PT_FORMS_RENDERER) = nanovg
         LinkFlags Pt-Forms : $(FREETYPE_LINKFLAGS) ;
         LinkLibs Pt-Forms : $(FREETYPE_LINKLIBS) ;
     }
+
+    LinkLibs Pt-Forms : [ Packages-LinkLibs freetype ] ;
+    LinkFlags Pt-Forms : [ FLibPath [ Packages-LibDir freetype ] ]
+                         [ Packages-LinkFlags freetype ] ;
 }
 
 SubInclude PT_TOP src Pt-Forms demo ;

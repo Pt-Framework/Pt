@@ -3,11 +3,15 @@ SubDirHdrs $(PT_TOP)/src/libpng ;
 SubDirObjects $(PT_OUTPUT_OBJECT) libpng ;
 SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
 
-if $(ZLIB_INCLUDES)
+if [ Packages-Includes zlib ]
 {
-    SubDirHdrs $(ZLIB_INCLUDES) ;
+    SubDirHdrs [ Packages-Includes zlib ] ;
 }
 
+if [ Packages-Defines zlib ]
+{
+    SubDirCcFlags [ Packages-Defines zlib ] ;
+}
 SubDirCcFlags [ FDefines PNG_ARM_NEON_OPT=0 ] ;
 
 Library png : png.c

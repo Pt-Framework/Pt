@@ -1,4 +1,14 @@
 # Included by Builtin-Use after the source root was found.
 
-Packages-SetIncludes freetype : [ FDirName $(PT_TOP) src freetype include ] ;
+Packages-SetIncludes freetype : [ FDirName $(PT_TOP) src freetype include ]
+                                [ Packages-Includes zlib ] ;
+Packages-SetDefines freetype : [ Packages-Defines zlib ] ;
 Packages-SetTarget freetype : freetype ;
+Packages-SetLinkLibs freetype : [ Packages-LinkLibs zlib ] ;
+Packages-SetLibDir freetype : [ Packages-LibDir zlib ] ;
+Packages-SetLinkFlags freetype : [ Packages-LinkFlags zlib ] ;
+
+if [ Packages-Target zlib ]
+{
+    freetype.TARGET += [ Packages-Target zlib ] ;
+}

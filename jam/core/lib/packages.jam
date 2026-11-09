@@ -13,9 +13,9 @@ JAMBASE_PACKAGES_JAM_INCLUDED = true ;
 # compiler flags (-DFOO=1 / /DFOO=1), the result of FDefines.
 # pkg.LINKLIBS is link-library flags. pkg.LIBDIR is raw library search
 # directories. pkg.LINKFLAGS is extra linker flags. pkg.TARGET is the
-# Jam target name of a source-built library; when it is set, linking
-# uses that target and pkg.LINKLIBS, pkg.LIBDIR and pkg.LINKFLAGS stay
-# unused for that consumer. Empty lists are omitted.
+# Jam target name of a source-built library. Consumers call
+# LinkLibraries with that name when it is set. They also apply
+# LINKLIBS, FLibPath of LIBDIR, and LINKFLAGS. Empty lists are omitted.
 #
 # Direct assignment to the dotted names remains valid. The accessors
 # are the preferred form so callers do not spell the names by hand.

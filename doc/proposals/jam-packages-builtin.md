@@ -12,7 +12,9 @@ the common package variables.
 A builtin package is also a consumer of the package interface. It may
 depend on other packages. Those dependencies are already resolved when
 the builtin is configured. The builtin does not care whether a
-dependency is itself builtin, prebuilt, or system.
+dependency is itself builtin, prebuilt, or system. As a provider it
+publishes complete public usage on the six variables, the same result
+a consumer would get from pkgconf.
 
 ## Timing {#timing}
 
@@ -23,7 +25,9 @@ FreeType, then openssl.
 
 When `Builtin-Use` includes a package `Jamconfigure`, and later when
 the package `Jamfile` is entered, the six variables of every dependency
-are already final. The builtin reads them only through the accessors.
+are already final. The `Jamconfigure` reads them through the accessors
+to publish this package. The `Jamfile` reads them through the accessors
+to compile.
 
 ## Init {#init}
 
@@ -59,7 +63,7 @@ Packages-SetTarget   zlib : z ;
 ```
 
 (`z` or `libz`, whichever name the `Library` or `SharedLibrary` rule
-uses.) It does not set the flag variables.
+uses.) `Packages-SetTarget` sets this package's library name.
 
 A non-empty `pkg.TARGET` is how `Builtin-Use` and consumers detect a
 builtin package. There is no separate status flag and no separate
@@ -70,52 +74,80 @@ It sets the variables whenever it runs. A later standalone project, if
 one is added, detects that it was not included from a parent and leaves
 the variables unset.
 
-## Baseline
-
-`src/Pt/Jamfile`, `src/Pt-Gfx/Jamfile`, `src/Pt-Ssl/Jamfile` and the
-inline source Jamfiles apply `LinkLibs` and `LinkFlags` only. They do
-not apply `FLibPath` of `LIBDIR`.
-
 ## Dependencies {#dependencies}
 
-A builtin package reads its dependencies through the accessors. The
-variables are already set. The package applies them with the ordinary
-Jam rules.
+The source package `Jamconfigure` publishes complete public usage.
+It sets this package's `INCLUDES` and `TARGET`, then copies each
+dependency onto the flag variables. When a dependency is itself
+builtin, it appends that dependency's `TARGET` so `LinkLibraries`
+receives every Jam library the consumer needs. `Packages-SetTarget`
+still sets this package's own name.
+
+The package `Jamfile` consumes dependencies through the accessors to
+compile. A static `Library` does not link.
 
 Example for png that depends on zlib:
 
 ```
-# src/libpng/Jamfile
-SubDirHdrs [ Packages-Includes zlib ] ;
-SubDirCcFlags [ Packages-Defines zlib ] ;
-
-Library png : png.c ... ;
+# src/libpng/Jamconfigure
+Packages-SetIncludes png : $(root) [ Packages-Includes zlib ] ;
+Packages-SetDefines  png : [ Packages-Defines zlib ] ;
+Packages-SetTarget   png : png ;
+Packages-SetLinkLibs png : [ Packages-LinkLibs zlib ] ;
+Packages-SetLibDir   png : [ Packages-LibDir zlib ] ;
+Packages-SetLinkFlags png : [ Packages-LinkFlags zlib ] ;
 
 if [ Packages-Target zlib ]
 {
-    LinkLibraries png : [ Packages-Target zlib ] ;
+    png.TARGET += [ Packages-Target zlib ] ;
 }
-else
+
+# src/libpng/Jamfile
+if [ Packages-Includes zlib ]
 {
-    LinkLibs png : [ Packages-LinkLibs zlib ] ;
-    LinkFlags png : [ FLibPath [ Packages-LibDir zlib ] ]
-                    [ Packages-LinkFlags zlib ] ;
+    SubDirHdrs [ Packages-Includes zlib ] ;
 }
+
+if [ Packages-Defines zlib ]
+{
+    SubDirCcFlags [ Packages-Defines zlib ] ;
+}
+
+Library png : png.c ... ;
 
 MakeLocate png : $(PT_OUTPUT_TARGET) ;
 ```
 
-The png sources are C, so the example uses `SubDirCcFlags`. A C++
+The png sources are C, so the Jamfile uses `SubDirCcFlags`. A C++
 consumer uses `SubDirC++Flags`.
 
-The png Jamfile does not test how zlib was resolved. A non-empty
-target means link that target; otherwise apply `LINKLIBS` together with
-`FLibPath` of `LIBDIR` and `LINKFLAGS`. The consumer of png links only
-png.
+The consumer of png applies the png package only:
+
+```
+if [ Packages-Includes png ]
+{
+    SubDirHdrs [ Packages-Includes png ] ;
+}
+
+if [ Packages-Defines png ]
+{
+    SubDirC++Flags [ Packages-Defines png ] ;
+}
+
+if [ Packages-Target png ]
+{
+    LinkLibraries tgt : [ Packages-Target png ] ;
+}
+
+LinkLibs  tgt : [ Packages-LinkLibs png ] ;
+LinkFlags tgt : [ FLibPath [ Packages-LibDir png ] ]
+                [ Packages-LinkFlags png ] ;
+```
 
 Prebuilt packages have no Jamfile, so `Prebuilt-Use` walks
 `prebuilts.<pkg>.DEPENDS` for `INCLUDES` and `LIBDIR`. That walk is not
-used for builtin packages.
+used for builtin packages. The source package `Jamconfigure` copies
+dependency usage itself.
 
 ## Selection {#selection}
 
@@ -130,5 +162,4 @@ Presence of the root alone does not select the package. Without the
 option and without a failed earlier step the package is not builtin.
 
 When builtin is selected the package-specific `*-Configure` is not
-called. The source package has already set `pkg.INCLUDES` and
-`pkg.TARGET`.
+called. The source package has already published the six variables.

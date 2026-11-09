@@ -1,15 +1,20 @@
 SubDir PT_TOP src freetype src ;
 SubDirHdrs $(PT_TOP)/include ;
-SubDirHdrs $(FREETYPE_INCLUDES) ;
+SubDirHdrs [ Packages-Includes freetype ] ;
 SubDirCcFlags [ FDefines FT2_BUILD_LIBRARY ] ;
 SubDirCcFlags [ FDefines FT_CONFIG_OPTION_SYSTEM_ZLIB ] ;
 SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
-SubDirObjects $(PT_OUTPUT_OBJECT) freetype ;
 
-if $(ZLIB_INCLUDES)
+if [ Packages-Includes zlib ]
 {
-    SubDirHdrs $(ZLIB_INCLUDES) ;
+    SubDirHdrs [ Packages-Includes zlib ] ;
 }
+
+if [ Packages-Defines zlib ]
+{
+    SubDirCcFlags [ Packages-Defines zlib ] ;
+}
+SubDirObjects $(PT_OUTPUT_OBJECT) freetype ;
 
 Library freetype :
     [ FDirName autofit autofit.c ]

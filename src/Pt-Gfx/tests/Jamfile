@@ -4,9 +4,9 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
 local PNG_TEST_SOURCES ;
 
-if $(PNG_INCLUDES)
+if [ Packages-Includes png ]
 {
-    SubDirHdrs $(PNG_INCLUDES) ;
+    SubDirHdrs [ Packages-Includes png ] ;
     PNG_TEST_SOURCES = PngTest.cpp ;
 }
 

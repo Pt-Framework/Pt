@@ -41,19 +41,34 @@ SubDirHdrs $(PT_TOP)/src/Pt-Gfx/freetype ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
-if $(PNG_INCLUDES)
+if [ Packages-Includes png ]
 {
-    SubDirHdrs $(PNG_INCLUDES) ;
+    SubDirHdrs [ Packages-Includes png ] ;
 }
 
-if $(JPEG_INCLUDES)
+if [ Packages-Defines png ]
 {
-    SubDirHdrs $(JPEG_INCLUDES) ;
+    SubDirC++Flags [ Packages-Defines png ] ;
 }
 
-if $(FREETYPE_INCLUDES)
+if [ Packages-Includes jpeg ]
 {
-    SubDirHdrs $(FREETYPE_INCLUDES) ;
+    SubDirHdrs [ Packages-Includes jpeg ] ;
+}
+
+if [ Packages-Defines jpeg ]
+{
+    SubDirC++Flags [ Packages-Defines jpeg ] ;
+}
+
+if [ Packages-Includes freetype ]
+{
+    SubDirHdrs [ Packages-Includes freetype ] ;
+}
+
+if [ Packages-Defines freetype ]
+{
+    SubDirC++Flags [ Packages-Defines freetype ] ;
 }
 
 PT_GFX_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Gfx $(PT_GFX_IMPL:L) ] ;
@@ -112,43 +127,27 @@ if [ Packages-Target png ]
 {
     LinkLibraries Pt-Gfx : [ Packages-Target png ] ;
 }
-else
-{
-    LinkFlags Pt-Gfx : $(PNG_LINKFLAGS) ;
-    LinkLibs Pt-Gfx : $(PNG_LINKLIBS) ;
-    ObjectC++Flags PngReader.cpp PngWriter.cpp : $(PNG_C++FLAGS) ;
-}
+
+LinkLibs Pt-Gfx : [ Packages-LinkLibs png ] ;
+LinkFlags Pt-Gfx : [ FLibPath [ Packages-LibDir png ] ]
+                   [ Packages-LinkFlags png ] ;
 
 if [ Packages-Target jpeg ]
 {
     LinkLibraries Pt-Gfx : [ Packages-Target jpeg ] ;
 }
-else
-{
-    LinkFlags Pt-Gfx : $(JPEG_LINKFLAGS) ;
-    LinkLibs Pt-Gfx : $(JPEG_LINKLIBS) ;
-    ObjectC++Flags JpegReader.cpp : $(JPEG_C++FLAGS) ;
-}
 
-if [ Packages-Target zlib ]
-{
-    LinkLibraries Pt-Gfx : [ Packages-Target zlib ] ;
-}
-else
-{
-    LinkFlags Pt-Gfx : $(ZLIB_LINKFLAGS) ;
-    LinkLibs Pt-Gfx : $(ZLIB_LINKLIBS) ;
-}
+LinkLibs Pt-Gfx : [ Packages-LinkLibs jpeg ] ;
+LinkFlags Pt-Gfx : [ FLibPath [ Packages-LibDir jpeg ] ]
+                   [ Packages-LinkFlags jpeg ] ;
 
 if [ Packages-Target freetype ]
 {
     LinkLibraries Pt-Gfx : [ Packages-Target freetype ] ;
 }
-else
-{
-    LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
-    LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
-    ObjectC++Flags $(PT_GFX_FREETYPE_SOURCES) : $(FREETYPE_C++FLAGS) ;
-}
+
+LinkLibs Pt-Gfx : [ Packages-LinkLibs freetype ] ;
+LinkFlags Pt-Gfx : [ FLibPath [ Packages-LibDir freetype ] ]
+                   [ Packages-LinkFlags freetype ] ;
 
 SubInclude PT_TOP src Pt-Gfx tests ;
