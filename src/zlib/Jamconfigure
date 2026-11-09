@@ -1,0 +1,11 @@
+# Included by Builtin-Use after the source root was found.
+
+local target = z ;
+
+if ! $(PRELIB)
+{
+    target = libz ;
+}
+
+Packages-SetIncludes zlib : [ FDirName $(PT_TOP) src zlib ] ;
+Packages-SetTarget zlib : $(target) ;

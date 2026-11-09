@@ -163,9 +163,9 @@ MakeInstall Pt-Forms : $(PT_INSTALL_LIBDIR) ;
 
 if $(PT_FORMS_RENDERER) = nanovg
 {
-    if $(WITH_BUILTIN_FREETYPE)
+    if [ Packages-Target freetype ]
     {
-        LinkLibraries Pt-Forms : freetype ;
+        LinkLibraries Pt-Forms : [ Packages-Target freetype ] ;
     }
     else
     {

@@ -35,7 +35,11 @@ if $(SSL_LINKFLAGS)
     LinkFlags Pt-Ssl : $(SSL_LINKFLAGS) ;
 }
 
-if $(WITH_OPENSSL)
+if [ Packages-Target openssl ]
+{
+    LinkLibraries Pt-Ssl : [ Packages-Target openssl ] ;
+}
+else if $(WITH_OPENSSL)
 {
     LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
 }

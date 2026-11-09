@@ -1,0 +1,4 @@
+# Included by Builtin-Use after the source root was found.
+
+Packages-SetIncludes freetype : [ FDirName $(PT_TOP) src freetype include ] ;
+Packages-SetTarget freetype : freetype ;

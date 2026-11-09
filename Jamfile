@@ -204,22 +204,22 @@ if $(WITH_BUILTIN_SKIA)
 	SubInclude PT_TOP src skia src ;
 }
 
-if $(WITH_BUILTIN_ZLIB)
+if [ Packages-Target zlib ]
 {
     SubInclude PT_TOP src zlib ;
 }
 
-if $(WITH_BUILTIN_LIBPNG)
+if [ Packages-Target png ]
 {
     SubInclude PT_TOP src libpng ;
 }
 
-if $(WITH_BUILTIN_LIBJPEG)
+if [ Packages-Target jpeg ]
 {
     SubInclude PT_TOP src libjpeg ;
 }
 
-if $(WITH_BUILTIN_FREETYPE)
+if [ Packages-Target freetype ]
 {
     SubInclude PT_TOP src freetype src ;
 }
@@ -229,7 +229,7 @@ if $(WITH_MBEDTLS)
     SubInclude PT_TOP src mbedtls ;
 }
 
-if $(WITH_OPENSSL)
+if [ Packages-Target openssl ]
 {
     SubInclude PT_TOP src openssl ;
 }

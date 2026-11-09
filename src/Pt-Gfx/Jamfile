@@ -108,9 +108,9 @@ if $(WITH_BLEND2D_BUILTIN)
     LinkLibraries Pt-Gfx : blend2d ;
 }
 
-if $(WITH_BUILTIN_LIBPNG)
+if [ Packages-Target png ]
 {
-    LinkLibraries Pt-Gfx : png ;
+    LinkLibraries Pt-Gfx : [ Packages-Target png ] ;
 }
 else
 {
@@ -119,9 +119,9 @@ else
     ObjectC++Flags PngReader.cpp PngWriter.cpp : $(PNG_C++FLAGS) ;
 }
 
-if $(WITH_BUILTIN_LIBJPEG)
+if [ Packages-Target jpeg ]
 {
-    LinkLibraries Pt-Gfx : jpeg ;
+    LinkLibraries Pt-Gfx : [ Packages-Target jpeg ] ;
 }
 else
 {
@@ -130,9 +130,9 @@ else
     ObjectC++Flags JpegReader.cpp : $(JPEG_C++FLAGS) ;
 }
 
-if $(WITH_BUILTIN_ZLIB)
+if [ Packages-Target zlib ]
 {
-    LinkLibraries Pt-Gfx : $(ZLIB_LIBRARY) ;
+    LinkLibraries Pt-Gfx : [ Packages-Target zlib ] ;
 }
 else
 {
@@ -140,9 +140,9 @@ else
     LinkLibs Pt-Gfx : $(ZLIB_LINKLIBS) ;
 }
 
-if $(WITH_BUILTIN_FREETYPE)
+if [ Packages-Target freetype ]
 {
-    LinkLibraries Pt-Gfx : freetype ;
+    LinkLibraries Pt-Gfx : [ Packages-Target freetype ] ;
 }
 else
 {

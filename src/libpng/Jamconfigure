@@ -1,0 +1,4 @@
+# Included by Builtin-Use after the source root was found.
+
+Packages-SetIncludes png : [ FDirName $(PT_TOP) src libpng ] ;
+Packages-SetTarget png : png ;

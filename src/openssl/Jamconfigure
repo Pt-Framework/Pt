@@ -60,3 +60,6 @@ switch $(TARGET_OS:L)
 
 Configure OPENSSL_CFLAGS ;
 EchoOption OPENSSL_CFLAGS : "OpenSSL CFLAGS" ;
+
+Packages-SetIncludes openssl : [ FDirName $(PT_TOP) src openssl include ] ;
+Packages-SetTarget openssl : Pt-Ssl-openssl ;

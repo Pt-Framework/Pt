@@ -65,10 +65,10 @@ A non-empty `pkg.TARGET` is how `Builtin-Use` and consumers detect a
 builtin package. There is no separate status flag and no separate
 `WITH_BUILTIN_xxx`.
 
-A source package that is also usable as a standalone project detects
-whether it was included from a parent and sets the variables only in
-that case. Its own top-level Jamconfigure continues to work when it is
-built alone.
+A package `Jamconfigure` under `src/<pkg>/` is the builtin configure.
+It sets the variables whenever it runs. A later standalone project, if
+one is added, detects that it was not included from a parent and leaves
+the variables unset.
 
 ## Baseline
 

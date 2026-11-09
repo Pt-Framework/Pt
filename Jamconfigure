@@ -539,24 +539,22 @@ if ! $(WITH_ZLIB)
     WITH_BUILTIN_ZLIB = yes ;
 }
 
-Configure WITH_BUILTIN_ZLIB ;
 EchoOption --with-inline-zlib : "Using inline zlib" : $(WITH_BUILTIN_ZLIB:E="no") ;
 
 if $(WITH_BUILTIN_ZLIB)
 {
-    ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib ] ;
+    if ! [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ]
+    {
+        Exit "Error: builtin zlib selected but not configured" ;
+    }
+
+    ZLIB_INCLUDES = [ Packages-Includes zlib ] ;
     ZLIB_C++FLAGS = ;
     ZLIB_LINKLIBS = ;
     ZLIB_LINKFLAGS = ;
-    ZLIB_LIBRARY = z ;
 
-    if ! $(PRELIB)
-    {
-        ZLIB_LIBRARY = libz ;
-    }
-
-    EchoOption ZLIB_LIBRARY : "ZLib library name" ;
-    Configure ZLIB_LIBRARY ;
+    Packages-Echo zlib ;
+    Packages-Configure zlib ;
 }
 
 Configure ZLIB_INCLUDES ;
@@ -602,15 +600,22 @@ if ! $(WITH_PNG)
     WITH_BUILTIN_LIBPNG = yes ;
 }
 
-Configure WITH_BUILTIN_LIBPNG ;
 EchoOption --with-inline-libpng : "Using inline libpng" : $(WITH_BUILTIN_LIBPNG:E="no") ;
 
 if $(WITH_BUILTIN_LIBPNG)
 {
-    PNG_INCLUDES = [ FDirName $(PT_TOP) src libpng ] ;
+    if ! [ Builtin-Use png : [ FDirName $(PT_TOP) src libpng ] ]
+    {
+        Exit "Error: builtin png selected but not configured" ;
+    }
+
+    PNG_INCLUDES = [ Packages-Includes png ] ;
     PNG_C++FLAGS = ;
     PNG_LINKLIBS = ;
     PNG_LINKFLAGS = ;
+
+    Packages-Echo png ;
+    Packages-Configure png ;
 }
 
 Configure PNG_INCLUDES ;
@@ -656,16 +661,23 @@ if ! $(WITH_JPEG)
     WITH_BUILTIN_LIBJPEG = yes ;
 }
 
-Configure WITH_BUILTIN_LIBJPEG ;
 EchoOption --with-inline-libjpeg : "Using inline libjpeg"
                                    : $(WITH_BUILTIN_LIBJPEG:E="no") ;
 
 if $(WITH_BUILTIN_LIBJPEG)
 {
-    JPEG_INCLUDES = [ FDirName $(PT_TOP) src libjpeg ] ;
+    if ! [ Builtin-Use jpeg : [ FDirName $(PT_TOP) src libjpeg ] ]
+    {
+        Exit "Error: builtin jpeg selected but not configured" ;
+    }
+
+    JPEG_INCLUDES = [ Packages-Includes jpeg ] ;
     JPEG_C++FLAGS = ;
     JPEG_LINKLIBS = ;
     JPEG_LINKFLAGS = ;
+
+    Packages-Echo jpeg ;
+    Packages-Configure jpeg ;
 }
 
 Configure JPEG_INCLUDES ;
@@ -711,15 +723,22 @@ if ! $(WITH_FREETYPE)
     WITH_BUILTIN_FREETYPE = yes ;
 }
 
-Configure WITH_BUILTIN_FREETYPE ;
 EchoOption --with-inline-freetype : "Using inline Freetype" : $(WITH_BUILTIN_FREETYPE:E="no") ;
 
 if $(WITH_BUILTIN_FREETYPE)
 {
-    FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src freetype include ] ;
+    if ! [ Builtin-Use freetype : [ FDirName $(PT_TOP) src freetype ] ]
+    {
+        Exit "Error: builtin freetype selected but not configured" ;
+    }
+
+    FREETYPE_INCLUDES = [ Packages-Includes freetype ] ;
     FREETYPE_C++FLAGS = ;
     FREETYPE_LINKLIBS = ;
     FREETYPE_LINKFLAGS = ;
+
+    Packages-Echo freetype ;
+    Packages-Configure freetype ;
 }
 
 Configure FREETYPE_INCLUDES ;
@@ -742,14 +761,20 @@ Load openssl.jam ;
 
 if --with-openssl in $(ARGV)
 {
-    include [ FDirName src openssl Jamconfigure ] ;
+    if ! [ Builtin-Use openssl : [ FDirName $(PT_TOP) src openssl ] ]
+    {
+        Exit "Error: builtin openssl selected but not configured" ;
+    }
 
     WITH_OPENSSL = "yes" ;
     Configure WITH_OPENSSL ;
 
     WITH_SSL = yes ;
     PT_SSL_IMPL = "openssl" ;
-    SSL_INCLUDES = [ FDirName $(PT_TOP) src openssl include ] ;
+    SSL_INCLUDES = [ Packages-Includes openssl ] ;
+
+    Packages-Echo openssl ;
+    Packages-Configure openssl ;
 }
 
 if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)

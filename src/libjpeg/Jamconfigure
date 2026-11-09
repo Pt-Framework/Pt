@@ -1,0 +1,4 @@
+# Included by Builtin-Use after the source root was found.
+
+Packages-SetIncludes jpeg : [ FDirName $(PT_TOP) src libjpeg ] ;
+Packages-SetTarget jpeg : jpeg ;
