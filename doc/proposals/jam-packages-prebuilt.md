@@ -9,23 +9,6 @@ platform. Its manifest is the pure-data file `prebuilts.jam` in the
 bundle root. `prebuilt.jam` translates the `prebuilts.*` assignments
 into the common package variables.
 
-## Baseline
-
-`Prebuilt-Use` sets `PREBUILT_ROOT` and includes `jam/packages.jam`.
-The rules `Prebuilt-Includes`, `Prebuilt-LinkLibs`, `Prebuilt-LibPath`
-and `Prebuilt-LinkFlags` return the values that `Jamconfigure` currently
-assigns with `?=` into `ZLIB_INCLUDES` and the other five variables
-before it calls `ZLib-Configure`. The same pattern is used for png,
-jpeg, FreeType and OpenSSL.
-
-The manifest uses `PREBUILT_SCHEMA`, `PREBUILT_ID`, `PREBUILT_PACKAGES`
-and dotted names of the form `PREBUILT_PACKAGE_LIBS.$(pkg)`. It lives
-under `jam/` and has an include guard. Schema must be 1.
-
-`Prebuilt-LibPath` walks `PREBUILT_PACKAGE_DEPENDS` only when
-`PREBUILT_LINKAGE` is `static`. The model has no linkage field and
-always walks `DEPENDS` for `LIBDIR`.
-
 ## Manifest {#manifest}
 
 The file `prebuilts.jam` contains only assignments. It has no rules,
@@ -120,12 +103,19 @@ prebuilt/<id>/
 `prebuilt.jam` provides:
 
 ```
+Prebuilt-Load dest
 Prebuilt-Use pkg
 ```
 
-It returns the package name when the loaded bundle lists the package,
-empty otherwise. On success it fills only still-empty common flag
-variables (already set values, including `-s` overrides, are left
+`Prebuilt-Load dest` binds the bundle. It records the root, includes
+`prebuilts.jam` from that directory, and checks that `prebuilts.version`
+is 1. A missing file or an unsupported version is an `Exit`. The caller
+invokes it once when a prebuilt folder is selected. `PREBUILT_ROOT` is
+internal to `prebuilt.jam`.
+
+`Prebuilt-Use pkg` returns the package name when the loaded bundle lists
+the package, empty otherwise. On success it fills only still-empty common
+flag variables (already set values, including `-s` overrides, are left
 unchanged):
 
 - `pkg.INCLUDES` from the include paths (default `<pkg>/include` plus
@@ -144,6 +134,5 @@ unchanged):
 The fill is done through the `Packages-Set*` accessors, but only when
 the corresponding variable is still empty. The existing `Prebuilt-*`
 primitive rules stay. They walk `prebuilts.<pkg>.DEPENDS` for include
-paths and library search directories.
-
-`Prebuilt-Use` checks that `prebuilts.version` is 1.
+paths and library search directories. They read the bundle bound by
+`Prebuilt-Load`.

@@ -123,13 +123,15 @@ while `WITH_pkg` is still empty. The first success sets `WITH_pkg`.
 
 1. Builtin override: `--with-inline-xxx` is given and `Builtin-Use`
    succeeds. This overrides every other source.
-2. Prebuilt or system/custom: `Prebuilt-Use` fills only still-empty
-   flag variables when the bundle contains the package (side effect
-   only). Already set values (including `-s` overrides) are left
-   unchanged. Then the package-specific `*-Configure` is called with
-   the resulting current values (prebuilt paths, `-s` hints, or empty
-   for a system probe). Custom `-s` settings are hints for the system
-   probe, not a separate source.
+2. Prebuilt or system/custom: when `--with-prebuilt` is selected,
+   `Jamconfigure` calls `Prebuilt-Load dest` once after fetch.
+   `Prebuilt-Use` fills only still-empty flag variables when the
+   bundle contains the package (side effect only). Already set values
+   (including `-s` overrides) are left unchanged. Then the
+   package-specific `*-Configure` is called with the resulting current
+   values (prebuilt paths, `-s` hints, or empty for a system probe).
+   Custom `-s` settings are hints for the system probe, not a separate
+   source.
 3. Builtin fallback: `Builtin-Use` succeeds when nothing earlier did.
 
 `Prebuilt-Use` returns the package name when the bundle contains it,

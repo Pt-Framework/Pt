@@ -5,8 +5,8 @@ PREBUILT_JAM_INCLUDED = true ;
 #
 # Maps a prebuilt bundle onto the common package variables. Loaded on
 # demand by Jamconfigure. Fetch, identity, Prebuilt-Has, Prebuilt-Bin
-# and Prebuilt-Lib live here. Prebuilt-Use currently loads the bundle
-# jam/packages.jam manifest; filling pkg.* is later work.
+# and Prebuilt-Lib live here. Prebuilt-Load dest binds the bundle.
+# Prebuilt-Use pkg fills still-empty pkg.* flag variables.
 
 Load fetch.jam ;
 
@@ -86,35 +86,83 @@ rule Prebuilt-Fetch ( url : dest )
     return $(fetched) ;
 }
 
-# Prebuilt-Use <dest>
+# Prebuilt-Load <dest>
 #
-# Sets PREBUILT_ROOT, includes <dest>/jam/packages.jam, and checks
-# PREBUILT_SCHEMA (must be 1).
+# Binds the bundle at dest: sets PREBUILT_ROOT, includes prebuilts.jam,
+# and checks prebuilts.version (must be 1). Caller invokes this once
+# when a prebuilt folder is selected.
 #
-rule Prebuilt-Use ( dest )
+rule Prebuilt-Load ( dest )
 {
     PREBUILT_ROOT = $(dest) ;
 
-    local jamfile = [ FDirName $(PREBUILT_ROOT) jam packages.jam ] ;
-
-    if ! [ CHECK_IF_FILE $(jamfile) ]
+    if ! $(prebuilts.version)
     {
-        Exit "Error: prebuilt packages.jam not found:" $(jamfile) ;
-    }
-    else
-    {
-        include $(jamfile) ;
+        local jamfile = [ FDirName $(PREBUILT_ROOT) prebuilts.jam ] ;
 
-        if $(PREBUILT_SCHEMA) != 1
+        if ! [ CHECK_IF_FILE $(jamfile) ]
         {
-            Exit "Error: unsupported PREBUILT_SCHEMA:" $(PREBUILT_SCHEMA) ;
+            Exit "Error: prebuilt prebuilts.jam not found:" $(jamfile) ;
+        }
+        else
+        {
+            include $(jamfile) ;
+
+            if $(prebuilts.version) != 1
+            {
+                Exit "Error: unsupported prebuilts.version:" $(prebuilts.version) ;
+            }
         }
     }
 }
 
+# Prebuilt-Use <pkg>
+#
+# Returns <pkg> when the loaded bundle lists it, empty otherwise. On
+# success fills still-empty pkg.INCLUDES, pkg.DEFINES, pkg.LINKLIBS,
+# pkg.LIBDIR and pkg.LINKFLAGS from the bundle. Leaves pkg.TARGET
+# empty. Already set values, including -s overrides, are left unchanged.
+#
+rule Prebuilt-Use ( pkg )
+{
+    local result ;
+
+    if $(pkg) in $(prebuilts.packages)
+    {
+        if ! [ Packages-Includes $(pkg) ]
+        {
+            Packages-SetIncludes $(pkg) : [ Prebuilt-Includes $(pkg) ] ;
+        }
+
+        if ! [ Packages-Defines $(pkg) ]
+        {
+            Packages-SetDefines $(pkg) : [ Prebuilt-CxxFlags $(pkg) ] ;
+        }
+
+        if ! [ Packages-LinkLibs $(pkg) ]
+        {
+            Packages-SetLinkLibs $(pkg) : [ Prebuilt-LinkLibs $(pkg) ] ;
+        }
+
+        if ! [ Packages-LibDir $(pkg) ]
+        {
+            Packages-SetLibDir $(pkg) : [ Prebuilt-LibPath $(pkg) ] ;
+        }
+
+        if ! [ Packages-LinkFlags $(pkg) ]
+        {
+            Packages-SetLinkFlags $(pkg) : [ Prebuilt-LinkFlags $(pkg) ] ;
+        }
+
+        result = $(pkg) ;
+    }
+
+    return $(result) ;
+}
+
 # Prebuilt-Depends <packages>
 #
-# Uses PREBUILT_PACKAGE_DEPENDS.$(pkg) for a unique dependency walk.
+# Uses prebuilts.$(pkg).DEPENDS for a unique dependency walk.
 # Named packages are first, dependencies last. Small-N list membership; not a
 # solver.
 #
@@ -131,7 +179,7 @@ rule Prebuilt-Depends ( packages + )
         if ! $(pkg) in $(result)
         {
             result += $(pkg) ;
-            pending += $(PREBUILT_PACKAGE_DEPENDS.$(pkg)) ;
+            pending += $(prebuilts.$(pkg).DEPENDS) ;
         }
     }
 
@@ -140,9 +188,9 @@ rule Prebuilt-Depends ( packages + )
 
 # Prebuilt-Includes <packages>
 #
-# Include dirs of the PREBUILT_PACKAGE_DEPENDS.$(pkg) closure.
-# PREBUILT_PACKAGE_INCLUDES.$(pkg) is prefix-relative (may contain /) when
-# the default $(pkg)/include is not enough; otherwise $(root)/$(pkg)/include.
+# Include dirs of the prebuilts.$(pkg).DEPENDS closure. Always
+# $(root)/$(pkg)/include, plus prebuilts.$(pkg).INCLUDES when set
+# (prefix-relative, may contain /).
 #
 rule Prebuilt-Includes ( packages + )
 {
@@ -151,17 +199,12 @@ rule Prebuilt-Includes ( packages + )
 
     for local pkg in $(pkgs)
     {
-        if $(PREBUILT_PACKAGE_INCLUDES.$(pkg))
+        result += [ FDirName $(PREBUILT_ROOT) $(pkg) include ] ;
+
+        for local inc in $(prebuilts.$(pkg).INCLUDES)
         {
-            for local inc in $(PREBUILT_PACKAGE_INCLUDES.$(pkg))
-            {
-                local parts = [ SPLIT_BY_CHARACTERS $(inc) : "/" ] ;
-                result += [ FDirName $(PREBUILT_ROOT) $(parts) ] ;
-            }
-        }
-        else
-        {
-            result += [ FDirName $(PREBUILT_ROOT) $(pkg) include ] ;
+            local parts = [ SPLIT_BY_CHARACTERS $(inc) : "/" ] ;
+            result += [ FDirName $(PREBUILT_ROOT) $(parts) ] ;
         }
     }
 
@@ -170,7 +213,7 @@ rule Prebuilt-Includes ( packages + )
 
 # Prebuilt-CxxFlags <packages>
 #
-# [ FDefines ... ] from PREBUILT_PACKAGE_DEFINES.$(pkg) for the named
+# [ FDefines ... ] from prebuilts.$(pkg).DEFINES for the named
 # packages only.
 #
 rule Prebuilt-CxxFlags ( packages + )
@@ -179,9 +222,9 @@ rule Prebuilt-CxxFlags ( packages + )
 
     for local pkg in $(packages)
     {
-        if $(PREBUILT_PACKAGE_DEFINES.$(pkg))
+        if $(prebuilts.$(pkg).DEFINES)
         {
-            result += [ FDefines $(PREBUILT_PACKAGE_DEFINES.$(pkg)) ] ;
+            result += [ FDefines $(prebuilts.$(pkg).DEFINES) ] ;
         }
     }
 
@@ -190,27 +233,21 @@ rule Prebuilt-CxxFlags ( packages + )
 
 # Prebuilt-LinkLibs <packages>
 #
-# Shared: PREBUILT_PACKAGE_LIBS.$(pkg), PREBUILT_PACKAGE_SYSLIBS.$(pkg), and
-# PREBUILT_PACKAGE_FRAMEWORKS.$(pkg) of the named packages. Static: same over
-# the PREBUILT_PACKAGE_DEPENDS.$(pkg) closure. Named packages first,
-# dependencies last. Frameworks are appended as -framework <name>.
+# prebuilts.$(pkg).LIBS, prebuilts.$(pkg).SYSLIBS and
+# prebuilts.$(pkg).FRAMEWORKS of the named packages only. Named packages
+# first. Frameworks are appended as -framework <name>. The package entry
+# is the complete public link line for this bundle.
 #
 rule Prebuilt-LinkLibs ( packages + )
 {
     local result ;
-    local pkgs = $(packages) ;
 
-    if $(PREBUILT_LINKAGE) = static
+    for local pkg in $(packages)
     {
-        pkgs = [ Prebuilt-Depends $(packages) ] ;
-    }
+        result += [ FLinkLibs $(prebuilts.$(pkg).LIBS)
+                              $(prebuilts.$(pkg).SYSLIBS) ] ;
 
-    for local pkg in $(pkgs)
-    {
-        result += [ FLinkLibs $(PREBUILT_PACKAGE_LIBS.$(pkg))
-                              $(PREBUILT_PACKAGE_SYSLIBS.$(pkg)) ] ;
-
-        for local fw in $(PREBUILT_PACKAGE_FRAMEWORKS.$(pkg))
+        for local fw in $(prebuilts.$(pkg).FRAMEWORKS)
         {
             result += -framework $(fw) ;
         }
@@ -221,28 +258,17 @@ rule Prebuilt-LinkLibs ( packages + )
 
 # Prebuilt-LibPath <packages>
 #
-# Library paths of the named packages. PREBUILT_PACKAGE_LIBPATH.$(pkg) is
-# prefix-relative; otherwise $(pkg)/lib. Shared: named packages. Static:
-# PREBUILT_PACKAGE_DEPENDS.$(pkg) closure (the link probe must see dependent
-# archives).
+# Library paths of the prebuilts.$(pkg).DEPENDS closure. Always
+# $(pkg)/lib, plus prebuilts.$(pkg).LIBDIR when set (prefix-relative).
 #
 rule Prebuilt-LibPath ( packages + )
 {
     local result ;
-    local pkgs = $(packages) ;
-
-    if $(PREBUILT_LINKAGE) = static
-    {
-        pkgs = [ Prebuilt-Depends $(packages) ] ;
-    }
+    local pkgs = [ Prebuilt-Depends $(packages) ] ;
 
     for local pkg in $(pkgs)
     {
-        local paths = $(PREBUILT_PACKAGE_LIBPATH.$(pkg)) ;
-        if ! $(paths)
-        {
-            paths = $(pkg)/lib ;
-        }
+        local paths = $(pkg)/lib $(prebuilts.$(pkg).LIBDIR) ;
 
         for local path in $(paths)
         {
@@ -261,23 +287,16 @@ rule Prebuilt-LibPath ( packages + )
 
 # Prebuilt-LinkFlags <packages>
 #
-# Extra linker flags from PREBUILT_PACKAGE_LINKFLAGS.$(pkg).
-# Shared: named packages. Static: PREBUILT_PACKAGE_DEPENDS.$(pkg) closure.
-# Never FLibPath: CheckDependencyLinkC++ adds it from LIBDIR.
+# Extra linker flags from prebuilts.$(pkg).LINKFLAGS of the named
+# packages only. Never FLibPath: the caller adds it from LIBDIR.
 #
 rule Prebuilt-LinkFlags ( packages + )
 {
     local result ;
-    local pkgs = $(packages) ;
 
-    if $(PREBUILT_LINKAGE) = static
+    for local pkg in $(packages)
     {
-        pkgs = [ Prebuilt-Depends $(packages) ] ;
-    }
-
-    for local pkg in $(pkgs)
-    {
-        result += $(PREBUILT_PACKAGE_LINKFLAGS.$(pkg)) ;
+        result += $(prebuilts.$(pkg).LINKFLAGS) ;
     }
 
     return $(result) ;
@@ -289,18 +308,18 @@ rule Prebuilt-LinkFlags ( packages + )
 #
 rule Prebuilt-Packages
 {
-    return $(PREBUILT_PACKAGES) ;
+    return $(prebuilts.packages) ;
 }
 
 # Prebuilt-Has <package>
 #
-# Returns <package> when it is in PREBUILT_PACKAGES, empty otherwise.
+# Returns <package> when it is in prebuilts.packages, empty otherwise.
 #
 rule Prebuilt-Has ( package )
 {
-    local result = ;
+    local result ;
 
-    if $(package) in $(PREBUILT_PACKAGES)
+    if $(package) in $(prebuilts.packages)
     {
         result = $(package) ;
     }

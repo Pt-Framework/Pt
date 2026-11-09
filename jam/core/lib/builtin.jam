@@ -7,15 +7,43 @@ JAMBASE_BUILTIN_JAM_INCLUDED = true ;
 # by Jamconfigure. This module knows nothing about prebuilt bundles,
 # configure option parsing, or resolution order.
 #
-# Builtin-Use pkg : root
+# Builtin-Use <pkg> : <root>
 #
-# Returns the package name when the source package is selected, empty
-# otherwise. Selection (directory check, include of the package
-# Jamconfigure, pkg.TARGET) is filled in by later work. This stub
-# does not select.
+# Returns <pkg> when the source package is selected, empty otherwise.
+# Presence is a directory check of <root>. There is no network access
+# and no download. When the directory exists the rule records the root
+# as builtin.<pkg>.root, includes <root>/Jamconfigure, and returns
+# <pkg> when pkg.TARGET is set. A missing Jamconfigure is an Exit.
+# A configure error in the package Jamconfigure is also an Exit.
+# Builtin-Use does not set pkg.TARGET.
 
 rule Builtin-Use ( pkg : root )
 {
+    local result ;
+
+    if [ FILE_IS_DIR $(root) ]
+    {
+        local name = builtin.$(pkg).root ;
+        $(name) = $(root) ;
+
+        local jamconfigure = [ FDirName $(root) Jamconfigure ] ;
+
+        if ! [ CHECK_IF_FILE $(jamconfigure) ]
+        {
+            Exit "Error: builtin Jamconfigure not found:" $(jamconfigure) ;
+        }
+        else
+        {
+            include $(jamconfigure) ;
+
+            if [ Packages-Target $(pkg) ]
+            {
+                result = $(pkg) ;
+            }
+        }
+    }
+
+    return $(result) ;
 }
 
 } # JAMBASE_BUILTIN_JAM_INCLUDED
