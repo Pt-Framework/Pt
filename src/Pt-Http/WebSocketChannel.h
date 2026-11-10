@@ -34,6 +34,8 @@ class WebSocketChannel : public Channel
 
         ~WebSocketChannel();
 
+        static std::string getAcceptKey(const std::string& key);
+
         void setMaxMessageSize(std::size_t maxSize);
 
         void setIdleTimeout(std::size_t ms);

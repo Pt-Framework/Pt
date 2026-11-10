@@ -27,61 +27,13 @@
  */
 #include <Pt/Http/WebSocketResponder.h>
 #include <Pt/Http/WebSocketService.h>
-#include <Pt/Base64Codec.h>
 #include <Pt/Http/Request.h>
-#include <Pt/TextStream.h>
-#include "Sha1.h"
-#include <cstdint>
+#include "WebSocketChannel.h"
 #include <string>
 #include <vector>
 
 namespace Pt {
 namespace Http {
-
-static std::string toBase64(const uint8_t* input, size_t size)
-{
-    static const char base64Chars[] =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    static const char padCharacter = '=';
-
-    std::string encodedString;
-    encodedString.reserve(((size / 3) + (size % 3 > 0)) * 4);
-
-    std::uint32_t temp{};
-    const uint8_t* it = &input[0];
-
-    for(std::size_t i = 0; i < size / 3; ++i)
-    {
-        temp = (*it++) << 16;
-        temp += (*it++) << 8;
-        temp += (*it++);
-        encodedString.append(1, base64Chars[(temp & 0x00FC0000) >> 18]);
-        encodedString.append(1, base64Chars[(temp & 0x0003F000) >> 12]);
-        encodedString.append(1, base64Chars[(temp & 0x00000FC0) >> 6]);
-        encodedString.append(1, base64Chars[(temp & 0x0000003F)]);
-    }
-
-    switch(size % 3)
-    {
-    case 1:
-        temp = (*it++) << 16;
-        encodedString.append(1, base64Chars[(temp & 0x00FC0000) >> 18]);
-        encodedString.append(1, base64Chars[(temp & 0x0003F000) >> 12]);
-        encodedString.append(2, padCharacter);
-        break;
-
-    case 2:
-        temp = (*it++) << 16;
-        temp += (*it++) << 8;
-        encodedString.append(1, base64Chars[(temp & 0x00FC0000) >> 18]);
-        encodedString.append(1, base64Chars[(temp & 0x0003F000) >> 12]);
-        encodedString.append(1, base64Chars[(temp & 0x00000FC0) >> 6]);
-        encodedString.append(1, padCharacter);
-        break;
-    }
-
-    return encodedString;
-}
 
 static bool isOws(char ch)
 {
@@ -158,19 +110,6 @@ static std::string toLower(const std::string& str)
 
     return lowerString;
 }
-
-std::string WebSocketResponder::computeAccept(const std::string& key)
-{
-    std::string accept(key);
-    accept += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-
-    Sha1 sha1(accept.data(), accept.size());
-
-    const std::vector<uint8_t>& d = sha1.calc();
-
-    return toBase64(&d[0], d.size());
-}
-
 
 WebSocketResponder::WebSocketResponder(Pt::Http::WebSocketService& s)
 : Pt::Http::Responder(s)
@@ -250,7 +189,8 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         reply.setStatus(101, "Switching Protocols");
         reply.header().setUpgrade();
         reply.header().set("Upgrade", "websocket");
-        reply.header().set("Sec-WebSocket-Accept", computeAccept(key).c_str());
+        const std::string accept = WebSocketChannel::getAcceptKey(key);
+        reply.header().set("Sec-WebSocket-Accept", accept.c_str());
         if( ! selected.empty() )
             reply.header().set("Sec-WebSocket-Protocol", selected.c_str());
     }

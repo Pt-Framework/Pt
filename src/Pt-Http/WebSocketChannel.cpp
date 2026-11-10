@@ -4,13 +4,17 @@
 */
 
 #include "WebSocketChannel.h"
+#include "Sha1.h"
 #include <Pt/Http/Stream.h>
 #include <Pt/Byteorder.h>
 #include <Pt/Utf8.h>
+#include <Pt/Base64Codec.h>
+#include <Pt/TextStream.h>
 #include <Pt/System/EventLoop.h>
 #include <cstring>
 #include <ctime>
 #include <exception>
+#include <sstream>
 #include <stdexcept>
 
 namespace Pt {
@@ -95,6 +99,23 @@ WebSocketChannel::WebSocketChannel()
 WebSocketChannel::~WebSocketChannel()
 {
     close();
+}
+
+
+std::string WebSocketChannel::getAcceptKey(const std::string& key)
+{
+    std::string accept(key);
+    accept += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
+    Sha1 sha1(accept.data(), accept.size());
+    const std::vector<uint8_t>& digest = sha1.calc();
+
+    std::ostringstream encoded;
+    Pt::BasicTextOStream<char, char> base64(encoded, new Pt::Base64Codec());
+    base64.write(reinterpret_cast<const char*>(digest.data()),
+                 static_cast<std::streamsize>(digest.size()));
+    base64.flush();
+    return encoded.str();
 }
 
 

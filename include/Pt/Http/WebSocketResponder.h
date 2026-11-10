@@ -58,8 +58,6 @@ class PT_HTTP_API WebSocketResponder : public Pt::Http::Responder
 
         virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop);
 
-    private:
-        static std::string computeAccept(const std::string& key);
 };
 
 }}

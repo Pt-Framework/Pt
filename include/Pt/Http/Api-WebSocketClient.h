@@ -49,13 +49,38 @@
     already the client's endpoint. The path and query of that URL
     become the request URL; the client does not take the host from
     the URL. The optional second argument is the Origin header.
+
+    %WebSocket::header() refers directly to %Client::request()'s
+    header. Set Authorization, Cookie or other application fields
+    before the handshake, while the client is idle. Those fields
+    remain in the request; the socket keeps no separate copy.
+    %beginConnect() discards a prepared body and query parameters
+    from an earlier request, sets HTTP/1.1 and the new target, and
+    resets Content-Length, Transfer-Encoding and Trailer for an
+    empty GET. The Upgrade fields, key, version and protocol offer
+    are controlled by the socket. A nonempty Origin argument
+    replaces a prepared Origin field; otherwise it is preserved.
+    Do not modify the header while the handshake is pending.
+
     %beginConnect() fills a GET with Connection, Upgrade,
     Sec-WebSocket-Version 13 and Sec-WebSocket-Key, and sends it
     through the client. %addProtocol() offers one
     Sec-WebSocket-Protocol name before that send. Several calls
-    offer several names, in order. A finished 101 becomes the stream this
-    socket formats. %endConnect() completes the handshake and throws
-    if it failed. %protocol() is the single name the server echoed,
+    offer several names, in order. The protocol offer is built from
+    these names rather than a manually prepared protocol field.
+
+    The server confirms the handshake with Sec-WebSocket-Accept:
+    the Base64-encoded SHA-1 digest of the transmitted key followed
+    by the fixed WebSocket GUID. The client requires status 101 and
+    that exact Accept value before it opens a stream. Leading and
+    trailing HTTP whitespace is ignored; the digest is case-sensitive.
+    A missing, empty or different Accept fails the handshake.
+    %connected() reports completion for success and failure alike;
+    call %endConnect() to observe the result. A handshake rejection
+    throws %HttpError, and repeated calls keep reporting that error
+    until the next %beginConnect().
+
+    %protocol() is the single name the server echoed,
     or empty when the server selected none. An echo that was not
     offered fails the handshake. After that success the socket no
     longer uses the client for messages. A client masks every frame

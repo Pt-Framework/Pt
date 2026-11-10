@@ -20,6 +20,7 @@ namespace Pt {
 namespace Http {
 
 class Client;
+class MessageHeader;
 class WebSocketChannel;
 
 
@@ -92,7 +93,24 @@ class WebSocketChannel;
     already the client's endpoint. The path and query of that URL
     become the request URL; the client does not take the host from
     the URL. The optional second argument is the Origin header.
-    %endConnect() completes the handshake and throws if it failed.
+
+    %header() accesses the client's request header directly. Set
+    Authorization, Cookie or other application fields there before
+    %beginConnect(), while the client is idle. No separate header
+    copy is held by the socket. %beginConnect() preserves these
+    fields, discards a prepared body, and sends an empty HTTP/1.1
+    GET. It resets body-framing fields and sets the Upgrade fields,
+    version, key and protocol offer itself. A nonempty Origin
+    argument replaces an existing Origin field; otherwise that
+    field is preserved. Do not edit the header during a handshake.
+
+    %connected() reports the handshake's completion, including a
+    failure. %endConnect() accepts only status 101 with the
+    Sec-WebSocket-Accept value for the key this socket sent. A
+    missing, empty or different Accept fails before any stream is
+    opened. HTTP whitespace around the value is ignored; the value
+    itself is case-sensitive. %endConnect() throws if the handshake
+    failed.
     %addProtocol() offers one Sec-WebSocket-Protocol name before
     %beginConnect(). Several calls offer several names, in order.
     After a finished handshake %protocol() is the single name the
@@ -175,11 +193,30 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         ~WebSocket();
 
+        /** @brief Returns the handshake header of the client's request.
+
+            Set application headers before %beginConnect(), while the
+            client is idle. The header belongs to the client and is
+            not copied by the socket. Do not modify it while a
+            handshake is pending.
+        */
+        MessageHeader& header();
+
+        /** @brief Returns the handshake header of the client's request.
+        */
+        const MessageHeader& header() const;
+
         /** @brief Begins a client handshake for @a url.
 
             @a url is a request path, or a %ws:// URL whose host and
             port are the client's endpoint. @a origin is the Origin
             header. Host, port and TLS come from the client.
+
+            Preserves application headers and discards any prepared
+            request body. A nonempty @a origin replaces an existing
+            Origin header. Upgrade fields and the protocol offer are
+            set by the socket; body-framing fields are reset for the
+            empty GET.
         */
         void beginConnect(const std::string& url,
                           const std::string& origin = std::string());
@@ -209,11 +246,15 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         /** @brief Completes the client handshake.
 
+            Requires status 101 and the Sec-WebSocket-Accept value
+            for the key sent by this socket. A rejected response
+            does not open a WebSocket stream.
+
             Rethrows the original asynchronous handshake error. The
             error remains available until the next %beginConnect().
 
             @throw %std::logic_error if the handshake is still pending.
-            @throw %HttpError if the upgrade or protocol was rejected.
+            @throw %HttpError if the status, Accept or protocol was rejected.
             @throw %IOError if sending or receiving failed.
         */
         void endConnect();
@@ -441,6 +482,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         WebSocketChannel*        _channel;
         std::string              _path;
         std::string              _protocol;
+        std::string              _acceptKey;
         std::vector<std::string> _protocols;
         std::exception_ptr       _error;
         bool                     _connecting;

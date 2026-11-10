@@ -23,8 +23,12 @@
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/Timer.h"
+#include <Pt/Base64Codec.h>
+#include <Pt/TextStream.h>
+#include "Sha1.h"
 
 #include <iterator>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -51,11 +55,22 @@ class DeclineResponder : public Pt::Http::Responder
             onWriteReply(request, reply, loop);
         }
 
-        virtual void onWriteReply(const Pt::Http::Request&, Pt::Http::Reply& reply, Pt::System::EventLoop&)
+        virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
+                                  Pt::System::EventLoop&)
         {
+            if(request.header().has("X-Test-Status"))
+            {
+                reply.setStatus(200, "OK");
+                setReady(true);
+                return;
+            }
+
             reply.setStatus(101, "Switching Protocols");
             reply.header().setUpgrade();
             reply.header().set("Upgrade", "websocket");
+            const char* accept = request.header().get("X-Test-Accept");
+            if(accept)
+                reply.header().set("Sec-WebSocket-Accept", accept);
             setReady(true);
         }
 };
@@ -113,6 +128,19 @@ class HandshakeObserver : public Pt::Connectable
             if(_throwOnReady)
                 throw std::runtime_error("connected slot failed");
 
+            _loop->exit();
+        }
+
+        void onReply(Pt::Http::Client& client)
+        {
+            Pt::Http::MessageProgress progress = client.endReceive();
+            if( ! progress.finished() )
+            {
+                client.beginReceive();
+                return;
+            }
+
+            ++_count;
             _loop->exit();
         }
 
@@ -1045,6 +1073,106 @@ class ProtocolService : public Pt::Http::WebSocketService
         std::size_t _opened;
 };
 
+class AcceptResponder : public DeclineResponder
+{
+    public:
+        explicit AcceptResponder(Pt::Http::WebSocketService& service)
+        : DeclineResponder(service)
+        {}
+
+    protected:
+        virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
+                                  Pt::System::EventLoop&)
+        {
+            reply.setStatus(101, "Switching Protocols");
+            reply.header().setUpgrade();
+            reply.header().set("Upgrade", "websocket");
+            std::string challenge(request.header().get("Sec-WebSocket-Key"));
+            challenge += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+            Pt::Http::Sha1 sha1(challenge.data(), challenge.size());
+            const std::vector<uint8_t>& digest = sha1.calc();
+            std::ostringstream encoded;
+            Pt::BasicTextOStream<char, char> base64(encoded, new Pt::Base64Codec());
+            base64.write(reinterpret_cast<const char*>(digest.data()), digest.size());
+            base64.flush();
+            std::string accept = encoded.str();
+
+            const char* field = request.header().get("X-Test-Reply");
+            const std::string mode = field ? field : "";
+            if(mode == "missing")
+            {
+                setReady(true);
+                return;
+            }
+            if(mode == "case")
+            {
+                for(std::size_t index = 0; index < accept.size(); ++index)
+                {
+                    if(accept[index] >= 'A' && accept[index] <= 'Z')
+                    {
+                        accept[index] += 'a' - 'A';
+                        break;
+                    }
+                    if(accept[index] >= 'a' && accept[index] <= 'z')
+                    {
+                        accept[index] -= 'a' - 'A';
+                        break;
+                    }
+                }
+            }
+            else if(mode == "ows")
+                accept = " \t" + accept + "\t ";
+            else if(mode == "list")
+                accept += ", " + accept;
+
+            reply.header().set("Sec-WebSocket-Accept", accept.c_str());
+            setReady(true);
+        }
+};
+
+
+class AcceptService : public ProtocolService
+{
+    public:
+        using ProtocolService::ProtocolService;
+
+    protected:
+        virtual Pt::Http::Responder* onGetResponder(const Pt::Http::Request&)
+        {
+            return new AcceptResponder(*this);
+        }
+
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                        const Pt::Http::Request& request,
+                                                        const Pt::Http::Reply& reply)
+        {
+            if(request.header().has("X-Custom"))
+            {
+                PT_UNIT_ASSERT(request.header().isSet("Authorization", "Bearer test"));
+                PT_UNIT_ASSERT(request.header().isSet("Cookie", "session=test"));
+                PT_UNIT_ASSERT_EQUALS(request.method(), "GET");
+                PT_UNIT_ASSERT(request.qparams().empty());
+                PT_UNIT_ASSERT_EQUALS(request.available(), static_cast<std::size_t>(0));
+
+                std::size_t count = 0;
+                for(Pt::Http::MessageHeader::ConstIterator field = request.header().begin();
+                    field != request.header().end(); ++field)
+                {
+                    if(std::string(field->name()) == "X-Custom")
+                    {
+                        const std::string expected = count == 0 ? "first" : "second";
+                        PT_UNIT_ASSERT_EQUALS(std::string(field->value()), expected);
+                        ++count;
+                    }
+                }
+                PT_UNIT_ASSERT_EQUALS(count, static_cast<std::size_t>(2));
+            }
+
+            return ProtocolService::onGetSession(stream, request, reply);
+        }
+};
+
+
 class FailSession : public Pt::Http::WebSocketSession
 {
     public:
@@ -1314,6 +1442,16 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("ProtocolRequired", *this, &WebSocketTest::ProtocolRequired);
             registerMethod("ProtocolRejected", *this, &WebSocketTest::ProtocolRejected);
             registerMethod("ProtocolHeader", *this, &WebSocketTest::ProtocolHeader);
+            registerMethod("HandshakeHeaders", *this, &WebSocketTest::HandshakeHeaders);
+            registerMethod("AcceptMissing", *this, &WebSocketTest::AcceptMissing);
+            registerMethod("AcceptEmpty", *this, &WebSocketTest::AcceptEmpty);
+            registerMethod("AcceptWrong", *this, &WebSocketTest::AcceptWrong);
+            registerMethod("AcceptCase", *this, &WebSocketTest::AcceptCase);
+            registerMethod("AcceptWhitespace", *this, &WebSocketTest::AcceptWhitespace);
+            registerMethod("AcceptList", *this, &WebSocketTest::AcceptList);
+            registerMethod("AcceptRetry", *this, &WebSocketTest::AcceptRetry);
+            registerMethod("AcceptVector", *this, &WebSocketTest::AcceptVector);
+            registerMethod("HandshakeStatus", *this, &WebSocketTest::HandshakeStatus);
             registerMethod("EndAfterClosed", *this, &WebSocketTest::EndAfterClosed);
             registerMethod("PingAfterShutdown", *this, &WebSocketTest::PingAfterShutdown);
             registerMethod("IdleBeforeConnect", *this, &WebSocketTest::IdleBeforeConnect);
@@ -1678,7 +1816,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             Pt::Http::Client client(*_loop, ep);
             Pt::Http::WebSocket socket(client);
-            socket.connected() += Pt::slot(*this, &WebSocketTest::onDeclineConnected);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocolFailed);
             socket.beginConnect("/ws");
 
             _loop->run();
@@ -2465,6 +2603,125 @@ class WebSocketTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void AcceptMissing()
+        {
+            checkAcceptFailure(0, false);
+        }
+
+        void AcceptEmpty()
+        {
+            checkAcceptFailure("", false);
+        }
+
+        void AcceptWrong()
+        {
+            checkAcceptFailure("s3pPLMBiTxaQ9kYGzzhZRbK+xOo=", false);
+        }
+
+        void HandshakeStatus()
+        {
+            checkAcceptFailure("s3pPLMBiTxaQ9kYGzzhZRbK+xOo=", true);
+        }
+
+        void checkAcceptFailure(const char* accept, bool wrongStatus)
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8181);
+            Pt::Http::Server server(*_loop, ep);
+            DeclineService service;
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            if(accept)
+                socket.header().set("X-Test-Accept", accept);
+            if(wrongStatus)
+                socket.header().set("X-Test-Status", "200");
+
+            HandshakeObserver observer(*_loop);
+            socket.connected() += Pt::slot(observer, &HandshakeObserver::onConnected);
+            socket.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << "not sent";
+            PT_UNIT_ASSERT_THROW(socket.beginSend(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
+        }
+
+        void HandshakeHeaders()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8180);
+            Pt::Http::Server server(*_loop, ep);
+            AcceptService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            const Pt::Http::WebSocket& constSocket = socket;
+            PT_UNIT_ASSERT(&socket.header() == &http.request().header());
+            PT_UNIT_ASSERT(&constSocket.header() == &http.request().header());
+
+            Pt::Http::Request& request = http.request();
+            request.setMethod("POST");
+            request.setQParams("old=query");
+            request.body() << "old body";
+            request.body().setstate(std::ios::failbit);
+            socket.header().set("Authorization", "Bearer test");
+            socket.header().set("Cookie", "session=test");
+            socket.header().add("X-Custom", "first");
+            socket.header().add("X-Custom", "second");
+            socket.header().set("Origin", "https://header.test");
+            socket.header().set("Sec-WebSocket-Version", "12");
+            socket.header().set("Sec-WebSocket-Key", "old-key");
+            socket.header().set("Sec-WebSocket-Protocol", "unoffered");
+            socket.header().set("Content-Length", "8");
+            socket.header().set("Transfer-Encoding", "chunked");
+            socket.header().set("Trailer", "X-Trailer");
+            socket.addProtocol("chat");
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocol);
+            socket.beginConnect("/ws");
+
+            PT_UNIT_ASSERT_EQUALS(request.method(), "GET");
+            PT_UNIT_ASSERT(request.qparams().empty());
+            PT_UNIT_ASSERT_EQUALS(request.pending(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT(request.body().good());
+            PT_UNIT_ASSERT(socket.header().isSet("Authorization", "Bearer test"));
+            PT_UNIT_ASSERT(socket.header().isSet("Cookie", "session=test"));
+            PT_UNIT_ASSERT(socket.header().isSet("Sec-WebSocket-Version", "13"));
+            PT_UNIT_ASSERT( ! socket.header().isSet("Sec-WebSocket-Key", "old-key") );
+            PT_UNIT_ASSERT(socket.header().isSet("Sec-WebSocket-Protocol", "chat"));
+            PT_UNIT_ASSERT( ! socket.header().has("Transfer-Encoding") );
+            PT_UNIT_ASSERT( ! socket.header().has("Trailer") );
+            PT_UNIT_ASSERT_EQUALS(socket.header().contentLength(), static_cast<std::size_t>(0));
+
+            std::size_t customFields = 0;
+            for(Pt::Http::MessageHeader::ConstIterator field = socket.header().begin();
+                field != socket.header().end(); ++field)
+            {
+                if(std::string(field->name()) == "X-Custom")
+                {
+                    const std::string expected = customFields == 0 ? "first" : "second";
+                    PT_UNIT_ASSERT_EQUALS(std::string(field->value()), expected);
+                    ++customFields;
+                }
+            }
+            PT_UNIT_ASSERT_EQUALS(customFields, static_cast<std::size_t>(2));
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_handshake);
+            PT_UNIT_ASSERT(_upgraded);
+            socket.endConnect();
+            PT_UNIT_ASSERT_EQUALS(_copied, "https://header.test");
+            PT_UNIT_ASSERT_EQUALS(_offered, "chat");
+        }
+
         void ProtocolHeader()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8030);
@@ -2479,6 +2736,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Http::Client http(*_loop, ep);
             Pt::Http::WebSocket socket(http);
             socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocol);
+            socket.header().set("Origin", "https://header.test");
             socket.beginConnect("/ws", "https://example.test");
 
             _loop->run();
@@ -2529,6 +2787,103 @@ class WebSocketTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void AcceptCase()
+        {
+            checkAcceptVariant("case", false);
+        }
+
+        void AcceptWhitespace()
+        {
+            checkAcceptVariant("ows", true);
+        }
+
+        void AcceptList()
+        {
+            checkAcceptVariant("list", false);
+        }
+
+        void checkAcceptVariant(const char* mode, bool success)
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8182);
+            Pt::Http::Server server(*_loop, ep);
+            AcceptService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.header().set("X-Test-Reply", mode);
+            HandshakeObserver observer(*_loop);
+            socket.connected() += Pt::slot(observer, &HandshakeObserver::onConnected);
+            socket.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            if(success)
+                socket.endConnect();
+            else
+            {
+                PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
+                PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
+            }
+        }
+
+        void AcceptRetry()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8183);
+            Pt::Http::Server server(*_loop, ep);
+            AcceptService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            HandshakeObserver observer(*_loop);
+            socket.connected() += Pt::slot(observer, &HandshakeObserver::onConnected);
+            socket.header().set("X-Test-Reply", "missing");
+            socket.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
+            http.close();
+            socket.header().remove("X-Test-Reply");
+            socket.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(2));
+            socket.endConnect();
+        }
+
+        void AcceptVector()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8184);
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            HandshakeObserver observer(*_loop);
+            http.replyReceived() += Pt::slot(observer, &HandshakeObserver::onReply);
+            http.request().setUrl("/ws");
+            http.request().header().setUpgrade();
+            http.request().header().set("Upgrade", "websocket");
+            http.request().header().set("Sec-WebSocket-Version", "13");
+            http.request().header().set("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ==");
+            http.beginReceive();
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(http.reply().statusCode(), 101u);
+            const char* accept = http.reply().header().get("Sec-WebSocket-Accept");
+            PT_UNIT_ASSERT(accept != 0);
+            PT_UNIT_ASSERT_EQUALS(std::string(accept), "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=");
+        }
+
         void HandshakeControl()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8025);

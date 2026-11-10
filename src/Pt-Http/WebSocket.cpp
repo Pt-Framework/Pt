@@ -46,12 +46,6 @@ bool isProtocolToken(const std::string& name)
     return true;
 }
 
-
-bool isOws(char ch)
-{
-    return ch == ' ' || ch == '\t';
-}
-
 } // namespace
 
 WebSocket::WebSocket(Client& client)
@@ -77,6 +71,18 @@ WebSocket::~WebSocket()
 }
 
 
+MessageHeader& WebSocket::header()
+{
+    return _client->request().header();
+}
+
+
+const MessageHeader& WebSocket::header() const
+{
+    return _client->request().header();
+}
+
+
 void WebSocket::addProtocol(const std::string& name)
 {
     if( ! isProtocolToken(name) )
@@ -92,21 +98,27 @@ void WebSocket::beginConnect(const std::string& url, const std::string& origin)
         throw std::logic_error("WebSocket has no client");
 
     _error = std::exception_ptr();
-    _connecting = true;
+    _acceptKey.clear();
+    _protocol.clear();
     parseUrl(url, origin);
 
-    _client->requestSent() += Pt::slot(*this, &WebSocket::onRequestSent);
-    _client->replyReceived() += Pt::slot(*this, &WebSocket::onReply);
-
     Request& request = _client->request();
-    request.clear();
+    request.discard();
+    request.body().clear();
     request.setMethod("GET");
     request.setUrl(_path);
+    request.setQParams(std::string());
+    request.header().setVersion(1, 1);
+    request.header().remove("Content-Length");
+    request.header().remove("Transfer-Encoding");
+    request.header().remove("Trailer");
+    request.header().remove("Sec-WebSocket-Protocol");
     request.header().set("Connection", "Upgrade");
     request.header().set("Upgrade", "websocket");
     request.header().set("Sec-WebSocket-Version", "13");
 
     const std::string key = createKey();
+    _acceptKey = WebSocketChannel::getAcceptKey(key);
     request.header().set("Sec-WebSocket-Key", key.c_str());
 
     if( ! origin.empty() )
@@ -121,7 +133,9 @@ void WebSocket::beginConnect(const std::string& url, const std::string& origin)
         request.header().set("Sec-WebSocket-Protocol", offered.c_str());
     }
 
-    _protocol.clear();
+    _connecting = true;
+    _client->requestSent() += Pt::slot(*this, &WebSocket::onRequestSent);
+    _client->replyReceived() += Pt::slot(*this, &WebSocket::onReply);
     _client->beginSend(true);
 }
 
@@ -173,19 +187,31 @@ void WebSocket::onReply(Client& client)
         if( client.reply().statusCode() != 101 )
             throw HttpError("WebSocket handshake failed");
 
+        const char* received = client.reply().header().get("Sec-WebSocket-Accept");
+        if( ! received )
+            throw HttpError("WebSocket handshake failed");
+
+        const std::string accept(received);
+        const std::size_t begin = accept.find_first_not_of(" \t");
+        const std::size_t end = accept.find_last_not_of(" \t");
+
+        if( begin == std::string::npos ||
+            accept.compare(begin, end - begin + 1, _acceptKey) != 0 )
+        {
+            throw HttpError("WebSocket handshake failed");
+        }
+
         const char* echoed = client.reply().header().get("Sec-WebSocket-Protocol");
         std::string selected;
         if(echoed && *echoed)
         {
             const std::string field(echoed);
-            std::size_t left = 0;
-            std::size_t right = field.size();
-            while(left < right && isOws(field[left]))
-                ++left;
-            while(right > left && isOws(field[right - 1]))
-                --right;
+            const std::size_t left = field.find_first_not_of(" \t");
+            const std::size_t right = field.find_last_not_of(" \t");
+            if(left == std::string::npos)
+                throw HttpError("WebSocket handshake failed");
 
-            selected = field.substr(left, right - left);
+            selected = field.substr(left, right - left + 1);
             if(selected.find(',') != std::string::npos || ! isProtocolToken(selected))
                 throw HttpError("WebSocket handshake failed");
 
