@@ -3039,7 +3039,9 @@ LIST * builtin_file_remove( FRAME * frame, int flags )
 /* Pt extension: FILE_RENAME
  *
  * Renames (moves) a file. Returns "true" on success, L0 on failure.
- * Invalidates the file system cache for both old and new paths.
+ * The old path is marked missing. The new path is recorded as an
+ * existing file: exists=0 would make file_query() skip the OS and
+ * treat the renamed file as missing.
  */
 LIST * builtin_file_rename( FRAME * frame, int flags )
 {
@@ -3058,12 +3060,22 @@ LIST * builtin_file_rename( FRAME * frame, int flags )
         ff->is_dir = 0;
         ff->exists = 0;
         timestamp_clear( &ff->time );
+        if ( ! list_empty( ff->files ) )
+        {
+            list_free( ff->files );
+            ff->files = L0;
+        }
 
         ff = file_info( list_front( new_arg ), &found );
-        ff->is_file = 0;
+        ff->is_file = 1;
         ff->is_dir = 0;
-        ff->exists = 0;
+        ff->exists = 1;
         timestamp_clear( &ff->time );
+        if ( ! list_empty( ff->files ) )
+        {
+            list_free( ff->files );
+            ff->files = L0;
+        }
 
         return list_new( object_copy( constant_true ) );
     }
@@ -3075,8 +3087,10 @@ LIST * builtin_file_rename( FRAME * frame, int flags )
 /* Pt extension: FILE_MKDIR
  *
  * Creates a directory. Returns "true" on success, L0 on failure.
- * Invalidates the file system cache so subsequent queries reflect
- * the new directory.
+ * Records the directory as existing and clears its cached children so
+ * later CHECK_IF_FILE of files created inside it restats the OS.
+ * exists=0 would make file_query() skip the OS and treat the new
+ * directory as missing.
  */
 LIST * builtin_file_mkdir( FRAME * frame, int flags )
 {
@@ -3090,9 +3104,14 @@ LIST * builtin_file_mkdir( FRAME * frame, int flags )
         int found;
         file_info_t * ff = file_info( list_front( arg ), &found );
         ff->is_file = 0;
-        ff->is_dir = 0;
-        ff->exists = 0;
+        ff->is_dir = 1;
+        ff->exists = 1;
         timestamp_clear( &ff->time );
+        if ( ! list_empty( ff->files ) )
+        {
+            list_free( ff->files );
+            ff->files = L0;
+        }
         return list_new( object_copy( constant_true ) );
     }
 
@@ -3172,4 +3191,3 @@ LIST * builtin_replace( FRAME * frame, int flags )
         return result;
     }
 }
-
