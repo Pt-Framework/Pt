@@ -204,32 +204,32 @@ if $(WITH_BUILTIN_SKIA)
 	SubInclude PT_TOP src skia src ;
 }
 
-if [ Packages-Target zlib ]
+if [ Package-Target zlib ]
 {
     SubInclude PT_TOP src zlib ;
 }
 
-if [ Packages-Target png ]
+if [ Package-Target png ]
 {
     SubInclude PT_TOP src libpng ;
 }
 
-if [ Packages-Target jpeg ]
+if [ Package-Target jpeg ]
 {
     SubInclude PT_TOP src libjpeg ;
 }
 
-if [ Packages-Target freetype ]
+if [ Package-Target freetype ]
 {
     SubInclude PT_TOP src freetype src ;
 }
 
-if [ Packages-Target mbedtls ]
+if [ Package-Target mbedtls ]
 {
     SubInclude PT_TOP src mbedtls ;
 }
 
-if [ Packages-Target openssl ]
+if [ Package-Target openssl ]
 {
     SubInclude PT_TOP src openssl ;
 }

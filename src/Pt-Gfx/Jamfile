@@ -41,34 +41,34 @@ SubDirHdrs $(PT_TOP)/src/Pt-Gfx/freetype ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
-if [ Packages-Includes png ]
+if [ Package-Includes png ]
 {
-    SubDirHdrs [ Packages-Includes png ] ;
+    SubDirHdrs [ Package-Includes png ] ;
 }
 
-if [ Packages-Defines png ]
+if [ Package-Defines png ]
 {
-    SubDirC++Flags [ Packages-Defines png ] ;
+    SubDirC++Flags [ Package-Defines png ] ;
 }
 
-if [ Packages-Includes jpeg ]
+if [ Package-Includes jpeg ]
 {
-    SubDirHdrs [ Packages-Includes jpeg ] ;
+    SubDirHdrs [ Package-Includes jpeg ] ;
 }
 
-if [ Packages-Defines jpeg ]
+if [ Package-Defines jpeg ]
 {
-    SubDirC++Flags [ Packages-Defines jpeg ] ;
+    SubDirC++Flags [ Package-Defines jpeg ] ;
 }
 
-if [ Packages-Includes freetype ]
+if [ Package-Includes freetype ]
 {
-    SubDirHdrs [ Packages-Includes freetype ] ;
+    SubDirHdrs [ Package-Includes freetype ] ;
 }
 
-if [ Packages-Defines freetype ]
+if [ Package-Defines freetype ]
 {
-    SubDirC++Flags [ Packages-Defines freetype ] ;
+    SubDirC++Flags [ Package-Defines freetype ] ;
 }
 
 PT_GFX_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Gfx $(PT_GFX_IMPL:L) ] ;
@@ -123,31 +123,31 @@ if $(WITH_BLEND2D_BUILTIN)
     LinkLibraries Pt-Gfx : blend2d ;
 }
 
-if [ Packages-Target png ]
+if [ Package-Target png ]
 {
-    LinkLibraries Pt-Gfx : [ Packages-Target png ] ;
+    LinkLibraries Pt-Gfx : [ Package-Target png ] ;
 }
 
-LinkLibs Pt-Gfx : [ Packages-LinkLibs png ] ;
-LinkFlags Pt-Gfx : [ FLibPath [ Packages-LibDir png ] ]
-                   [ Packages-LinkFlags png ] ;
+LinkLibs Pt-Gfx : [ Package-LinkLibs png ] ;
+LinkFlags Pt-Gfx : [ FLibPath [ Package-LibDir png ] ]
+                   [ Package-LinkFlags png ] ;
 
-if [ Packages-Target jpeg ]
+if [ Package-Target jpeg ]
 {
-    LinkLibraries Pt-Gfx : [ Packages-Target jpeg ] ;
+    LinkLibraries Pt-Gfx : [ Package-Target jpeg ] ;
 }
 
-LinkLibs Pt-Gfx : [ Packages-LinkLibs jpeg ] ;
-LinkFlags Pt-Gfx : [ FLibPath [ Packages-LibDir jpeg ] ]
-                   [ Packages-LinkFlags jpeg ] ;
+LinkLibs Pt-Gfx : [ Package-LinkLibs jpeg ] ;
+LinkFlags Pt-Gfx : [ FLibPath [ Package-LibDir jpeg ] ]
+                   [ Package-LinkFlags jpeg ] ;
 
-if [ Packages-Target freetype ]
+if [ Package-Target freetype ]
 {
-    LinkLibraries Pt-Gfx : [ Packages-Target freetype ] ;
+    LinkLibraries Pt-Gfx : [ Package-Target freetype ] ;
 }
 
-LinkLibs Pt-Gfx : [ Packages-LinkLibs freetype ] ;
-LinkFlags Pt-Gfx : [ FLibPath [ Packages-LibDir freetype ] ]
-                   [ Packages-LinkFlags freetype ] ;
+LinkLibs Pt-Gfx : [ Package-LinkLibs freetype ] ;
+LinkFlags Pt-Gfx : [ FLibPath [ Package-LibDir freetype ] ]
+                   [ Package-LinkFlags freetype ] ;
 
 SubInclude PT_TOP src Pt-Gfx tests ;

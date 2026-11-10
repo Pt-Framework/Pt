@@ -486,7 +486,7 @@ if $(PT_WITH_PREBUILT)
         }
     }
 
-    PT_PREBUILT_ID ?= [ Prebuilt-Tuple $(abi) ] ;
+    PT_PREBUILT_ID ?= [ Prebuilt-Id $(abi) ] ;
     PT_PREBUILT_ROOT = [ FDirName $(PT_TOP) prebuilt $(PT_PREBUILT_ID) ] ;
     EchoOption PT_PREBUILT_ID : "Using prebuilt" ;
 
@@ -526,11 +526,11 @@ if ! $(WITH_ZLIB)
     Prebuilt-Use zlib ;
 
     WITH_ZLIB = [ ZLib-Configure
-                    [ Packages-Includes zlib ]
-                  : [ Packages-Defines zlib ]
-                  : [ Packages-LinkLibs zlib ]
-                  : [ Packages-LibDir zlib ]
-                  : [ Packages-LinkFlags zlib ] ] ;
+                    [ Package-Includes zlib ]
+                  : [ Package-Defines zlib ]
+                  : [ Package-LinkLibs zlib ]
+                  : [ Package-LibDir zlib ]
+                  : [ Package-LinkFlags zlib ] ] ;
 }
 
 if ! $(WITH_ZLIB)
@@ -538,12 +538,12 @@ if ! $(WITH_ZLIB)
     WITH_ZLIB = [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ] ;
 }
 
-Packages-Echo zlib ;
+Package-Echo zlib ;
 EchoOption WITH_ZLIB : "ZLib found" : $(WITH_ZLIB:E="no") ;
 
 if $(WITH_ZLIB)
 {
-    Packages-Configure zlib ;
+    Package-Configure zlib ;
 }
 
 #############################################################################
@@ -564,11 +564,11 @@ if ! $(WITH_PNG)
     Prebuilt-Use png ;
 
     WITH_PNG = [ Png-Configure
-                   [ Packages-Includes png ]
-                 : [ Packages-Defines png ]
-                 : [ Packages-LinkLibs png ]
-                 : [ Packages-LibDir png ]
-                 : [ Packages-LinkFlags png ] ] ;
+                   [ Package-Includes png ]
+                 : [ Package-Defines png ]
+                 : [ Package-LinkLibs png ]
+                 : [ Package-LibDir png ]
+                 : [ Package-LinkFlags png ] ] ;
 }
 
 if ! $(WITH_PNG)
@@ -576,12 +576,12 @@ if ! $(WITH_PNG)
     WITH_PNG = [ Builtin-Use png : [ FDirName $(PT_TOP) src libpng ] ] ;
 }
 
-Packages-Echo png ;
+Package-Echo png ;
 EchoOption WITH_PNG : "PNG found" : $(WITH_PNG:E="no") ;
 
 if $(WITH_PNG)
 {
-    Packages-Configure png ;
+    Package-Configure png ;
 }
 
 #############################################################################
@@ -602,11 +602,11 @@ if ! $(WITH_JPEG)
     Prebuilt-Use jpeg ;
 
     WITH_JPEG = [ Jpeg-Configure
-                    [ Packages-Includes jpeg ]
-                  : [ Packages-Defines jpeg ]
-                  : [ Packages-LinkLibs jpeg ]
-                  : [ Packages-LibDir jpeg ]
-                  : [ Packages-LinkFlags jpeg ] ] ;
+                    [ Package-Includes jpeg ]
+                  : [ Package-Defines jpeg ]
+                  : [ Package-LinkLibs jpeg ]
+                  : [ Package-LibDir jpeg ]
+                  : [ Package-LinkFlags jpeg ] ] ;
 }
 
 if ! $(WITH_JPEG)
@@ -614,12 +614,12 @@ if ! $(WITH_JPEG)
     WITH_JPEG = [ Builtin-Use jpeg : [ FDirName $(PT_TOP) src libjpeg ] ] ;
 }
 
-Packages-Echo jpeg ;
+Package-Echo jpeg ;
 EchoOption WITH_JPEG : "JPEG found" : $(WITH_JPEG:E="no") ;
 
 if $(WITH_JPEG)
 {
-    Packages-Configure jpeg ;
+    Package-Configure jpeg ;
 }
 
 #############################################################################
@@ -640,11 +640,11 @@ if ! $(WITH_FREETYPE)
     Prebuilt-Use freetype ;
 
     WITH_FREETYPE = [ Freetype-Configure
-                        [ Packages-Includes freetype ]
-                      : [ Packages-Defines freetype ]
-                      : [ Packages-LinkLibs freetype ]
-                      : [ Packages-LibDir freetype ]
-                      : [ Packages-LinkFlags freetype ] ] ;
+                        [ Package-Includes freetype ]
+                      : [ Package-Defines freetype ]
+                      : [ Package-LinkLibs freetype ]
+                      : [ Package-LibDir freetype ]
+                      : [ Package-LinkFlags freetype ] ] ;
 }
 
 if ! $(WITH_FREETYPE)
@@ -652,12 +652,12 @@ if ! $(WITH_FREETYPE)
     WITH_FREETYPE = [ Builtin-Use freetype : [ FDirName $(PT_TOP) src freetype ] ] ;
 }
 
-Packages-Echo freetype ;
+Package-Echo freetype ;
 EchoOption WITH_FREETYPE : "Freetype found" : $(WITH_FREETYPE:E="no") ;
 
 if $(WITH_FREETYPE)
 {
-    Packages-Configure freetype ;
+    Package-Configure freetype ;
 }
 
 #############################################################################
@@ -686,11 +686,11 @@ if ! $(WITH_SSL) && --with-openssl in $(ARGV)
     Prebuilt-Use openssl ;
 
     if [ OpenSsl-Configure
-            [ Packages-Includes openssl ]
-          : [ Packages-Defines openssl ]
-          : [ Packages-LinkLibs openssl ]
-          : [ Packages-LibDir openssl ]
-          : [ Packages-LinkFlags openssl ] ]
+            [ Package-Includes openssl ]
+          : [ Package-Defines openssl ]
+          : [ Package-LinkLibs openssl ]
+          : [ Package-LibDir openssl ]
+          : [ Package-LinkFlags openssl ] ]
     {
         WITH_SSL = yes ;
         PT_SSL_IMPL = openssl ;
@@ -711,11 +711,11 @@ if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
     Prebuilt-Use mbedtls ;
 
     if [ MbedTls-Configure
-            [ Packages-Includes mbedtls ]
-          : [ Packages-Defines mbedtls ]
-          : [ Packages-LinkLibs mbedtls ]
-          : [ Packages-LibDir mbedtls ]
-          : [ Packages-LinkFlags mbedtls ] ]
+            [ Package-Includes mbedtls ]
+          : [ Package-Defines mbedtls ]
+          : [ Package-LinkLibs mbedtls ]
+          : [ Package-LibDir mbedtls ]
+          : [ Package-LinkFlags mbedtls ] ]
     {
         WITH_SSL = yes ;
         PT_SSL_IMPL = mbedtls ;
@@ -727,11 +727,11 @@ if ! $(WITH_SSL)
     Prebuilt-Use openssl ;
 
     if [ OpenSsl-Configure
-            [ Packages-Includes openssl ]
-          : [ Packages-Defines openssl ]
-          : [ Packages-LinkLibs openssl ]
-          : [ Packages-LibDir openssl ]
-          : [ Packages-LinkFlags openssl ] ]
+            [ Package-Includes openssl ]
+          : [ Package-Defines openssl ]
+          : [ Package-LinkLibs openssl ]
+          : [ Package-LibDir openssl ]
+          : [ Package-LinkFlags openssl ] ]
     {
         WITH_SSL = yes ;
         PT_SSL_IMPL = openssl ;
@@ -743,11 +743,11 @@ if ! $(WITH_SSL)
     Prebuilt-Use mbedtls ;
 
     if [ MbedTls-Configure
-            [ Packages-Includes mbedtls ]
-          : [ Packages-Defines mbedtls ]
-          : [ Packages-LinkLibs mbedtls ]
-          : [ Packages-LibDir mbedtls ]
-          : [ Packages-LinkFlags mbedtls ] ]
+            [ Package-Includes mbedtls ]
+          : [ Package-Defines mbedtls ]
+          : [ Package-LinkLibs mbedtls ]
+          : [ Package-LibDir mbedtls ]
+          : [ Package-LinkFlags mbedtls ] ]
     {
         WITH_SSL = yes ;
         PT_SSL_IMPL = mbedtls ;
@@ -761,14 +761,14 @@ if ! $(WITH_SSL)
 
 if $(PT_SSL_IMPL) = openssl
 {
-    Packages-Echo openssl ;
-    Packages-Configure openssl ;
+    Package-Echo openssl ;
+    Package-Configure openssl ;
 }
 
 if $(PT_SSL_IMPL) = mbedtls
 {
-    Packages-Echo mbedtls ;
-    Packages-Configure mbedtls ;
+    Package-Echo mbedtls ;
+    Package-Configure mbedtls ;
 }
 
 Configure WITH_SSL ;
@@ -1120,7 +1120,7 @@ else if $(PT_FORMS_IMPL:L) = "x11"
 
         if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
         {
-            PT_FORMS_INCLUDES = [ Packages-Includes freetype ] $(X11_INCLUDES) $(XFT_INCLUDES) ;
+            PT_FORMS_INCLUDES = [ Package-Includes freetype ] $(X11_INCLUDES) $(XFT_INCLUDES) ;
             PT_FORMS_LINKLIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
             WITH_FORMS = yes ;
         }
@@ -1221,7 +1221,7 @@ else if $(PT_FORMS_IMPL:L) = "wayland"
         if $(WAYLAND_EGL_LIBS) && $(EGL_LIBS) && $(GLESV2_LIBS)
         {
             PT_FORMS_LINKLIBS += $(EGL_LIBS) $(GLESV2_LIBS) $(WAYLAND_EGL_LIBS) $(M_LINKLIBS) ;
-            PT_FORMS_INCLUDES += [ Packages-Includes freetype ] ;
+            PT_FORMS_INCLUDES += [ Package-Includes freetype ] ;
             PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WAYLAND_NANOVG ] ;
         }
         else

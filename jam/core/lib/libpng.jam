@@ -69,7 +69,7 @@ rule Png-ConfigureLink ( includes * : defines * : linklibs * : libdir * : linkfl
 # hints have been provided), then falling back to compile-probes with
 # toolset-neutral library flags.
 #
-# On success writes the five flag variables unmerged through Packages-Set*
+# On success writes the five flag variables unmerged through Package-Set*
 # and returns png. On failure returns empty and leaves the variables
 # unchanged.
 
@@ -111,11 +111,11 @@ rule Png-Configure ( includes * : defines * : linklibs * : libdir * : linkflags 
 
     if $(result)
     {
-        Packages-SetIncludes png : $(includes) ;
-        Packages-SetDefines png : $(defines) ;
-        Packages-SetLinkLibs png : $(linklibs) ;
-        Packages-SetLibDir png : $(libdir) ;
-        Packages-SetLinkFlags png : $(linkflags) ;
+        Package-SetIncludes png : $(includes) ;
+        Package-SetDefines png : $(defines) ;
+        Package-SetLinkLibs png : $(linklibs) ;
+        Package-SetLibDir png : $(libdir) ;
+        Package-SetLinkFlags png : $(linkflags) ;
     }
 
     return $(result) ;

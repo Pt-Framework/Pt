@@ -6,26 +6,26 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl ;
 
 if $(PT_SSL_IMPL) = openssl
 {
-    if [ Packages-Includes openssl ]
+    if [ Package-Includes openssl ]
     {
-        SubDirHdrs [ Packages-Includes openssl ] ;
+        SubDirHdrs [ Package-Includes openssl ] ;
     }
 
-    if [ Packages-Defines openssl ]
+    if [ Package-Defines openssl ]
     {
-        SubDirC++Flags [ Packages-Defines openssl ] ;
+        SubDirC++Flags [ Package-Defines openssl ] ;
     }
 }
 else if $(PT_SSL_IMPL) = mbedtls
 {
-    if [ Packages-Includes mbedtls ]
+    if [ Package-Includes mbedtls ]
     {
-        SubDirHdrs [ Packages-Includes mbedtls ] ;
+        SubDirHdrs [ Package-Includes mbedtls ] ;
     }
 
-    if [ Packages-Defines mbedtls ]
+    if [ Package-Defines mbedtls ]
     {
-        SubDirC++Flags [ Packages-Defines mbedtls ] ;
+        SubDirC++Flags [ Package-Defines mbedtls ] ;
     }
 }
 
@@ -47,25 +47,25 @@ MakeInstall Pt-Ssl : $(PT_INSTALL_LIBDIR) ;
 
 if $(PT_SSL_IMPL) = openssl
 {
-    if [ Packages-Target openssl ]
+    if [ Package-Target openssl ]
     {
-        LinkLibraries Pt-Ssl : [ Packages-Target openssl ] ;
+        LinkLibraries Pt-Ssl : [ Package-Target openssl ] ;
     }
 
-    LinkLibs Pt-Ssl : [ Packages-LinkLibs openssl ] ;
-    LinkFlags Pt-Ssl : [ FLibPath [ Packages-LibDir openssl ] ]
-                       [ Packages-LinkFlags openssl ] ;
+    LinkLibs Pt-Ssl : [ Package-LinkLibs openssl ] ;
+    LinkFlags Pt-Ssl : [ FLibPath [ Package-LibDir openssl ] ]
+                       [ Package-LinkFlags openssl ] ;
 }
 else if $(PT_SSL_IMPL) = mbedtls
 {
-    if [ Packages-Target mbedtls ]
+    if [ Package-Target mbedtls ]
     {
-        LinkLibraries Pt-Ssl : [ Packages-Target mbedtls ] ;
+        LinkLibraries Pt-Ssl : [ Package-Target mbedtls ] ;
     }
 
-    LinkLibs Pt-Ssl : [ Packages-LinkLibs mbedtls ] ;
-    LinkFlags Pt-Ssl : [ FLibPath [ Packages-LibDir mbedtls ] ]
-                       [ Packages-LinkFlags mbedtls ] ;
+    LinkLibs Pt-Ssl : [ Package-LinkLibs mbedtls ] ;
+    LinkFlags Pt-Ssl : [ FLibPath [ Package-LibDir mbedtls ] ]
+                       [ Package-LinkFlags mbedtls ] ;
 }
 
 if $(WITH_SSL)

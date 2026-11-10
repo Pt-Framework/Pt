@@ -1,5 +1,5 @@
 SubDir PT_TOP src mbedtls ;
-SubDirHdrs [ Packages-Includes mbedtls ] ;
+SubDirHdrs [ Package-Includes mbedtls ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) mbedtls ;
 
 MBEDTLS_SUBDIR   = [ FDirName $(PT_TOP) src mbedtls library ] ;

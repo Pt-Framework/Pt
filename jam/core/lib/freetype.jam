@@ -58,7 +58,7 @@ rule Freetype-ConfigureLink ( includes * : defines * : linklibs * : libdir * : l
 # no hints have been provided), then falling back to compile-probes with
 # toolset-neutral library flags.
 #
-# On success writes the five flag variables unmerged through Packages-Set*
+# On success writes the five flag variables unmerged through Package-Set*
 # and returns freetype. On failure returns empty and leaves the variables
 # unchanged.
 
@@ -122,11 +122,11 @@ rule Freetype-Configure ( includes * : defines * : linklibs * : libdir * : linkf
 
     if $(result)
     {
-        Packages-SetIncludes freetype : $(includes) ;
-        Packages-SetDefines freetype : $(defines) ;
-        Packages-SetLinkLibs freetype : $(linklibs) ;
-        Packages-SetLibDir freetype : $(libdir) ;
-        Packages-SetLinkFlags freetype : $(linkflags) ;
+        Package-SetIncludes freetype : $(includes) ;
+        Package-SetDefines freetype : $(defines) ;
+        Package-SetLinkLibs freetype : $(linklibs) ;
+        Package-SetLibDir freetype : $(libdir) ;
+        Package-SetLinkFlags freetype : $(linkflags) ;
     }
 
     return $(result) ;

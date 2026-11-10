@@ -7,5 +7,5 @@ if ! $(PRELIB)
     target = libz ;
 }
 
-Packages-SetIncludes zlib : [ FDirName $(PT_TOP) src zlib ] ;
-Packages-SetTarget zlib : $(target) ;
+Package-SetIncludes zlib : [ FDirName $(PT_TOP) src zlib ] ;
+Package-SetTarget zlib : $(target) ;

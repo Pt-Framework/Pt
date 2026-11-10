@@ -37,7 +37,7 @@ to compile.
 Builtin-Use pkg : root
 ```
 
-It registers the source root and returns the package name when the
+It takes the source root and returns the package name when the
 package succeeds, empty otherwise.
 
 Presence is a directory check. There is no network access and no
@@ -58,12 +58,12 @@ The source package sets the common variables itself in its own
 `Jamconfigure`, and only after its checks have succeeded:
 
 ```
-Packages-SetIncludes zlib : $(root) ;
-Packages-SetTarget   zlib : z ;
+Package-SetIncludes zlib : $(root) ;
+Package-SetTarget   zlib : z ;
 ```
 
 (`z` or `libz`, whichever name the `Library` or `SharedLibrary` rule
-uses.) `Packages-SetTarget` sets this package's library name.
+uses.) `Package-SetTarget` sets this package's library name.
 
 A non-empty `pkg.TARGET` is how `Builtin-Use` and consumers detect a
 builtin package. There is no separate status flag and no separate
@@ -80,7 +80,7 @@ The source package `Jamconfigure` publishes complete public usage.
 It sets this package's `INCLUDES` and `TARGET`, then copies each
 dependency onto the flag variables. When a dependency is itself
 builtin, it appends that dependency's `TARGET` so `LinkLibraries`
-receives every Jam library the consumer needs. `Packages-SetTarget`
+receives every Jam library the consumer needs. `Package-SetTarget`
 still sets this package's own name.
 
 The package `Jamfile` consumes dependencies through the accessors to
@@ -90,27 +90,27 @@ Example for png that depends on zlib:
 
 ```
 # src/libpng/Jamconfigure
-Packages-SetIncludes png : $(root) [ Packages-Includes zlib ] ;
-Packages-SetDefines  png : [ Packages-Defines zlib ] ;
-Packages-SetTarget   png : png ;
-Packages-SetLinkLibs png : [ Packages-LinkLibs zlib ] ;
-Packages-SetLibDir   png : [ Packages-LibDir zlib ] ;
-Packages-SetLinkFlags png : [ Packages-LinkFlags zlib ] ;
+Package-SetIncludes png : $(root) [ Package-Includes zlib ] ;
+Package-SetDefines  png : [ Package-Defines zlib ] ;
+Package-SetTarget   png : png ;
+Package-SetLinkLibs png : [ Package-LinkLibs zlib ] ;
+Package-SetLibDir   png : [ Package-LibDir zlib ] ;
+Package-SetLinkFlags png : [ Package-LinkFlags zlib ] ;
 
-if [ Packages-Target zlib ]
+if [ Package-Target zlib ]
 {
-    png.TARGET += [ Packages-Target zlib ] ;
+    png.TARGET += [ Package-Target zlib ] ;
 }
 
 # src/libpng/Jamfile
-if [ Packages-Includes zlib ]
+if [ Package-Includes zlib ]
 {
-    SubDirHdrs [ Packages-Includes zlib ] ;
+    SubDirHdrs [ Package-Includes zlib ] ;
 }
 
-if [ Packages-Defines zlib ]
+if [ Package-Defines zlib ]
 {
-    SubDirCcFlags [ Packages-Defines zlib ] ;
+    SubDirCcFlags [ Package-Defines zlib ] ;
 }
 
 Library png : png.c ... ;
@@ -124,28 +124,28 @@ consumer uses `SubDirC++Flags`.
 The consumer of png applies the png package only:
 
 ```
-if [ Packages-Includes png ]
+if [ Package-Includes png ]
 {
-    SubDirHdrs [ Packages-Includes png ] ;
+    SubDirHdrs [ Package-Includes png ] ;
 }
 
-if [ Packages-Defines png ]
+if [ Package-Defines png ]
 {
-    SubDirC++Flags [ Packages-Defines png ] ;
+    SubDirC++Flags [ Package-Defines png ] ;
 }
 
-if [ Packages-Target png ]
+if [ Package-Target png ]
 {
-    LinkLibraries tgt : [ Packages-Target png ] ;
+    LinkLibraries tgt : [ Package-Target png ] ;
 }
 
-LinkLibs  tgt : [ Packages-LinkLibs png ] ;
-LinkFlags tgt : [ FLibPath [ Packages-LibDir png ] ]
-                [ Packages-LinkFlags png ] ;
+LinkLibs  tgt : [ Package-LinkLibs png ] ;
+LinkFlags tgt : [ FLibPath [ Package-LibDir png ] ]
+                [ Package-LinkFlags png ] ;
 ```
 
 Prebuilt packages have no Jamfile, so `Prebuilt-Use` walks
-`prebuilts.<pkg>.DEPENDS` for `INCLUDES` and `LIBDIR`. That walk is not
+`prebuilt.<pkg>.DEPENDS` for `INCLUDES` and `LIBDIR`. That walk is not
 used for builtin packages. The source package `Jamconfigure` copies
 dependency usage itself.
 

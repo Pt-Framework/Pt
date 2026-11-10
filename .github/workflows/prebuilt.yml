@@ -1,4 +1,4 @@
-name: Build Prebuilt Package
+name: Prebuilt
 
 on:
   workflow_dispatch:
@@ -170,7 +170,7 @@ jobs:
         run: |
           $out = "${{ env.PREFIX }}"
           $id = "${{ env.PREBUILT_ID }}"
-          $jamPath = Join-Path $out "prebuilts.jam"
+          $jamPath = Join-Path $out "prebuilt.jam"
           $onWindows = "${{ runner.os }}" -eq "Windows"
 
           foreach ($pkg in @("zlib", "png", "jpeg", "freetype", "openssl")) {
@@ -227,38 +227,38 @@ jobs:
           }
 
           if (-not (Test-Path $jamPath)) {
-            Write-Error "Missing prebuilts.jam"
+            Write-Error "Missing prebuilt.jam"
             exit 1
           }
           $text = Get-Content $jamPath -Raw
-          if ($text -notmatch "prebuilts\.version\s+=\s+1\s*;") {
-            Write-Error "prebuilts.jam missing prebuilts.version = 1"
+          if ($text -notmatch "prebuilt\.VERSION\s+=\s+1\s*;") {
+            Write-Error "prebuilt.jam missing prebuilt.VERSION = 1"
             exit 1
           }
-          if ($text -notmatch [regex]::Escape("prebuilts.id       = $id ;") -and $text -notmatch [regex]::Escape("prebuilts.id = $id ;")) {
-            Write-Error "prebuilts.jam prebuilts.id is not $id"
+          if ($text -notmatch [regex]::Escape("prebuilt.ID       = $id ;") -and $text -notmatch [regex]::Escape("prebuilt.ID = $id ;")) {
+            Write-Error "prebuilt.jam prebuilt.ID is not $id"
             exit 1
           }
-          if ($text -notmatch "prebuilts\.packages\s+=") {
-            Write-Error "prebuilts.jam missing prebuilts.packages"
+          if ($text -notmatch "prebuilt\.PACKAGES\s+=") {
+            Write-Error "prebuilt.jam missing prebuilt.PACKAGES"
             exit 1
           }
           foreach ($pkg in @("zlib", "png", "jpeg", "freetype", "openssl")) {
-            if ($text -notmatch "prebuilts\.packages\s+=\s+[^;]*\b$pkg\b") {
-              Write-Error "prebuilts.packages missing $pkg"
+            if ($text -notmatch "prebuilt\.PACKAGES\s+=\s+[^;]*\b$pkg\b") {
+              Write-Error "prebuilt.PACKAGES missing $pkg"
               exit 1
             }
           }
           if ($text -match "PREBUILT_PACKAGES_JAM_INCLUDED|PREBUILT_PACKAGE_|ZLIB_INCLUDES|FLinkLibs|full_deploy|\.conan2|D:\\a\\|C:/Users/") {
-            Write-Error "prebuilts.jam contains forbidden tokens or absolute CI paths"
+            Write-Error "prebuilt.jam contains forbidden tokens or absolute CI paths"
             exit 1
           }
 
-          foreach ($m in [regex]::Matches($text, 'prebuilts\.(\S+)\.LIBS\s+=\s+([^;]+);')) {
+          foreach ($m in [regex]::Matches($text, 'prebuilt\.(\S+)\.LIBS\s+=\s+([^;]+);')) {
             $pkg = $m.Groups[1].Value
             $libs = $m.Groups[2].Value.Trim() -split '\s+' | Where-Object { $_ }
             $libPaths = @("$pkg/lib")
-            $libDirMatch = [regex]::Match($text, "prebuilts\.$([regex]::Escape($pkg))\.LIBDIR\s+=\s+([^;]+);")
+            $libDirMatch = [regex]::Match($text, "prebuilt\.$([regex]::Escape($pkg))\.LIBDIR\s+=\s+([^;]+);")
             if ($libDirMatch.Success) {
               $libPaths += $libDirMatch.Groups[1].Value.Trim() -split '\s+' | Where-Object { $_ }
             }
@@ -279,7 +279,7 @@ jobs:
                 }
               }
               if (-not $found) {
-                Write-Error "Missing library $lib for prebuilts.$pkg.LIBS"
+                Write-Error "Missing library $lib for prebuilt.$pkg.LIBS"
                 exit 1
               }
             }
@@ -298,10 +298,10 @@ jobs:
         run: |
           $zip = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PREBUILT_ID }}.zip"
           $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
-          $jamPath = Join-Path "${{ env.PREFIX }}" "prebuilts.jam"
+          $jamPath = Join-Path "${{ env.PREFIX }}" "prebuilt.jam"
           $text = Get-Content $jamPath -Raw
           $packages = @()
-          foreach ($m in [regex]::Matches($text, 'prebuilts\.(\S+)\.VERSION\s+=\s+([^;]+);')) {
+          foreach ($m in [regex]::Matches($text, 'prebuilt\.(\S+)\.VERSION\s+=\s+([^;]+);')) {
             $packages += "$($m.Groups[1].Value)/$($m.Groups[2].Value.Trim())"
           }
           $manifest = "$zip.manifest"

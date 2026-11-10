@@ -53,7 +53,7 @@ rule OpenSsl-ConfigureLink ( includes * : defines * : linklibs * : libdir * : li
 # no hints have been provided), then falling back to compile-probes with
 # toolset-neutral library flags.
 #
-# On success writes the five flag variables unmerged through Packages-Set*
+# On success writes the five flag variables unmerged through Package-Set*
 # and returns openssl. On failure returns empty and leaves the variables
 # unchanged.
 
@@ -95,11 +95,11 @@ rule OpenSsl-Configure ( includes * : defines * : linklibs * : libdir * : linkfl
 
     if $(result)
     {
-        Packages-SetIncludes openssl : $(includes) ;
-        Packages-SetDefines openssl : $(defines) ;
-        Packages-SetLinkLibs openssl : $(linklibs) ;
-        Packages-SetLibDir openssl : $(libdir) ;
-        Packages-SetLinkFlags openssl : $(linkflags) ;
+        Package-SetIncludes openssl : $(includes) ;
+        Package-SetDefines openssl : $(defines) ;
+        Package-SetLinkLibs openssl : $(linklibs) ;
+        Package-SetLibDir openssl : $(libdir) ;
+        Package-SetLinkFlags openssl : $(linkflags) ;
     }
 
     return $(result) ;

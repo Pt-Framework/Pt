@@ -73,7 +73,7 @@ rule ZLib-ConfigureLink ( includes * : defines * : linklibs * : libdir * : linkf
 # hints have been provided), then falling back to compile-probes with
 # toolset-neutral library flags.
 #
-# On success writes the five flag variables unmerged through Packages-Set*
+# On success writes the five flag variables unmerged through Package-Set*
 # and returns zlib. On failure returns empty and leaves the variables
 # unchanged.
 
@@ -115,11 +115,11 @@ rule ZLib-Configure ( includes * : defines * : linklibs * : libdir * : linkflags
 
     if $(result)
     {
-        Packages-SetIncludes zlib : $(includes) ;
-        Packages-SetDefines zlib : $(defines) ;
-        Packages-SetLinkLibs zlib : $(linklibs) ;
-        Packages-SetLibDir zlib : $(libdir) ;
-        Packages-SetLinkFlags zlib : $(linkflags) ;
+        Package-SetIncludes zlib : $(includes) ;
+        Package-SetDefines zlib : $(defines) ;
+        Package-SetLinkLibs zlib : $(linklibs) ;
+        Package-SetLibDir zlib : $(libdir) ;
+        Package-SetLinkFlags zlib : $(linkflags) ;
     }
 
     return $(result) ;

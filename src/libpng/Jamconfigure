@@ -1,14 +1,14 @@
 # Included by Builtin-Use after the source root was found.
 
-Packages-SetIncludes png : [ FDirName $(PT_TOP) src libpng ]
-                           [ Packages-Includes zlib ] ;
-Packages-SetDefines png : [ Packages-Defines zlib ] ;
-Packages-SetTarget png : png ;
-Packages-SetLinkLibs png : [ Packages-LinkLibs zlib ] ;
-Packages-SetLibDir png : [ Packages-LibDir zlib ] ;
-Packages-SetLinkFlags png : [ Packages-LinkFlags zlib ] ;
+Package-SetIncludes png : [ FDirName $(PT_TOP) src libpng ]
+                           [ Package-Includes zlib ] ;
+Package-SetDefines png : [ Package-Defines zlib ] ;
+Package-SetTarget png : png ;
+Package-SetLinkLibs png : [ Package-LinkLibs zlib ] ;
+Package-SetLibDir png : [ Package-LibDir zlib ] ;
+Package-SetLinkFlags png : [ Package-LinkFlags zlib ] ;
 
-if [ Packages-Target zlib ]
+if [ Package-Target zlib ]
 {
-    png.TARGET += [ Packages-Target zlib ] ;
+    png.TARGET += [ Package-Target zlib ] ;
 }

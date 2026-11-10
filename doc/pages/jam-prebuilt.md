@@ -118,12 +118,12 @@ configure probes openssl, then mbedtls, then @c nossl.
 @section jam-prebuilt-page-Layout Bundle Directory Layout
 
 One platform is one directory and one zip. Each library lives in its own
-subdirectory, named after @c prebuilts.packages (@c zlib, @c png, @c jpeg,
+subdirectory, named after @c prebuilt.PACKAGES (@c zlib, @c png, @c jpeg,
 @c freetype, @c openssl).
 
 @verbatim
 prebuilt/<name>/
-  prebuilts.jam
+  prebuilt.jam
   zlib/
     include/zlib.h
     lib/zlib.lib          (or libz.a / libz.dylib)
@@ -147,13 +147,13 @@ prebuilt/<name>/
     bin/...
 @endverbatim
 
-Default locations, relative to @c PREBUILT_ROOT:
+Default locations, relative to @c prebuilt.ROOT:
 
 - Headers: @c $(pkg)/include
 - Libraries: @c $(pkg)/lib
 - Binaries: @c $(pkg)/bin
 
-@c prebuilts.<pkg>.INCLUDES is set only when that layout is not enough
+@c prebuilt.<pkg>.INCLUDES is set only when that layout is not enough
 (FreeType's @c include/freetype2). Those paths are added to the default
 @c $(pkg)/include. The native @c lib/ and @c bin/ directories are kept
 complete. There are no version directories and no @c debug/ folder inside
@@ -161,47 +161,47 @@ an @c md tree. Library names stay the same for a given platform folder
 (@c zlib.lib in both @c md and @c mdd).
 
 The directory can be moved as a whole because it contains no absolute paths.
-The project calls @c Prebuilt-Load dest once; that rule includes
-@c prebuilts.jam from the bundle directory.
+The project calls @c Prebuilt-Load root once; that rule includes
+@c prebuilt.jam from the bundle directory.
 
-@section jam-prebuilt-page-Manifest The prebuilts.jam Manifest
+@section jam-prebuilt-page-Manifest The prebuilt.jam Manifest
 
-Each bundle contains one Jam data file at @c prebuilts.jam in the bundle
+Each bundle contains one Jam data file at @c prebuilt.jam in the bundle
 root. It assigns variables only: no rules, no include guard, and no toolset
 flags. The rules that use those variables live in @c jam/prebuilt.jam.
 Unknown fields are ignored by Jam.
 
 Bundle-wide variables:
 
-- @c prebuilts.version is the file format version. The project requires @c 1.
-- @c prebuilts.id is the same string as the directory and zip name.
-- @c prebuilts.packages lists the package names that have dotted keys.
+- @c prebuilt.VERSION is the file format version. The project requires @c 1.
+- @c prebuilt.ID is the same string as the directory and zip name.
+- @c prebuilt.PACKAGES lists the package names that have dotted keys.
 
-Per-package variables use the form @c prebuilts.<pkg>.<FIELD>. Omit empty
-lists. Values are names, tokens, or paths relative to @c PREBUILT_ROOT,
+Per-package variables use the form @c prebuilt.<pkg>.<FIELD>. Omit empty
+lists. Values are names, tokens, or paths relative to @c prebuilt.ROOT,
 never raw flags (@c -l, @c -I, @c -D, @c -framework, @c /LIBPATH):
 
-- @c prebuilts.<pkg>.LIBS: library names inside the bundle
+- @c prebuilt.<pkg>.LIBS: library names inside the bundle
   (@c zlib, @c png16, @c ssl @c crypto). Not @c -lssl or @c zlib.lib.
-- @c prebuilts.<pkg>.DEPENDS: other packages in this bundle that
+- @c prebuilt.<pkg>.DEPENDS: other packages in this bundle that
   this one needs.
-- @c prebuilts.<pkg>.SYSLIBS: OS linker names that are not in the zip
+- @c prebuilt.<pkg>.SYSLIBS: OS linker names that are not in the zip
   (@c crypt32, @c ws2_32). Jam applies @c FLinkLibs.
-- @c prebuilts.<pkg>.FRAMEWORKS: macOS framework names.
-- @c prebuilts.<pkg>.DEFINES: preprocessor tokens, not @c -D.
-- @c prebuilts.<pkg>.INCLUDES: include paths relative to
-  @c PREBUILT_ROOT, only if not @c $(pkg)/include.
-- @c prebuilts.<pkg>.LIBDIR: library paths relative to
-  @c PREBUILT_ROOT, only if not @c $(pkg)/lib.
-- @c prebuilts.<pkg>.LINKFLAGS: extra linker flags.
-- @c prebuilts.<pkg>.VERSION: version string for documentation.
+- @c prebuilt.<pkg>.FRAMEWORKS: macOS framework names.
+- @c prebuilt.<pkg>.DEFINES: preprocessor tokens, not @c -D.
+- @c prebuilt.<pkg>.INCLUDES: include paths relative to
+  @c prebuilt.ROOT, only if not @c $(pkg)/include.
+- @c prebuilt.<pkg>.LIBDIR: library paths relative to
+  @c prebuilt.ROOT, only if not @c $(pkg)/lib.
+- @c prebuilt.<pkg>.LINKFLAGS: extra linker flags.
+- @c prebuilt.<pkg>.VERSION: version string for documentation.
 
 Optional fields (ignored by Jam, available for other tools):
 
-- @c prebuilts.<pkg>.LICENSE: SPDX identifier
-- @c prebuilts.<pkg>.URL: upstream URL
-- @c prebuilts.<pkg>.SHA256: checksum of key artifacts
-- any other @c prebuilts.<pkg>.* key
+- @c prebuilt.<pkg>.LICENSE: SPDX identifier
+- @c prebuilt.<pkg>.URL: upstream URL
+- @c prebuilt.<pkg>.SHA256: checksum of key artifacts
+- any other @c prebuilt.<pkg>.* key
 
 Each package entry is the complete public usage of that package for the
 linkage of this bundle: @c LIBS, @c SYSLIBS, @c FRAMEWORKS, @c DEFINES and
@@ -222,32 +222,32 @@ package variables from the manifest.
 Example:
 
 @code
-# prebuilts.jam
-prebuilts.version  = 1 ;
-prebuilts.id       = windows-x64-msvc-md ;
-prebuilts.packages = zlib png jpeg freetype openssl ;
+# prebuilt.jam
+prebuilt.VERSION  = 1 ;
+prebuilt.ID       = windows-x64-msvc-md ;
+prebuilt.PACKAGES = zlib png jpeg freetype openssl ;
 
-prebuilts.zlib.LIBS     = zlib ;
-prebuilts.zlib.VERSION  = 1.3.1 ;
+prebuilt.zlib.LIBS     = zlib ;
+prebuilt.zlib.VERSION  = 1.3.1 ;
 
-prebuilts.png.LIBS      = png16 ;
-prebuilts.png.DEPENDS   = zlib ;
-prebuilts.png.VERSION   = 1.6.43 ;
+prebuilt.png.LIBS      = png16 ;
+prebuilt.png.DEPENDS   = zlib ;
+prebuilt.png.VERSION   = 1.6.43 ;
 
-prebuilts.jpeg.LIBS     = jpeg ;
-prebuilts.jpeg.VERSION  = 3.0.3 ;
+prebuilt.jpeg.LIBS     = jpeg ;
+prebuilt.jpeg.VERSION  = 3.0.3 ;
 
-prebuilts.freetype.LIBS    = freetype ;
-prebuilts.freetype.DEPENDS = png zlib ;
-prebuilts.freetype.VERSION = 2.13.2 ;
+prebuilt.freetype.LIBS    = freetype ;
+prebuilt.freetype.DEPENDS = png zlib ;
+prebuilt.freetype.VERSION = 2.13.2 ;
 
-prebuilts.openssl.LIBS     = ssl crypto ;
-prebuilts.openssl.SYSLIBS  = crypt32 ws2_32 advapi32 user32 ;
-prebuilts.openssl.VERSION  = 3.3.1 ;
+prebuilt.openssl.LIBS     = ssl crypto ;
+prebuilt.openssl.SYSLIBS  = crypt32 ws2_32 advapi32 user32 ;
+prebuilt.openssl.VERSION  = 3.3.1 ;
 @endcode
 
-A macOS bundle uses a three-part @c prebuilts.id such as @c macos-arm64-clang.
-The Windows @c mdd folder uses @c prebuilts.id = windows-x64-msvc-mdd and
+A macOS bundle uses a three-part @c prebuilt.ID such as @c macos-arm64-clang.
+The Windows @c mdd folder uses @c prebuilt.ID = windows-x64-msvc-mdd and
 different files on disk.
 
 @section jam-prebuilt-page-Configure Configure Integration
@@ -261,10 +261,10 @@ Every package Configure rule has the same arguments:
 If any of those is set, pkg-config is skipped and the first link attempt uses
 the passed libraries. If all five are empty, pkg-config and name guessing
 run. On success the rule writes the five flags unmerged through
-@c Packages-Set* (@c LIBDIR still raw, @c LINKFLAGS still extra flags) and
+@c Package-Set* (@c LIBDIR still raw, @c LINKFLAGS still extra flags) and
 returns the package name. It does not set @c pkg.TARGET.
 
-Jamconfigure calls @c Prebuilt-Load dest once after fetch. That binds the
+Jamconfigure calls @c Prebuilt-Load root once after fetch. That binds the
 bundle. @c Prebuilt-Use pkg fills still-empty @c pkg.* flag variables when
 the bundle lists that package. It leaves @c pkg.TARGET empty.
 
@@ -284,11 +284,11 @@ if ! $(WITH_ZLIB)
     Prebuilt-Use zlib ;
 
     WITH_ZLIB = [ ZLib-Configure
-                    [ Packages-Includes zlib ]
-                  : [ Packages-Defines zlib ]
-                  : [ Packages-LinkLibs zlib ]
-                  : [ Packages-LibDir zlib ]
-                  : [ Packages-LinkFlags zlib ] ] ;
+                    [ Package-Includes zlib ]
+                  : [ Package-Defines zlib ]
+                  : [ Package-LinkLibs zlib ]
+                  : [ Package-LibDir zlib ]
+                  : [ Package-LinkFlags zlib ] ] ;
 }
 
 if ! $(WITH_ZLIB)
@@ -296,15 +296,15 @@ if ! $(WITH_ZLIB)
     WITH_ZLIB = [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ] ;
 }
 
-Packages-Echo zlib ;
+Package-Echo zlib ;
 
 if $(WITH_ZLIB)
 {
-    Packages-Configure zlib ;
+    Package-Configure zlib ;
 }
 @endcode
 
-@c Packages-Echo always prints the six variables. @c Packages-Configure
+@c Package-Echo always prints the six variables. @c Package-Configure
 persists them only when the package was found. A builtin package
 @c Jamconfigure publishes the six variables, including @c pkg.TARGET.
 There is no separate @c WITH_BUILTIN_xxx flag.
@@ -315,63 +315,63 @@ selects the Pt-Ssl backend with sequential @c if ! $(WITH_SSL) steps:
 @c --with-mbedtls, then default openssl, then default mbedtls, then
 @c nossl. Success sets @c WITH_SSL and @c PT_SSL_IMPL.
 
-Jamfiles do not mention @c PREBUILT_ROOT. They read the accessors:
+Jamfiles do not mention @c prebuilt.ROOT. They read the accessors:
 
 @code
-if [ Packages-Includes png ]
+if [ Package-Includes png ]
 {
-    SubDirHdrs [ Packages-Includes png ] ;
+    SubDirHdrs [ Package-Includes png ] ;
 }
 
-if [ Packages-Defines png ]
+if [ Package-Defines png ]
 {
-    SubDirC++Flags [ Packages-Defines png ] ;
+    SubDirC++Flags [ Package-Defines png ] ;
 }
 
-if [ Packages-Target png ]
+if [ Package-Target png ]
 {
-    LinkLibraries mylib : [ Packages-Target png ] ;
+    LinkLibraries mylib : [ Package-Target png ] ;
 }
 
-LinkLibs  mylib : [ Packages-LinkLibs png ] ;
-LinkFlags mylib : [ FLibPath [ Packages-LibDir png ] ]
-                  [ Packages-LinkFlags png ] ;
+LinkLibs  mylib : [ Package-LinkLibs png ] ;
+LinkFlags mylib : [ FLibPath [ Package-LibDir png ] ]
+                  [ Package-LinkFlags png ] ;
 @endcode
 
 @c pkg.LIBDIR is raw. The consumer applies @c FLibPath when passing it to
 @c LinkFlags.
 
 Include directories always cover dependent packages as well. @c png.h includes
-@c zlib.h, and a Jamfile can call @c SubDirHdrs [ Packages-Includes png ]
-without adding zlib. @c Prebuilt-Use walks @c prebuilts.<pkg>.DEPENDS for
+@c zlib.h, and a Jamfile can call @c SubDirHdrs [ Package-Includes png ]
+without adding zlib. @c Prebuilt-Use walks @c prebuilt.<pkg>.DEPENDS for
 include directories and library search directories.
 @c Prebuilt-Includes freetype returns FreeType's include dirs plus png and
-zlib. @c Prebuilt-LibPath walks the same graph.
+zlib. @c Prebuilt-LibDir walks the same graph.
 
 Link lines take @c LIBS, @c SYSLIBS and @c FRAMEWORKS from the named package
 entry only. The entry is the complete public link line for this bundle.
 MSVC OpenSSL still needs @c crypt32 @c ws2_32 @c advapi32 @c user32 on the
-line (@c prebuilts.openssl.SYSLIBS).
+line (@c prebuilt.openssl.SYSLIBS).
 
 @section jam-prebuilt-page-API Jam Rules
 
 The rules live in @c jam/prebuilt.jam, loaded once per project. The bundle
-file is @c prebuilts.jam. Toolset helpers stay in the project:
+file is @c prebuilt.jam. Toolset helpers stay in the project:
 @c FLinkLibs, @c FIncludes, @c FDefines, @c FLibPath.
 
-- @c Prebuilt-Tuple ( abi ? ) \n
+- @c Prebuilt-Id ( abi ? ) \n
   Builds the platform folder name from @c TARGET_OS, @c TARGET_OSPLAT and
   @c TOOLSET, with an optional extra suffix such as @c md.
 
-- @c Prebuilt-Fetch ( url : dest ) \n
+- @c Prebuilt-Fetch ( url : root ) \n
   Downloads @c url when the remote @c url.manifest differs from
-  @c dest/manifest. Replaces @c dest with the unzipped archive. Any download
+  @c root/manifest. Replaces @c root with the unzipped archive. Any download
   failure exits. The caller must run @c Fetch-Configure first.
 
-- @c Prebuilt-Load ( dest ) \n
-  Binds the bundle at @c dest, includes @c prebuilts.jam, and exits if
-  @c prebuilts.version is not @c 1. The caller invokes this once when a
-  prebuilt folder is selected.
+- @c Prebuilt-Load ( root ) \n
+  Binds the bundle at @c root, sets @c prebuilt.ROOT, includes @c prebuilt.jam,
+  and exits if @c prebuilt.VERSION is not @c 1. The caller invokes this once
+  when a prebuilt folder is selected.
 
 - @c Prebuilt-Use ( pkg ) \n
   Returns @c pkg when the loaded bundle lists it, empty otherwise. On
@@ -379,38 +379,38 @@ file is @c prebuilts.jam. Toolset helpers stay in the project:
   @c pkg.LINKLIBS, @c pkg.LIBDIR and @c pkg.LINKFLAGS. Leaves
   @c pkg.TARGET empty.
 
-- @c Prebuilt-Has ( package ) \n
-  Returns @c package when it is listed in @c prebuilts.packages, empty
+- @c Prebuilt-Has ( pkg ) \n
+  Returns @c pkg when it is listed in @c prebuilt.PACKAGES, empty
   otherwise.
 
 - @c Prebuilt-Depends ( packages + ) \n
-  Walks @c prebuilts.<pkg>.DEPENDS without duplicates. Named packages first,
+  Walks @c prebuilt.<pkg>.DEPENDS without duplicates. Named packages first,
   dependencies last.
 
 - @c Prebuilt-Includes ( packages + ) \n
   Include directories of those packages and the packages they depend on.
-  Always @c $(PREBUILT_ROOT)/$(pkg)/include, plus
-  @c prebuilts.<pkg>.INCLUDES when set.
+  Always @c $(prebuilt.ROOT)/$(pkg)/include, plus
+  @c prebuilt.<pkg>.INCLUDES when set.
 
-- @c Prebuilt-CxxFlags ( packages + ) \n
-  @c [ FDefines $(prebuilts.<pkg>.DEFINES) ] for the named packages only.
+- @c Prebuilt-Defines ( packages + ) \n
+  @c [ FDefines $(prebuilt.<pkg>.DEFINES) ] for the named packages only.
 
 - @c Prebuilt-LinkLibs ( packages + ) \n
-  @c prebuilts.<pkg>.LIBS, @c SYSLIBS and @c FRAMEWORKS of the named
+  @c prebuilt.<pkg>.LIBS, @c SYSLIBS and @c FRAMEWORKS of the named
   packages only. Always passed through @c FLinkLibs. Frameworks are
   appended as @c -framework name.
 
-- @c Prebuilt-LibPath ( packages + ) \n
-  Always @c $(PREBUILT_ROOT)/$(pkg)/lib, plus @c prebuilts.<pkg>.LIBDIR
+- @c Prebuilt-LibDir ( packages + ) \n
+  Always @c $(prebuilt.ROOT)/$(pkg)/lib, plus @c prebuilt.<pkg>.LIBDIR
   when set, over the packages returned by @c Prebuilt-Depends.
 
 - @c Prebuilt-LinkFlags ( packages + ) \n
-  Extra flags from @c prebuilts.<pkg>.LINKFLAGS of the named packages
+  Extra flags from @c prebuilt.<pkg>.LINKFLAGS of the named packages
   only. Does not duplicate @c FLibPath; the caller adds that from
   @c LIBDIR.
 
 - @c Prebuilt-Packages \n
-  All package names exported by the bundle (@c prebuilts.packages).
+  All package names exported by the bundle (@c prebuilt.PACKAGES).
 
 - @c Prebuilt-Bin ( packages + ) / @c Prebuilt-Lib ( packages + ) \n
   All files below the native @c bin/ or @c lib/ directory of each named
@@ -453,18 +453,18 @@ redistributable. Release products use @c md. Local debug builds may place
 @section jam-prebuilt-page-Produce Creating Prebuilt Dependencies
 
 A bundle can be written by hand: fill the per-package directories, write
-@c prebuilts.jam, and point @c --with-prebuilt --prebuilt-local at the
-platform folder under @c prebuilt. Conan is not required. @c prebuilts.jam is
+@c prebuilt.jam, and point @c --with-prebuilt --prebuilt-local at the
+platform folder under @c prebuilt. Conan is not required. @c prebuilt.jam is
 @c KEY = value assignments and is readable without running Jam.
 
 A generator, including one driven by Conan in CI, writes the same layout:
 
 - One directory per package: @c $(pkg)/include, @c $(pkg)/lib, @c $(pkg)/bin
-- @c prebuilts.jam: library names to @c prebuilts.<pkg>.LIBS, other
-  packages in this bundle to @c prebuilts.<pkg>.DEPENDS, OS linker names to
-  @c prebuilts.<pkg>.SYSLIBS, macOS frameworks to
-  @c prebuilts.<pkg>.FRAMEWORKS, extra include dirs to
-  @c prebuilts.<pkg>.INCLUDES
+- @c prebuilt.jam: library names to @c prebuilt.<pkg>.LIBS, other
+  packages in this bundle to @c prebuilt.<pkg>.DEPENDS, OS linker names to
+  @c prebuilt.<pkg>.SYSLIBS, macOS frameworks to
+  @c prebuilt.<pkg>.FRAMEWORKS, extra include dirs to
+  @c prebuilt.<pkg>.INCLUDES
 - Complete @c lib/ and @c bin/ directories, without sorting or moving files
 - Do not emit @c pkg.INCLUDES / @c pkg.LINKLIBS from the generator;
   @c Prebuilt-Use fills those from the layout
@@ -472,5 +472,5 @@ A generator, including one driven by Conan in CI, writes the same layout:
 - macOS / Linux: one folder name without a runtime suffix until a second
   variant exists
 - Check: @c zlib/include/zlib.h, @c zlib/lib/zlib.lib or @c libz.a, @c bin/
-  when shared, @c prebuilts.jam, no version directories, no absolute
+  when shared, @c prebuilt.jam, no version directories, no absolute
   machine paths

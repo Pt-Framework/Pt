@@ -50,24 +50,24 @@ includes or defines.
 A consumer applies the variables with the ordinary Jam rules:
 
 ```
-if [ Packages-Includes pkg ]
+if [ Package-Includes pkg ]
 {
-    SubDirHdrs [ Packages-Includes pkg ] ;
+    SubDirHdrs [ Package-Includes pkg ] ;
 }
 
-if [ Packages-Defines pkg ]
+if [ Package-Defines pkg ]
 {
-    SubDirCcFlags [ Packages-Defines pkg ] ;
+    SubDirCcFlags [ Package-Defines pkg ] ;
 }
 
-if [ Packages-Target pkg ]
+if [ Package-Target pkg ]
 {
-    LinkLibraries tgt : [ Packages-Target pkg ] ;
+    LinkLibraries tgt : [ Package-Target pkg ] ;
 }
 
-LinkLibs  tgt : [ Packages-LinkLibs pkg ] ;
-LinkFlags tgt : [ FLibPath [ Packages-LibDir pkg ] ]
-                [ Packages-LinkFlags pkg ] ;
+LinkLibs  tgt : [ Package-LinkLibs pkg ] ;
+LinkFlags tgt : [ FLibPath [ Package-LibDir pkg ] ]
+                [ Package-LinkFlags pkg ] ;
 ```
 
 C targets use `SubDirCcFlags`. C++ targets use `SubDirC++Flags`.
@@ -76,52 +76,52 @@ Consumers, user overrides and Configure rules use only the dotted form.
 The former five-tuple names (`ZLIB_*`, `PNG_*`, `JPEG_*`, `FREETYPE_*`,
 `SSL_*`) are not produced and are not read.
 
-`packages.jam` provides accessors so callers do not spell the dotted
+`package.jam` provides accessors so callers do not spell the dotted
 names by hand:
 
 ```
-Packages-Includes pkg
-Packages-Defines pkg
-Packages-LinkLibs pkg
-Packages-LibDir pkg
-Packages-LinkFlags pkg
-Packages-Target pkg
+Package-Includes pkg
+Package-Defines pkg
+Package-LinkLibs pkg
+Package-LibDir pkg
+Package-LinkFlags pkg
+Package-Target pkg
 
-Packages-SetIncludes pkg : values *
-Packages-SetDefines pkg : values *
-Packages-SetLinkLibs pkg : values *
-Packages-SetLibDir pkg : values *
-Packages-SetLinkFlags pkg : values *
-Packages-SetTarget pkg : value
+Package-SetIncludes pkg : values *
+Package-SetDefines pkg : values *
+Package-SetLinkLibs pkg : values *
+Package-SetLibDir pkg : values *
+Package-SetLinkFlags pkg : values *
+Package-SetTarget pkg : value
 ```
 
 Getters return the current list (empty if unset). Setters replace the
 list. Direct assignment to the dotted variables remains valid; the
 accessors are the preferred form.
 
-`packages.jam` also provides:
+`package.jam` also provides:
 
 ```
-Packages-Echo pkg
-Packages-Configure pkg
+Package-Echo pkg
+Package-Configure pkg
 ```
 
-`Packages-Echo` always prints the six variables via `EchoOption`.
-`Packages-Configure` persists them via `Configure`. Both operate only
+`Package-Echo` always prints the six variables via `EchoOption`.
+`Package-Configure` persists them via `Configure`. Both operate only
 on the common names.
 
 ## Modules {#modules}
 
 Three modules own the mechanism:
 
-- `packages.jam` defines the common variable interface, its accessors,
-  `Packages-Echo` and `Packages-Configure`. It knows nothing about
+- `package.jam` defines the common variable interface, its accessors,
+  `Package-Echo` and `Package-Configure`. It knows nothing about
   prebuilt bundles, source package roots, configure options, or
   resolution order.
 - `prebuilt.jam` maps a prebuilt bundle onto the common variables.
-- `builtin.jam` registers source-package roots and selects them.
+- `builtin.jam` selects source packages from a root directory.
 
-`packages.jam` is included once. The other two modules are loaded on
+`package.jam` is included once. The other two modules are loaded on
 demand by `Jamconfigure`.
 
 ## Configure {#configure}
@@ -136,7 +136,7 @@ while `WITH_pkg` is still empty. The first success sets `WITH_pkg`.
 1. Builtin override: `--with-inline-xxx` is given and `Builtin-Use`
    succeeds. This overrides every other source.
 2. Prebuilt or system/custom: when `--with-prebuilt` is selected,
-   `Jamconfigure` calls `Prebuilt-Load dest` once after fetch.
+   `Jamconfigure` calls `Prebuilt-Load root` once after fetch.
    `Prebuilt-Use` fills only still-empty flag variables when the
    bundle contains the package (side effect only). Already set values
    (including `-s` overrides) are left unchanged. Then the
@@ -164,7 +164,7 @@ an empty system probe.
 It probes with `CheckBuildC++`. `FIncludes` of `INCLUDES` and `FLibPath`
 of `LIBDIR` appear only on the probe line, together with `LINKLIBS` and
 `LINKFLAGS`. On success it writes the five flag variables unmerged
-through the `Packages-Set*` accessors (`LIBDIR` still raw, `LINKFLAGS`
+through the `Package-Set*` accessors (`LIBDIR` still raw, `LINKFLAGS`
 still extra flags) and returns the package name. On failure it returns
 empty and leaves the variables unchanged. It does not set `pkg.TARGET`.
 
@@ -176,8 +176,8 @@ empty and leaves the variables unchanged. It does not set `pkg.TARGET`.
 detect a source package by a non-empty target. There is no separate
 `WITH_BUILTIN_xxx` flag.
 
-`Packages-Echo` always runs so the configure output shows the option
-and the variable values. `Packages-Configure` runs only when `WITH_pkg`
+`Package-Echo` always runs so the configure output shows the option
+and the variable values. `Package-Configure` runs only when `WITH_pkg`
 is set. It persists the six variables that are already set; it does not
 probe and it does not decide success. An unfound package does not
 persist values for later build steps.
@@ -206,11 +206,11 @@ if ! $(WITH_ZLIB)
     Prebuilt-Use zlib ;
 
     WITH_ZLIB = [ ZLib-Configure
-                    [ Packages-Includes zlib ]
-                  : [ Packages-Defines zlib ]
-                  : [ Packages-LinkLibs zlib ]
-                  : [ Packages-LibDir zlib ]
-                  : [ Packages-LinkFlags zlib ] ] ;
+                    [ Package-Includes zlib ]
+                  : [ Package-Defines zlib ]
+                  : [ Package-LinkLibs zlib ]
+                  : [ Package-LibDir zlib ]
+                  : [ Package-LinkFlags zlib ] ] ;
 }
 
 # 3. Builtin fallback
@@ -219,12 +219,12 @@ if ! $(WITH_ZLIB)
     WITH_ZLIB = [ Builtin-Use zlib : src/zlib ] ;
 }
 
-Packages-Echo zlib ;
+Package-Echo zlib ;
 EchoOption WITH_ZLIB : "ZLib found" : $(WITH_ZLIB:E="no") ;
 
 if $(WITH_ZLIB)
 {
-    Packages-Configure zlib ;
+    Package-Configure zlib ;
 }
 ```
 

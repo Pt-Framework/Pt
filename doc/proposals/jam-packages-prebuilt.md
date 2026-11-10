@@ -5,44 +5,44 @@ proposal: jam-packages.md
 # Prebuilt Packages
 
 A prebuilt bundle supplies compiled headers and libraries for one
-platform. Its manifest is the pure-data file `prebuilts.jam` in the
-bundle root. `prebuilt.jam` translates the `prebuilts.*` assignments
+platform. Its manifest is the pure-data file `prebuilt.jam` in the
+bundle root. `prebuilt.jam` translates the `prebuilt.*` assignments
 into the common package variables.
 
 ## Manifest {#manifest}
 
-The file `prebuilts.jam` contains only assignments. It has no rules,
+The file `prebuilt.jam` contains only assignments. It has no rules,
 no include guard and no toolset flags. Unknown fields are ignored by
 Jam.
 
 Bundle-wide variables:
 
-- `prebuilts.version` — format version (must be 1)
-- `prebuilts.id` — same string as the directory / zip name
-- `prebuilts.packages` — list of package names
+- `prebuilt.VERSION` — format version (must be 1)
+- `prebuilt.ID` — same string as the directory / zip name
+- `prebuilt.PACKAGES` — list of package names
 
-Per-package variables use the form `prebuilts.<pkg>.<FIELD>`.
+Per-package variables use the form `prebuilt.<pkg>.<FIELD>`.
 Omit empty lists. Values are names, tokens or paths relative to the
 bundle root:
 
-- `prebuilts.<pkg>.LIBS` — library names inside the bundle
-- `prebuilts.<pkg>.DEPENDS` — other packages in this bundle
-- `prebuilts.<pkg>.SYSLIBS` — OS linker names (not in the zip)
-- `prebuilts.<pkg>.FRAMEWORKS` — macOS framework names
-- `prebuilts.<pkg>.DEFINES` — preprocessor tokens
-- `prebuilts.<pkg>.INCLUDES` — include paths relative to the bundle root
+- `prebuilt.<pkg>.LIBS` — library names inside the bundle
+- `prebuilt.<pkg>.DEPENDS` — other packages in this bundle
+- `prebuilt.<pkg>.SYSLIBS` — OS linker names (not in the zip)
+- `prebuilt.<pkg>.FRAMEWORKS` — macOS framework names
+- `prebuilt.<pkg>.DEFINES` — preprocessor tokens
+- `prebuilt.<pkg>.INCLUDES` — include paths relative to the bundle root
   (only when not `<pkg>/include`)
-- `prebuilts.<pkg>.LIBDIR` — library paths relative to the bundle root
+- `prebuilt.<pkg>.LIBDIR` — library paths relative to the bundle root
   (only when not `<pkg>/lib`)
-- `prebuilts.<pkg>.LINKFLAGS` — extra linker flags
-- `prebuilts.<pkg>.VERSION` — version string
+- `prebuilt.<pkg>.LINKFLAGS` — extra linker flags
+- `prebuilt.<pkg>.VERSION` — version string
 
 Optional fields (ignored by Jam, available for other tools):
 
-- `prebuilts.<pkg>.LICENSE` — SPDX identifier
-- `prebuilts.<pkg>.URL` — upstream URL
-- `prebuilts.<pkg>.SHA256` — checksum of key artifacts
-- any other `prebuilts.<pkg>.*` key
+- `prebuilt.<pkg>.LICENSE` — SPDX identifier
+- `prebuilt.<pkg>.URL` — upstream URL
+- `prebuilt.<pkg>.SHA256` — checksum of key artifacts
+- any other `prebuilt.<pkg>.*` key
 
 Each package entry is the complete public usage of that package for
 the linkage of this bundle: `LIBS`, `SYSLIBS`, `FRAMEWORKS`, `DEFINES`
@@ -68,26 +68,26 @@ packages of their own.
 Example:
 
 ```jam
-# prebuilts.jam
-prebuilts.version  = 1 ;
-prebuilts.id       = windows-x64-msvc-md ;
-prebuilts.packages = zlib png jpeg freetype openssl ;
+# prebuilt.jam
+prebuilt.VERSION  = 1 ;
+prebuilt.ID       = windows-x64-msvc-md ;
+prebuilt.PACKAGES = zlib png jpeg freetype openssl ;
 
-prebuilts.zlib.LIBS     = z ;
-prebuilts.zlib.VERSION  = 1.3.1 ;
-prebuilts.zlib.LICENSE  = Zlib ;
+prebuilt.zlib.LIBS     = z ;
+prebuilt.zlib.VERSION  = 1.3.1 ;
+prebuilt.zlib.LICENSE  = Zlib ;
 
-prebuilts.openssl.LIBS     = ssl crypto ;
-prebuilts.openssl.SYSLIBS  = crypt32 ws2_32 advapi32 user32 ;
-prebuilts.openssl.VERSION  = 3.3.1 ;
-prebuilts.openssl.LICENSE  = OpenSSL ;
+prebuilt.openssl.LIBS     = ssl crypto ;
+prebuilt.openssl.SYSLIBS  = crypt32 ws2_32 advapi32 user32 ;
+prebuilt.openssl.VERSION  = 3.3.1 ;
+prebuilt.openssl.LICENSE  = OpenSSL ;
 ```
 
 Directory layout:
 
 ```
 prebuilt/<id>/
-  prebuilts.jam
+  prebuilt.jam
   zlib/
     include/
     lib/
@@ -103,15 +103,15 @@ prebuilt/<id>/
 `prebuilt.jam` provides:
 
 ```
-Prebuilt-Load dest
+Prebuilt-Load root
 Prebuilt-Use pkg
 ```
 
-`Prebuilt-Load dest` binds the bundle. It records the root, includes
-`prebuilts.jam` from that directory, and checks that `prebuilts.version`
+`Prebuilt-Load root` binds the bundle. It sets `prebuilt.ROOT`, includes
+`prebuilt.jam` from that directory, and checks that `prebuilt.VERSION`
 is 1. A missing file or an unsupported version is an `Exit`. The caller
-invokes it once when a prebuilt folder is selected. `PREBUILT_ROOT` is
-internal to `prebuilt.jam`.
+invokes it once when a prebuilt folder is selected. `prebuilt.ROOT` is
+internal to `prebuilt.jam` and is not a manifest key.
 
 `Prebuilt-Use pkg` returns the package name when the loaded bundle lists
 the package, empty otherwise. On success it fills only still-empty common
@@ -119,20 +119,20 @@ flag variables (already set values, including `-s` overrides, are left
 unchanged):
 
 - `pkg.INCLUDES` from the include paths (default `<pkg>/include` plus
-  any `prebuilts.<pkg>.INCLUDES`, walking `DEPENDS`)
-- `pkg.DEFINES` from `prebuilts.<pkg>.DEFINES` (via `FDefines`).
+  any `prebuilt.<pkg>.INCLUDES`, walking `DEPENDS`)
+- `pkg.DEFINES` from `prebuilt.<pkg>.DEFINES` (via `FDefines`).
   `DEPENDS` is not walked.
-- `pkg.LINKLIBS` from `prebuilts.<pkg>.LIBS`, `SYSLIBS` and
+- `pkg.LINKLIBS` from `prebuilt.<pkg>.LIBS`, `SYSLIBS` and
   `FRAMEWORKS` (via `FLinkLibs`). `DEPENDS` is not walked. The entry
   is the complete public link line for this bundle.
 - `pkg.LIBDIR` from the library paths (default `<pkg>/lib` plus any
-  `prebuilts.<pkg>.LIBDIR`, walking `DEPENDS`)
-- `pkg.LINKFLAGS` from `prebuilts.<pkg>.LINKFLAGS`. `DEPENDS` is not
+  `prebuilt.<pkg>.LIBDIR`, walking `DEPENDS`)
+- `pkg.LINKFLAGS` from `prebuilt.<pkg>.LINKFLAGS`. `DEPENDS` is not
   walked.
 - leaves `pkg.TARGET` empty
 
-The fill is done through the `Packages-Set*` accessors, but only when
+The fill is done through the `Package-Set*` accessors, but only when
 the corresponding variable is still empty. The existing `Prebuilt-*`
-primitive rules stay. They walk `prebuilts.<pkg>.DEPENDS` for include
+primitive rules stay. They walk `prebuilt.<pkg>.DEPENDS` for include
 paths and library search directories. They read the bundle bound by
 `Prebuilt-Load`.

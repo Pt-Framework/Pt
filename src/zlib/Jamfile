@@ -3,7 +3,7 @@ SubDirHdrs $(PT_TOP)/src/zlib ;
 #SubDirHdrs $(PT_TOP)/src/zlib/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) zlib ;
 
-ZLIB_TARGET = [ Packages-Target zlib ] ;
+ZLIB_TARGET = [ Package-Target zlib ] ;
 
 if ! $(ZLIB_TARGET)
 {

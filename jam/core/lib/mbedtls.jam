@@ -54,7 +54,7 @@ rule MbedTls-ConfigureLink ( includes * : defines * : linklibs * : libdir * : li
 # no hints have been provided), then falling back to compile-probes with
 # toolset-neutral library flags.
 #
-# On success writes the five flag variables unmerged through Packages-Set*
+# On success writes the five flag variables unmerged through Package-Set*
 # and returns mbedtls. On failure returns empty and leaves the variables
 # unchanged.
 
@@ -96,11 +96,11 @@ rule MbedTls-Configure ( includes * : defines * : linklibs * : libdir * : linkfl
 
     if $(result)
     {
-        Packages-SetIncludes mbedtls : $(includes) ;
-        Packages-SetDefines mbedtls : $(defines) ;
-        Packages-SetLinkLibs mbedtls : $(linklibs) ;
-        Packages-SetLibDir mbedtls : $(libdir) ;
-        Packages-SetLinkFlags mbedtls : $(linkflags) ;
+        Package-SetIncludes mbedtls : $(includes) ;
+        Package-SetDefines mbedtls : $(defines) ;
+        Package-SetLinkLibs mbedtls : $(linklibs) ;
+        Package-SetLibDir mbedtls : $(libdir) ;
+        Package-SetLinkFlags mbedtls : $(linkflags) ;
     }
 
     return $(result) ;

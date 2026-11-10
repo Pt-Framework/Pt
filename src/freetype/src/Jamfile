@@ -1,18 +1,18 @@
 SubDir PT_TOP src freetype src ;
 SubDirHdrs $(PT_TOP)/include ;
-SubDirHdrs [ Packages-Includes freetype ] ;
+SubDirHdrs [ Package-Includes freetype ] ;
 SubDirCcFlags [ FDefines FT2_BUILD_LIBRARY ] ;
 SubDirCcFlags [ FDefines FT_CONFIG_OPTION_SYSTEM_ZLIB ] ;
 SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
 
-if [ Packages-Includes zlib ]
+if [ Package-Includes zlib ]
 {
-    SubDirHdrs [ Packages-Includes zlib ] ;
+    SubDirHdrs [ Package-Includes zlib ] ;
 }
 
-if [ Packages-Defines zlib ]
+if [ Package-Defines zlib ]
 {
-    SubDirCcFlags [ Packages-Defines zlib ] ;
+    SubDirCcFlags [ Package-Defines zlib ] ;
 }
 SubDirObjects $(PT_OUTPUT_OBJECT) freetype ;
 

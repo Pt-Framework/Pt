@@ -67,7 +67,7 @@ rule Jpeg-ConfigureLink ( includes * : defines * : linklibs * : libdir * : linkf
 # hints have been provided), then falling back to compile-probes with
 # toolset-neutral library flags.
 #
-# On success writes the five flag variables unmerged through Packages-Set*
+# On success writes the five flag variables unmerged through Package-Set*
 # and returns jpeg. On failure returns empty and leaves the variables
 # unchanged.
 
@@ -109,11 +109,11 @@ rule Jpeg-Configure ( includes * : defines * : linklibs * : libdir * : linkflags
 
     if $(result)
     {
-        Packages-SetIncludes jpeg : $(includes) ;
-        Packages-SetDefines jpeg : $(defines) ;
-        Packages-SetLinkLibs jpeg : $(linklibs) ;
-        Packages-SetLibDir jpeg : $(libdir) ;
-        Packages-SetLinkFlags jpeg : $(linkflags) ;
+        Package-SetIncludes jpeg : $(includes) ;
+        Package-SetDefines jpeg : $(defines) ;
+        Package-SetLinkLibs jpeg : $(linklibs) ;
+        Package-SetLibDir jpeg : $(libdir) ;
+        Package-SetLinkFlags jpeg : $(linkflags) ;
     }
 
     return $(result) ;

@@ -3,14 +3,14 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_API_EXPORT ] [ FDefines $(PT_ATOMICS_DEFINES) ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt ;
 
-if [ Packages-Includes zlib ]
+if [ Package-Includes zlib ]
 {
-    SubDirHdrs [ Packages-Includes zlib ] ;
+    SubDirHdrs [ Package-Includes zlib ] ;
 }
 
-if [ Packages-Defines zlib ]
+if [ Package-Defines zlib ]
 {
-    SubDirC++Flags [ Packages-Defines zlib ] ;
+    SubDirC++Flags [ Package-Defines zlib ] ;
 }
 
 SharedLibrary Pt : Atomicity.cpp
@@ -49,13 +49,13 @@ SharedLibrary Pt : Atomicity.cpp
 MakeLocate Pt : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt : $(PT_INSTALL_LIBDIR) ;
 
-if [ Packages-Target zlib ]
+if [ Package-Target zlib ]
 {
-    LinkLibraries Pt : [ Packages-Target zlib ] ;
+    LinkLibraries Pt : [ Package-Target zlib ] ;
 }
 
-LinkLibs Pt : [ Packages-LinkLibs zlib ] ;
-LinkFlags Pt : [ FLibPath [ Packages-LibDir zlib ] ]
-               [ Packages-LinkFlags zlib ] ;
+LinkLibs Pt : [ Package-LinkLibs zlib ] ;
+LinkFlags Pt : [ FLibPath [ Package-LibDir zlib ] ]
+               [ Package-LinkFlags zlib ] ;
 
 SubInclude PT_TOP src Pt tests ;

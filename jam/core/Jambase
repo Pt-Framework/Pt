@@ -48,7 +48,7 @@ rule Load
 }
 
 Load base.jam ;
-Load packages.jam ;
+Load package.jam ;
 
 ##########################################################################
 # Configuration Switch
