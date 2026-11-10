@@ -1,4 +1,4 @@
-name: Prebuilt
+name: Prebuilt Dependencies
 
 on:
   workflow_dispatch:
