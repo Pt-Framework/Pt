@@ -58,10 +58,6 @@ if $(WITH_FORMS_NANOVG)
     {
         SubDirHdrs [ Packages-Includes freetype ] ;
     }
-    else if $(FREETYPE_INCLUDES)
-    {
-        SubDirHdrs $(FREETYPE_INCLUDES) ;
-    }
 
     if [ Packages-Defines freetype ]
     {
@@ -180,11 +176,6 @@ if $(PT_FORMS_RENDERER) = nanovg
     if [ Packages-Target freetype ]
     {
         LinkLibraries Pt-Forms : [ Packages-Target freetype ] ;
-    }
-    else
-    {
-        LinkFlags Pt-Forms : $(FREETYPE_LINKFLAGS) ;
-        LinkLibs Pt-Forms : $(FREETYPE_LINKLIBS) ;
     }
 
     LinkLibs Pt-Forms : [ Packages-LinkLibs freetype ] ;

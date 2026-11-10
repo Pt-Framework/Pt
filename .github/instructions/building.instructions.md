@@ -64,8 +64,14 @@ Windows always has an ABI tag. Other OS omit it until an ABI split exists.
 - Fetch URL: `https://github.com/Pt-Framework/Pt/releases/download/$(PREBUILT_RELEASE)/$(id).zip`
 
 User overrides still win: `--with-inline-zlib` / `--with-inline-libpng` /
-`--with-inline-libjpeg` / `--with-inline-freetype`, and the five-tuple
-(`ZLIB_INCLUDES=...` and the rest). `?=` does not overwrite them.
+`--with-inline-libjpeg` / `--with-inline-freetype`, and dotted package
+flags (`-szlib.INCLUDES=...` and the rest). `Prebuilt-Use` does not
+overwrite already set values.
+
+SSL backends: `--with-inline-openssl` / `--with-inline-mbedtls` select
+builtin. `--with-openssl` / `--with-mbedtls` select prebuilt or system.
+With no SSL flag, configure probes system/prebuilt openssl, then
+mbedtls.
 
 Prebuilt dependencies preserve native per-package `bin/` and `lib/` trees. They do
 not select runtime files for installation. A consuming Jamfile chooses packages

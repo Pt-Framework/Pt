@@ -8,122 +8,112 @@ LIBJPEG_CHECK_CODE = "#include <stdio.h>"
                      "jpeg_create_decompress(&dinfo);"
                      "return 0; }" ;
 
-rule Jpeg-CheckCompile ( includes * : c++flags * )
+rule Jpeg-Probe ( includes * : defines * : linklibs * : libdir * : linkflags * )
 {
-    return [ CheckDependencyCompileC++ JPEG : $(LIBJPEG_CHECK_CODE)
-                                            : $(includes) : $(c++flags) ] ;
+    return [ CheckBuildC++ $(LIBJPEG_CHECK_CODE)
+                          : $(defines) [ FIncludes $(includes) ]
+                          : $(linklibs) [ FLibPath $(libdir) ] $(linkflags) ] ;
 }
 
-rule Jpeg-CheckLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+rule Jpeg-ConfigureLink ( includes * : defines * : linklibs * : libdir * : linkflags * )
 {
-    return [ CheckDependencyLinkC++ JPEG : $(LIBJPEG_CHECK_CODE)
-                                         : $(includes) : $(c++flags)
-                                         : $(linklibs) : $(libdir) : $(linkflags) ] ;
-}
-
-rule Jpeg-Check ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
-{
-    return [ CheckDependencyC++ JPEG : $(LIBJPEG_CHECK_CODE)
-                                     : $(includes) : $(c++flags)
-                                     : $(linklibs) : $(libdir) : $(linkflags) ] ;
-}
-
-rule Jpeg-ConfigureInclude ( includes * : c++flags * )
-{
-    local result = [ Jpeg-CheckCompile $(includes) : $(c++flags) ] ;
-    return $(result) ;
-}
-
-rule Jpeg-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
-{
-    local result ;
+    local used ;
+    local candidate ;
 
     local is_debug ;
     if $(WITH_DEBUG) && ! $(WITH_OPTIM) { is_debug = true ; }
 
-    # 1: caller-provided libs
-    if ! $(result) && $(linklibs)
+    if ! $(used) && $(linklibs)
     {
-        result = [ Jpeg-CheckLink $(includes)
-                                 : $(c++flags)
-                                 : $(linklibs)
-                                 : $(libdir) : $(linkflags) ] ;
+        if [ Jpeg-Probe $(includes) : $(defines) : $(linklibs) : $(libdir) : $(linkflags) ]
+        {
+            used = $(linklibs) ;
+        }
     }
 
-    # 2: debug lib (jpeg-static with d suffix, libjpeg-turbo convention)
-    if ! $(result) && $(is_debug)
+    if ! $(used) && $(is_debug)
     {
-        result = [ Jpeg-CheckLink $(includes)
-                                 : $(c++flags)
-                                 : [ FLinkLibs jpegd ]
-                                 : $(libdir) : $(linkflags) ] ;
+        candidate = [ FLinkLibs jpegd ] ;
+        if [ Jpeg-Probe $(includes) : $(defines) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    # 3: MSVC-style lib name (jpeg)
-    if ! $(result)
+    if ! $(used)
     {
-        result = [ Jpeg-CheckLink $(includes)
-                                 : $(c++flags)
-                                 : [ FLinkLibs jpeg ]
-                                 : $(libdir) : $(linkflags) ] ;
+        candidate = [ FLinkLibs jpeg ] ;
+        if [ Jpeg-Probe $(includes) : $(defines) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    # 4: turbo variant (turbojpeg)
-    if ! $(result)
+    if ! $(used)
     {
-        result = [ Jpeg-CheckLink $(includes)
-                                 : $(c++flags)
-                                 : [ FLinkLibs turbojpeg ]
-                                 : $(libdir) : $(linkflags) ] ;
+        candidate = [ FLinkLibs turbojpeg ] ;
+        if [ Jpeg-Probe $(includes) : $(defines) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    return $(result) ;
+    return $(used) ;
 }
 
-# Jpeg-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
+# Jpeg-Configure INCLUDES : DEFINES : LINKLIBS : LIBDIR : LINKFLAGS
 #
 # Probes for a system libjpeg installation by trying pkg-config first (if no
 # hints have been provided), then falling back to compile-probes with
 # toolset-neutral library flags.
 #
-# Returns "yes" on success; JPEG_INCLUDES, JPEG_C++FLAGS, JPEG_LINKLIBS
-# and JPEG_LINKFLAGS are set as a side-effect by CheckDependencyCompileC++
-# and CheckDependencyLinkC++.
+# On success writes the five flag variables unmerged through Packages-Set*
+# and returns jpeg. On failure returns empty and leaves the variables
+# unchanged.
 
-rule Jpeg-Configure ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+rule Jpeg-Configure ( includes * : defines * : linklibs * : libdir * : linkflags * )
 {
     local result ;
 
-    # Pkg-config (only when no hints are provided)
-    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(c++flags) && ! $(linkflags)
+    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(defines) && ! $(linkflags)
     {
         Load pkgconfig.jam ;
 
         if [ PkgConfig-Exists libjpeg ]
         {
             includes  = [ PkgConfig-Includes libjpeg ] ;
-            c++flags  = [ PkgConfig-CFlags libjpeg ] ;
+            defines   = [ PkgConfig-CFlags libjpeg ] ;
             linklibs  = [ PkgConfig-LinkLibs libjpeg ] ;
             linkflags = [ PkgConfig-LinkFlags libjpeg ] ;
 
-            result = [ Jpeg-Check $(includes)
-                                 : $(c++flags)
-                                 : $(linklibs)
-                                 : : $(linkflags) ] ;
+            if [ Jpeg-Probe $(includes) : $(defines) : $(linklibs) : : $(linkflags) ]
+            {
+                result = jpeg ;
+            }
         }
     }
 
-    # Include search, then link search
     if ! $(result)
     {
-        if [ Jpeg-ConfigureInclude $(includes) : $(c++flags) ]
+        if [ Jpeg-Probe $(includes) : $(defines) ]
         {
-            includes = $(JPEG_INCLUDES) ;
-            c++flags = $(JPEG_C++FLAGS) ;
-
-            result = [ Jpeg-ConfigureLink $(includes) : $(c++flags)
-                                         : $(linklibs) : $(libdir) : $(linkflags) ] ;
+            local used = [ Jpeg-ConfigureLink $(includes) : $(defines)
+                                            : $(linklibs) : $(libdir) : $(linkflags) ] ;
+            if $(used)
+            {
+                linklibs = $(used) ;
+                result = jpeg ;
+            }
         }
+    }
+
+    if $(result)
+    {
+        Packages-SetIncludes jpeg : $(includes) ;
+        Packages-SetDefines jpeg : $(defines) ;
+        Packages-SetLinkLibs jpeg : $(linklibs) ;
+        Packages-SetLibDir jpeg : $(libdir) ;
+        Packages-SetLinkFlags jpeg : $(linkflags) ;
     }
 
     return $(result) ;

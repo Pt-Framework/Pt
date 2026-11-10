@@ -514,60 +514,37 @@ if $(PT_WITH_PREBUILT)
 
 Load zlib.jam ;
 
-if --with-inline-zlib in $(ARGV)
-{
-    WITH_BUILTIN_ZLIB = yes ;
-}
+EchoOption --with-inline-zlib : "Using inline zlib" : [ HasOption --with-inline-zlib ] ;
 
-if ! $(WITH_BUILTIN_ZLIB)
+if ! $(WITH_ZLIB) && --with-inline-zlib in $(ARGV)
 {
-    if [ Prebuilt-Has zlib ]
-    {
-        ZLIB_INCLUDES  ?= [ Prebuilt-Includes zlib ] ;
-        ZLIB_C++FLAGS  ?= [ Prebuilt-CxxFlags zlib ] ;
-        ZLIB_LINKLIBS  ?= [ Prebuilt-LinkLibs zlib ] ;
-        ZLIB_LIBDIR    ?= [ Prebuilt-LibPath zlib ] ;
-        ZLIB_LINKFLAGS ?= [ Prebuilt-LinkFlags zlib ] ;
-    }
-
-    WITH_ZLIB = [ ZLib-Configure $(ZLIB_INCLUDES) : $(ZLIB_C++FLAGS) :
-                                 $(ZLIB_LINKLIBS) : $(ZLIB_LIBDIR) : $(ZLIB_LINKFLAGS) ] ;
+    WITH_ZLIB = [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ] ;
 }
 
 if ! $(WITH_ZLIB)
 {
-    WITH_BUILTIN_ZLIB = yes ;
+    Prebuilt-Use zlib ;
+
+    WITH_ZLIB = [ ZLib-Configure
+                    [ Packages-Includes zlib ]
+                  : [ Packages-Defines zlib ]
+                  : [ Packages-LinkLibs zlib ]
+                  : [ Packages-LibDir zlib ]
+                  : [ Packages-LinkFlags zlib ] ] ;
 }
 
-EchoOption --with-inline-zlib : "Using inline zlib" : $(WITH_BUILTIN_ZLIB:E="no") ;
-
-if $(WITH_BUILTIN_ZLIB)
+if ! $(WITH_ZLIB)
 {
-    if ! [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ]
-    {
-        Exit "Error: builtin zlib selected but not configured" ;
-    }
+    WITH_ZLIB = [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ] ;
+}
 
-    ZLIB_INCLUDES = [ Packages-Includes zlib ] ;
-    ZLIB_C++FLAGS = ;
-    ZLIB_LINKLIBS = ;
-    ZLIB_LINKFLAGS = ;
+Packages-Echo zlib ;
+EchoOption WITH_ZLIB : "ZLib found" : $(WITH_ZLIB:E="no") ;
 
-    Packages-Echo zlib ;
+if $(WITH_ZLIB)
+{
     Packages-Configure zlib ;
 }
-
-Configure ZLIB_INCLUDES ;
-EchoOption ZLIB_INCLUDES : "ZLib includes" ;
-
-Configure ZLIB_C++FLAGS ;
-EchoOption ZLIB_C++FLAGS : "ZLib C++ flags" ;
-
-Configure ZLIB_LINKLIBS ;
-EchoOption ZLIB_LINKLIBS : "ZLib libs" ;
-
-EchoOption ZLIB_LINKFLAGS : "ZLib link flags" ;
-Configure ZLIB_LINKFLAGS ;
 
 #############################################################################
 # PNG support with libpng
@@ -575,60 +552,37 @@ Configure ZLIB_LINKFLAGS ;
 
 Load libpng.jam ;
 
-if --with-inline-libpng in $(ARGV)
-{
-    WITH_BUILTIN_LIBPNG = yes ;
-}
+EchoOption --with-inline-libpng : "Using inline libpng" : [ HasOption --with-inline-libpng ] ;
 
-if ! $(WITH_BUILTIN_LIBPNG)
+if ! $(WITH_PNG) && --with-inline-libpng in $(ARGV)
 {
-    if [ Prebuilt-Has png ]
-    {
-        PNG_INCLUDES  ?= [ Prebuilt-Includes png ] ;
-        PNG_C++FLAGS  ?= [ Prebuilt-CxxFlags png ] ;
-        PNG_LINKLIBS  ?= [ Prebuilt-LinkLibs png ] ;
-        PNG_LIBDIR    ?= [ Prebuilt-LibPath png ] ;
-        PNG_LINKFLAGS ?= [ Prebuilt-LinkFlags png ] ;
-    }
-
-    WITH_PNG = [ Png-Configure $(PNG_INCLUDES) : $(PNG_C++FLAGS) :
-                               $(PNG_LINKLIBS) : $(PNG_LIBDIR) : $(PNG_LINKFLAGS) ] ;
+    WITH_PNG = [ Builtin-Use png : [ FDirName $(PT_TOP) src libpng ] ] ;
 }
 
 if ! $(WITH_PNG)
 {
-    WITH_BUILTIN_LIBPNG = yes ;
+    Prebuilt-Use png ;
+
+    WITH_PNG = [ Png-Configure
+                   [ Packages-Includes png ]
+                 : [ Packages-Defines png ]
+                 : [ Packages-LinkLibs png ]
+                 : [ Packages-LibDir png ]
+                 : [ Packages-LinkFlags png ] ] ;
 }
 
-EchoOption --with-inline-libpng : "Using inline libpng" : $(WITH_BUILTIN_LIBPNG:E="no") ;
-
-if $(WITH_BUILTIN_LIBPNG)
+if ! $(WITH_PNG)
 {
-    if ! [ Builtin-Use png : [ FDirName $(PT_TOP) src libpng ] ]
-    {
-        Exit "Error: builtin png selected but not configured" ;
-    }
+    WITH_PNG = [ Builtin-Use png : [ FDirName $(PT_TOP) src libpng ] ] ;
+}
 
-    PNG_INCLUDES = [ Packages-Includes png ] ;
-    PNG_C++FLAGS = ;
-    PNG_LINKLIBS = ;
-    PNG_LINKFLAGS = ;
+Packages-Echo png ;
+EchoOption WITH_PNG : "PNG found" : $(WITH_PNG:E="no") ;
 
-    Packages-Echo png ;
+if $(WITH_PNG)
+{
     Packages-Configure png ;
 }
-
-Configure PNG_INCLUDES ;
-EchoOption PNG_INCLUDES : "PNG includes" ;
-
-Configure PNG_C++FLAGS ;
-EchoOption PNG_C++FLAGS : "PNG C++ flags" ;
-
-Configure PNG_LINKLIBS ;
-EchoOption PNG_LINKLIBS : "PNG libs" ;
-
-Configure PNG_LINKFLAGS ;
-EchoOption PNG_LINKFLAGS : "PNG link flags" ;
 
 #############################################################################
 # JPEG support with libjpeg
@@ -636,61 +590,37 @@ EchoOption PNG_LINKFLAGS : "PNG link flags" ;
 
 Load libjpeg.jam ;
 
-if --with-inline-libjpeg in $(ARGV)
-{
-    WITH_BUILTIN_LIBJPEG = yes ;
-}
+EchoOption --with-inline-libjpeg : "Using inline libjpeg" : [ HasOption --with-inline-libjpeg ] ;
 
-if ! $(WITH_BUILTIN_LIBJPEG)
+if ! $(WITH_JPEG) && --with-inline-libjpeg in $(ARGV)
 {
-    if [ Prebuilt-Has jpeg ]
-    {
-        JPEG_INCLUDES  ?= [ Prebuilt-Includes jpeg ] ;
-        JPEG_C++FLAGS  ?= [ Prebuilt-CxxFlags jpeg ] ;
-        JPEG_LINKLIBS  ?= [ Prebuilt-LinkLibs jpeg ] ;
-        JPEG_LIBDIR    ?= [ Prebuilt-LibPath jpeg ] ;
-        JPEG_LINKFLAGS ?= [ Prebuilt-LinkFlags jpeg ] ;
-    }
-
-    WITH_JPEG = [ Jpeg-Configure $(JPEG_INCLUDES) : $(JPEG_C++FLAGS) :
-                                 $(JPEG_LINKLIBS) : $(JPEG_LIBDIR) : $(JPEG_LINKFLAGS) ] ;
+    WITH_JPEG = [ Builtin-Use jpeg : [ FDirName $(PT_TOP) src libjpeg ] ] ;
 }
 
 if ! $(WITH_JPEG)
 {
-    WITH_BUILTIN_LIBJPEG = yes ;
+    Prebuilt-Use jpeg ;
+
+    WITH_JPEG = [ Jpeg-Configure
+                    [ Packages-Includes jpeg ]
+                  : [ Packages-Defines jpeg ]
+                  : [ Packages-LinkLibs jpeg ]
+                  : [ Packages-LibDir jpeg ]
+                  : [ Packages-LinkFlags jpeg ] ] ;
 }
 
-EchoOption --with-inline-libjpeg : "Using inline libjpeg"
-                                   : $(WITH_BUILTIN_LIBJPEG:E="no") ;
-
-if $(WITH_BUILTIN_LIBJPEG)
+if ! $(WITH_JPEG)
 {
-    if ! [ Builtin-Use jpeg : [ FDirName $(PT_TOP) src libjpeg ] ]
-    {
-        Exit "Error: builtin jpeg selected but not configured" ;
-    }
+    WITH_JPEG = [ Builtin-Use jpeg : [ FDirName $(PT_TOP) src libjpeg ] ] ;
+}
 
-    JPEG_INCLUDES = [ Packages-Includes jpeg ] ;
-    JPEG_C++FLAGS = ;
-    JPEG_LINKLIBS = ;
-    JPEG_LINKFLAGS = ;
+Packages-Echo jpeg ;
+EchoOption WITH_JPEG : "JPEG found" : $(WITH_JPEG:E="no") ;
 
-    Packages-Echo jpeg ;
+if $(WITH_JPEG)
+{
     Packages-Configure jpeg ;
 }
-
-Configure JPEG_INCLUDES ;
-EchoOption JPEG_INCLUDES : "JPEG includes" ;
-
-Configure JPEG_C++FLAGS ;
-EchoOption JPEG_C++FLAGS : "JPEG C++ flags" ;
-
-Configure JPEG_LINKLIBS ;
-EchoOption JPEG_LINKLIBS : "JPEG libs" ;
-
-Configure JPEG_LINKFLAGS ;
-EchoOption JPEG_LINKFLAGS : "JPEG link flags" ;
 
 #############################################################################
 # Freetype support
@@ -698,153 +628,154 @@ EchoOption JPEG_LINKFLAGS : "JPEG link flags" ;
 
 Load freetype.jam ;
 
-if --with-inline-freetype in $(ARGV)
-{
-    WITH_BUILTIN_FREETYPE = yes ;
-}
+EchoOption --with-inline-freetype : "Using inline Freetype" : [ HasOption --with-inline-freetype ] ;
 
-if ! $(WITH_BUILTIN_FREETYPE)
+if ! $(WITH_FREETYPE) && --with-inline-freetype in $(ARGV)
 {
-    if [ Prebuilt-Has freetype ]
-    {
-        FREETYPE_INCLUDES  ?= [ Prebuilt-Includes freetype ] ;
-        FREETYPE_C++FLAGS  ?= [ Prebuilt-CxxFlags freetype ] ;
-        FREETYPE_LINKLIBS  ?= [ Prebuilt-LinkLibs freetype ] ;
-        FREETYPE_LIBDIR    ?= [ Prebuilt-LibPath freetype ] ;
-        FREETYPE_LINKFLAGS ?= [ Prebuilt-LinkFlags freetype ] ;
-    }
-
-    WITH_FREETYPE = [ Freetype-Configure $(FREETYPE_INCLUDES) : $(FREETYPE_C++FLAGS) :
-                                         $(FREETYPE_LINKLIBS) : $(FREETYPE_LIBDIR) : $(FREETYPE_LINKFLAGS) ] ;
+    WITH_FREETYPE = [ Builtin-Use freetype : [ FDirName $(PT_TOP) src freetype ] ] ;
 }
 
 if ! $(WITH_FREETYPE)
 {
-    WITH_BUILTIN_FREETYPE = yes ;
+    Prebuilt-Use freetype ;
+
+    WITH_FREETYPE = [ Freetype-Configure
+                        [ Packages-Includes freetype ]
+                      : [ Packages-Defines freetype ]
+                      : [ Packages-LinkLibs freetype ]
+                      : [ Packages-LibDir freetype ]
+                      : [ Packages-LinkFlags freetype ] ] ;
 }
 
-EchoOption --with-inline-freetype : "Using inline Freetype" : $(WITH_BUILTIN_FREETYPE:E="no") ;
-
-if $(WITH_BUILTIN_FREETYPE)
+if ! $(WITH_FREETYPE)
 {
-    if ! [ Builtin-Use freetype : [ FDirName $(PT_TOP) src freetype ] ]
-    {
-        Exit "Error: builtin freetype selected but not configured" ;
-    }
+    WITH_FREETYPE = [ Builtin-Use freetype : [ FDirName $(PT_TOP) src freetype ] ] ;
+}
 
-    FREETYPE_INCLUDES = [ Packages-Includes freetype ] ;
-    FREETYPE_C++FLAGS = ;
-    FREETYPE_LINKLIBS = ;
-    FREETYPE_LINKFLAGS = ;
+Packages-Echo freetype ;
+EchoOption WITH_FREETYPE : "Freetype found" : $(WITH_FREETYPE:E="no") ;
 
-    Packages-Echo freetype ;
+if $(WITH_FREETYPE)
+{
     Packages-Configure freetype ;
 }
-
-Configure FREETYPE_INCLUDES ;
-EchoOption FREETYPE_INCLUDES : "Freetype includes" ;
-
-Configure FREETYPE_C++FLAGS ;
-EchoOption FREETYPE_C++FLAGS : "Freetype C++ flags" ;
-
-Configure FREETYPE_LINKLIBS ;
-EchoOption FREETYPE_LINKLIBS : "Freetype libs" ;
-
-Configure FREETYPE_LINKFLAGS ;
-EchoOption FREETYPE_LINKFLAGS : "Freetype link flags" ;
 
 #############################################################################
 # SSL libraries and includes
 #############################################################################
 
 Load openssl.jam ;
+Load mbedtls.jam ;
 
-if --with-openssl in $(ARGV)
+EchoOption --with-inline-openssl : "Using inline OpenSSL" : [ HasOption --with-inline-openssl ] ;
+EchoOption --with-openssl : "Using OpenSSL" : [ HasOption --with-openssl ] ;
+EchoOption --with-inline-mbedtls : "Using inline mbedTLS" : [ HasOption --with-inline-mbedtls ] ;
+EchoOption --with-mbedtls : "Using mbedTLS" : [ HasOption --with-mbedtls ] ;
+
+if ! $(WITH_SSL) && --with-inline-openssl in $(ARGV)
 {
-    if ! [ Builtin-Use openssl : [ FDirName $(PT_TOP) src openssl ] ]
+    if [ Builtin-Use openssl : [ FDirName $(PT_TOP) src openssl ] ]
     {
-        Exit "Error: builtin openssl selected but not configured" ;
+        WITH_SSL = yes ;
+        PT_SSL_IMPL = openssl ;
     }
+}
 
-    WITH_OPENSSL = "yes" ;
-    Configure WITH_OPENSSL ;
+if ! $(WITH_SSL) && --with-openssl in $(ARGV)
+{
+    Prebuilt-Use openssl ;
 
-    WITH_SSL = yes ;
-    PT_SSL_IMPL = "openssl" ;
-    SSL_INCLUDES = [ Packages-Includes openssl ] ;
+    if [ OpenSsl-Configure
+            [ Packages-Includes openssl ]
+          : [ Packages-Defines openssl ]
+          : [ Packages-LinkLibs openssl ]
+          : [ Packages-LibDir openssl ]
+          : [ Packages-LinkFlags openssl ] ]
+    {
+        WITH_SSL = yes ;
+        PT_SSL_IMPL = openssl ;
+    }
+}
 
-    Packages-Echo openssl ;
-    Packages-Configure openssl ;
+if ! $(WITH_SSL) && --with-inline-mbedtls in $(ARGV)
+{
+    if [ Builtin-Use mbedtls : [ FDirName $(PT_TOP) src mbedtls ] ]
+    {
+        WITH_SSL = yes ;
+        PT_SSL_IMPL = mbedtls ;
+    }
 }
 
 if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
 {
-    WITH_MBEDTLS = "yes" ;
-    Configure WITH_MBEDTLS ;
+    Prebuilt-Use mbedtls ;
 
-    WITH_SSL = yes ;
-    PT_SSL_IMPL = "mbedtls" ;
-    SSL_INCLUDES = [ FDirName $(PT_TOP) src mbedtls include ] ;
-
-    # mbedTLS uses BCryptGenRandom() as its entropy source on Windows
-    WITH_BCRYPT = [ CheckBuildC++ "#include <windows.h>"
-                                  "#include <bcrypt.h>"
-                                  "int main() { BCryptGenRandom(NULL, 0, 0,"
-                                  "BCRYPT_USE_SYSTEM_PREFERRED_RNG); return 0; }"
-                                  : ""
-                                  : "bcrypt.lib" ] ;
-
-    if $(WITH_BCRYPT)
+    if [ MbedTls-Configure
+            [ Packages-Includes mbedtls ]
+          : [ Packages-Defines mbedtls ]
+          : [ Packages-LinkLibs mbedtls ]
+          : [ Packages-LibDir mbedtls ]
+          : [ Packages-LinkFlags mbedtls ] ]
     {
-        SSL_LINKLIBS += bcrypt.lib ;
+        WITH_SSL = yes ;
+        PT_SSL_IMPL = mbedtls ;
     }
 }
 
 if ! $(WITH_SSL)
 {
-    if [ Prebuilt-Has openssl ]
-    {
-        SSL_INCLUDES  ?= [ Prebuilt-Includes openssl ] ;
-        SSL_C++FLAGS  ?= [ Prebuilt-CxxFlags openssl ] ;
-        SSL_LINKLIBS  ?= [ Prebuilt-LinkLibs openssl ] ;
-        SSL_LIBDIR    ?= [ Prebuilt-LibPath openssl ] ;
-        SSL_LINKFLAGS ?= [ Prebuilt-LinkFlags openssl ] ;
-    }
+    Prebuilt-Use openssl ;
 
-    WITH_SSL = [ OpenSsl-Configure $(SSL_INCLUDES) : $(SSL_C++FLAGS) :
-                                   $(SSL_LINKLIBS) : $(SSL_LIBDIR) : $(SSL_LINKFLAGS) ] ;
-
-    if $(WITH_SSL)
+    if [ OpenSsl-Configure
+            [ Packages-Includes openssl ]
+          : [ Packages-Defines openssl ]
+          : [ Packages-LinkLibs openssl ]
+          : [ Packages-LibDir openssl ]
+          : [ Packages-LinkFlags openssl ] ]
     {
-        PT_SSL_IMPL = "openssl" ;
+        WITH_SSL = yes ;
+        PT_SSL_IMPL = openssl ;
     }
 }
 
 if ! $(WITH_SSL)
 {
-    PT_SSL_IMPL = "nossl" ;
+    Prebuilt-Use mbedtls ;
+
+    if [ MbedTls-Configure
+            [ Packages-Includes mbedtls ]
+          : [ Packages-Defines mbedtls ]
+          : [ Packages-LinkLibs mbedtls ]
+          : [ Packages-LibDir mbedtls ]
+          : [ Packages-LinkFlags mbedtls ] ]
+    {
+        WITH_SSL = yes ;
+        PT_SSL_IMPL = mbedtls ;
+    }
 }
 
-EchoOption --with-openssl : "Builtin OpenSSL library" : $(WITH_OPENSSL:E="no") ;
-EchoOption --with-mbedtls : "Builtin mbedTLS library" : $(WITH_MBEDTLS:E="no") ;
+if ! $(WITH_SSL)
+{
+    PT_SSL_IMPL = nossl ;
+}
+
+if $(PT_SSL_IMPL) = openssl
+{
+    Packages-Echo openssl ;
+    Packages-Configure openssl ;
+}
+
+if $(PT_SSL_IMPL) = mbedtls
+{
+    Packages-Echo mbedtls ;
+    Packages-Configure mbedtls ;
+}
 
 Configure WITH_SSL ;
 EchoOption WITH_SSL : "SSL support" : $(WITH_SSL:E="no") ;
 
 Configure PT_SSL_IMPL ;
 EchoOption PT_SSL_IMPL : "SSL implementation" ;
-
-Configure SSL_INCLUDES ;
-EchoOption SSL_INCLUDES : "SSL includes" ;
-
-Configure SSL_C++FLAGS ;
-EchoOption SSL_C++FLAGS : "SSL C++ flags" ;
-
-Configure SSL_LINKLIBS ;
-EchoOption SSL_LINKLIBS : "SSL libs" ;
-
-Configure SSL_LINKFLAGS ;
-EchoOption SSL_LINKFLAGS : "SSL link flags" ;
 
 #############################################################################
 # blend2D graphics library
@@ -1189,7 +1120,7 @@ else if $(PT_FORMS_IMPL:L) = "x11"
 
         if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
         {
-            PT_FORMS_INCLUDES = $(FREETYPE_INCLUDES) $(X11_INCLUDES) $(XFT_INCLUDES) ;
+            PT_FORMS_INCLUDES = [ Packages-Includes freetype ] $(X11_INCLUDES) $(XFT_INCLUDES) ;
             PT_FORMS_LINKLIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
             WITH_FORMS = yes ;
         }
@@ -1290,7 +1221,7 @@ else if $(PT_FORMS_IMPL:L) = "wayland"
         if $(WAYLAND_EGL_LIBS) && $(EGL_LIBS) && $(GLESV2_LIBS)
         {
             PT_FORMS_LINKLIBS += $(EGL_LIBS) $(GLESV2_LIBS) $(WAYLAND_EGL_LIBS) $(M_LINKLIBS) ;
-            PT_FORMS_INCLUDES += $(FREETYPE_INCLUDES) ;
+            PT_FORMS_INCLUDES += [ Packages-Includes freetype ] ;
             PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WAYLAND_NANOVG ] ;
         }
         else

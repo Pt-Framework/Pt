@@ -35,98 +35,66 @@ rule Qt-SetVersion ( version )
 # Qt-SetRoot ROOT
 #
 # Sets QTDIR to the given root directory. When QTDIR is set, Qt-Configure
-# derives include/lib paths from it and does not fall back to pkg-config
-# or DEPS_INCLUDES/DEPS_LIBDIR. The tool rules (Qt-ConfigureMoc, etc.)
-# also use QTDIR/bin/ as a fallback for tool lookup.
+# derives include/lib paths from it and does not fall back to pkg-config.
+# The tool rules (Qt-ConfigureMoc, etc.) also use QTDIR/bin/ as a fallback
+# for tool lookup.
 
 rule Qt-SetRoot ( root )
 {
     QTDIR = $(root) ;
 }
 
-rule Qt-CheckCompile ( includes * : c++flags * )
+rule Qt-Probe ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
 {
-    return [ CheckDependencyCompileC++ QT : $(QT_CHECK_CODE)
-                                          : $(includes) : $(c++flags) ] ;
-}
-
-rule Qt-CheckLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
-{
-    return [ CheckDependencyLinkC++ QT : $(QT_CHECK_CODE)
-                                       : $(includes) : $(c++flags)
-                                       : $(linklibs) : $(libdir) : $(linkflags) ] ;
-}
-
-rule Qt-Check ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
-{
-    return [ CheckDependencyC++ QT : $(QT_CHECK_CODE)
-                                   : $(includes) : $(c++flags)
-                                   : $(linklibs) : $(libdir) : $(linkflags) ] ;
-}
-
-rule Qt-ConfigureInclude ( includes * : c++flags * )
-{
-    local result = [ Qt-CheckCompile $(includes) : $(c++flags) ] ;
-    return $(result) ;
+    return [ CheckBuildC++ $(QT_CHECK_CODE)
+                          : $(c++flags) [ FIncludes $(includes) ]
+                          : $(linklibs) [ FLibPath $(libdir) ] $(linkflags) ] ;
 }
 
 rule Qt-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
 {
-    local result ;
+    local used ;
+    local candidate ;
 
     local is_debug ;
     if $(WITH_DEBUG) && ! $(WITH_OPTIM) { is_debug = true ; }
 
-    # 1: caller-provided libs
-    if ! $(result) && $(linklibs)
+    if ! $(used) && $(linklibs)
     {
-        result = [ Qt-CheckLink $(includes)
-                               : $(c++flags)
-                               : $(linklibs)
-                               : $(libdir) : $(linkflags) ] ;
+        if [ Qt-Probe $(includes) : $(c++flags) : $(linklibs) : $(libdir) : $(linkflags) ]
+        {
+            used = $(linklibs) ;
+        }
     }
 
-    # 2: MSVC debug (Qt5Cored.lib / Qt6Cored.lib etc.)
-    if ! $(result) && $(is_debug)
+    if ! $(used) && $(is_debug)
     {
-        result = [ Qt-CheckLink $(includes)
-                               : $(c++flags)
-                               : $(QT_CHECK_LIBS:S=d.lib)
-                               : $(libdir) : $(linkflags) ] ;
+        candidate = $(QT_CHECK_LIBS:S=d.lib) ;
+        if [ Qt-Probe $(includes) : $(c++flags) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    # 3: MSVC release (Qt5Core.lib / Qt6Core.lib etc.)
-    if ! $(result)
+    if ! $(used)
     {
-        result = [ Qt-CheckLink $(includes)
-                               : $(c++flags)
-                               : $(QT_CHECK_LIBS:S=.lib)
-                               : $(libdir) : $(linkflags) ] ;
+        candidate = $(QT_CHECK_LIBS:S=.lib) ;
+        if [ Qt-Probe $(includes) : $(c++flags) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    # 4: Unix-style -l flags (-lQt5Core / -lQt6Core etc.)
-    if ! $(result)
+    if ! $(used)
     {
-        result = [ Qt-CheckLink $(includes)
-                               : $(c++flags)
-                               : [ FLinkLibs $(QT_CHECK_LIBS) ]
-                               : $(libdir) : $(linkflags) ] ;
+        candidate = [ FLinkLibs $(QT_CHECK_LIBS) ] ;
+        if [ Qt-Probe $(includes) : $(c++flags) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    # 5: macOS frameworks (-framework QtCore -framework QtWidgets -framework QtGui)
-    if ! $(result)
-    {
-        local fw_c++flags  = -F$(libdir) ;
-        local fw_linkflags = -F$(libdir) ;
-        local fw_linklibs  = "-framework "$(QT_CHECK_FRAMEWORKS) ;
-
-        result = [ Qt-CheckLink $(includes)
-                               : $(fw_c++flags)
-                               : $(fw_linklibs)
-                               : : $(fw_linkflags) ] ;
-    }
-
-    return $(result) ;
+    return $(used) ;
 }
 
 # Qt-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
@@ -137,37 +105,53 @@ rule Qt-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkfl
 #   1. Caller-provided hints (explicit INCLUDES, LIBDIR, etc.)
 #   2. QTDIR — if set, derives include/lib from it; no further fallback
 #   3. pkg-config
-#   4. DEPS_INCLUDES / DEPS_LIBDIR (global dependency path)
+#   4. Default compiler paths
 #
 # When QTDIR is set (via Qt-SetRoot or -sQTDIR=...) and no explicit
 # hints are provided, QTDIR is authoritative: the search stops after
 # probing QTDIR-derived paths, regardless of success.
 #
 # Returns "yes" on success; QT_INCLUDES, QT_C++FLAGS, QT_LINKLIBS
-# and QT_LINKFLAGS are set as a side-effect.
+# and QT_LINKFLAGS are set. QT_LINKFLAGS includes FLibPath of QT_LIBDIR.
 
 rule Qt-Configure ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
 {
     local result ;
+    local used ;
 
-    # QTDIR is authoritative when no explicit hints are provided
     if ! $(includes) && ! $(libdir) && $(QTDIR)
     {
         includes = [ FDirName $(QTDIR) include ] ;
         libdir   = [ FDirName $(QTDIR) lib ] ;
 
-        if [ Qt-ConfigureInclude $(includes) : $(c++flags) ]
+        if [ Qt-Probe $(includes) : $(c++flags) ]
         {
-            includes = $(QT_INCLUDES) ;
-            c++flags = $(QT_C++FLAGS) ;
+            used = [ Qt-ConfigureLink $(includes) : $(c++flags)
+                                     : $(linklibs) : $(libdir) : $(linkflags) ] ;
+            if $(used)
+            {
+                linklibs = $(used) ;
+                result = yes ;
+            }
+            else if $(libdir)
+            {
+                local fw_c++flags  = -F$(libdir) ;
+                local fw_linkflags = -F$(libdir) ;
+                local fw_linklibs  = "-framework "$(QT_CHECK_FRAMEWORKS) ;
 
-            result = [ Qt-ConfigureLink $(includes) : $(c++flags)
-                                       : $(linklibs) : $(libdir) : $(linkflags) ] ;
+                if [ Qt-Probe $(includes) : $(fw_c++flags) : $(fw_linklibs) : : $(fw_linkflags) ]
+                {
+                    c++flags  = $(fw_c++flags) ;
+                    linklibs  = $(fw_linklibs) ;
+                    libdir    = ;
+                    linkflags = $(fw_linkflags) ;
+                    result = yes ;
+                }
+            }
         }
     }
     else
     {
-        # Pkg-config (only when no hints are provided)
         if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(c++flags) && ! $(linkflags)
         {
             Load pkgconfig.jam ;
@@ -179,25 +163,50 @@ rule Qt-Configure ( includes * : c++flags * : linklibs * : libdir * : linkflags 
                 linklibs  = [ PkgConfig-LinkLibs $(QT_CHECK_LIBS) ] ;
                 linkflags = [ PkgConfig-LinkFlags $(QT_CHECK_LIBS) ] ;
 
-                result = [ Qt-Check $(includes)
-                                   : $(c++flags)
-                                   : $(linklibs)
-                                   : : $(linkflags) ] ;
+                if [ Qt-Probe $(includes) : $(c++flags) : $(linklibs) : : $(linkflags) ]
+                {
+                    result = yes ;
+                }
             }
         }
 
-        # Include search, then link search (uses DEPS as last fallback)
         if ! $(result)
         {
-            if [ Qt-ConfigureInclude $(includes) : $(c++flags) ]
+            if [ Qt-Probe $(includes) : $(c++flags) ]
             {
-                includes = $(QT_INCLUDES) ;
-                c++flags = $(QT_C++FLAGS) ;
-
-                result = [ Qt-ConfigureLink $(includes) : $(c++flags)
-                                           : $(linklibs) : $(libdir) : $(linkflags) ] ;
+                used = [ Qt-ConfigureLink $(includes) : $(c++flags)
+                                         : $(linklibs) : $(libdir) : $(linkflags) ] ;
+                if $(used)
+                {
+                    linklibs = $(used) ;
+                    result = yes ;
+                }
             }
         }
+
+        if ! $(result) && $(libdir)
+        {
+            local fw_c++flags  = -F$(libdir) ;
+            local fw_linkflags = -F$(libdir) ;
+            local fw_linklibs  = "-framework "$(QT_CHECK_FRAMEWORKS) ;
+
+            if [ Qt-Probe $(includes) : $(fw_c++flags) : $(fw_linklibs) : : $(fw_linkflags) ]
+            {
+                c++flags  = $(fw_c++flags) ;
+                linklibs  = $(fw_linklibs) ;
+                libdir    = ;
+                linkflags = $(fw_linkflags) ;
+                result = yes ;
+            }
+        }
+    }
+
+    if $(result)
+    {
+        QT_INCLUDES  = $(includes) ;
+        QT_C++FLAGS  = $(c++flags) ;
+        QT_LINKLIBS  = $(linklibs) ;
+        QT_LINKFLAGS = [ FLibPath $(libdir) ] $(linkflags) ;
     }
 
     return $(result) ;

@@ -7,35 +7,17 @@ LIBPNG_CHECK_CODE = "#include <png.h>"
                     "PNG_LIBPNG_VER_STRING, 0, 0, 0);"
                     "return 0; }" ;
 
-rule Png-CheckCompile ( includes * : c++flags * )
+rule Png-Probe ( includes * : defines * : linklibs * : libdir * : linkflags * )
 {
-    return [ CheckDependencyCompileC++ PNG : $(LIBPNG_CHECK_CODE)
-                                           : $(includes) : $(c++flags) ] ;
+    return [ CheckBuildC++ $(LIBPNG_CHECK_CODE)
+                          : $(defines) [ FIncludes $(includes) ]
+                          : $(linklibs) [ FLibPath $(libdir) ] $(linkflags) ] ;
 }
 
-rule Png-CheckLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+rule Png-ConfigureLink ( includes * : defines * : linklibs * : libdir * : linkflags * )
 {
-    return [ CheckDependencyLinkC++ PNG : $(LIBPNG_CHECK_CODE)
-                                        : $(includes) : $(c++flags)
-                                        : $(linklibs) : $(libdir) : $(linkflags) ] ;
-}
-
-rule Png-Check ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
-{
-    return [ CheckDependencyC++ PNG : $(LIBPNG_CHECK_CODE)
-                                   : $(includes) : $(c++flags)
-                                   : $(linklibs) : $(libdir) : $(linkflags) ] ;
-}
-
-rule Png-ConfigureInclude ( includes * : c++flags * )
-{
-    local hdr_found = [ Png-CheckCompile $(includes) : $(c++flags) ] ;
-    return $(hdr_found) ;
-}
-
-rule Png-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
-{
-    local result ;
+    local used ;
+    local candidate ;
 
     local is_debug ;
     if $(WITH_DEBUG) && ! $(WITH_OPTIM)
@@ -43,89 +25,97 @@ rule Png-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkf
         is_debug = true ;
     }
 
-    # 1: caller-provided libs
-    if ! $(result) && $(linklibs)
+    if ! $(used) && $(linklibs)
     {
-        result = [ Png-CheckLink $(includes)
-                                : $(c++flags)
-                                : $(linklibs)
-                                : $(libdir) : $(linkflags) ] ;
+        if [ Png-Probe $(includes) : $(defines) : $(linklibs) : $(libdir) : $(linkflags) ]
+        {
+            used = $(linklibs) ;
+        }
     }
 
-    # 2: debug lib (libpng16d)
-    if ! $(result) && $(is_debug)
+    if ! $(used) && $(is_debug)
     {
-        result = [ Png-CheckLink $(includes)
-                                : $(c++flags)
-                                : [ FLinkLibs libpng16d ]
-                                : $(libdir) : $(linkflags) ] ;
+        candidate = [ FLinkLibs libpng16d ] ;
+        if [ Png-Probe $(includes) : $(defines) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    # 3: MSVC-style lib name (libpng16)
-    if ! $(result)
+    if ! $(used)
     {
-        result = [ Png-CheckLink $(includes)
-                                : $(c++flags)
-                                : [ FLinkLibs libpng16 ]
-                                : $(libdir) : $(linkflags) ] ;
+        candidate = [ FLinkLibs libpng16 ] ;
+        if [ Png-Probe $(includes) : $(defines) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    # 4: Unix-style lib name (png)
-    if ! $(result)
+    if ! $(used)
     {
-        result = [ Png-CheckLink $(includes)
-                                : $(c++flags)
-                                : [ FLinkLibs png ]
-                                : $(libdir) : $(linkflags) ] ;
+        candidate = [ FLinkLibs png ] ;
+        if [ Png-Probe $(includes) : $(defines) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    return $(result) ;
+    return $(used) ;
 }
 
-# Png-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
+# Png-Configure INCLUDES : DEFINES : LINKLIBS : LIBDIR : LINKFLAGS
 #
 # Probes for a system libpng installation by trying pkg-config first (if no
 # hints have been provided), then falling back to compile-probes with
 # toolset-neutral library flags.
 #
-# Returns "yes" on success; PNG_INCLUDES, PNG_C++FLAGS, PNG_LINKLIBS
-# and PNG_LINKFLAGS are set as a side-effect by CheckDependencyCompileC++
-# and CheckDependencyLinkC++.
+# On success writes the five flag variables unmerged through Packages-Set*
+# and returns png. On failure returns empty and leaves the variables
+# unchanged.
 
-rule Png-Configure ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+rule Png-Configure ( includes * : defines * : linklibs * : libdir * : linkflags * )
 {
     local result ;
 
-    # Pkg-config (only when no hints are provided)
-    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(c++flags) && ! $(linkflags)
+    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(defines) && ! $(linkflags)
     {
         Load pkgconfig.jam ;
 
         if [ PkgConfig-Exists libpng ]
         {
             includes  = [ PkgConfig-Includes libpng ] ;
-            c++flags  = [ PkgConfig-CFlags libpng ] ;
+            defines   = [ PkgConfig-CFlags libpng ] ;
             linklibs  = [ PkgConfig-LinkLibs libpng ] ;
             linkflags = [ PkgConfig-LinkFlags libpng ] ;
 
-            result = [ Png-Check $(includes)
-                                : $(c++flags)
-                                : $(linklibs)
-                                : : $(linkflags) ] ;
+            if [ Png-Probe $(includes) : $(defines) : $(linklibs) : : $(linkflags) ]
+            {
+                result = png ;
+            }
         }
     }
 
-    # Include search, then link search
     if ! $(result)
     {
-        if [ Png-ConfigureInclude $(includes) : $(c++flags) ]
+        if [ Png-Probe $(includes) : $(defines) ]
         {
-            includes = $(PNG_INCLUDES) ;
-            c++flags = $(PNG_C++FLAGS) ;
-
-            result = [ Png-ConfigureLink $(includes) : $(c++flags)
-                                        : $(linklibs) : $(libdir) : $(linkflags) ] ;
+            local used = [ Png-ConfigureLink $(includes) : $(defines)
+                                           : $(linklibs) : $(libdir) : $(linkflags) ] ;
+            if $(used)
+            {
+                linklibs = $(used) ;
+                result = png ;
+            }
         }
+    }
+
+    if $(result)
+    {
+        Packages-SetIncludes png : $(includes) ;
+        Packages-SetDefines png : $(defines) ;
+        Packages-SetLinkLibs png : $(linklibs) ;
+        Packages-SetLibDir png : $(libdir) ;
+        Packages-SetLinkFlags png : $(linkflags) ;
     }
 
     return $(result) ;

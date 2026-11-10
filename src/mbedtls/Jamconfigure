@@ -1,0 +1,16 @@
+# Included by Builtin-Use after the source root was found.
+
+Packages-SetIncludes mbedtls : [ FDirName $(PT_TOP) src mbedtls include ] ;
+Packages-SetTarget mbedtls : mbedtls ;
+
+WITH_BCRYPT = [ CheckBuildC++ "#include <windows.h>"
+                              "#include <bcrypt.h>"
+                              "int main() { BCryptGenRandom(NULL, 0, 0,"
+                              "BCRYPT_USE_SYSTEM_PREFERRED_RNG); return 0; }"
+                              : ""
+                              : "bcrypt.lib" ] ;
+
+if $(WITH_BCRYPT)
+{
+    Packages-SetLinkLibs mbedtls : [ FLinkLibs bcrypt ] ;
+}

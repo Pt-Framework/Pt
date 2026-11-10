@@ -224,7 +224,7 @@ if [ Packages-Target freetype ]
     SubInclude PT_TOP src freetype src ;
 }
 
-if $(WITH_MBEDTLS)
+if [ Packages-Target mbedtls ]
 {
     SubInclude PT_TOP src mbedtls ;
 }

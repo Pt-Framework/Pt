@@ -28,14 +28,6 @@ copies their public usage onto its own variables.
 A non-empty `pkg.TARGET` means the package is builtin (source-built).
 Prebuilt and system leave `TARGET` empty.
 
-## Baseline
-
-`CheckDependencyLinkC++` and `CheckDependencyC++` apply `FLibPath` to
-`LIBDIR` and store the result in `*_LINKFLAGS`. `SetDependencyPath`
-exists in `configure.jam` and has no callers. `Jamconfigure` persists
-`INCLUDES`, `C++FLAGS`, `LINKLIBS` and `LINKFLAGS`; it does not persist
-`LIBDIR`.
-
 ## Variables {#variables}
 
 The common variables are dotted: `$(pkg.INCLUDES)`, `$(pkg.DEFINES)`,
@@ -240,10 +232,21 @@ The same pattern applies to png, jpeg and FreeType.
 
 ### SSL backends
 
-`Jamconfigure` selects the Pt-Ssl backend. The package is `openssl`.
-Resolution uses `Prebuilt-Use`, `OpenSsl-Configure` and
-`Builtin-Use openssl : src/openssl`. Builtin runs only for
-`--with-openssl`; there is no builtin fallback. Success sets
-`PT_SSL_IMPL` to `openssl` and `WITH_SSL`. `--with-mbedtls` is the
-other backend override. When neither backend is found, `PT_SSL_IMPL`
-is `nossl`. `Pt-Ssl` reads the accessors of `openssl` or `mbedtls`.
+`Jamconfigure` selects the Pt-Ssl backend from packages `openssl` and
+`mbedtls`. Builtin only with `--with-inline-openssl` or
+`--with-inline-mbedtls`. `--with-openssl` and `--with-mbedtls` name the
+prebuilt or system backend.
+
+Independent `if`s, each `if ! $(WITH_SSL)`. Explicit flags run first:
+
+1. `--with-inline-openssl`: `Builtin-Use openssl`
+2. `--with-openssl`: `Prebuilt-Use openssl` and `OpenSsl-Configure`
+3. `--with-inline-mbedtls`: `Builtin-Use mbedtls`
+4. `--with-mbedtls`: `Prebuilt-Use mbedtls` and `MbedTls-Configure`
+5. Default openssl: `Prebuilt-Use openssl` and `OpenSsl-Configure`
+6. Default mbedtls: `Prebuilt-Use mbedtls` and `MbedTls-Configure`
+7. `PT_SSL_IMPL = nossl`
+
+Success sets `WITH_SSL` and `PT_SSL_IMPL` to `openssl` or `mbedtls`.
+`Pt-Ssl` reads the accessors of that package. The bcrypt probe for
+builtin mbedtls lives in `src/mbedtls/Jamconfigure`.

@@ -8,134 +8,125 @@ FREETYPE_CHECK_CODE = "#include <ft2build.h>"
                      "FT_Init_FreeType( &ft );"
                      "return 0; }" ;
 
-rule Freetype-CheckCompile ( includes * : c++flags * )
+rule Freetype-Probe ( includes * : defines * : linklibs * : libdir * : linkflags * )
 {
-    return [ CheckDependencyCompileC++ FREETYPE : $(FREETYPE_CHECK_CODE)
-                                                : $(includes) : $(c++flags) ] ;
+    return [ CheckBuildC++ $(FREETYPE_CHECK_CODE)
+                          : $(defines) [ FIncludes $(includes) ]
+                          : $(linklibs) [ FLibPath $(libdir) ] $(linkflags) ] ;
 }
 
-rule Freetype-CheckLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+rule Freetype-ConfigureLink ( includes * : defines * : linklibs * : libdir * : linkflags * )
 {
-    return [ CheckDependencyLinkC++ FREETYPE : $(FREETYPE_CHECK_CODE)
-                                             : $(includes) : $(c++flags)
-                                             : $(linklibs) : $(libdir) : $(linkflags) ] ;
-}
-
-rule Freetype-Check ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
-{
-    return [ CheckDependencyC++ FREETYPE : $(FREETYPE_CHECK_CODE)
-                                        : $(includes) : $(c++flags)
-                                        : $(linklibs) : $(libdir) : $(linkflags) ] ;
-}
-
-rule Freetype-ConfigureInclude ( includes * : c++flags * )
-{
-    local result ;
-
-    # 1: caller-provided includes
-    if ! $(result)
-    {
-        result = [ Freetype-CheckCompile $(includes) : $(c++flags) ] ;
-    }
-
-    # 2: /usr/include system path
-    if ! $(result) && ! $(includes)
-    {
-        result = [ Freetype-CheckCompile /usr/include/freetype2 /usr/include
-                                           : $(c++flags) ] ;
-    }
-
-    # 3: /usr/local/include system path
-    if ! $(result) && ! $(includes)
-    {
-        result = [ Freetype-CheckCompile /usr/local/include/freetype2 /usr/local/include
-                                           : $(c++flags) ] ;
-    }
-
-    return $(result) ;
-}
-
-rule Freetype-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
-{
-    local result ;
+    local used ;
+    local candidate ;
 
     local is_debug ;
     if $(WITH_DEBUG) && ! $(WITH_OPTIM) { is_debug = true ; }
 
-    # 1: caller-provided libs
-    if ! $(result) && $(linklibs)
+    if ! $(used) && $(linklibs)
     {
-        result = [ Freetype-CheckLink $(includes)
-                                     : $(c++flags)
-                                     : $(linklibs)
-                                     : $(libdir) : $(linkflags) ] ;
+        if [ Freetype-Probe $(includes) : $(defines) : $(linklibs) : $(libdir) : $(linkflags) ]
+        {
+            used = $(linklibs) ;
+        }
     }
 
-    # 2: debug lib (freetyped)
-    if ! $(result) && $(is_debug)
+    if ! $(used) && $(is_debug)
     {
-        result = [ Freetype-CheckLink $(includes)
-                                     : $(c++flags)
-                                     : [ FLinkLibs freetyped ]
-                                     : $(libdir) : $(linkflags) ] ;
+        candidate = [ FLinkLibs freetyped ] ;
+        if [ Freetype-Probe $(includes) : $(defines) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    # 3: normal lib (freetype)
-    if ! $(result)
+    if ! $(used)
     {
-        result = [ Freetype-CheckLink $(includes)
-                                     : $(c++flags)
-                                     : [ FLinkLibs freetype ]
-                                     : $(libdir) : $(linkflags) ] ;
+        candidate = [ FLinkLibs freetype ] ;
+        if [ Freetype-Probe $(includes) : $(defines) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
     }
 
-    return $(result) ;
+    return $(used) ;
 }
 
-# Freetype-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
+# Freetype-Configure INCLUDES : DEFINES : LINKLIBS : LIBDIR : LINKFLAGS
 #
 # Probes for a system freetype installation by trying pkg-config first (if
 # no hints have been provided), then falling back to compile-probes with
 # toolset-neutral library flags.
 #
-# Returns "yes" on success; FREETYPE_INCLUDES, FREETYPE_C++FLAGS,
-# FREETYPE_LINKLIBS and FREETYPE_LINKFLAGS are set as a side-effect by
-# CheckDependencyCompileC++ and CheckDependencyLinkC++.
+# On success writes the five flag variables unmerged through Packages-Set*
+# and returns freetype. On failure returns empty and leaves the variables
+# unchanged.
 
-rule Freetype-Configure ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+rule Freetype-Configure ( includes * : defines * : linklibs * : libdir * : linkflags * )
 {
     local result ;
+    local hdr ;
 
-    # Pkg-config (only when no hints are provided)
-    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(c++flags) && ! $(linkflags)
+    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(defines) && ! $(linkflags)
     {
         Load pkgconfig.jam ;
 
         if [ PkgConfig-Exists freetype2 ]
         {
             includes  = [ PkgConfig-Includes freetype2 ] ;
-            c++flags  = [ PkgConfig-CFlags freetype2 ] ;
+            defines   = [ PkgConfig-CFlags freetype2 ] ;
             linklibs  = [ PkgConfig-LinkLibs freetype2 ] ;
             linkflags = [ PkgConfig-LinkFlags freetype2 ] ;
 
-            result = [ Freetype-Check $(includes)
-                                     : $(c++flags)
-                                     : $(linklibs)
-                                     : : $(linkflags) ] ;
+            if [ Freetype-Probe $(includes) : $(defines) : $(linklibs) : : $(linkflags) ]
+            {
+                result = freetype ;
+            }
         }
     }
 
-    # Include search, then link search
     if ! $(result)
     {
-        if [ Freetype-ConfigureInclude $(includes) : $(c++flags) ]
+        if [ Freetype-Probe $(includes) : $(defines) ]
         {
-            includes = $(FREETYPE_INCLUDES) ;
-            c++flags = $(FREETYPE_C++FLAGS) ;
-
-            result = [ Freetype-ConfigureLink $(includes) : $(c++flags)
-                                             : $(linklibs) : $(libdir) : $(linkflags) ] ;
+            hdr = yes ;
         }
+        else if ! $(includes)
+        {
+            includes = /usr/include/freetype2 /usr/include ;
+            if [ Freetype-Probe $(includes) : $(defines) ]
+            {
+                hdr = yes ;
+            }
+            else
+            {
+                includes = /usr/local/include/freetype2 /usr/local/include ;
+                if [ Freetype-Probe $(includes) : $(defines) ]
+                {
+                    hdr = yes ;
+                }
+            }
+        }
+
+        if $(hdr)
+        {
+            local used = [ Freetype-ConfigureLink $(includes) : $(defines)
+                                                : $(linklibs) : $(libdir) : $(linkflags) ] ;
+            if $(used)
+            {
+                linklibs = $(used) ;
+                result = freetype ;
+            }
+        }
+    }
+
+    if $(result)
+    {
+        Packages-SetIncludes freetype : $(includes) ;
+        Packages-SetDefines freetype : $(defines) ;
+        Packages-SetLinkLibs freetype : $(linklibs) ;
+        Packages-SetLibDir freetype : $(libdir) ;
+        Packages-SetLinkFlags freetype : $(linkflags) ;
     }
 
     return $(result) ;

@@ -1,0 +1,109 @@
+if ! $(JAMBASE_MBEDTLS_JAM_INCLUDED) {
+JAMBASE_MBEDTLS_JAM_INCLUDED = true ;
+
+MBEDTLS_CHECK_CODE = "#include <mbedtls/ssl.h>"
+                     "int main() {"
+                     "mbedtls_ssl_context ctx;"
+                     "mbedtls_ssl_init(&ctx);"
+                     "return 0; }" ;
+
+rule MbedTls-Probe ( includes * : defines * : linklibs * : libdir * : linkflags * )
+{
+    return [ CheckBuildC++ $(MBEDTLS_CHECK_CODE)
+                          : $(defines) [ FIncludes $(includes) ]
+                          : $(linklibs) [ FLibPath $(libdir) ] $(linkflags) ] ;
+}
+
+rule MbedTls-ConfigureLink ( includes * : defines * : linklibs * : libdir * : linkflags * )
+{
+    local used ;
+    local candidate ;
+
+    if ! $(used) && $(linklibs)
+    {
+        if [ MbedTls-Probe $(includes) : $(defines) : $(linklibs) : $(libdir) : $(linkflags) ]
+        {
+            used = $(linklibs) ;
+        }
+    }
+
+    if ! $(used)
+    {
+        candidate = [ FLinkLibs mbedtls mbedx509 mbedcrypto ] ;
+        if [ MbedTls-Probe $(includes) : $(defines) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
+    }
+
+    if ! $(used)
+    {
+        candidate = [ FLinkLibs mbedcrypto ] ;
+        if [ MbedTls-Probe $(includes) : $(defines) : $(candidate) : $(libdir) : $(linkflags) ]
+        {
+            used = $(candidate) ;
+        }
+    }
+
+    return $(used) ;
+}
+
+# MbedTls-Configure INCLUDES : DEFINES : LINKLIBS : LIBDIR : LINKFLAGS
+#
+# Probes for a system mbedTLS installation by trying pkg-config first (if
+# no hints have been provided), then falling back to compile-probes with
+# toolset-neutral library flags.
+#
+# On success writes the five flag variables unmerged through Packages-Set*
+# and returns mbedtls. On failure returns empty and leaves the variables
+# unchanged.
+
+rule MbedTls-Configure ( includes * : defines * : linklibs * : libdir * : linkflags * )
+{
+    local result ;
+
+    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(defines) && ! $(linkflags)
+    {
+        Load pkgconfig.jam ;
+
+        if [ PkgConfig-Exists mbedtls ]
+        {
+            includes  = [ PkgConfig-Includes mbedtls ] ;
+            defines   = [ PkgConfig-CFlags mbedtls ] ;
+            linklibs  = [ PkgConfig-LinkLibs mbedtls ] ;
+            linkflags = [ PkgConfig-LinkFlags mbedtls ] ;
+
+            if [ MbedTls-Probe $(includes) : $(defines) : $(linklibs) : : $(linkflags) ]
+            {
+                result = mbedtls ;
+            }
+        }
+    }
+
+    if ! $(result)
+    {
+        if [ MbedTls-Probe $(includes) : $(defines) ]
+        {
+            local used = [ MbedTls-ConfigureLink $(includes) : $(defines)
+                                               : $(linklibs) : $(libdir) : $(linkflags) ] ;
+            if $(used)
+            {
+                linklibs = $(used) ;
+                result = mbedtls ;
+            }
+        }
+    }
+
+    if $(result)
+    {
+        Packages-SetIncludes mbedtls : $(includes) ;
+        Packages-SetDefines mbedtls : $(defines) ;
+        Packages-SetLinkLibs mbedtls : $(linklibs) ;
+        Packages-SetLibDir mbedtls : $(libdir) ;
+        Packages-SetLinkFlags mbedtls : $(linkflags) ;
+    }
+
+    return $(result) ;
+}
+
+} # JAMBASE_MBEDTLS_JAM_INCLUDED

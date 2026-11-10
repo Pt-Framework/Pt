@@ -71,14 +71,16 @@ is:
 https://github.com/Pt-Framework/Pt/releases/download/<PREBUILT_RELEASE>/<name>.zip
 @endverbatim
 
-Settings made explicitly always win. If any of the five package variables
-are set on the command line or in the environment, or if a flag is passed
-that builds that package from sources in the tree, prebuilt paths are not
-applied to that package. The following commands keep a hand-chosen zlib or
-build zlib from sources, while still using the bundle for the other libraries:
+Settings made explicitly always win. If any of the dotted package flags
+(@c pkg.INCLUDES, @c pkg.DEFINES, @c pkg.LINKLIBS, @c pkg.LIBDIR,
+@c pkg.LINKFLAGS) are set on the command line or in the environment, or if
+a flag is passed that builds that package from sources in the tree, prebuilt
+paths are not applied to that package. The following commands keep a
+hand-chosen zlib or build zlib from sources, while still using the bundle
+for the other libraries:
 
 @code
-./jam.sh configure --with-prebuilt -sZLIB_INCLUDES=/opt/zlib/include
+./jam.sh configure --with-prebuilt -szlib.INCLUDES=/opt/zlib/include
 ./jam.sh configure --with-prebuilt --with-inline-zlib
 @endcode
 
@@ -86,29 +88,32 @@ Flags such as @c --with-inline-zlib, @c --with-inline-libpng,
 @c --with-inline-libjpeg and @c --with-inline-freetype skip the corresponding
 Configure probe and build that package from sources in the tree.
 
-Configure looks for each library in this order:
+For zlib, png, jpeg and FreeType, configure looks for each library in this
+order:
 
 @verbatim
-User settings / --with-inline-xxx
-        |
-        |  else, if a prebuilt folder was selected
-        v
-Prebuilt paths  ->  one package Configure probe
-        |
-        |  else (prebuilt not selected), or probe failed
-        v
-System / compiler paths / pkg-config
+--with-inline-xxx  ->  Builtin-Use
         |
         |  else
         v
-Sources in the tree
+Prebuilt-Use (no-op unless --with-prebuilt)  ->  *-Configure probe
+        |
+        |  else
+        v
+Builtin-Use fallback
 @endverbatim
 
-When prebuilt libraries are selected, the system is not consulted for packages
-listed in the bundle. When they are not selected, @c prebuilt is not consulted
-at all. There is no fallback from one platform folder to another. If the chosen
-folder is missing, configure reports an error. If a package probe against the
-bundle fails, that package falls back to sources in the tree.
+@c Prebuilt-Use fills only still-empty flag variables. @c *-Configure then
+probes those values: prebuilt paths, @c -s hints, or an empty system probe
+(pkg-config and compiler paths). There is no fallback from one platform
+folder to another. If the chosen folder is missing, configure reports an
+error. If the probe fails, zlib, png, jpeg and FreeType fall back to
+sources in the tree.
+
+OpenSSL and mbedTLS are the Pt-Ssl backends. Builtin runs only for
+@c --with-inline-openssl or @c --with-inline-mbedtls. @c --with-openssl and
+@c --with-mbedtls name the prebuilt or system backend. With no SSL flag,
+configure probes openssl, then mbedtls, then @c nossl.
 
 @section jam-prebuilt-page-Layout Bundle Directory Layout
 
@@ -211,8 +216,8 @@ field and no walk for @c LINKLIBS, @c DEFINES or @c LINKFLAGS. If png is in
 the bundle, zlib is in the bundle too. There are no version ranges, no
 optional dependencies, and no search for a package outside the bundle.
 
-The file does not set @c pkg.INCLUDES or @c ZLIB_*. @c Prebuilt-Use fills
-the common package variables from the manifest.
+The file does not set @c pkg.INCLUDES. @c Prebuilt-Use fills the common
+package variables from the manifest.
 
 Example:
 
@@ -250,86 +255,96 @@ different files on disk.
 Every package Configure rule has the same arguments:
 
 @verbatim
-*-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
+*-Configure INCLUDES : DEFINES : LINKLIBS : LIBDIR : LINKFLAGS
 @endverbatim
 
 If any of those is set, pkg-config is skipped and the first link attempt uses
-the passed libraries. If all five are empty, pkg-config and name
-guessing run. On success the five @c *_ variables are set.
+the passed libraries. If all five are empty, pkg-config and name guessing
+run. On success the rule writes the five flags unmerged through
+@c Packages-Set* (@c LIBDIR still raw, @c LINKFLAGS still extra flags) and
+returns the package name. It does not set @c pkg.TARGET.
 
 Jamconfigure calls @c Prebuilt-Load dest once after fetch. That binds the
 bundle. @c Prebuilt-Use pkg fills still-empty @c pkg.* flag variables when
-the bundle lists that package. It leaves @c pkg.TARGET empty. The current
-Jamconfigure still copies primitive results into @c ZLIB_* and the other
-five-tuples before it calls Configure.
+the bundle lists that package. It leaves @c pkg.TARGET empty.
 
-For each package, if that package is in the bundle and sources in the tree
-were not requested, empty variables are filled from the bundle, then
-Configure is called once:
+zlib, png, jpeg and FreeType use independent @c ifs. Each step runs only
+while @c WITH_pkg is empty:
 
 @code
 Load zlib.jam ;
 
-if --with-inline-zlib in $(ARGV)
+if ! $(WITH_ZLIB) && --with-inline-zlib in $(ARGV)
 {
-    WITH_BUILTIN_ZLIB = yes ;
-}
-
-if ! $(WITH_BUILTIN_ZLIB)
-{
-    if [ Prebuilt-Has zlib ]
-    {
-        ZLIB_INCLUDES  ?= [ Prebuilt-Includes zlib ] ;
-        ZLIB_C++FLAGS  ?= [ Prebuilt-CxxFlags zlib ] ;
-        ZLIB_LINKLIBS  ?= [ Prebuilt-LinkLibs zlib ] ;
-        ZLIB_LIBDIR    ?= [ Prebuilt-LibPath zlib ] ;
-        ZLIB_LINKFLAGS ?= [ Prebuilt-LinkFlags zlib ] ;
-    }
-
-    WITH_ZLIB = [ ZLib-Configure $(ZLIB_INCLUDES) : $(ZLIB_C++FLAGS) :
-                                 $(ZLIB_LINKLIBS) : $(ZLIB_LIBDIR) : $(ZLIB_LINKFLAGS) ] ;
+    WITH_ZLIB = [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ] ;
 }
 
 if ! $(WITH_ZLIB)
 {
-    WITH_BUILTIN_ZLIB = yes ;
+    Prebuilt-Use zlib ;
+
+    WITH_ZLIB = [ ZLib-Configure
+                    [ Packages-Includes zlib ]
+                  : [ Packages-Defines zlib ]
+                  : [ Packages-LinkLibs zlib ]
+                  : [ Packages-LibDir zlib ]
+                  : [ Packages-LinkFlags zlib ] ] ;
+}
+
+if ! $(WITH_ZLIB)
+{
+    WITH_ZLIB = [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ] ;
+}
+
+Packages-Echo zlib ;
+
+if $(WITH_ZLIB)
+{
+    Packages-Configure zlib ;
 }
 @endcode
 
-The same pattern is used for png (@c PNG_*), jpeg (@c JPEG_*), FreeType
-(@c FREETYPE_*), and OpenSSL. The zip package name is @c openssl; the Jam
-variables stay @c SSL_*, as @c OpenSsl-Configure already uses. Flags that
-select sources in the tree are handled before the prebuilt or system probe.
+@c Packages-Echo always prints the six variables. @c Packages-Configure
+persists them only when the package was found. A builtin package
+@c Jamconfigure publishes the six variables, including @c pkg.TARGET.
+There is no separate @c WITH_BUILTIN_xxx flag.
 
-Package name to variable mapping:
+OpenSSL is package @c openssl, mbedTLS is package @c mbedtls. Jamconfigure
+selects the Pt-Ssl backend with sequential @c if ! $(WITH_SSL) steps:
+@c --with-inline-openssl, @c --with-openssl, @c --with-inline-mbedtls,
+@c --with-mbedtls, then default openssl, then default mbedtls, then
+@c nossl. Success sets @c WITH_SSL and @c PT_SSL_IMPL.
 
-- @c zlib -> @c ZLIB_*
-- @c png -> @c PNG_*
-- @c jpeg -> @c JPEG_*
-- @c freetype -> @c FREETYPE_*
-- @c openssl -> @c SSL_*
-
-@c *_LIBDIR is required. Setting only @c *_LINKLIBS leaves the linker without
-@c FLibPath of the package's @c lib/ directory. @c CheckDependencyLinkC++
-turns @c LIBDIR into @c *_LINKFLAGS.
-
-Jamfiles do not mention @c PREBUILT_ROOT. They keep using the five package
-variables:
+Jamfiles do not mention @c PREBUILT_ROOT. They read the accessors:
 
 @code
-SubDirHdrs $(PNG_INCLUDES) ;
-LinkFlags mylib : $(PNG_LINKFLAGS) ;
-LinkLibs  mylib : $(PNG_LINKLIBS) ;
-ObjectC++Flags PngReader.cpp PngWriter.cpp : $(PNG_C++FLAGS) ;
+if [ Packages-Includes png ]
+{
+    SubDirHdrs [ Packages-Includes png ] ;
+}
+
+if [ Packages-Defines png ]
+{
+    SubDirC++Flags [ Packages-Defines png ] ;
+}
+
+if [ Packages-Target png ]
+{
+    LinkLibraries mylib : [ Packages-Target png ] ;
+}
+
+LinkLibs  mylib : [ Packages-LinkLibs png ] ;
+LinkFlags mylib : [ FLibPath [ Packages-LibDir png ] ]
+                  [ Packages-LinkFlags png ] ;
 @endcode
 
-Whether a package was found or built from sources is still the usual
-@c WITH_* / @c WITH_BUILTIN_* variables, as without prebuilt libraries.
+@c pkg.LIBDIR is raw. The consumer applies @c FLibPath when passing it to
+@c LinkFlags.
 
 Include directories always cover dependent packages as well. @c png.h includes
-@c zlib.h, and a Jamfile can call @c SubDirHdrs $(PNG_INCLUDES) without adding
-@c ZLIB_INCLUDES. Therefore @c Prebuilt-Includes png returns @c png/include
-and @c zlib/include. That walk follows @c prebuilts.<pkg>.DEPENDS.
+@c zlib.h, and a Jamfile can call @c SubDirHdrs [ Packages-Includes png ]
+without adding zlib. @c Prebuilt-Use walks @c prebuilts.<pkg>.DEPENDS for
+include directories and library search directories.
 @c Prebuilt-Includes freetype returns FreeType's include dirs plus png and
 zlib. @c Prebuilt-LibPath walks the same graph.
 
@@ -451,8 +466,8 @@ A generator, including one driven by Conan in CI, writes the same layout:
   @c prebuilts.<pkg>.FRAMEWORKS, extra include dirs to
   @c prebuilts.<pkg>.INCLUDES
 - Complete @c lib/ and @c bin/ directories, without sorting or moving files
-- Do not emit @c ZLIB_INCLUDES / @c PNG_LINKLIBS from the generator; that
-  mapping is @c jam/prebuilt.jam
+- Do not emit @c pkg.INCLUDES / @c pkg.LINKLIBS from the generator;
+  @c Prebuilt-Use fills those from the layout
 - Windows: two zips, @c windows-x64-msvc-md and @c windows-x64-msvc-mdd
 - macOS / Linux: one folder name without a runtime suffix until a second
   variant exists
