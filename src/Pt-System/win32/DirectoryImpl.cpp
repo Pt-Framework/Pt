@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005-2013 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,10 +30,21 @@
 #include "PathImpl.h"
 #include "Pt/System/IOError.h"
 #include <string>
+#include <cwchar>
 
 namespace Pt {
 
 namespace System {
+
+namespace {
+
+bool isDotEntry(const wchar_t* name)
+{
+    return name[0] == L'.' && (name[1] == L'\0' || (name[1] == L'.' && name[2] == L'\0'));
+}
+
+}
+
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const Path& path)
 : _refs(1)
@@ -50,13 +61,27 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 }
 
 
+void DirectoryIteratorImpl::assignEntry(const wchar_t* name)
+{
+    std::size_t n = std::wcslen(name);
+    Pt::String s = Pt::String::fromUtf16(name, name + n);
+
+    if(_finfo.path().empty())
+        _finfo.setPath(_dir, s);
+    else
+        _finfo.setFileName(s);
+}
+
+
 void DirectoryIteratorImpl::init(const Path& path)
 {
+    _dir = path;
+
     std::wstring wpath = path.impl()->c_str();
 
     if( ! wpath.empty() && wpath[wpath.size()-1] != L'\\' )
         wpath += L'\\';
-    
+
     wpath += L'*';
 
     _findHandle = FindFirstFileW( wpath.c_str(), &_current );
@@ -64,23 +89,37 @@ void DirectoryIteratorImpl::init(const Path& path)
     if(_findHandle == INVALID_HANDLE_VALUE)
         throw AccessFailed( path.toString().narrow() );
 
-    _finfo.path().impl()->assign(_current.cFileName);
+    while( isDotEntry(_current.cFileName) )
+    {
+        if( FALSE == FindNextFileW(_findHandle, &_current) )
+        {
+            ::FindClose(_findHandle);
+            _findHandle = INVALID_HANDLE_VALUE;
+            return;
+        }
+    }
+
+    assignEntry(_current.cFileName);
 }
 
 
 bool DirectoryIteratorImpl::advance()
 {
-    if( FALSE == FindNextFileW(_findHandle, &_current) )
+    for(;;)
     {
-        ::FindClose(_findHandle);
+        if( FALSE == FindNextFileW(_findHandle, &_current) )
+        {
+            ::FindClose(_findHandle);
+            _findHandle = INVALID_HANDLE_VALUE;
+            _finfo.clear();
+            return false;
+        }
 
-        // INVALID_HANDLE_VALUE means end iterator
-        _findHandle = INVALID_HANDLE_VALUE;
-        _finfo.clear();
-        return false;
+        if( ! isDotEntry(_current.cFileName) )
+            break;
     }
 
-    _finfo.path().impl()->assign(_current.cFileName);
+    assignEntry(_current.cFileName);
     return true;
 }
 

@@ -142,6 +142,9 @@ class PathImpl
         std::size_t size() const
         { return _path.size(); }
 
+        void resize(std::size_t n)
+        { _path.resize(n); }
+
         const char* c_str() const
         { return _path.c_str(); }
 

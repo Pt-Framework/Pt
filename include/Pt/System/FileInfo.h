@@ -64,6 +64,14 @@ namespace System {
     }
     @endcode
 
+    A %FileInfo constructed with a path identifies that node. The same type
+    is the directory entry of %DirectoryIterator: the iterator stores a
+    %FileInfo whose path is the full path of the current entry, so the
+    instance queries apply to that entry without joining the parent
+    directory again. type() follows symbolic links and reports the kind of
+    the target as %Invalid, %File or %Directory. isLink() does not follow
+    and reports whether the path itself names a symbolic link.
+
     Most operations are available as non-member functions, so it is not
     neccessary to create temporary %FileInfo objects. Only the paths to
     files or directories are required to perform file system operations.
@@ -103,13 +111,13 @@ namespace System {
 class PT_SYSTEM_API FileInfo
 {
     public:
-        //! @brief File-node type
+        /** @brief Kind of a file-system node after following symbolic links.
+        */
         enum Type
         {
-            Invalid = 0,   //!< Invalid file type
+            Invalid = 0,   //!< No node at the path, or the target cannot be accessed
             Directory = 1, //!< Directory
-            File = 2,      //!< Regular file
-            Link = 4       //!< Symbolic link
+            File = 2       //!< Regular file
         };
 
         //! @brief File permission flags.
@@ -181,21 +189,43 @@ class PT_SYSTEM_API FileInfo
         Pt::uint64_t size() const
         { return FileInfo::size(_path); }
 
-        //! @brief Returns the file type.
+        /** @brief Returns the type of the target at the path.
+
+            Symbolic links are followed.
+        */
         Type type() const
         { return FileInfo::type(_path); }
 
+        /** @brief Returns true if the path itself refers to a symbolic link.
+
+            The target of the link is not followed.
+        */
         bool isLink() const
         { return FileInfo::isLink(_path); }
+
+        //! @brief Returns true if a file or directory exists at the path.
+        bool exists() const
+        { return FileInfo::exists(_path); }
+
+        //! @brief Returns the time when last modified.
+        DateTime lastModified() const
+        { return FileInfo::lastModified(_path); }
 
         //! @brief Returns the file permissions.
         Perms permissions() const
         { return FileInfo::permissions(_path); }
 
     public:
-        //! @brief Returns the type of file at the \a path.
+        /** @brief Returns the type of the target at \a path.
+
+            Symbolic links are followed.
+        */
         static Type type(const Path& path);
 
+        /** @brief Returns true if \a path itself refers to a symbolic link.
+
+            The target of the link is not followed.
+        */
         static bool isLink(const Path& path);
 
         //! @brief Returns the size of the file in bytes.
@@ -250,8 +280,26 @@ class PT_SYSTEM_API FileInfo
 
     public:
         //! @internal
-        Path& path()
-        { return _path; }
+        void setPath(const Path& dir, const char* name)
+        {
+            _path = dir;
+            _path /= name;
+        }
+
+        //! @internal
+        void setPath(const Path& dir, const Pt::String& name)
+        {
+            _path = dir;
+            _path /= name;
+        }
+
+        //! @internal
+        void setFileName(const char* name)
+        { _path.setFileName(name); }
+
+        //! @internal
+        void setFileName(const Pt::String& name)
+        { _path.setFileName(name); }
 
     private:
         Path _path;

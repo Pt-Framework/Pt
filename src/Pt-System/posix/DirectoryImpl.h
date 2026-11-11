@@ -59,13 +59,18 @@ class DirectoryIteratorImpl
 
         bool advance();
 
+        bool atEnd() const
+        { return _current == 0; }
+
     private:
         void init(const char*);
 
+        void assignEntry(const char* name);
+
     private:
         unsigned int _refs;
+        Path _dir;
         FileInfo _finfo;
-        //std::size_t _pathlen;
         DIR* _handle;
         ::dirent* _current;
 };

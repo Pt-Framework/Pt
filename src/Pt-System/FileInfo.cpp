@@ -69,7 +69,7 @@ FileInfo::Type FileInfo::type(const Path& path)
 
 bool FileInfo::isLink(const Path& path)
 {
-    return FileInfoImpl::linkStatus(path) == FileInfo::Link;
+    return FileInfoImpl::isLink(path);
 }
 
 
@@ -141,25 +141,19 @@ void FileInfo::removeAll(const Pt::System::Path& path)
 
     for(Pt::System::DirectoryIterator it(path); it != end; ++it)
     {
-        Pt::String fileName = it->path().fileName();
+        const Pt::System::Path& subPath = it->path();
 
-        if(fileName.empty() || fileName == "." || fileName == "..")
-            continue;
-
-        Pt::System::Path subPath = path / it->path();
-        Pt::System::FileInfo::Type fileType = FileInfo::type(subPath);
-
-        if(fileType == Pt::System::FileInfo::Link)
+        if( it->isLink() )
         {
             Pt::System::FileInfo::remove(subPath);
             PT_LOG_DEBUG( "removed link: " << subPath.toLocal() );
         }
-        else if(fileType == Pt::System::FileInfo::Directory)
+        else if( it->type() == Pt::System::FileInfo::Directory )
         {
             FileInfo::removeAll(subPath);
             PT_LOG_DEBUG( "removing dir: " << subPath.toLocal() );
         }
-        else // Pt::System::FileInfo::File
+        else
         {
             Pt::System::FileInfo::remove(subPath);
             PT_LOG_DEBUG( "removed: " << subPath.toLocal() );

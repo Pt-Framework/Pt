@@ -63,6 +63,12 @@ class PathImpl
             return (_path.size() - nullSize) / sizeof(wchar_t);
         }
 
+        void resize(std::size_t n)
+        {
+            _path.resize(n * sizeof(wchar_t));
+            _path.append(nullSize, '\0');
+        }
+
         const wchar_t* c_str() const
         { return reinterpret_cast<const wchar_t*>( _path.c_str() ); }
 

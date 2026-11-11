@@ -95,28 +95,13 @@ class FileInfoImpl
             return FileInfo::File;
         }
 
-        static FileInfo::Type linkStatus(const Path& path)
+        static bool isLink(const Path& path)
         {
             struct stat st;
             if( 0 != ::lstat(path.impl()->c_str(), &st) )
-            {
-                return FileInfo::Invalid;
-            }
+                return false;
 
-            if( S_ISLNK(st.st_mode) )
-            {
-                return FileInfo::Link;
-            }
-            else if( S_ISREG(st.st_mode) )
-            {
-                return FileInfo::File;
-            }
-            else if( S_ISDIR(st.st_mode) )
-            {
-                return FileInfo::Directory;
-            }
-
-            return FileInfo::File;
+            return S_ISLNK(st.st_mode) != 0;
         }
 
         static std::size_t size(const Path& path)

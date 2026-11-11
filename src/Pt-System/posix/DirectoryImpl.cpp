@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006-2008 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -44,13 +44,22 @@ namespace Pt {
 
 namespace System {
 
+namespace {
+
+bool isDotEntry(const char* name)
+{
+    return name[0] == '.' && (name[1] == '\0' || (name[1] == '.' && name[2] == '\0'));
+}
+
+}
+
+
 DirectoryIteratorImpl::DirectoryIteratorImpl(const Path& path)
 : _refs(1)
-//, _pathlen(0)
+, _dir(path)
 , _handle(0)
 , _current(0)
 {
-    _finfo.path() = path;
     init( path.impl()->c_str() );
 }
 
@@ -65,20 +74,11 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 void DirectoryIteratorImpl::init(const char* path)
 {
     _handle = ::opendir(path);
-    
+
     if( ! _handle )
     {
         throw AccessFailed(path);
     }
-
-    //std::string& strpath = _finfo.path();
-
-    //// append a trailing slash if not empty, so we can add the
-    //// directory entry name easily
-    //if( ! strpath.empty() && strpath[strpath.size() - 1] != '/')
-    //    strpath += '/';
-
-    //_pathlen = strpath.size();
 
     this->advance();
 }
@@ -86,20 +86,30 @@ void DirectoryIteratorImpl::init(const char* path)
 
 bool DirectoryIteratorImpl::advance()
 {
-    // _current == 0 means end
-    _current = ::readdir( _handle );
-
-    if(_current)
+    for(;;)
     {
-        _finfo.path().impl()->assign(_current->d_name);
+        _current = ::readdir(_handle);
+        if( ! _current )
+        {
+            _finfo.clear();
+            return false;
+        }
 
-        //std::string& path = _finfo.path();
-
-        //path.erase(_pathlen);
-        //path += _current->d_name;
+        if( ! isDotEntry(_current->d_name) )
+            break;
     }
 
-    return _current != 0;
+    assignEntry(_current->d_name);
+    return true;
+}
+
+
+void DirectoryIteratorImpl::assignEntry(const char* name)
+{
+    if(_finfo.path().empty())
+        _finfo.setPath(_dir, name);
+    else
+        _finfo.setFileName(name);
 }
 
 } // namespace System

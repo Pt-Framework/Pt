@@ -41,6 +41,7 @@ class PathTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "Concat", *this, &PathTest::Concat );
             Pt::Unit::TestSuite::registerMethod( "Compare", *this, &PathTest::Compare );
             Pt::Unit::TestSuite::registerMethod( "FileName", *this, &PathTest::FileName );
+            Pt::Unit::TestSuite::registerMethod( "SetFileName", *this, &PathTest::SetFileName );
             Pt::Unit::TestSuite::registerMethod( "DirName", *this, &PathTest::DirName );
             Pt::Unit::TestSuite::registerMethod( "BaseName", *this, &PathTest::BaseName );
             Pt::Unit::TestSuite::registerMethod( "Extension", *this, &PathTest::Extension );
@@ -117,6 +118,25 @@ class PathTest : public Pt::Unit::TestSuite
 
             path = "abc";
             PT_UNIT_ASSERT_EQUALS( path.fileName(), "abc" );
+        }
+
+        void SetFileName()
+        {
+            Pt::System::Path path("abc");
+            path /= "xyz.txt";
+            path.setFileName("foo.dat");
+
+            PT_UNIT_ASSERT_EQUALS( path.fileName(), "foo.dat" );
+            PT_UNIT_ASSERT( path == (Pt::System::Path("abc") / "foo.dat") );
+
+            path.setFileName("bar");
+            PT_UNIT_ASSERT_EQUALS( path.fileName(), "bar" );
+            PT_UNIT_ASSERT( path == (Pt::System::Path("abc") / "bar") );
+
+            path = "onlyname";
+            path.setFileName("other");
+            PT_UNIT_ASSERT_EQUALS( path.fileName(), "other" );
+            PT_UNIT_ASSERT( path == Pt::System::Path("other") );
         }
 
         void DirName()

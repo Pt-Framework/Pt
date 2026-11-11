@@ -82,26 +82,16 @@ class FileInfoImpl
             return FileInfo::File;
         }
 
-        static FileInfo::Type linkStatus(const Path& path)
+        static bool isLink(const Path& path)
         {
             WIN32_FILE_ATTRIBUTE_DATA info;
-            BOOL ret = GetFileAttributesExW( path.impl()->c_str(), 
-                                             GetFileExInfoStandard, 
+            BOOL ret = GetFileAttributesExW( path.impl()->c_str(),
+                                             GetFileExInfoStandard,
                                              &info );
             if(ret == 0)
-            {
-                return FileInfo::Invalid;
-            }
+                return false;
 
-            DWORD attr = info.dwFileAttributes;
-
-            if(attr & FILE_ATTRIBUTE_REPARSE_POINT)
-                return FileInfo::Link;
-
-            if(attr & FILE_ATTRIBUTE_DIRECTORY)
-                return FileInfo::Directory;
-
-            return FileInfo::File;
+            return (info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
         }
 
         static Pt::uint64_t size(const Path& path)

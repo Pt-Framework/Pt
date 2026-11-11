@@ -57,14 +57,20 @@ class DirectoryIteratorImpl
 
         bool advance();
 
+        bool atEnd() const
+        { return _findHandle == INVALID_HANDLE_VALUE; }
+
         const FileInfo& get() const
         { return _finfo; }
 
     private:
         void init(const Path& path);
 
+        void assignEntry(const wchar_t* name);
+
     private:
         unsigned int _refs;
+        Path _dir;
         FileInfo _finfo;
         HANDLE _findHandle;
         WIN32_FIND_DATAW _current;

@@ -217,6 +217,36 @@ void Path::clear()
 }
 
 
+Path& Path::setFileName(const Pt::String& s)
+{
+    PathImpl::size_type pos = _impl->rfind( _impl->dirsep() );
+    if(pos == PathImpl::npos())
+        _impl->clear();
+    else
+        _impl->resize(pos + 1);
+
+    return concat(s);
+}
+
+
+Path& Path::setFileName(const char* s)
+{
+    return setFileName(s, std::strlen(s));
+}
+
+
+Path& Path::setFileName(const char* s, std::size_t n)
+{
+    PathImpl::size_type pos = _impl->rfind( _impl->dirsep() );
+    if(pos == PathImpl::npos())
+        _impl->clear();
+    else
+        _impl->resize(pos + 1);
+
+    return concat(s, n);
+}
+
+
 bool Path::empty() const
 {
     return _impl->empty();

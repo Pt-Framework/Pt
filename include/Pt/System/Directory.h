@@ -30,6 +30,7 @@
 #define PT_SYSTEM_DIRECTORY_H
 
 #include <Pt/System/Api.h>
+#include <Pt/System/FileInfo.h>
 #include <iterator>
 
 namespace Pt {
@@ -37,18 +38,15 @@ namespace Pt {
 namespace System {
 
 class Path;
-class FileInfo;
 
 /** @brief Iterates over entries of a directory.
 
-    The Pt::System::DirectoryIterator can be used to iterate over the contents
-    of directories. It is created with a path to a directory and satisfies
-    the requirements for a forward iterator. The iterator successivly reads
-    the contents of the assoziated directory and returns a %FileInfo when
-    dereferenced. Like the stream iterators of the C++ standard library, it
-    changes to a special state when the end of the directory is reached. This
-    state is identical to a default constructed iterator, so instances thereof
-    can serve as the iterator to the end of the directory. 
+    A %DirectoryIterator walks through the entries of a directory and
+    dereferences to a %FileInfo for the current entry. That %FileInfo is
+    the directory entry: its path is the full path of the node, and the
+    instance queries such as type(), size() and exists() refer to that
+    node. The special names `.` and `..` are skipped, so a loop over the
+    iterator yields only the actual contents of the directory.
 
     @code
     try
@@ -59,7 +57,13 @@ class FileInfo;
 
         for( ; it != end; ++it)
         {
-            std::cout << "name : " << it->path().toLocal() << std::endl;
+            const Pt::System::FileInfo& entry = *it;
+            std::cout << entry.path().toLocal();
+
+            if(entry.type() == Pt::System::FileInfo::Directory)
+                std::cout << " [dir]\n";
+            else
+                std::cout << " " << entry.size() << " bytes\n";
         }
     }
     catch(const Pt::System::AccessFailed& e)
@@ -68,12 +72,16 @@ class FileInfo;
     }
     @endcode
 
-    The constructor throws an %AccessFailed exception if the path is not a valid
-    directory. The exception can be avoided by checking the path with @link
-    Pt::System::FileInfo::type() FileInfo::type()@endlink first, to make sure
-    it is valid. The DirectoryIterator can then be advanced to get the %FileInfo
-    for the next file in the directory, until the end of the directory contents
-    is reached.
+    The iterator meets the requirements of an input iterator. Copies share
+    the iteration position; incrementing one copy moves the others as well.
+    When no entries remain, the iterator takes on the same state as a
+    default-constructed iterator, which therefore serves as the past-the-end
+    iterator. A directory that contains no entries besides `.` and `..`
+    compares equal to that end iterator immediately after construction.
+
+    The constructor throws %AccessFailed if the path is not an accessible
+    directory. The exception can be avoided by checking the path with
+    @link Pt::System::FileInfo::type() FileInfo::type()@endlink first.
 
     @ingroup Pt-System-FileSystem
 */
@@ -82,7 +90,7 @@ class PT_SYSTEM_API DirectoryIterator
     public:
         typedef FileInfo value_type;
         typedef std::ptrdiff_t difference_type;
-        typedef std::forward_iterator_tag iterator_category;
+        typedef std::input_iterator_tag iterator_category;
         typedef const FileInfo* pointer;
         typedef const FileInfo& reference;
 

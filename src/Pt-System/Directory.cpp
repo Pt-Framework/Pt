@@ -38,14 +38,24 @@ namespace Pt {
 namespace System {
 
 DirectoryIterator::DirectoryIterator(const Path& path)
+: _impl(new DirectoryIteratorImpl(path))
 {
-    _impl = new DirectoryIteratorImpl( path );
+    if(_impl->atEnd())
+    {
+        delete _impl;
+        _impl = 0;
+    }
 }
 
 
 DirectoryIterator::DirectoryIterator(const FileInfo& fi)
+: _impl(new DirectoryIteratorImpl(fi.path()))
 {
-    _impl = new DirectoryIteratorImpl( fi.path() );
+    if(_impl->atEnd())
+    {
+        delete _impl;
+        _impl = 0;
+    }
 }
 
 

@@ -68,12 +68,7 @@ void FontRegistry::addFonts(const System::Path& path)
     System::DirectoryIterator end;
 
     for(; it != end; ++it)
-    {
-        if(it->path().fileName() == "." || it->path().fileName() == "..")
-            continue;
-
-        addFont(path / it->path());
-    }
+        addFont(it->path());
 }
 
 

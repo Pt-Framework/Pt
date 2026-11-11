@@ -27,6 +27,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/System/FileInfo.h"
+#include "Pt/System/IOError.h"
 #include "Pt/System/Path.h"
 
 class FileInfoTest : public Pt::Unit::TestSuite
@@ -35,12 +36,14 @@ class FileInfoTest : public Pt::Unit::TestSuite
         FileInfoTest()
         : Pt::Unit::TestSuite("Pt::System::FileInfoTest")
         , _file("xxxPermTestFile")
+        , _link("xxxPermTestLink")
         {
             Pt::Unit::TestSuite::registerMethod( "QueryPerms", *this, &FileInfoTest::QueryPerms );
             Pt::Unit::TestSuite::registerMethod( "ReplacePerms", *this, &FileInfoTest::ReplacePerms );
             Pt::Unit::TestSuite::registerMethod( "AddPerms", *this, &FileInfoTest::AddPerms );
             Pt::Unit::TestSuite::registerMethod( "RemovePerms", *this, &FileInfoTest::RemovePerms );
             Pt::Unit::TestSuite::registerMethod( "BitwiseOperators", *this, &FileInfoTest::BitwiseOperators );
+            Pt::Unit::TestSuite::registerMethod( "IsLink", *this, &FileInfoTest::IsLink );
         }
 
         void setUp()
@@ -52,6 +55,9 @@ class FileInfoTest : public Pt::Unit::TestSuite
 
         void tearDown()
         {
+            if( Pt::System::FileInfo::isLink(_link) )
+                Pt::System::FileInfo::remove(_link);
+
             if( Pt::System::FileInfo::exists(_file) )
             {
                 // ensure writable so we can delete
@@ -68,9 +74,11 @@ class FileInfoTest : public Pt::Unit::TestSuite
         void AddPerms();
         void RemovePerms();
         void BitwiseOperators();
+        void IsLink();
 
     private:
         Pt::System::Path _file;
+        Pt::System::Path _link;
 };
 
 Pt::Unit::RegisterTest<FileInfoTest> register_FileInfoTest;
@@ -163,4 +171,23 @@ void FileInfoTest::BitwiseOperators()
     p &= FileInfo::OwnerRead;
     PT_UNIT_ASSERT( (p & FileInfo::OwnerWrite) == FileInfo::NoPerms );
     PT_UNIT_ASSERT( (p & FileInfo::OwnerRead) != FileInfo::NoPerms );
+}
+
+
+void FileInfoTest::IsLink()
+{
+    try
+    {
+        Pt::System::FileInfo::createSymlink(_file, _link);
+    }
+    catch(const Pt::System::AccessFailed&)
+    {
+        return;
+    }
+
+    PT_UNIT_ASSERT( Pt::System::FileInfo::isLink(_link) );
+    PT_UNIT_ASSERT( Pt::System::FileInfo::type(_link) == Pt::System::FileInfo::File );
+    PT_UNIT_ASSERT( Pt::System::FileInfo::exists(_link) );
+    PT_UNIT_ASSERT( ! Pt::System::FileInfo::isLink(_file) );
+    PT_UNIT_ASSERT( Pt::System::FileInfo::type(_file) == Pt::System::FileInfo::File );
 }

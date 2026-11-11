@@ -202,6 +202,22 @@ class PT_SYSTEM_API Path
         */
         void clear();
 
+        /** @brief Sets the last path component.
+
+            The directory prefix is kept. If the path has no separator, the
+            whole path is replaced. The existing storage is reused when it
+            is large enough.
+        */
+        Path& setFileName(const Pt::String& s);
+
+        /** @brief Sets the last path component.
+        */
+        Path& setFileName(const char* s);
+
+        /** @brief Sets the last path component.
+        */
+        Path& setFileName(const char* s, std::size_t n);
+
         // Query
 
         /** @brief Returns true if path is empty.
