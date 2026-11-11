@@ -1,0 +1,59 @@
+name: Deploy Docs
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build and Deploy Website
+    runs-on: windows-2022
+    steps:
+      - name: Checkout Pt
+        uses: actions/checkout@v6
+
+      - name: Install Doxygen 1.18.0 (Windows)
+        shell: pwsh
+        run: |
+          $url = "https://github.com/doxygen/doxygen/releases/download/Release_1_18_0/doxygen-1.18.0.windows.x64.bin.zip"
+          Invoke-WebRequest -Uri $url -OutFile "doxygen.zip"
+          Expand-Archive -Path "doxygen.zip" -DestinationPath "doxygen-bin"
+          echo "$pwd\doxygen-bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          & "$pwd\doxygen-bin\doxygen.exe" -v
+
+      - name: Build Website
+        shell: pwsh
+        run: |
+          cd doc
+          doxygen Doxyfile
+
+      - name: Checkout Pages repo
+        uses: actions/checkout@v6
+        with:
+          repository: Pt-Framework/Pt-Framework.github.io
+          path: pages
+          ssh-key: ${{ secrets.PAGES_DEPLOY_KEY }}
+
+      - name: Deploy Website
+        shell: pwsh
+        run: |
+          # Keep meta files, replace the rest with the generated site
+          Get-ChildItem -Path pages -Exclude ".git", "CNAME", ".github", ".nojekyll" | Remove-Item -Recurse -Force
+
+          Copy-Item -Path "doc/website/*" -Destination "pages" -Recurse -Force
+
+          Set-Location pages
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add --all
+          $status = git status --porcelain
+          if ($status) {
+              git commit -m "Update website from Pt/doc (manual deploy)"
+              git push
+          } else {
+              Write-Host "No changes to commit."
+          }
