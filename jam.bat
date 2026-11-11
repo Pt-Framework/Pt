@@ -19,12 +19,39 @@ if /i "%~1"=="init" (
     set "INIT=1"
     shift
 )
-if defined INIT goto do_init
+if defined INIT goto parse_init
 
 call :classify_core "%CORE%"
 if /i "!CORE_STATE!"=="invalid" goto invalid_core
 if /i not "!CORE_STATE!"=="match" goto need_init
 goto build_host_binary
+
+:parse_init
+setlocal DisableDelayedExpansion
+set "INIT_OPTION="
+set "INIT_HEADERS="
+
+:parse_init_argument
+if [%1]==[] goto init_parsed
+if defined INIT_OPTION goto parse_init_header
+if "%~1"=="--header" set "INIT_OPTION=--header"
+shift
+goto parse_init_argument
+
+:parse_init_header
+set "INIT_ARGUMENT=%~1"
+setlocal EnableDelayedExpansion
+set "INIT_HEADERS=!INIT_HEADERS! --header "!INIT_ARGUMENT!""
+for /f "delims=" %%H in ("!INIT_HEADERS!") do (
+    endlocal
+    set "INIT_HEADERS=%%H"
+)
+set "INIT_OPTION="
+shift
+goto parse_init_argument
+
+:init_parsed
+setlocal EnableDelayedExpansion
 
 :do_init
 if not exist "%CORE%\" (
@@ -114,7 +141,7 @@ if errorlevel 1 (
     rd /s /q "%INCOMING%"
     exit /b 1
 )
-curl.exe -L -f -o "%ARCHIVE%" "%ARCHIVE_URL%"
+curl.exe -L -f -o "%ARCHIVE%" !INIT_HEADERS! "%ARCHIVE_URL%"
 if errorlevel 1 (
     echo Could not download "%ARCHIVE_URL%".
     rd /s /q "%INCOMING%"

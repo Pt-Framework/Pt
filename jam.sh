@@ -201,10 +201,11 @@ download_archive()
 {
     _url=$1
     _dest=$2
+    shift 2
     if command -v curl >/dev/null 2>&1; then
-        curl -L -f -o "$_dest" "$_url"
+        curl -L -f -o "$_dest" "$@" "$_url"
     elif command -v wget >/dev/null 2>&1; then
-        wget -O "$_dest" "$_url"
+        wget -O "$_dest" "$@" "$_url"
     else
         echo "Required tool \"curl\" or \"wget\" was not found." >&2
         exit 1
@@ -241,7 +242,7 @@ install_snapshot()
 
     ARCHIVE="$INCOMING/jam-$JAM_PIN.tar.gz"
     URL="$JAM_DIST_ROOT/jam-$JAM_PIN/jam-$JAM_PIN.tar.gz"
-    if ! download_archive "$URL" "$ARCHIVE"; then
+    if ! download_archive "$URL" "$ARCHIVE" "$@"; then
         echo "Could not download \"$URL\"." >&2
         rm -rf "$INCOMING"
         exit 1
@@ -330,13 +331,34 @@ build_host_binary()
     )
 }
 
-if [ -n "$INIT" ]; then
-    install_snapshot
+initialize()
+{
+    _option=
+    for _argument in "$@"; do
+        shift
+        case "$_option" in
+            --header)
+                set -- "$@" --header "$_argument"
+                _option=
+                ;;
+            *)
+                case "$_argument" in
+                    --header) _option=--header ;;
+                esac
+                ;;
+        esac
+    done
+
+    install_snapshot "$@"
     STATE=`core_state "$CORE"`
     if [ "$STATE" != "match" ]; then
         invalid_core
     fi
     build_host_binary
+}
+
+if [ -n "$INIT" ]; then
+    initialize "$@"
     exit 0
 fi
 
