@@ -1477,7 +1477,6 @@
     <None Include="$(MSBuildThisFileDirectory)..\..\jam\vc8.jam" />
     <None Include="$(MSBuildThisFileDirectory)..\..\jam\vc9.jam" />
     <None Include="$(MSBuildThisFileDirectory)..\..\jam\vcbase.jam" />
-    <None Include="$(MSBuildThisFileDirectory)..\..\jam\vswhere.exe" />
     <None Include="$(MSBuildThisFileDirectory)..\..\jam\vswhere.jam" />
     <None Include="$(MSBuildThisFileDirectory)..\..\jam\wasm.jam" />
     <None Include="$(MSBuildThisFileDirectory)..\..\jam\win32.jam" />

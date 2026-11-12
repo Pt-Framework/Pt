@@ -17,7 +17,7 @@ SUFDBG ?= "" ;
 
 if ! $(TOOLSET)
 {
-	VSWHERE_RESULT = [ EXEC $(VSWHERE)" -nologo -property installationPath -version 17.0" ] ;
+	VSWHERE_RESULT = [ EXEC "\"$(VSWHERE)\" -nologo -property installationPath -products * -version 17.0" ] ;
 
 	if $(VSWHERE_RESULT[2])
 	{
@@ -27,7 +27,7 @@ if ! $(TOOLSET)
 
 if ! $(TOOLSET)
 {
-	VSWHERE_RESULT = [ EXEC $(VSWHERE)" -nologo -property installationPath -version 16.0" ] ;
+	VSWHERE_RESULT = [ EXEC "\"$(VSWHERE)\" -nologo -property installationPath -products * -version 16.0" ] ;
 
 	if $(VSWHERE_RESULT[2])
 	{
@@ -37,7 +37,7 @@ if ! $(TOOLSET)
 
 if ! $(TOOLSET)
 {	
-	VSWHERE_RESULT = [ EXEC $(VSWHERE)" -nologo -property installationPath -version 15.0" ] ;
+	VSWHERE_RESULT = [ EXEC "\"$(VSWHERE)\" -nologo -property installationPath -products * -version 15.0" ] ;
 
 	if $(VSWHERE_RESULT[2])
 	{

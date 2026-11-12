@@ -1000,7 +1000,6 @@
     <None Include="..\..\jam\vc8.jam" />
     <None Include="..\..\jam\vc9.jam" />
     <None Include="..\..\jam\vcbase.jam" />
-    <None Include="..\..\jam\vswhere.exe" />
     <None Include="..\..\jam\vswhere.jam" />
     <None Include="..\..\jam\win32.jam" />
     <None Include="..\..\jam\wince.jam" />

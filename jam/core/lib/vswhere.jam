@@ -1,7 +1,43 @@
 if ! $(JAMBASE_VSWHERE_JAM_INCLUDED) {
 JAMBASE_VSWHERE_JAM_INCLUDED = true ;
 
-VSWHERE = vswhere.exe ;
-VSWHERE = $(VSWHERE:R=$(JAM_ROOT)/core/lib) ;
+if ! $(VSWHERE)
+{
+    local _candidate ;
+    local _pf86 = $(ProgramFiles(x86):J=" ") ;
+    local _pf = $(ProgramFiles:J=" ") ;
+
+    if $(_pf86)
+    {
+        _candidate = $(_pf86)"\\Microsoft Visual Studio\\Installer\\vswhere.exe" ;
+        if [ CHECK_IF_FILE $(_candidate) ]
+        {
+            VSWHERE = $(_candidate) ;
+        }
+    }
+
+    if ! $(VSWHERE)
+    {
+        if $(_pf)
+        {
+            _candidate = $(_pf)"\\Microsoft Visual Studio\\Installer\\vswhere.exe" ;
+            if [ CHECK_IF_FILE $(_candidate) ]
+            {
+                VSWHERE = $(_candidate) ;
+            }
+        }
+    }
+
+    if ! $(VSWHERE)
+    {
+        VSWHERE = [ GLOB $(PATH) : vswhere.exe ] ;
+        VSWHERE = $(VSWHERE[1]) ;
+    }
+
+    if ! $(VSWHERE)
+    {
+        Exit "Expected vswhere.exe at \""$(_pf86)"\\Microsoft Visual Studio\\Installer\\vswhere.exe\". Use -sVSWHERE to override." ;
+    }
+}
 
 } #JAMBASE_VSWHERE_JAM_INCLUDED

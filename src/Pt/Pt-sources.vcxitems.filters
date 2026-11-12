@@ -4640,9 +4640,6 @@
     <None Include="$(MSBuildThisFileDirectory)..\..\jam\vcbase.jam">
       <Filter>jam</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\jam\vswhere.exe">
-      <Filter>jam</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)..\..\jam\vswhere.jam">
       <Filter>jam</Filter>
     </None>

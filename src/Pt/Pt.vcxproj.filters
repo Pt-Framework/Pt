@@ -3176,9 +3176,6 @@
     <None Include="..\..\jam\vcbase.jam">
       <Filter>jam</Filter>
     </None>
-    <None Include="..\..\jam\vswhere.exe">
-      <Filter>jam</Filter>
-    </None>
     <None Include="..\..\jam\vswhere.jam">
       <Filter>jam</Filter>
     </None>

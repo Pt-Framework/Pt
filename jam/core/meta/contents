@@ -23,7 +23,7 @@
 1023  lib/lsbpkg.jam
 485  lib/macosx.jam
 1899  lib/mfc.jam
-1271  lib/nt.jam
+1319  lib/nt.jam
 4030  lib/openssl.jam
 4036  lib/pkgconfig.jam
 5411  lib/posix.jam
@@ -49,10 +49,9 @@
 41  lib/vc17.jam
 2983  lib/vc8.jam
 3169  lib/vc9.jam
-13181  lib/vcbase.jam
+13185  lib/vcbase.jam
 4595  lib/vcpkg.jam
-458872  lib/vswhere.exe
-181  lib/vswhere.jam
+984  lib/vswhere.jam
 4503  lib/wayland.jam
 3227  lib/win32.jam
 593  lib/wince.jam

@@ -49,7 +49,6 @@ and may be versioned with the project's build configuration.
   Jambase
   lib/
     *.jam
-    vswhere.exe
   src/
     *.c
     *.h
@@ -109,9 +108,8 @@ without whitespace:
 
 The sizes are the byte lengths of those files as stored in the
 snapshot. Text files in `core/` use LF. It includes `Jambase`,
-libraries, runtime assets such as `lib/vswhere.exe`, and sources. It
-excludes every binary below `bin/`, whether that binary was packaged
-or built locally by `init`. An
+libraries, and sources. It excludes every binary below `bin/`,
+whether that binary was packaged or built locally by `init`. An
 initialization that downloads a snapshot checks the recorded file
 sizes after extracting it. An initialization of an already present
 snapshot whose version matches the pin checks `format` and `version`; a

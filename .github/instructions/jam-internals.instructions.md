@@ -26,8 +26,7 @@ jam/
     │   ├── shell.jam        # Shell/script rules
     │   ├── unittest.jam     # RunUnitTest rule and PtUnitTestAction
     │   ├── pt.jam           # ConfigurePt — Pt-specific library detection
-    │   ├── vc*.jam / gcc.jam ...  # Toolset-specific compiler flags and rules
-    │   └── vswhere.exe
+    │   └── vc*.jam / gcc.jam ...  # Toolset-specific compiler flags and rules
     ├── bin/
     │   └── <host-id>/       # windows-x64, linux-x64, macos-universal
     │       └── jam[.exe]
