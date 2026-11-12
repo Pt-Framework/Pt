@@ -4,10 +4,15 @@ proposal: jam-packages.md
 
 # Builtin Source Packages
 
-A source package lives under `src/<pkg>/`. It may be a plain directory
-or a git submodule. It is never fetched at configure time. When
-selected it is built as part of the project and exposes itself through
-the common package variables.
+A source package lives in a directory the parent names at configure.
+It may be a plain directory or a git submodule. It is never fetched at
+configure time. When selected it is built as part of the project and
+exposes itself through the common package variables.
+
+The package name is the public identity. Parent and package files use
+the same name for `Builtin-Use`, `Package-Echo`, `Package-Configure`,
+`Builtin-SubInclude`, `Builtin-Set`, `Builtin-Get`, and the six
+usage variables. There is no renaming.
 
 A builtin package is also a consumer of the package interface. It may
 depend on other packages. Those dependencies are already resolved when
@@ -18,10 +23,10 @@ a consumer would get from pkgconf.
 
 ## Timing {#timing}
 
-Package resolution in `Jamconfigure` finishes before any builtin
-`SubInclude` runs. Dependencies are resolved before the packages that
-need them. For the current set the order is zlib, then png, jpeg,
-FreeType, then openssl.
+Package resolution in `Jamconfigure` finishes before any
+`Builtin-SubInclude` runs. Dependencies are resolved before the
+packages that need them. For the current set the order is zlib, then
+png, jpeg, FreeType, then openssl.
 
 When `Builtin-Use` includes a package `Jamconfigure`, and later when
 the package `Jamfile` is entered, the six variables of every dependency
@@ -31,35 +36,49 @@ to compile.
 
 ## Init {#init}
 
-`builtin.jam` provides:
+`builtin.jam` is loaded from Jambase. It provides:
 
 ```
-Builtin-Use pkg : root
+Builtin-Top pkg
+Builtin-SetTop pkg : value
+Builtin-Use pkg : dir +
+Builtin-SubInclude pkg
+Builtin-Set pkg : var : value
+Builtin-Get pkg : var
 ```
 
-It takes the source root and returns the package name when the
-package succeeds, empty otherwise.
+`Builtin-Use` joins `dir` with `FDirName` to form the source root and
+returns the package name when the package succeeds, empty otherwise.
 
 Presence is a directory check. There is no network access and no
-download. When the root exists the rule includes the package's
-`Jamconfigure`. That file performs any checks the package needs.
+download. When the root exists the rule sets `pkg.TOP`, includes the
+package's `Jamconfigure`, and persists `pkg.TOP` when `pkg.TARGET` is
+set.
 
 - If the directory is missing the rule returns empty.
+- If the package `Jamconfigure` is missing the rule calls `Exit`.
 - If the package `Jamconfigure` calls `Exit` the whole configure aborts.
 - If the package sets `pkg.TARGET` the rule returns the package name.
 
-When the package is selected, `builtin.jam` issues the `SubInclude`
-that descends into the source package's Jamfile. The descent happens
-once, after all package resolutions have finished.
+The parent names the source path once, at configure:
+
+```
+WITH_PNG = [ Builtin-Use png : $(PT_TOP) src libpng ] ;
+Package-Echo png ;
+if $(WITH_PNG)
+{
+    Package-Configure png ;
+}
+```
 
 ## Target {#target}
 
 The source package sets the common variables itself in its own
-`Jamconfigure`, and only after its checks have succeeded:
+`Jamconfigure`, after `Builtin-Use` has set `pkg.TOP`:
 
 ```
-Package-SetIncludes zlib : $(root) ;
-Package-SetTarget   zlib : z ;
+Package-SetIncludes png : [ Builtin-Top png ] [ Package-Includes zlib ] ;
+Package-SetTarget   png : png ;
 ```
 
 (`z` or `libz`, whichever name the `Library` or `SharedLibrary` rule
@@ -69,10 +88,69 @@ A non-empty `pkg.TARGET` is how `Builtin-Use` and consumers detect a
 builtin package. There is no separate status flag and no separate
 `WITH_BUILTIN_xxx`.
 
-A package `Jamconfigure` under `src/<pkg>/` is the builtin configure.
-It sets the variables whenever it runs. A later standalone project, if
-one is added, detects that it was not included from a parent and leaves
-the variables unset.
+The package `Jamconfigure` uses `Builtin-Top` for its source root. It
+does not mention the parent tree (`PT_TOP`) or the relative tokens the
+parent passed to `Builtin-Use`.
+
+## Descent {#descent}
+
+The parent Jamfile includes a selected builtin with `Builtin-SubInclude`
+only when `Package-Target` is set. The rule is not a no-op for an
+unselected package.
+
+`Builtin-SubInclude` sets the `SubDir` Jamrules gate `pkg.TOP-included`
+and then `SubInclude pkg.TOP`. The package Jamfile calls `SubDir pkg.TOP`.
+The gate stops `SubDir` from loading `$(pkg.TOP)/Jamrules`.
+
+```
+if [ Package-Target png ]
+{
+    Builtin-Set png : OUTPUT_TARGET : $(PT_OUTPUT_TARGET) ;
+    Builtin-Set png : OUTPUT_OBJECT : $(PT_OUTPUT_OBJECT) ;
+    Builtin-SubInclude png ;
+}
+```
+
+The package Jamfile:
+
+```
+SubDir png.TOP ;
+```
+
+## Output properties {#output}
+
+Locate is parent to builtin. The parent sets package-specific names
+the Jamfile reads. The caller knows the names from that Jamfile. There
+is no advertised need-list.
+
+```
+Builtin-Set pkg : var : value
+Builtin-Get pkg : var
+```
+
+The values live as `pkg.var` (for example `png.OUTPUT_TARGET`). Names
+are specific to the package. libpng uses `OUTPUT_TARGET` and
+`OUTPUT_OBJECT`. Another package may use other names.
+
+The package applies the real Jam rules when the property is set.
+Unset means locate from `SubDir pkg.TOP`.
+
+```
+if [ Builtin-Get png : OUTPUT_OBJECT ]
+{
+    SubDirObjects [ Builtin-Get png : OUTPUT_OBJECT ] png ;
+}
+
+Library png : png.c ... ;
+
+if [ Builtin-Get png : OUTPUT_TARGET ]
+{
+    MakeLocate png : [ Builtin-Get png : OUTPUT_TARGET ] ;
+}
+```
+
+The parent sets the properties in the Jamfile before `Builtin-SubInclude`,
+only when `Package-Target` is set. They are not persisted.
 
 ## Dependencies {#dependencies}
 
@@ -90,7 +168,7 @@ Example for png that depends on zlib:
 
 ```
 # src/libpng/Jamconfigure
-Package-SetIncludes png : $(root) [ Package-Includes zlib ] ;
+Package-SetIncludes png : [ Builtin-Top png ] [ Package-Includes zlib ] ;
 Package-SetDefines  png : [ Package-Defines zlib ] ;
 Package-SetTarget   png : png ;
 Package-SetLinkLibs png : [ Package-LinkLibs zlib ] ;
@@ -103,19 +181,22 @@ if [ Package-Target zlib ]
 }
 
 # src/libpng/Jamfile
-if [ Package-Includes zlib ]
-{
-    SubDirHdrs [ Package-Includes zlib ] ;
-}
+SubDir png.TOP ;
 
-if [ Package-Defines zlib ]
+SubDirHdrs [ Package-Includes png ] ;
+SubDirCcFlags [ Package-Defines png ] ;
+
+if [ Builtin-Get png : OUTPUT_OBJECT ]
 {
-    SubDirCcFlags [ Package-Defines zlib ] ;
+    SubDirObjects [ Builtin-Get png : OUTPUT_OBJECT ] png ;
 }
 
 Library png : png.c ... ;
 
-MakeLocate png : $(PT_OUTPUT_TARGET) ;
+if [ Builtin-Get png : OUTPUT_TARGET ]
+{
+    MakeLocate png : [ Builtin-Get png : OUTPUT_TARGET ] ;
+}
 ```
 
 The png sources are C, so the Jamfile uses `SubDirCcFlags`. A C++
@@ -163,3 +244,10 @@ option and without a failed earlier step the package is not builtin.
 
 When builtin is selected the package-specific `*-Configure` is not
 called. The source package has already published the six variables.
+
+## Baseline {#baseline}
+
+zlib, jpeg, freetype, mbedtls and openssl `Jamconfigure` files still
+build include paths from `PT_TOP`. Their parent `Jamfile` still uses
+`SubInclude PT_TOP ...` when `Package-Target` is set. libpng follows
+the model in this file.

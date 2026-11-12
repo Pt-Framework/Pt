@@ -1,7 +1,6 @@
-# Included by Builtin-Use after the source root was found.
+# Included by Builtin-Use after png.TOP is set.
 
-Package-SetIncludes png : [ FDirName $(PT_TOP) src libpng ]
-                           [ Package-Includes zlib ] ;
+Package-SetIncludes png : [ Builtin-Top png ] [ Package-Includes zlib ] ;
 Package-SetDefines png : [ Package-Defines zlib ] ;
 Package-SetTarget png : png ;
 Package-SetLinkLibs png : [ Package-LinkLibs zlib ] ;

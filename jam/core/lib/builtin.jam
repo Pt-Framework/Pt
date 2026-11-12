@@ -3,22 +3,71 @@ JAMBASE_BUILTIN_JAM_INCLUDED = true ;
 
 # builtin.jam
 #
-# Selects source packages from a root directory. Loaded on demand
-# by Jamconfigure. This module knows nothing about prebuilt bundles,
-# configure option parsing, or resolution order.
+# Selects source packages from a root directory. Loaded from Jambase.
+# This module knows nothing about prebuilt bundles, configure option
+# parsing, or resolution order.
 #
-# Builtin-Use <pkg> : <root>
-#
-# Returns <pkg> when the source package is selected, empty otherwise.
-# Presence is a directory check of <root>. There is no network access
-# and no download. When the directory exists the rule includes
-# <root>/Jamconfigure, and returns <pkg> when pkg.TARGET is set.
-# A missing Jamconfigure is an Exit. A configure error in the package
-# Jamconfigure is also an Exit. Builtin-Use does not set pkg.TARGET.
+# The package name is the public identity. Builtin-Use, Builtin-Top,
+# Builtin-SubInclude, Builtin-Set and Builtin-Get all take that name.
+# The parent passes the source path once, at configure.
 
-rule Builtin-Use ( pkg : root )
+# Builtin-Top <pkg>
+#
+# Returns pkg.TOP, the source root set by Builtin-Use. Empty if unset.
+#
+rule Builtin-Top ( pkg )
+{
+    local name = $(pkg).TOP ;
+    return $($(name)) ;
+}
+
+# Builtin-SetTop <pkg> : <value>
+#
+# Replaces pkg.TOP with value. Builtin-Use calls this before it
+# includes the package Jamconfigure.
+#
+rule Builtin-SetTop ( pkg : value )
+{
+    local name = $(pkg).TOP ;
+    $(name) = $(value) ;
+}
+
+# Builtin-Set <pkg> : <var> : <value>
+#
+# Sets pkg.var to value. The parent sets package-specific names the
+# package Jamfile reads with Builtin-Get, for example OUTPUT_TARGET.
+#
+rule Builtin-Set ( pkg : var : value * )
+{
+    local name = $(pkg).$(var) ;
+    $(name) = $(value) ;
+}
+
+# Builtin-Get <pkg> : <var>
+#
+# Returns pkg.var. Empty if unset.
+#
+rule Builtin-Get ( pkg : var )
+{
+    local name = $(pkg).$(var) ;
+    return $($(name)) ;
+}
+
+# Builtin-Use <pkg> : <dir>
+#
+# Joins dir with FDirName to form the source root. Returns pkg when
+# the source package is selected, empty otherwise. Presence is a
+# directory check of the root. There is no network access and no
+# download. When the directory exists the rule sets pkg.TOP, includes
+# <root>/Jamconfigure, persists pkg.TOP when pkg.TARGET is set, and
+# returns pkg. A missing Jamconfigure is an Exit. A configure error
+# in the package Jamconfigure is also an Exit. Builtin-Use does not
+# set pkg.TARGET.
+#
+rule Builtin-Use ( pkg : dir + )
 {
     local result ;
+    local root = [ FDirName $(dir) ] ;
 
     if [ FILE_IS_DIR $(root) ]
     {
@@ -30,16 +79,33 @@ rule Builtin-Use ( pkg : root )
         }
         else
         {
+            Builtin-SetTop $(pkg) : $(root) ;
             include $(jamconfigure) ;
 
             if [ Package-Target $(pkg) ]
             {
+                local top = $(pkg).TOP ;
+                Configure $(top) ;
                 result = $(pkg) ;
             }
         }
     }
 
     return $(result) ;
+}
+
+# Builtin-SubInclude <pkg>
+#
+# Includes the package Jamfile. Sets the SubDir Jamrules gate
+# pkg.TOP-included, then SubInclude pkg.TOP. The caller invokes this
+# only when Package-Target is set.
+#
+rule Builtin-SubInclude ( pkg )
+{
+    local name = $(pkg).TOP ;
+    local gate = $(name)-included ;
+    $(gate) = TRUE ;
+    SubInclude $(name) ;
 }
 
 } # JAMBASE_BUILTIN_JAM_INCLUDED

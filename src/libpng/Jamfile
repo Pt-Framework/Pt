@@ -1,18 +1,14 @@
-SubDir PT_TOP src libpng ;
-SubDirHdrs $(PT_TOP)/src/libpng ;
-SubDirObjects $(PT_OUTPUT_OBJECT) libpng ;
+SubDir png.TOP ;
+
+SubDirHdrs [ Package-Includes png ] ;
+SubDirCcFlags [ Package-Defines png ] ;
 SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
-
-if [ Package-Includes zlib ]
-{
-    SubDirHdrs [ Package-Includes zlib ] ;
-}
-
-if [ Package-Defines zlib ]
-{
-    SubDirCcFlags [ Package-Defines zlib ] ;
-}
 SubDirCcFlags [ FDefines PNG_ARM_NEON_OPT=0 ] ;
+
+if [ Builtin-Get png : OUTPUT_OBJECT ]
+{
+    SubDirObjects [ Builtin-Get png : OUTPUT_OBJECT ] png ;
+}
 
 Library png : png.c
               pngerror.c
@@ -30,4 +26,7 @@ Library png : png.c
               pngwtran.c
               pngwutil.c ;
 
-MakeLocate png : $(PT_OUTPUT_TARGET) ;
+if [ Builtin-Get png : OUTPUT_TARGET ]
+{
+    MakeLocate png : [ Builtin-Get png : OUTPUT_TARGET ] ;
+}

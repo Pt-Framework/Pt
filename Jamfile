@@ -211,7 +211,9 @@ if [ Package-Target zlib ]
 
 if [ Package-Target png ]
 {
-    SubInclude PT_TOP src libpng ;
+    Builtin-Set png : OUTPUT_TARGET : $(PT_OUTPUT_TARGET) ;
+    Builtin-Set png : OUTPUT_OBJECT : $(PT_OUTPUT_OBJECT) ;
+    Builtin-SubInclude png ;
 }
 
 if [ Package-Target jpeg ]

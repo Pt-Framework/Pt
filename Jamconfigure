@@ -556,7 +556,7 @@ EchoOption --with-inline-libpng : "Using inline libpng" : [ HasOption --with-inl
 
 if ! $(WITH_PNG) && --with-inline-libpng in $(ARGV)
 {
-    WITH_PNG = [ Builtin-Use png : [ FDirName $(PT_TOP) src libpng ] ] ;
+    WITH_PNG = [ Builtin-Use png : $(PT_TOP) src libpng ] ;
 }
 
 if ! $(WITH_PNG)
@@ -573,7 +573,7 @@ if ! $(WITH_PNG)
 
 if ! $(WITH_PNG)
 {
-    WITH_PNG = [ Builtin-Use png : [ FDirName $(PT_TOP) src libpng ] ] ;
+    WITH_PNG = [ Builtin-Use png : $(PT_TOP) src libpng ] ;
 }
 
 Package-Echo png ;
