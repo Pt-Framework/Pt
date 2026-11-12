@@ -1,4 +1,4 @@
-SubDir PT_TOP ;
+#SubDir PT_TOP ;
 
 #############################################################################
 # Toolset configuration
@@ -514,18 +514,23 @@ if $(PT_WITH_PREBUILT)
 
 Load zlib.jam ;
 
+WITH_BUILTIN_ZLIB = [ HasOption --with-inline-zlib ] ;
 EchoOption --with-inline-zlib : "Using inline zlib" : [ HasOption --with-inline-zlib ] ;
 
-if ! $(WITH_ZLIB) && ! ( --with-inline-zlib in $(ARGV) )
+if ! $(WITH_BUILTIN_ZLIB)
 {
     Prebuilt-Use zlib ;
 
-    WITH_ZLIB = [ ZLib-Configure
-                    [ Package-Includes zlib ]
-                  : [ Package-Defines zlib ]
-                  : [ Package-LinkLibs zlib ]
-                  : [ Package-LibDir zlib ]
-                  : [ Package-LinkFlags zlib ] ] ;
+    WITH_ZLIB = [ ZLib-Configure [ Package-Includes zlib ]
+                               : [ Package-Defines zlib ]
+                               : [ Package-LinkLibs zlib ]
+                               : [ Package-LibDir zlib ]
+                               : [ Package-LinkFlags zlib ] ] ;
+
+    if $(WITH_ZLIB)
+    {
+        Package-Configure zlib ;
+    }
 }
 
 if ! $(WITH_ZLIB)
@@ -534,16 +539,12 @@ if ! $(WITH_ZLIB)
     if $(WITH_ZLIB)
     {
         Builtin-Configure zlib ;
+        Package-Configure zlib ;
     }
 }
 
 Package-Echo zlib ;
 EchoOption WITH_ZLIB : "ZLib found" : $(WITH_ZLIB:E="no") ;
-
-if $(WITH_ZLIB)
-{
-    Package-Configure zlib ;
-}
 
 #############################################################################
 # PNG support with libpng
