@@ -1,4 +1,4 @@
-# Included by Builtin-Use after the source root was found.
+# Included by Builtin-Use after zlib.TOP is set.
 
 local target = z ;
 
@@ -7,5 +7,5 @@ if ! $(PRELIB)
     target = libz ;
 }
 
-Package-SetIncludes zlib : [ FDirName $(PT_TOP) src zlib ] ;
+Package-SetIncludes zlib : [ Builtin-Top zlib ] ;
 Package-SetTarget zlib : $(target) ;

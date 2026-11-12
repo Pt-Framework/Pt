@@ -1,11 +1,11 @@
-SubDir PT_TOP src openssl ;
+SubDir openssl.TOP ;
 
-SubDirHdrs $(PT_TOP)/src/openssl ;
-SubDirHdrs $(PT_TOP)/src/openssl/include ;
-SubDirHdrs $(PT_TOP)/src/openssl/crypto ;
-SubDirHdrs $(PT_TOP)/src/openssl/crypto/asn1 ;
-SubDirHdrs $(PT_TOP)/src/openssl/crypto/evp ;
-SubDirHdrs $(PT_TOP)/src/openssl/crypto/modes ;
+SubDirHdrs [ Builtin-Top openssl ] ;
+SubDirHdrs [ Package-Includes openssl ] ;
+SubDirHdrs [ FDirName [ Builtin-Top openssl ] crypto ] ;
+SubDirHdrs [ FDirName [ Builtin-Top openssl ] crypto asn1 ] ;
+SubDirHdrs [ FDirName [ Builtin-Top openssl ] crypto evp ] ;
+SubDirHdrs [ FDirName [ Builtin-Top openssl ] crypto modes ] ;
 
 SubDirCcFlags $(OPENSSL_CFLAGS) ;
 SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
@@ -26,7 +26,10 @@ SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_JPAKE ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_EC_NISTP_64_GCC_128 ] ;
 
-SubDirObjects $(PT_OUTPUT_OBJECT) openssl ;
+if [ Builtin-Get openssl : OUTPUT_OBJECT ]
+{
+    SubDirObjects [ Builtin-Get openssl : OUTPUT_OBJECT ] openssl ;
+}
 
 # OpenSSL 1.0.1e
 
@@ -815,4 +818,7 @@ Library Pt-Ssl-openssl :
    #crypto/ppccap.c
 ;
 
-MakeLocate Pt-Ssl-openssl : $(PT_OUTPUT_TARGET) ;
+if [ Builtin-Get openssl : OUTPUT_TARGET ]
+{
+    MakeLocate Pt-Ssl-openssl : [ Builtin-Get openssl : OUTPUT_TARGET ] ;
+}

@@ -121,8 +121,9 @@ Three modules own the mechanism:
 - `prebuilt.jam` maps a prebuilt bundle onto the common variables.
 - `builtin.jam` selects source packages from a root directory.
 
-`package.jam` is included once. The other two modules are loaded on
-demand by `Jamconfigure`.
+`package.jam` is included from Jambase. `prebuilt.jam` is loaded on
+demand by `Jamconfigure`. `builtin.jam` is loaded by `Jamconfigure`
+and by the parent `Jamfile`.
 
 ## Configure {#configure}
 
@@ -194,14 +195,7 @@ Load zlib.jam ;
 EchoOption --with-inline-zlib : "Using inline zlib"
     : $([ HasOption --with-inline-zlib ]:E="no") ;
 
-# 1. Builtin per Option (Override)
-if ! $(WITH_ZLIB) && --with-inline-zlib in $(ARGV)
-{
-    WITH_ZLIB = [ Builtin-Use zlib : src/zlib ] ;
-}
-
-# 2. Prebuilt or System/Custom
-if ! $(WITH_ZLIB)
+if ! $(WITH_ZLIB) && ! ( --with-inline-zlib in $(ARGV) )
 {
     Prebuilt-Use zlib ;
 
@@ -213,10 +207,13 @@ if ! $(WITH_ZLIB)
                   : [ Package-LinkFlags zlib ] ] ;
 }
 
-# 3. Builtin fallback
 if ! $(WITH_ZLIB)
 {
-    WITH_ZLIB = [ Builtin-Use zlib : src/zlib ] ;
+    WITH_ZLIB = [ Builtin-Use zlib : $(PT_TOP) src zlib ] ;
+    if $(WITH_ZLIB)
+    {
+        Builtin-Configure zlib ;
+    }
 }
 
 Package-Echo zlib ;
@@ -228,7 +225,9 @@ if $(WITH_ZLIB)
 }
 ```
 
-The same pattern applies to png, jpeg and FreeType.
+The same pattern applies to png, jpeg and FreeType. `--with-inline-xxx`
+skips prebuilt and system. `Builtin-Use` runs once as override or as
+fallback.
 
 ### SSL backends
 
@@ -239,9 +238,9 @@ prebuilt or system backend.
 
 Independent `if`s, each `if ! $(WITH_SSL)`. Explicit flags run first:
 
-1. `--with-inline-openssl`: `Builtin-Use openssl`
+1. `--with-inline-openssl`: `Builtin-Use openssl` and `Builtin-Configure openssl`
 2. `--with-openssl`: `Prebuilt-Use openssl` and `OpenSsl-Configure`
-3. `--with-inline-mbedtls`: `Builtin-Use mbedtls`
+3. `--with-inline-mbedtls`: `Builtin-Use mbedtls` and `Builtin-Configure mbedtls`
 4. `--with-mbedtls`: `Prebuilt-Use mbedtls` and `MbedTls-Configure`
 5. Default openssl: `Prebuilt-Use openssl` and `OpenSsl-Configure`
 6. Default mbedtls: `Prebuilt-Use mbedtls` and `MbedTls-Configure`

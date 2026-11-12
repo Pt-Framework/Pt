@@ -3,7 +3,8 @@ JAMBASE_BUILTIN_JAM_INCLUDED = true ;
 
 # builtin.jam
 #
-# Selects source packages from a root directory. Loaded from Jambase.
+# Selects source packages from a root directory. Loaded by
+# Jamconfigure and by the parent Jamfile.
 # This module knows nothing about prebuilt bundles, configure option
 # parsing, or resolution order.
 #

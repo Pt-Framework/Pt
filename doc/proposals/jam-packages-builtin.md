@@ -36,7 +36,8 @@ to compile.
 
 ## Init {#init}
 
-`builtin.jam` is loaded from Jambase. It provides:
+`builtin.jam` is loaded by `Jamconfigure` and by the parent `Jamfile`.
+Jambase does not load it. It provides:
 
 ```
 Builtin-Top pkg
@@ -252,9 +253,28 @@ option and without a failed earlier step the package is not builtin.
 When builtin is selected the package-specific `*-Configure` is not
 called. The source package has already published the six variables.
 
-## Baseline {#baseline}
+The parent inverts the inline flag so `Builtin-Use` runs once. Prebuilt
+and system run only when the flag is absent. `Builtin-Configure`
+persists `pkg.TOP` when `Builtin-Use` succeeded:
 
-zlib, jpeg, freetype, mbedtls and openssl `Jamconfigure` files still
-build include paths from `PT_TOP`. Their parent `Jamfile` still uses
-`SubInclude PT_TOP ...` when `Package-Target` is set. libpng follows
-the model in this file.
+```
+if ! $(WITH_PNG) && ! ( --with-inline-libpng in $(ARGV) )
+{
+    Prebuilt-Use png ;
+
+    WITH_PNG = [ Png-Configure [ Package-Includes png ]
+                             : [ Package-Defines png ]
+                             : [ Package-LinkLibs png ]
+                             : [ Package-LibDir png ]
+                             : [ Package-LinkFlags png ] ] ;
+}
+
+if ! $(WITH_PNG)
+{
+    WITH_PNG = [ Builtin-Use png : $(PT_TOP) src libpng ] ;
+    if $(WITH_PNG)
+    {
+        Builtin-Configure png ;
+    }
+}
+```

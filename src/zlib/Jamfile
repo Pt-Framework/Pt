@@ -1,19 +1,13 @@
-SubDir PT_TOP src zlib ;
-SubDirHdrs $(PT_TOP)/src/zlib ;
-#SubDirHdrs $(PT_TOP)/src/zlib/include ;
-SubDirObjects $(PT_OUTPUT_OBJECT) zlib ;
+SubDir zlib.TOP ;
+
+SubDirHdrs [ Package-Includes zlib ] ;
+
+if [ Builtin-Get zlib : OUTPUT_OBJECT ]
+{
+    SubDirObjects [ Builtin-Get zlib : OUTPUT_OBJECT ] zlib ;
+}
 
 ZLIB_TARGET = [ Package-Target zlib ] ;
-
-if ! $(ZLIB_TARGET)
-{
-    ZLIB_TARGET = z ;
-
-    if ! $(PRELIB)
-    {
-        ZLIB_TARGET = libz ;
-    }
-}
 
 Library $(ZLIB_TARGET) : adler32.c
                           compress.c
@@ -31,4 +25,7 @@ Library $(ZLIB_TARGET) : adler32.c
                           uncompr.c
                           zutil.c ;
 
-MakeLocate $(ZLIB_TARGET) : $(PT_OUTPUT_TARGET) ;
+if [ Builtin-Get zlib : OUTPUT_TARGET ]
+{
+    MakeLocate $(ZLIB_TARGET) : [ Builtin-Get zlib : OUTPUT_TARGET ] ;
+}

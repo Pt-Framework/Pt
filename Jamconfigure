@@ -516,12 +516,7 @@ Load zlib.jam ;
 
 EchoOption --with-inline-zlib : "Using inline zlib" : [ HasOption --with-inline-zlib ] ;
 
-if ! $(WITH_ZLIB) && --with-inline-zlib in $(ARGV)
-{
-    WITH_ZLIB = [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ] ;
-}
-
-if ! $(WITH_ZLIB)
+if ! $(WITH_ZLIB) && ! ( --with-inline-zlib in $(ARGV) )
 {
     Prebuilt-Use zlib ;
 
@@ -535,7 +530,11 @@ if ! $(WITH_ZLIB)
 
 if ! $(WITH_ZLIB)
 {
-    WITH_ZLIB = [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ] ;
+    WITH_ZLIB = [ Builtin-Use zlib : $(PT_TOP) src zlib ] ;
+    if $(WITH_ZLIB)
+    {
+        Builtin-Configure zlib ;
+    }
 }
 
 Package-Echo zlib ;
@@ -554,16 +553,7 @@ Load libpng.jam ;
 
 EchoOption --with-inline-libpng : "Using inline libpng" : [ HasOption --with-inline-libpng ] ;
 
-if ! $(WITH_PNG) && --with-inline-libpng in $(ARGV)
-{
-    WITH_PNG = [ Builtin-Use png : $(PT_TOP) src libpng ] ;
-    if $(WITH_PNG)
-    {
-        Builtin-Configure png ;
-    }
-}
-
-if ! $(WITH_PNG)
+if ! $(WITH_PNG) && ! ( --with-inline-libpng in $(ARGV) )
 {
     Prebuilt-Use png ;
 
@@ -599,12 +589,7 @@ Load libjpeg.jam ;
 
 EchoOption --with-inline-libjpeg : "Using inline libjpeg" : [ HasOption --with-inline-libjpeg ] ;
 
-if ! $(WITH_JPEG) && --with-inline-libjpeg in $(ARGV)
-{
-    WITH_JPEG = [ Builtin-Use jpeg : [ FDirName $(PT_TOP) src libjpeg ] ] ;
-}
-
-if ! $(WITH_JPEG)
+if ! $(WITH_JPEG) && ! ( --with-inline-libjpeg in $(ARGV) )
 {
     Prebuilt-Use jpeg ;
 
@@ -618,7 +603,11 @@ if ! $(WITH_JPEG)
 
 if ! $(WITH_JPEG)
 {
-    WITH_JPEG = [ Builtin-Use jpeg : [ FDirName $(PT_TOP) src libjpeg ] ] ;
+    WITH_JPEG = [ Builtin-Use jpeg : $(PT_TOP) src libjpeg ] ;
+    if $(WITH_JPEG)
+    {
+        Builtin-Configure jpeg ;
+    }
 }
 
 Package-Echo jpeg ;
@@ -637,12 +626,7 @@ Load freetype.jam ;
 
 EchoOption --with-inline-freetype : "Using inline Freetype" : [ HasOption --with-inline-freetype ] ;
 
-if ! $(WITH_FREETYPE) && --with-inline-freetype in $(ARGV)
-{
-    WITH_FREETYPE = [ Builtin-Use freetype : [ FDirName $(PT_TOP) src freetype ] ] ;
-}
-
-if ! $(WITH_FREETYPE)
+if ! $(WITH_FREETYPE) && ! ( --with-inline-freetype in $(ARGV) )
 {
     Prebuilt-Use freetype ;
 
@@ -656,7 +640,11 @@ if ! $(WITH_FREETYPE)
 
 if ! $(WITH_FREETYPE)
 {
-    WITH_FREETYPE = [ Builtin-Use freetype : [ FDirName $(PT_TOP) src freetype ] ] ;
+    WITH_FREETYPE = [ Builtin-Use freetype : $(PT_TOP) src freetype ] ;
+    if $(WITH_FREETYPE)
+    {
+        Builtin-Configure freetype ;
+    }
 }
 
 Package-Echo freetype ;
@@ -681,8 +669,9 @@ EchoOption --with-mbedtls : "Using mbedTLS" : [ HasOption --with-mbedtls ] ;
 
 if ! $(WITH_SSL) && --with-inline-openssl in $(ARGV)
 {
-    if [ Builtin-Use openssl : [ FDirName $(PT_TOP) src openssl ] ]
+    if [ Builtin-Use openssl : $(PT_TOP) src openssl ]
     {
+        Builtin-Configure openssl ;
         WITH_SSL = yes ;
         PT_SSL_IMPL = openssl ;
     }
@@ -706,8 +695,9 @@ if ! $(WITH_SSL) && --with-openssl in $(ARGV)
 
 if ! $(WITH_SSL) && --with-inline-mbedtls in $(ARGV)
 {
-    if [ Builtin-Use mbedtls : [ FDirName $(PT_TOP) src mbedtls ] ]
+    if [ Builtin-Use mbedtls : $(PT_TOP) src mbedtls ]
     {
+        Builtin-Configure mbedtls ;
         WITH_SSL = yes ;
         PT_SSL_IMPL = mbedtls ;
     }

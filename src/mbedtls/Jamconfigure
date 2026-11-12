@@ -1,6 +1,6 @@
-# Included by Builtin-Use after the source root was found.
+# Included by Builtin-Use after mbedtls.TOP is set.
 
-Package-SetIncludes mbedtls : [ FDirName $(PT_TOP) src mbedtls include ] ;
+Package-SetIncludes mbedtls : [ FDirName [ Builtin-Top mbedtls ] include ] ;
 Package-SetTarget mbedtls : mbedtls ;
 
 WITH_BCRYPT = [ CheckBuildC++ "#include <windows.h>"

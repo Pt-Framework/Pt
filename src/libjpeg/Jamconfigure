@@ -1,4 +1,4 @@
-# Included by Builtin-Use after the source root was found.
+# Included by Builtin-Use after jpeg.TOP is set.
 
-Package-SetIncludes jpeg : [ FDirName $(PT_TOP) src libjpeg ] ;
+Package-SetIncludes jpeg : [ Builtin-Top jpeg ] ;
 Package-SetTarget jpeg : jpeg ;

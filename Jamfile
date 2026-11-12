@@ -37,6 +37,7 @@ rule Moc
 #############################################################################
 Load unittest.jam ;
 Load lsbpkg.jam ;
+Load builtin.jam ;
 
 # set default directory to build objects and targets
 # ALL_LOCATE_OBJECTS ?= [ FDirName $(PT_TOP) output ] ;
@@ -206,7 +207,9 @@ if $(WITH_BUILTIN_SKIA)
 
 if [ Package-Target zlib ]
 {
-    SubInclude PT_TOP src zlib ;
+    Builtin-Set zlib : OUTPUT_TARGET : $(PT_OUTPUT_TARGET) ;
+    Builtin-Set zlib : OUTPUT_OBJECT : $(PT_OUTPUT_OBJECT) ;
+    Builtin-SubInclude zlib ;
 }
 
 if [ Package-Target png ]
@@ -218,22 +221,30 @@ if [ Package-Target png ]
 
 if [ Package-Target jpeg ]
 {
-    SubInclude PT_TOP src libjpeg ;
+    Builtin-Set jpeg : OUTPUT_TARGET : $(PT_OUTPUT_TARGET) ;
+    Builtin-Set jpeg : OUTPUT_OBJECT : $(PT_OUTPUT_OBJECT) ;
+    Builtin-SubInclude jpeg ;
 }
 
 if [ Package-Target freetype ]
 {
-    SubInclude PT_TOP src freetype src ;
+    Builtin-Set freetype : OUTPUT_TARGET : $(PT_OUTPUT_TARGET) ;
+    Builtin-Set freetype : OUTPUT_OBJECT : $(PT_OUTPUT_OBJECT) ;
+    Builtin-SubInclude freetype ;
 }
 
 if [ Package-Target mbedtls ]
 {
-    SubInclude PT_TOP src mbedtls ;
+    Builtin-Set mbedtls : OUTPUT_TARGET : $(PT_OUTPUT_TARGET) ;
+    Builtin-Set mbedtls : OUTPUT_OBJECT : $(PT_OUTPUT_OBJECT) ;
+    Builtin-SubInclude mbedtls ;
 }
 
 if [ Package-Target openssl ]
 {
-    SubInclude PT_TOP src openssl ;
+    Builtin-Set openssl : OUTPUT_TARGET : $(PT_OUTPUT_TARGET) ;
+    Builtin-Set openssl : OUTPUT_OBJECT : $(PT_OUTPUT_OBJECT) ;
+    Builtin-SubInclude openssl ;
 }
 
 if $(WITH_BLEND2D_BUILTIN)

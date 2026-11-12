@@ -1,7 +1,12 @@
-SubDir PT_TOP src libjpeg ;
-SubDirHdrs $(PT_TOP)/src/libjpeg ;
-SubDirObjects $(PT_OUTPUT_OBJECT) libjpeg ;
+SubDir jpeg.TOP ;
+
+SubDirHdrs [ Package-Includes jpeg ] ;
 SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
+
+if [ Builtin-Get jpeg : OUTPUT_OBJECT ]
+{
+    SubDirObjects [ Builtin-Get jpeg : OUTPUT_OBJECT ] libjpeg ;
+}
 
 Library jpeg : jcapimin.c jcapistd.c jccoefct.c jccolor.c jcdctmgr.c jchuff.c
                jcinit.c jcmainct.c jcmarker.c jcmaster.c jcomapi.c jcparam.c
@@ -12,4 +17,7 @@ Library jpeg : jcapimin.c jcapistd.c jccoefct.c jccolor.c jcdctmgr.c jchuff.c
                jfdctint.c jidctflt.c jidctfst.c jidctint.c jidctred.c jquant1.c
                jquant2.c jutils.c jmemmgr.c jmemnobs.c ;
 
-MakeLocate jpeg : $(PT_OUTPUT_TARGET) ;
+if [ Builtin-Get jpeg : OUTPUT_TARGET ]
+{
+    MakeLocate jpeg : [ Builtin-Get jpeg : OUTPUT_TARGET ] ;
+}

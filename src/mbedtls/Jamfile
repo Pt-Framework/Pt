@@ -1,9 +1,18 @@
-SubDir PT_TOP src mbedtls ;
-SubDirHdrs [ Package-Includes mbedtls ] ;
-SubDirObjects $(PT_OUTPUT_OBJECT) mbedtls ;
+SubDir mbedtls.TOP ;
 
-MBEDTLS_SUBDIR   = [ FDirName $(PT_TOP) src mbedtls library ] ;
+SubDirHdrs [ Package-Includes mbedtls ] ;
+
+if [ Builtin-Get mbedtls : OUTPUT_OBJECT ]
+{
+    SubDirObjects [ Builtin-Get mbedtls : OUTPUT_OBJECT ] mbedtls ;
+}
+
+MBEDTLS_SUBDIR   = [ FDirName [ Builtin-Top mbedtls ] library ] ;
 MBEDTLS_SOURCES += [ GLOB $(MBEDTLS_SUBDIR) : *.c  ] ;
 
 Library mbedtls : $(MBEDTLS_SOURCES) ;
-MakeLocate mbedtls : $(PT_OUTPUT_TARGET) ;
+
+if [ Builtin-Get mbedtls : OUTPUT_TARGET ]
+{
+    MakeLocate mbedtls : [ Builtin-Get mbedtls : OUTPUT_TARGET ] ;
+}

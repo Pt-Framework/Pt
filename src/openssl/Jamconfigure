@@ -6,12 +6,13 @@
 # prefer openssl configuration for TARGET_OS over OS family (PT_SYSTEM)
 #
 
-local opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(TARGET_OS:L)-$(TARGET_OSPLAT:L).h ] ;
+local top = [ Builtin-Top openssl ] ;
+local opensslconf_target = [ FDirName $(top) opensslconf-$(TARGET_OS:L)-$(TARGET_OSPLAT:L).h ] ;
 
 if ! [ CHECK_IF_FILE $(opensslconf_target) ]
 {
-    opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(PT_SYSTEM:L)-$(TARGET_OSPLAT:L).h ] ;
-        
+    opensslconf_target = [ FDirName $(top) opensslconf-$(PT_SYSTEM:L)-$(TARGET_OSPLAT:L).h ] ;
+
     if ! [ CHECK_IF_FILE $(opensslconf_target) ]
     {
         Exit "ERROR: Could not configure builtin OpenSSL for" $(TARGET_OS:L) $(TARGET_OSPLAT:L) ;
@@ -22,7 +23,7 @@ if ! [ CHECK_IF_FILE $(opensslconf_target) ]
 # copy crypto/opensslconf.h file
 #
 
-local opensslconf = [ FDirName $(PT_TOP) src openssl crypto opensslconf.h ] ;
+local opensslconf = [ FDirName $(top) crypto opensslconf.h ] ;
 if ! [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ]
 {
     Exit "ERROR: Could not copy opensslconf.h." ;
@@ -32,7 +33,7 @@ if ! [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ]
 # copy openssl/opensslconf.h file
 #
 
-opensslconf = [ FDirName $(PT_TOP) src openssl include openssl opensslconf.h ] ;
+opensslconf = [ FDirName $(top) include openssl opensslconf.h ] ;
 if ! [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ]
 {
     Exit "ERROR: Could not copy opensslconf.h." ;
@@ -61,5 +62,5 @@ switch $(TARGET_OS:L)
 Configure OPENSSL_CFLAGS ;
 EchoOption OPENSSL_CFLAGS : "OpenSSL CFLAGS" ;
 
-Package-SetIncludes openssl : [ FDirName $(PT_TOP) src openssl include ] ;
+Package-SetIncludes openssl : [ FDirName $(top) include ] ;
 Package-SetTarget openssl : Pt-Ssl-openssl ;
