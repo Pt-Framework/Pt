@@ -42,6 +42,7 @@ to compile.
 Builtin-Top pkg
 Builtin-SetTop pkg : value
 Builtin-Use pkg : dir +
+Builtin-Configure pkg
 Builtin-SubInclude pkg
 Builtin-Set pkg : var : value
 Builtin-Get pkg : var
@@ -52,8 +53,9 @@ returns the package name when the package succeeds, empty otherwise.
 
 Presence is a directory check. There is no network access and no
 download. When the root exists the rule sets `pkg.TOP`, includes the
-package's `Jamconfigure`, and persists `pkg.TOP` when `pkg.TARGET` is
-set.
+package's `Jamconfigure`, and returns the package name when
+`pkg.TARGET` is set. It does not persist `pkg.TOP`. The parent calls
+`Builtin-Configure` when `Builtin-Use` succeeded.
 
 - If the directory is missing the rule returns empty.
 - If the package `Jamconfigure` is missing the rule calls `Exit`.
@@ -64,6 +66,11 @@ The parent names the source path once, at configure:
 
 ```
 WITH_PNG = [ Builtin-Use png : $(PT_TOP) src libpng ] ;
+if $(WITH_PNG)
+{
+    Builtin-Configure png ;
+}
+
 Package-Echo png ;
 if $(WITH_PNG)
 {

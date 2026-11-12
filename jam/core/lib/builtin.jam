@@ -8,8 +8,9 @@ JAMBASE_BUILTIN_JAM_INCLUDED = true ;
 # parsing, or resolution order.
 #
 # The package name is the public identity. Builtin-Use, Builtin-Top,
-# Builtin-SubInclude, Builtin-Set and Builtin-Get all take that name.
-# The parent passes the source path once, at configure.
+# Builtin-Configure, Builtin-SubInclude, Builtin-Set and Builtin-Get
+# all take that name. The parent passes the source path once, at
+# configure.
 
 # Builtin-Top <pkg>
 #
@@ -59,10 +60,10 @@ rule Builtin-Get ( pkg : var )
 # the source package is selected, empty otherwise. Presence is a
 # directory check of the root. There is no network access and no
 # download. When the directory exists the rule sets pkg.TOP, includes
-# <root>/Jamconfigure, persists pkg.TOP when pkg.TARGET is set, and
-# returns pkg. A missing Jamconfigure is an Exit. A configure error
-# in the package Jamconfigure is also an Exit. Builtin-Use does not
-# set pkg.TARGET.
+# <root>/Jamconfigure, and returns pkg when pkg.TARGET is set. A
+# missing Jamconfigure is an Exit. A configure error in the package
+# Jamconfigure is also an Exit. Builtin-Use does not set pkg.TARGET
+# and does not persist pkg.TOP.
 #
 rule Builtin-Use ( pkg : dir + )
 {
@@ -84,14 +85,24 @@ rule Builtin-Use ( pkg : dir + )
 
             if [ Package-Target $(pkg) ]
             {
-                local top = $(pkg).TOP ;
-                Configure $(top) ;
                 result = $(pkg) ;
             }
         }
     }
 
     return $(result) ;
+}
+
+# Builtin-Configure <pkg>
+#
+# Persists pkg.TOP via Configure. Does not probe and does not decide
+# success. The caller invokes this when Builtin-Use has just
+# succeeded.
+#
+rule Builtin-Configure ( pkg )
+{
+    local top = $(pkg).TOP ;
+    Configure $(top) ;
 }
 
 # Builtin-SubInclude <pkg>
