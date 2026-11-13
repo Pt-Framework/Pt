@@ -28,27 +28,25 @@ goto build_host_binary
 
 :parse_init
 setlocal DisableDelayedExpansion
-set "INIT_OPTION="
+set "INIT_STATE="
 set "INIT_HEADERS="
 
-:parse_init_argument
+:parse_init_loop
 if [%1]==[] goto init_parsed
-if defined INIT_OPTION goto parse_init_header
-if "%~1"=="--header" set "INIT_OPTION=--header"
-shift
-goto parse_init_argument
-
-:parse_init_header
-set "INIT_ARGUMENT=%~1"
-setlocal EnableDelayedExpansion
-set "INIT_HEADERS=!INIT_HEADERS! --header "!INIT_ARGUMENT!""
-for /f "delims=" %%H in ("!INIT_HEADERS!") do (
-    endlocal
-    set "INIT_HEADERS=%%H"
+if defined INIT_STATE (
+    set "INIT_ARGUMENT=%~1"
+    setlocal EnableDelayedExpansion
+    set "INIT_HEADERS=!INIT_HEADERS! --header "!INIT_ARGUMENT!""
+    for /f "delims=" %%H in ("!INIT_HEADERS!") do (
+        endlocal
+        set "INIT_HEADERS=%%H"
+    )
+    set "INIT_STATE="
+) else (
+    if "%~1"=="--header" set "INIT_STATE=--header"
 )
-set "INIT_OPTION="
 shift
-goto parse_init_argument
+goto parse_init_loop
 
 :init_parsed
 setlocal EnableDelayedExpansion
