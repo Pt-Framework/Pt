@@ -1,4 +1,4 @@
-# Included by Builtin-Use after jpeg.TOP is set.
+# Included by Builtin-Configure after jpeg.TOP is set.
 
 Package-SetIncludes jpeg : [ Builtin-Top jpeg ] ;
 Package-SetTarget jpeg : jpeg ;

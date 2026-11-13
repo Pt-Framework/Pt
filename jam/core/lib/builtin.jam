@@ -8,30 +8,20 @@ JAMBASE_BUILTIN_JAM_INCLUDED = true ;
 # This module knows nothing about prebuilt bundles, configure option
 # parsing, or resolution order.
 #
-# The package name is the public identity. Builtin-Use, Builtin-Top,
-# Builtin-Configure, Builtin-SubInclude, Builtin-Set and Builtin-Get
-# all take that name. The parent passes the source path once, at
-# configure.
+# The package name is the public identity. Builtin-Configure,
+# Builtin-Top, Builtin-SubInclude, Builtin-Set and Builtin-Get all
+# take that name. The parent passes the source path once, at
+# configure, to Builtin-Configure.
 
 # Builtin-Top <pkg>
 #
-# Returns pkg.TOP, the source root set by Builtin-Use. Empty if unset.
+# Returns pkg.TOP, the source root set by Builtin-Configure. Empty if
+# unset.
 #
 rule Builtin-Top ( pkg )
 {
     local name = $(pkg).TOP ;
     return $($(name)) ;
-}
-
-# Builtin-SetTop <pkg> : <value>
-#
-# Replaces pkg.TOP with value. Builtin-Use calls this before it
-# includes the package Jamconfigure.
-#
-rule Builtin-SetTop ( pkg : value )
-{
-    local name = $(pkg).TOP ;
-    $(name) = $(value) ;
 }
 
 # Builtin-Set <pkg> : <var> : <value>
@@ -55,18 +45,19 @@ rule Builtin-Get ( pkg : var )
     return $($(name)) ;
 }
 
-# Builtin-Use <pkg> : <dir>
+# Builtin-Configure <pkg> : <dir>
 #
 # Joins dir with FDirName to form the source root. Returns pkg when
 # the source package is selected, empty otherwise. Presence is a
 # directory check of the root. There is no network access and no
 # download. When the directory exists the rule sets pkg.TOP, includes
-# <root>/Jamconfigure, and returns pkg when pkg.TARGET is set. A
-# missing Jamconfigure is an Exit. A configure error in the package
-# Jamconfigure is also an Exit. Builtin-Use does not set pkg.TARGET
-# and does not persist pkg.TOP.
+# <root>/Jamconfigure, and returns pkg when pkg.TARGET is set. On
+# success it persists pkg.TOP and the six common variables. A missing
+# directory returns empty. A missing Jamconfigure is an Exit. A
+# configure error in the package Jamconfigure is also an Exit. The
+# rule does not set pkg.TARGET and does not probe.
 #
-rule Builtin-Use ( pkg : dir + )
+rule Builtin-Configure ( pkg : dir + )
 {
     local result ;
     local root = [ FDirName $(dir) ] ;
@@ -81,36 +72,17 @@ rule Builtin-Use ( pkg : dir + )
         }
         else
         {
-            Builtin-SetTop $(pkg) : $(root) ;
+            local name = $(pkg).TOP ;
+            $(name) = $(root) ;
             include $(jamconfigure) ;
 
             if [ Package-Target $(pkg) ]
             {
+                Configure $(name) ;
+                Package-Configure $(pkg) ;
                 result = $(pkg) ;
             }
         }
-    }
-
-    return $(result) ;
-}
-
-# Builtin-Configure <pkg> : <dir>
-#
-# Selects the source package at dir via Builtin-Use. On success
-# persists pkg.TOP and the six common variables and returns pkg.
-# Returns empty when Builtin-Use does not set pkg.TARGET. Does not
-# probe.
-#
-rule Builtin-Configure ( pkg : dir + )
-{
-    local result ;
-
-    if [ Builtin-Use $(pkg) : $(dir) ]
-    {
-        local top = $(pkg).TOP ;
-        Configure $(top) ;
-        Package-Configure $(pkg) ;
-        result = $(pkg) ;
     }
 
     return $(result) ;

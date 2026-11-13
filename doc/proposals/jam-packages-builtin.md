@@ -10,7 +10,7 @@ configure time. When selected it is built as part of the project and
 exposes itself through the common package variables.
 
 The package name is the public identity. Parent and package files use
-the same name for `Builtin-Use`, `Package-Echo`, `Package-Configure`,
+the same name for `Builtin-Configure`, `Package-Status`, `Package-Configure`,
 `Builtin-SubInclude`, `Builtin-Set`, `Builtin-Get`, and the six
 usage variables. There is no renaming.
 
@@ -28,7 +28,7 @@ Package resolution in `Jamconfigure` finishes before any
 packages that need them. For the current set the order is zlib, then
 png, jpeg, FreeType, then openssl.
 
-When `Builtin-Use` includes a package `Jamconfigure`, and later when
+When `Builtin-Configure` includes a package `Jamconfigure`, and later when
 the package `Jamfile` is entered, the six variables of every dependency
 are already final. The `Jamconfigure` reads them through the accessors
 to publish this package. The `Jamfile` reads them through the accessors
@@ -41,31 +41,27 @@ Jambase does not load it. It provides:
 
 ```
 Builtin-Top pkg
-Builtin-SetTop pkg : value
-Builtin-Use pkg : dir +
 Builtin-Configure pkg : dir +
 Builtin-SubInclude pkg
 Builtin-Set pkg : var : value
 Builtin-Get pkg : var
 ```
 
-`Builtin-Use` joins `dir` with `FDirName` to form the source root and
-returns the package name when the package succeeds, empty otherwise.
+`Builtin-Configure` joins `dir` with `FDirName` to form the source
+root and returns the package name when the package succeeds, empty
+otherwise.
 
 Presence is a directory check. There is no network access and no
-download. When the root exists the rule sets `pkg.TOP`, includes the
-package's `Jamconfigure`, and returns the package name when
-`pkg.TARGET` is set. It does not persist `pkg.TOP`.
+download. When the root exists the rule sets `pkg.TOP` and includes
+the package's `Jamconfigure`. When `pkg.TARGET` is set it persists
+`pkg.TOP` and the six common variables via `Package-Configure` and
+returns the package name. It does not print. It does not set
+`pkg.TARGET`.
 
 - If the directory is missing the rule returns empty.
 - If the package `Jamconfigure` is missing the rule calls `Exit`.
 - If the package `Jamconfigure` calls `Exit` the whole configure aborts.
 - If the package sets `pkg.TARGET` the rule returns the package name.
-
-`Builtin-Configure pkg : dir` calls `Builtin-Use`. On success it
-persists `pkg.TOP` and the six common variables via `Package-Configure`
-and returns the package name. It does not print. A missing directory
-returns empty.
 
 The parent names the source path once, at configure:
 
@@ -76,7 +72,7 @@ WITH_PNG = [ Builtin-Configure png : $(PT_TOP) src libpng ] ;
 ## Target {#target}
 
 The source package sets the common variables itself in its own
-`Jamconfigure`, after `Builtin-Use` has set `pkg.TOP`:
+`Jamconfigure`, after `Builtin-Configure` has set `pkg.TOP`:
 
 ```
 Package-SetIncludes png : [ Builtin-Top png ] [ Package-Includes zlib ] ;
@@ -86,14 +82,14 @@ Package-SetTarget   png : png ;
 (`z` or `libz`, whichever name the `Library` or `SharedLibrary` rule
 uses.) `Package-SetTarget` sets this package's library name.
 
-A non-empty `pkg.TARGET` is how `Builtin-Use` and consumers detect a
+A non-empty `pkg.TARGET` is how `Builtin-Configure` and consumers detect a
 builtin package. There is no separate status flag. `WITH_BUILTIN_xxx`
 holds the inline option during configure. It is not persisted and it
 is not how a consumer detects a builtin package.
 
 The package `Jamconfigure` uses `Builtin-Top` for its source root. It
 does not mention the parent tree (`PT_TOP`) or the relative tokens the
-parent passed to `Builtin-Use`.
+parent passed to `Builtin-Configure`.
 
 ## Descent {#descent}
 
@@ -228,7 +224,7 @@ LinkFlags tgt : [ FLibPath [ Package-LibDir png ] ]
                 [ Package-LinkFlags png ] ;
 ```
 
-Prebuilt packages have no Jamfile, so `Prebuilt-Use` walks
+Prebuilt packages have no Jamfile, so `Prebuilt-Enable` walks
 `prebuilt.<pkg>.DEPENDS` for `INCLUDES` and `LIBDIR`. That walk is not
 used for builtin packages. The source package `Jamconfigure` copies
 dependency usage itself.
@@ -237,10 +233,10 @@ dependency usage itself.
 
 Builtin is used in two cases only:
 
-- Override: `--with-inline-xxx` is given and `Builtin-Use` returns the
+- Override: `--with-inline-xxx` is given and `Builtin-Configure` returns the
   package name. This overrides prebuilt and system/custom.
 - Fallback: nothing earlier (prebuilt or system/custom) succeeded and
-  `Builtin-Use` returns the package name.
+  `Builtin-Configure` returns the package name.
 
 Presence of the root alone does not select the package. Without the
 option and without a failed earlier step the package is not builtin.
@@ -260,7 +256,7 @@ if ! $(WITH_BUILTIN_PNG)
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use png ;
+        Prebuilt-Enable png ;
     }
 
     WITH_PNG = [ Png-Configure png ] ;

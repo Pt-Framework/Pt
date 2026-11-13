@@ -5,8 +5,8 @@ JAMBASE_PREBUILT_JAM_INCLUDED = true ;
 #
 # Maps a prebuilt bundle onto the common package variables. Loaded on
 # demand by Jamconfigure. Fetch, identity, Prebuilt-Has, Prebuilt-Bin
-# and Prebuilt-Lib live here. Prebuilt-Load root binds the bundle.
-# Prebuilt-Use pkg fills still-empty pkg.* flag variables.
+# and Prebuilt-Lib live here. Prebuilt-Import root binds the bundle.
+# Prebuilt-Enable pkg fills still-empty pkg.* flag variables.
 
 Load fetch.jam ;
 
@@ -48,16 +48,17 @@ rule Prebuilt-Id ( abi ? )
 
 # Prebuilt-Fetch <url> : <root>
 #
-# Download <url> when <url>.manifest changed. root is the
-# prefix directory. The sidecar is root.manifest, next to root,
-# not inside it. Returns root when fetched, empty when up to
-# date. Caller must Fetch-Configure first.
+# Download <url> when <url>.manifest differs from the sidecar
+# root.manifest. root is the prefix directory. The sidecar sits
+# next to root, not inside it, so replacing the tree leaves it in
+# place. Detects curl and tar itself. Returns root when fetched,
+# empty when up to date.
 #
 rule Prebuilt-Fetch ( url : root )
 {
     Fetch-Configure ;
 
-    local manifestLocal = [ FDirName $(root) manifest ] ;
+    local manifestLocal = $(root).manifest ;
     local manifestTmp   = $(root).manifest.tmp ;
     local archiveTmp    = $(root).tmp ;
     local fetched       = ;
@@ -76,23 +77,27 @@ rule Prebuilt-Fetch ( url : root )
         Fetch-Url $(url) : $(archiveTmp) ;
         Fetch-RmDir $(root) ;
         Fetch-Unzip $(archiveTmp) : $(root) ;
+        FILE_REMOVE $(manifestLocal) ;
         FILE_RENAME $(manifestTmp) : $(manifestLocal) ;
         fetched = $(root) ;
     }
+    else
+    {
+        FILE_REMOVE $(manifestTmp) ;
+    }
 
-    FILE_REMOVE $(manifestTmp) ;
     FILE_REMOVE $(archiveTmp) ;
 
     return $(fetched) ;
 }
 
-# Prebuilt-Load <root>
+# Prebuilt-Import <root>
 #
 # Binds the bundle at root: sets prebuilt.ROOT, includes prebuilt.jam,
 # and checks prebuilt.VERSION (must be 1). Caller invokes this once
 # when a prebuilt folder is selected.
 #
-rule Prebuilt-Load ( root )
+rule Prebuilt-Import ( root )
 {
     prebuilt.ROOT = $(root) ;
 
@@ -116,14 +121,14 @@ rule Prebuilt-Load ( root )
     }
 }
 
-# Prebuilt-Use <pkg>
+# Prebuilt-Enable <pkg>
 #
 # Returns <pkg> when the loaded bundle lists it, empty otherwise. On
 # success fills still-empty pkg.INCLUDES, pkg.DEFINES, pkg.LINKLIBS,
 # pkg.LIBDIR and pkg.LINKFLAGS from the bundle. Leaves pkg.TARGET
 # empty. Already set values, including -s overrides, are left unchanged.
 #
-rule Prebuilt-Use ( pkg )
+rule Prebuilt-Enable ( pkg )
 {
     local result ;
 

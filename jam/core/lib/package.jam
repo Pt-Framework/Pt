@@ -152,7 +152,7 @@ rule Package-SetTarget ( pkg : value )
     $(name) = $(value) ;
 }
 
-# Package-Echo <pkg>
+# Package-Status <pkg>
 #
 # Prints whether the package was found, then the six common variables
 # via EchoOption, including empty lists. The found line is yes after
@@ -160,7 +160,7 @@ rule Package-SetTarget ( pkg : value )
 # pkg.FOUND. Operates only on the common names plus the found flag.
 # Does not decide whether the package was found.
 #
-rule Package-Echo ( pkg )
+rule Package-Status ( pkg )
 {
     EchoOption "---"            : "$(pkg) found" : $($(pkg).FOUND:E="no") ;
     EchoOption $(pkg).INCLUDES  : "$(pkg) includes" ;

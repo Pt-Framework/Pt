@@ -40,7 +40,7 @@ of `LIBDIR`, and `LINKFLAGS`.
 
 `pkg.INCLUDES` is raw include directories. `pkg.DEFINES` is formatted
 compiler flags (`-DFOO=1` / `/DFOO=1`), the result of `FDefines`.
-The manifest stores raw tokens (`FOO=1`); `Prebuilt-Use` converts them
+The manifest stores raw tokens (`FOO=1`); `Prebuilt-Enable` converts them
 with `FDefines` when filling `pkg.DEFINES`. `pkg.LINKLIBS` is
 link-library flags. `pkg.LIBDIR` is raw library search directories.
 `pkg.LINKFLAGS` is extra linker flags. Empty lists are omitted:
@@ -102,11 +102,11 @@ accessors are the preferred form.
 `package.jam` also provides:
 
 ```
-Package-Echo pkg
+Package-Status pkg
 Package-Configure pkg
 ```
 
-`Package-Echo` prints whether the package was found, then the six
+`Package-Status` prints whether the package was found, then the six
 variables via `EchoOption`, including empty lists. The found line is
 `yes` after `Package-Configure`, otherwise `no`. The bracket names the
 package, not `pkg.FOUND`. It is the detail primitive. The configure
@@ -121,7 +121,7 @@ setting it does not select the package.
 Three modules own the mechanism:
 
 - `package.jam` defines the common variable interface, its accessors,
-  `Package-Echo` and `Package-Configure`. It knows nothing about
+  `Package-Status` and `Package-Configure`. It knows nothing about
   prebuilt bundles, source package roots, configure options, or
   resolution order.
 - `prebuilt.jam` maps a prebuilt bundle onto the common variables.
@@ -147,8 +147,8 @@ how a consumer detects the package.
    `Builtin-Configure pkg : dir` succeeds. This overrides every other
    source.
 2. Prebuilt or system/custom: when `--with-prebuilt` is selected,
-   `Jamconfigure` calls `Prebuilt-Load root` once after fetch.
-   `Prebuilt-Use` runs only when `PT_WITH_PREBUILT` is set. It fills
+   `Jamconfigure` calls `Prebuilt-Import root` once after fetch.
+   `Prebuilt-Enable` runs only when `PT_WITH_PREBUILT` is set. It fills
    still-empty flag variables when the bundle contains the package
    (side effect only). Already set values (including `-s` overrides)
    are left unchanged. Then the package-specific `*-Configure pkg`
@@ -158,21 +158,19 @@ how a consumer detects the package.
 3. Builtin fallback: `Builtin-Configure pkg : dir` succeeds when
    nothing earlier did.
 
-`Prebuilt-Use` returns the package name when the bundle contains it,
+`Prebuilt-Enable` returns the package name when the bundle contains it,
 empty otherwise. Its return value is not assigned to `WITH_pkg`. It
 only fills still-empty flag variables.
 
-`Builtin-Use pkg : root` includes the source package's `Jamconfigure`.
-That file publishes the six variables only after its checks succeed.
-A non-empty `pkg.TARGET` is the success signal. `Builtin-Use` returns
-the package name when `pkg.TARGET` is set, empty otherwise. A configure
-error in the package `Jamconfigure` calls `Exit` and aborts. A missing
-root returns empty.
-
-`Builtin-Configure pkg : dir` calls `Builtin-Use`. On success it
-persists `pkg.TOP` and the six common variables via `Package-Configure`
-and returns the package name. A missing directory returns empty. A
-missing package `Jamconfigure` is an `Exit`.
+`Builtin-Configure pkg : dir` joins `dir` to the source root, sets
+`pkg.TOP`, and includes the source package's `Jamconfigure`. That file
+publishes the six variables only after its checks succeed. A non-empty
+`pkg.TARGET` is the success signal. On success the rule persists
+`pkg.TOP` and the six common variables via `Package-Configure` and
+returns the package name. A missing directory returns empty. A missing
+package `Jamconfigure` is an `Exit`. A configure error in the package
+`Jamconfigure` calls `Exit` and aborts. The rule does not set
+`pkg.TARGET`.
 
 A `*-Configure` rule takes the package name. It reads the current flag
 values from the accessors as hints. It does not know whether they came
@@ -203,8 +201,8 @@ six variables.
 
 ## Reporting {#reporting}
 
-`Jamconfigure` calls `Package-Echo` after the chain. That is the whole
-package report. `Package-Echo` prints the found line first, then the
+`Jamconfigure` calls `Package-Status` after the chain. That is the whole
+package report. `Package-Status` prints the found line first, then the
 six variables. The found value is `yes` when `Package-Configure` ran,
 and `no` when it did not. The bracket names the package, not
 `pkg.FOUND`. The line does not name the origin. The six
@@ -216,14 +214,14 @@ prebuilt package. A system find has neither.
 A failed stage is silent. Probe attempts (`ZLib-Probe`,
 `PkgConfig-Exists`, individual link-name guesses) print nothing. Their
 detail is already in `ConfigureLog`. `*-Configure` and
-`Builtin-Configure` do not print and do not call `Package-Echo`.
-`Prebuilt-Use` prints nothing. It fills hints.
+`Builtin-Configure` do not print and do not call `Package-Status`.
+`Prebuilt-Enable` prints nothing. It fills hints.
 
 `Jamconfigure` drops the found-line. The selection lines stay. Those
 are `--with-inline-*`, and for SSL `WITH_SSL` and `PT_SSL_IMPL`.
 
 ```
-Package-Echo zlib ;
+Package-Status zlib ;
 ```
 
 ```
@@ -238,7 +236,7 @@ Package-Echo zlib ;
 
 When nothing was found, `pkg.FOUND` prints `no` and the six variables
 are empty. The same reporting applies to png, jpeg and FreeType. For
-SSL, `Package-Echo` follows for the selected backend and prints that
+SSL, `Package-Status` follows for the selected backend and prints that
 package's found flag. `nossl` has no package to print.
 
 ### zlib example
@@ -253,7 +251,7 @@ if ! $(WITH_BUILTIN_ZLIB)
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use zlib ;
+        Prebuilt-Enable zlib ;
     }
 
     WITH_ZLIB = [ ZLib-Configure zlib ] ;
@@ -264,7 +262,7 @@ if ! $(WITH_ZLIB)
     WITH_ZLIB = [ Builtin-Configure zlib : $(PT_TOP) src zlib ] ;
 }
 
-Package-Echo zlib ;
+Package-Status zlib ;
 ```
 
 The same pattern applies to png, jpeg and FreeType. `--with-inline-xxx`
@@ -281,11 +279,11 @@ prebuilt or system backend.
 Independent `if`s, each `if ! $(WITH_SSL)`. Explicit flags run first:
 
 1. `--with-inline-openssl`: `Builtin-Configure openssl : dir`
-2. `--with-openssl`: `Prebuilt-Use openssl` and `OpenSsl-Configure openssl`
+2. `--with-openssl`: `Prebuilt-Enable openssl` and `OpenSsl-Configure openssl`
 3. `--with-inline-mbedtls`: `Builtin-Configure mbedtls : dir`
-4. `--with-mbedtls`: `Prebuilt-Use mbedtls` and `MbedTls-Configure mbedtls`
-5. Default openssl: `Prebuilt-Use openssl` and `OpenSsl-Configure openssl`
-6. Default mbedtls: `Prebuilt-Use mbedtls` and `MbedTls-Configure mbedtls`
+4. `--with-mbedtls`: `Prebuilt-Enable mbedtls` and `MbedTls-Configure mbedtls`
+5. Default openssl: `Prebuilt-Enable openssl` and `OpenSsl-Configure openssl`
+6. Default mbedtls: `Prebuilt-Enable mbedtls` and `MbedTls-Configure mbedtls`
 7. `PT_SSL_IMPL = nossl`
 
 Success sets `WITH_SSL` and `PT_SSL_IMPL` to `openssl` or `mbedtls`.

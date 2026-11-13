@@ -1,4 +1,4 @@
-# Included by Builtin-Use after zlib.TOP is set.
+# Included by Builtin-Configure after zlib.TOP is set.
 
 local target = z ;
 

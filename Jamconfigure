@@ -501,7 +501,7 @@ if $(PT_WITH_PREBUILT)
 
     Configure PT_PREBUILT_ROOT ;
 
-    Prebuilt-Load $(PT_PREBUILT_ROOT) ;
+    Prebuilt-Import $(PT_PREBUILT_ROOT) ;
     local packages = [ Prebuilt-Packages ] ;
     PT_PREBUILT_BIN_FILES = [ Prebuilt-Bin $(packages) ] ;
     PT_PREBUILT_LIB_FILES = [ Prebuilt-Lib $(packages) ] ;
@@ -522,7 +522,7 @@ if ! $(WITH_BUILTIN_ZLIB)
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use zlib ;
+        Prebuilt-Enable zlib ;
     }
 
     WITH_ZLIB = [ ZLib-Configure zlib ] ;
@@ -533,7 +533,7 @@ if ! $(WITH_ZLIB)
     WITH_ZLIB = [ Builtin-Configure zlib : $(PT_TOP) src zlib ] ;
 }
 
-Package-Echo zlib ;
+Package-Status zlib ;
 
 #############################################################################
 # PNG support with libpng
@@ -548,7 +548,7 @@ if ! $(WITH_BUILTIN_PNG)
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use png ;
+        Prebuilt-Enable png ;
     }
 
     WITH_PNG = [ Png-Configure png ] ;
@@ -559,7 +559,7 @@ if ! $(WITH_PNG)
     WITH_PNG = [ Builtin-Configure png : $(PT_TOP) src libpng ] ;
 }
 
-Package-Echo png ;
+Package-Status png ;
 
 #############################################################################
 # JPEG support with libjpeg
@@ -574,7 +574,7 @@ if ! $(WITH_BUILTIN_JPEG)
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use jpeg ;
+        Prebuilt-Enable jpeg ;
     }
 
     WITH_JPEG = [ Jpeg-Configure jpeg ] ;
@@ -585,7 +585,7 @@ if ! $(WITH_JPEG)
     WITH_JPEG = [ Builtin-Configure jpeg : $(PT_TOP) src libjpeg ] ;
 }
 
-Package-Echo jpeg ;
+Package-Status jpeg ;
 
 #############################################################################
 # Freetype support
@@ -600,7 +600,7 @@ if ! $(WITH_BUILTIN_FREETYPE)
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use freetype ;
+        Prebuilt-Enable freetype ;
     }
 
     WITH_FREETYPE = [ Freetype-Configure freetype ] ;
@@ -611,7 +611,7 @@ if ! $(WITH_FREETYPE)
     WITH_FREETYPE = [ Builtin-Configure freetype : $(PT_TOP) src freetype ] ;
 }
 
-Package-Echo freetype ;
+Package-Status freetype ;
 
 #############################################################################
 # SSL libraries and includes
@@ -638,7 +638,7 @@ if ! $(WITH_SSL) && --with-openssl in $(ARGV)
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use openssl ;
+        Prebuilt-Enable openssl ;
     }
 
     if [ OpenSsl-Configure openssl ]
@@ -661,7 +661,7 @@ if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use mbedtls ;
+        Prebuilt-Enable mbedtls ;
     }
 
     if [ MbedTls-Configure mbedtls ]
@@ -675,7 +675,7 @@ if ! $(WITH_SSL)
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use openssl ;
+        Prebuilt-Enable openssl ;
     }
 
     if [ OpenSsl-Configure openssl ]
@@ -689,7 +689,7 @@ if ! $(WITH_SSL)
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use mbedtls ;
+        Prebuilt-Enable mbedtls ;
     }
 
     if [ MbedTls-Configure mbedtls ]
@@ -706,12 +706,12 @@ if ! $(WITH_SSL)
 
 if $(PT_SSL_IMPL) = openssl
 {
-    Package-Echo openssl ;
+    Package-Status openssl ;
 }
 
 if $(PT_SSL_IMPL) = mbedtls
 {
-    Package-Echo mbedtls ;
+    Package-Status mbedtls ;
 }
 
 Configure WITH_SSL ;

@@ -51,13 +51,13 @@ the consumed entry when a consumer of that entry needs them. A shared
 bundle lists the public libraries. A static bundle lists the full
 closure in link order.
 
-`DEPENDS` is the dependency graph of the bundle. `Prebuilt-Use` walks
+`DEPENDS` is the dependency graph of the bundle. `Prebuilt-Enable` walks
 it only for include paths and library search directories. There is no
 linkage field and no walk for `LINKLIBS`, `DEFINES` or `LINKFLAGS`.
 
 Deployment uses the same graph. A consumer calls `Prebuilt-Depends` to
 obtain the closure, then `Prebuilt-Bin` and `Prebuilt-Lib` to collect
-the files to install. `Prebuilt-Use` does not select runtime files.
+the files to install. `Prebuilt-Enable` does not select runtime files.
 
 OpenSSL is one package `openssl`. Its entry is the complete public
 usage (libraries `ssl` and `crypto`, extra include or lib paths when
@@ -103,17 +103,17 @@ prebuilt/<id>/
 `prebuilt.jam` provides:
 
 ```
-Prebuilt-Load root
-Prebuilt-Use pkg
+Prebuilt-Import root
+Prebuilt-Enable pkg
 ```
 
-`Prebuilt-Load root` binds the bundle. It sets `prebuilt.ROOT`, includes
+`Prebuilt-Import root` binds the bundle. It sets `prebuilt.ROOT`, includes
 `prebuilt.jam` from that directory, and checks that `prebuilt.VERSION`
 is 1. A missing file or an unsupported version is an `Exit`. The caller
 invokes it once when a prebuilt folder is selected. `prebuilt.ROOT` is
 internal to `prebuilt.jam` and is not a manifest key.
 
-`Prebuilt-Use pkg` returns the package name when the loaded bundle lists
+`Prebuilt-Enable pkg` returns the package name when the loaded bundle lists
 the package, empty otherwise. On success it fills only still-empty common
 flag variables (already set values, including `-s` overrides, are left
 unchanged):
@@ -131,11 +131,11 @@ unchanged):
   walked.
 - leaves `pkg.TARGET` empty
 
-`Prebuilt-Use` prints nothing. Filling hints is not a find. The
+`Prebuilt-Enable` prints nothing. Filling hints is not a find. The
 following `*-Configure` decides the find.
 
 The fill is done through the `Package-Set*` accessors, but only when
 the corresponding variable is still empty. The existing `Prebuilt-*`
 primitive rules stay. They walk `prebuilt.<pkg>.DEPENDS` for include
 paths and library search directories. They read the bundle bound by
-`Prebuilt-Load`.
+`Prebuilt-Import`.

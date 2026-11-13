@@ -96,14 +96,14 @@ order:
         |
         |  else
         v
-Prebuilt-Use (only with --with-prebuilt)  ->  *-Configure pkg
+Prebuilt-Enable (only with --with-prebuilt)  ->  *-Configure pkg
         |
         |  else
         v
 Builtin-Configure fallback
 @endverbatim
 
-@c Prebuilt-Use fills only still-empty flag variables. @c *-Configure pkg
+@c Prebuilt-Enable fills only still-empty flag variables. @c *-Configure pkg
 then reads those values: prebuilt paths, @c -s hints, or an empty system
 probe (pkg-config and compiler paths). There is no fallback from one
 platform folder to another. If the chosen folder is missing, configure
@@ -161,7 +161,7 @@ an @c md tree. Library names stay the same for a given platform folder
 (@c zlib.lib in both @c md and @c mdd).
 
 The directory can be moved as a whole because it contains no absolute paths.
-The project calls @c Prebuilt-Load root once; that rule includes
+The project calls @c Prebuilt-Import root once; that rule includes
 @c prebuilt.jam from the bundle directory.
 
 @section jam-prebuilt-page-Manifest The prebuilt.jam Manifest
@@ -210,13 +210,13 @@ consumed entry when a consumer of that entry needs them. A shared bundle
 lists the public libraries. A static bundle lists the full closure in link
 order.
 
-@c DEPENDS is the dependency graph of the bundle. @c Prebuilt-Use walks it
+@c DEPENDS is the dependency graph of the bundle. @c Prebuilt-Enable walks it
 only for include paths and library search directories. There is no linkage
 field and no walk for @c LINKLIBS, @c DEFINES or @c LINKFLAGS. If png is in
 the bundle, zlib is in the bundle too. There are no version ranges, no
 optional dependencies, and no search for a package outside the bundle.
 
-The file does not set @c pkg.INCLUDES. @c Prebuilt-Use fills the common
+The file does not set @c pkg.INCLUDES. @c Prebuilt-Enable fills the common
 package variables from the manifest.
 
 Example:
@@ -266,8 +266,8 @@ still raw, @c LINKFLAGS still extra flags), persists them with
 @c Package-Configure, and returns the package name. It does not set
 @c pkg.TARGET.
 
-Jamconfigure calls @c Prebuilt-Load root once after fetch. That binds the
-bundle. @c Prebuilt-Use pkg fills still-empty @c pkg.* flag variables when
+Jamconfigure calls @c Prebuilt-Import root once after fetch. That binds the
+bundle. @c Prebuilt-Enable pkg fills still-empty @c pkg.* flag variables when
 the bundle lists that package. It leaves @c pkg.TARGET empty.
 
 zlib, png, jpeg and FreeType use independent @c ifs. Each step runs only
@@ -280,7 +280,7 @@ if ! $(WITH_ZLIB) && ! ( --with-inline-zlib in $(ARGV) )
 {
     if $(PT_WITH_PREBUILT)
     {
-        Prebuilt-Use zlib ;
+        Prebuilt-Enable zlib ;
     }
 
     WITH_ZLIB = [ ZLib-Configure zlib ] ;
@@ -291,10 +291,10 @@ if ! $(WITH_ZLIB)
     WITH_ZLIB = [ Builtin-Configure zlib : $(PT_TOP) src zlib ] ;
 }
 
-Package-Echo zlib ;
+Package-Status zlib ;
 @endcode
 
-@c Package-Echo always prints whether the package was found as @c yes or @c no, then the six variables. @c *-Configure and
+@c Package-Status always prints whether the package was found as @c yes or @c no, then the six variables. @c *-Configure and
 @c Builtin-Configure persist through @c Package-Configure when the package
 was found. A builtin package @c Jamconfigure publishes the six variables,
 including @c pkg.TARGET. There is no separate @c WITH_BUILTIN_xxx flag.
@@ -333,7 +333,7 @@ LinkFlags mylib : [ FLibPath [ Package-LibDir png ] ]
 
 Include directories always cover dependent packages as well. @c png.h includes
 @c zlib.h, and a Jamfile can call @c SubDirHdrs [ Package-Includes png ]
-without adding zlib. @c Prebuilt-Use walks @c prebuilt.<pkg>.DEPENDS for
+without adding zlib. @c Prebuilt-Enable walks @c prebuilt.<pkg>.DEPENDS for
 include directories and library search directories.
 @c Prebuilt-Includes freetype returns FreeType's include dirs plus png and
 zlib. @c Prebuilt-LibDir walks the same graph.
@@ -354,16 +354,17 @@ file is @c prebuilt.jam. Toolset helpers stay in the project:
   @c TOOLSET, with an optional extra suffix such as @c md.
 
 - @c Prebuilt-Fetch ( url : root ) \n
-  Downloads @c url when the remote @c url.manifest differs from
-  @c root/manifest. Replaces @c root with the unzipped archive. Any download
-  failure exits. The caller must run @c Fetch-Configure first.
+  Downloads @c url when the remote @c url.manifest differs from the sidecar
+  @c root.manifest next to @c root. Replaces @c root with the unzipped
+  archive and leaves the sidecar in place. Any download failure exits.
+  Detects curl and tar itself.
 
-- @c Prebuilt-Load ( root ) \n
+- @c Prebuilt-Import ( root ) \n
   Binds the bundle at @c root, sets @c prebuilt.ROOT, includes @c prebuilt.jam,
   and exits if @c prebuilt.VERSION is not @c 1. The caller invokes this once
   when a prebuilt folder is selected.
 
-- @c Prebuilt-Use ( pkg ) \n
+- @c Prebuilt-Enable ( pkg ) \n
   Returns @c pkg when the loaded bundle lists it, empty otherwise. On
   success fills still-empty @c pkg.INCLUDES, @c pkg.DEFINES,
   @c pkg.LINKLIBS, @c pkg.LIBDIR and @c pkg.LINKFLAGS. Leaves
@@ -457,7 +458,7 @@ A generator, including one driven by Conan in CI, writes the same layout:
   @c prebuilt.<pkg>.INCLUDES
 - Complete @c lib/ and @c bin/ directories, without sorting or moving files
 - Do not emit @c pkg.INCLUDES / @c pkg.LINKLIBS from the generator;
-  @c Prebuilt-Use fills those from the layout
+  @c Prebuilt-Enable fills those from the layout
 - Windows: two zips, @c windows-x64-msvc-md and @c windows-x64-msvc-mdd
 - macOS / Linux: one folder name without a runtime suffix until a second
   variant exists

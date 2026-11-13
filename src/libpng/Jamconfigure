@@ -1,4 +1,4 @@
-# Included by Builtin-Use after png.TOP is set.
+# Included by Builtin-Configure after png.TOP is set.
 
 Package-SetIncludes png : [ Builtin-Top png ] [ Package-Includes zlib ] ;
 Package-SetDefines png : [ Package-Defines zlib ] ;

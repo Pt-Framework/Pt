@@ -1,4 +1,4 @@
-# Included by Builtin-Use after mbedtls.TOP is set.
+# Included by Builtin-Configure after mbedtls.TOP is set.
 
 Package-SetIncludes mbedtls : [ FDirName [ Builtin-Top mbedtls ] include ] ;
 Package-SetTarget mbedtls : mbedtls ;

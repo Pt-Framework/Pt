@@ -1,4 +1,4 @@
-# Included by Builtin-Use after freetype.TOP is set.
+# Included by Builtin-Configure after freetype.TOP is set.
 
 Package-SetIncludes freetype : [ FDirName [ Builtin-Top freetype ] include ]
                                 [ Package-Includes zlib ] ;
