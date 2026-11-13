@@ -470,6 +470,8 @@ PT_WITH_PREBUILT = [ HasOption --with-prebuilt ] ;
 PT_PREBUILT_ID ?= [ GetOption --with-prebuilt ] ;
 PT_PREBUILT_LOCAL = [ HasOption --prebuilt-local ] ;
 PT_PREBUILT_RELEASE ?= prebuilt-1 ;
+PT_PREBUILT_URL_BASE = "https://github.com/Pt-Framework/Pt/releases/download" ;
+PT_PREBUILT_URL_BASE = "$(PT_PREBUILT_URL_BASE)/$(PT_PREBUILT_RELEASE)" ;
 
 EchoOption --prebuilt-local : "Local prebuilt" : $(PT_PREBUILT_LOCAL:E="no") ;
 EchoOption --with-prebuilt=<id> : "Enable prebuilt" : $(PT_WITH_PREBUILT:E="no") ;
@@ -492,8 +494,7 @@ if $(PT_WITH_PREBUILT)
 
     if ! $(PT_PREBUILT_LOCAL)
     {
-        local base = "https://github.com/Pt-Framework/Pt/releases/download/$(PT_PREBUILT_RELEASE)" ;
-        local url = [ FDirName $(base) $(PT_PREBUILT_ID:S=.zip) ] ;
+        local url = $(PT_PREBUILT_URL_BASE)/$(PT_PREBUILT_ID:S=.zip) ;
         Prebuilt-Fetch $(url) : $(PT_PREBUILT_ROOT) ;
         EchoOption PT_PREBUILT_RELEASE : "Fetched prebuilt" ;
     }
@@ -515,7 +516,7 @@ if $(PT_WITH_PREBUILT)
 Load zlib.jam ;
 
 WITH_BUILTIN_ZLIB = [ HasOption --with-inline-zlib ] ;
-EchoOption --with-inline-zlib : "Using inline zlib" : $(WITH_BUILTIN_ZLIB) ;
+EchoOption --with-inline-zlib : "Using inline zlib" : $(WITH_BUILTIN_ZLIB:E=no) ;
 
 if ! $(WITH_BUILTIN_ZLIB)
 {
@@ -533,7 +534,6 @@ if ! $(WITH_ZLIB)
 }
 
 Package-Echo zlib ;
-EchoOption WITH_ZLIB : "ZLib found" : $(WITH_ZLIB:E="no") ;
 
 #############################################################################
 # PNG support with libpng
@@ -560,7 +560,6 @@ if ! $(WITH_PNG)
 }
 
 Package-Echo png ;
-EchoOption WITH_PNG : "PNG found" : $(WITH_PNG:E="no") ;
 
 #############################################################################
 # JPEG support with libjpeg
@@ -587,7 +586,6 @@ if ! $(WITH_JPEG)
 }
 
 Package-Echo jpeg ;
-EchoOption WITH_JPEG : "JPEG found" : $(WITH_JPEG:E="no") ;
 
 #############################################################################
 # Freetype support
@@ -614,7 +612,6 @@ if ! $(WITH_FREETYPE)
 }
 
 Package-Echo freetype ;
-EchoOption WITH_FREETYPE : "Freetype found" : $(WITH_FREETYPE:E="no") ;
 
 #############################################################################
 # SSL libraries and includes

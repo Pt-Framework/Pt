@@ -106,10 +106,11 @@ Package-Echo pkg
 Package-Configure pkg
 ```
 
-`Package-Echo` prints `pkg.FOUND` and the six variables via
-`EchoOption`, including empty lists. `pkg.FOUND` is `yes` after
-`Package-Configure`, otherwise the line shows `no`. It is the detail
-primitive. The configure run calls it after each package chain.
+`Package-Echo` prints whether the package was found, then the six
+variables via `EchoOption`, including empty lists. The found line is
+`yes` after `Package-Configure`, otherwise `no`. The bracket names the
+package, not `pkg.FOUND`. It is the detail primitive. The configure
+run calls it after each package chain.
 `Package-Configure` persists the six names via `Configure` and sets
 `pkg.FOUND` to `yes`. It does not persist `pkg.FOUND`. `pkg.FOUND` is
 configure reporting. It is not one of the six usage variables, and
@@ -203,9 +204,10 @@ six variables.
 ## Reporting {#reporting}
 
 `Jamconfigure` calls `Package-Echo` after the chain. That is the whole
-package report. `Package-Echo` prints `pkg.FOUND` first, then the six
-variables. The found value is `yes` when `Package-Configure` ran, and
-`no` when it did not. The line does not name the origin. The six
+package report. `Package-Echo` prints the found line first, then the
+six variables. The found value is `yes` when `Package-Configure` ran,
+and `no` when it did not. The bracket names the package, not
+`pkg.FOUND`. The line does not name the origin. The six
 brackets name the usage variables, so the user sees what to override
 with `-s`. `pkg.LINKLIBS` is one of those lines. A set `pkg.TARGET` is
 a builtin package. A set `pkg.LIBDIR` with an empty `pkg.TARGET` is a
@@ -225,7 +227,7 @@ Package-Echo zlib ;
 ```
 
 ```
-- zlib found [zlib.FOUND]: yes
+- zlib found [zlib]: yes
 - zlib includes [zlib.INCLUDES]: <pkg.INCLUDES>
 - zlib defines [zlib.DEFINES]: <pkg.DEFINES>
 - zlib libs [zlib.LINKLIBS]: <pkg.LINKLIBS>
@@ -238,17 +240,6 @@ When nothing was found, `pkg.FOUND` prints `no` and the six variables
 are empty. The same reporting applies to png, jpeg and FreeType. For
 SSL, `Package-Echo` follows for the selected backend and prints that
 package's found flag. `nossl` has no package to print.
-
-### Baseline
-
-`ZLib-Configure`, `Png-Configure`, `Jpeg-Configure`,
-`Freetype-Configure`, `OpenSsl-Configure`, `MbedTls-Configure` and
-`Builtin-Configure` return the package name and print nothing.
-`Jamconfigure` calls `Package-Echo` after each of zlib, png, jpeg and
-FreeType, and for the selected SSL backend. It then prints
-`WITH_pkg : "<Name> found"` with the package name or `no`. The
-found-line is what this task drops. `Package-Echo` prints `yes` or
-`no` from `pkg.FOUND`.
 
 ### zlib example
 

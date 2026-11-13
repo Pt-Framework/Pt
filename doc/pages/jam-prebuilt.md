@@ -294,7 +294,7 @@ if ! $(WITH_ZLIB)
 Package-Echo zlib ;
 @endcode
 
-@c Package-Echo always prints the six variables. @c *-Configure and
+@c Package-Echo always prints whether the package was found as @c yes or @c no, then the six variables. @c *-Configure and
 @c Builtin-Configure persist through @c Package-Configure when the package
 was found. A builtin package @c Jamconfigure publishes the six variables,
 including @c pkg.TARGET. There is no separate @c WITH_BUILTIN_xxx flag.

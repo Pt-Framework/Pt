@@ -154,12 +154,15 @@ rule Package-SetTarget ( pkg : value )
 
 # Package-Echo <pkg>
 #
-# Prints the six common variables via EchoOption, including empty
-# lists. Operates only on the common names. Does not decide whether
-# the package was found.
+# Prints whether the package was found, then the six common variables
+# via EchoOption, including empty lists. The found line is yes after
+# Package-Configure, otherwise no. The bracket names the package, not
+# pkg.FOUND. Operates only on the common names plus the found flag.
+# Does not decide whether the package was found.
 #
 rule Package-Echo ( pkg )
 {
+    EchoOption "---"            : "$(pkg) found" : $($(pkg).FOUND:E="no") ;
     EchoOption $(pkg).INCLUDES  : "$(pkg) includes" ;
     EchoOption $(pkg).DEFINES   : "$(pkg) defines" ;
     EchoOption $(pkg).LINKLIBS  : "$(pkg) libs" ;
@@ -171,9 +174,11 @@ rule Package-Echo ( pkg )
 # Package-Configure <pkg>
 #
 # Persists the six common variables via Configure, including empty
-# lists. Operates only on the common names. Does not probe and does
-# not decide success. The caller invokes this only when the package
-# was found.
+# lists, and sets pkg.FOUND to yes. Does not persist pkg.FOUND.
+# pkg.FOUND is configure reporting. It is not a usage variable, and
+# setting it does not select the package. Operates only on the common
+# names plus the found flag. Does not probe and does not decide
+# success. The caller invokes this only when the package was found.
 #
 rule Package-Configure ( pkg )
 {
@@ -183,6 +188,9 @@ rule Package-Configure ( pkg )
     Configure $(pkg).LIBDIR ;
     Configure $(pkg).LINKFLAGS ;
     Configure $(pkg).TARGET ;
+
+    local found = $(pkg).FOUND ;
+    $(found) = yes ;
 }
 
 } # JAMBASE_PACKAGE_JAM_INCLUDED

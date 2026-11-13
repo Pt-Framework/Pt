@@ -7,7 +7,3 @@
 - [Builtin Source](jam-packages-builtin.md)
 
 ## Open Tasks
-
-- [Reporting](jam-packages-interface.md#reporting): `Package-Configure`
-  sets `pkg.FOUND`. `Package-Echo` prints that flag as `yes` or `no`
-  and the six variables. `Jamconfigure` drops the found-line.
