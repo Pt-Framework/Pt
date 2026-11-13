@@ -106,10 +106,14 @@ Package-Echo pkg
 Package-Configure pkg
 ```
 
-`Package-Echo` prints the six variables via `EchoOption`, including
-empty lists. It is the detail primitive. The configure run calls it
-after each package chain. `Package-Configure` persists the six names
-via `Configure`. Both operate only on the common names.
+`Package-Echo` prints `pkg.FOUND` and the six variables via
+`EchoOption`, including empty lists. `pkg.FOUND` is `yes` after
+`Package-Configure`, otherwise the line shows `no`. It is the detail
+primitive. The configure run calls it after each package chain.
+`Package-Configure` persists the six names via `Configure` and sets
+`pkg.FOUND` to `yes`. It does not persist `pkg.FOUND`. `pkg.FOUND` is
+configure reporting. It is not one of the six usage variables, and
+setting it does not select the package.
 
 ## Modules {#modules}
 
@@ -133,7 +137,10 @@ the only place that knows about user settings, configure options,
 prebuilt and builtin.
 
 For each package the steps are independent `if`s. Each step runs only
-while `WITH_pkg` is still empty. The first success sets `WITH_pkg`.
+while `WITH_pkg` is still empty. The first success sets `WITH_pkg` to
+the package name the winning rule returns. Empty means not found.
+`WITH_pkg` is a configure selection. It is not persisted and it is not
+how a consumer detects the package.
 
 1. Builtin override: `--with-inline-xxx` is given and
    `Builtin-Configure pkg : dir` succeeds. This overrides every other
@@ -184,8 +191,10 @@ the inline option during configure. It is not persisted and it is not
 how a consumer detects a builtin package.
 
 `Package-Configure` is the persist primitive for the six names.
-`*-Configure` and `Builtin-Configure` call it on success. An unfound
-package does not persist values for later build steps.
+`*-Configure` and `Builtin-Configure` call it on success. That call
+also sets `pkg.FOUND` to `yes`. An unfound package does not call it,
+so `pkg.FOUND` stays empty and no values are persisted for later build
+steps.
 
 When builtin is selected the package-specific `*-Configure` is not
 called. The source package `Jamconfigure` has already published the
@@ -193,47 +202,53 @@ six variables.
 
 ## Reporting {#reporting}
 
-The rule that decides a find prints one result line. `Jamconfigure`
-prints the selection options. A failed stage is silent. Probe attempts
-(`ZLib-Probe`, `PkgConfig-Exists`, individual link-name guesses) print
-nothing. Their detail is already in `ConfigureLog`.
+`Jamconfigure` calls `Package-Echo` after the chain. That is the whole
+package report. `Package-Echo` prints `pkg.FOUND` first, then the six
+variables. The found value is `yes` when `Package-Configure` ran, and
+`no` when it did not. The line does not name the origin. The six
+brackets name the usage variables, so the user sees what to override
+with `-s`. `pkg.LINKLIBS` is one of those lines. A set `pkg.TARGET` is
+a builtin package. A set `pkg.LIBDIR` with an empty `pkg.TARGET` is a
+prebuilt package. A system find has neither.
 
-`*-Configure` prints on success. It derives the origin from state it
-already has. The origin is `prebuilt` when `Prebuilt-Has pkg` is set,
-otherwise `system`. The place is `pkg.LIBDIR` for prebuilt and
-`pkg.LINKLIBS` for system. On failure it prints nothing.
+A failed stage is silent. Probe attempts (`ZLib-Probe`,
+`PkgConfig-Exists`, individual link-name guesses) print nothing. Their
+detail is already in `ConfigureLog`. `*-Configure` and
+`Builtin-Configure` do not print and do not call `Package-Echo`.
+`Prebuilt-Use` prints nothing. It fills hints.
 
-`Builtin-Configure` prints on success. The line names the package, the
-origin `builtin`, and `pkg.TOP`. A missing directory prints nothing.
-
-`Prebuilt-Use` prints nothing. It fills hints. The following
-`*-Configure` can still fail, and that rule prints the result.
-
-`Jamconfigure` keeps the option line. After the chain, if `WITH_pkg` is
-still empty, it prints the not-found line. It does not print a success
-line and does not call `Package-Echo`.
+`Jamconfigure` drops the found-line. The selection lines stay. Those
+are `--with-inline-*`, and for SSL `WITH_SSL` and `PT_SSL_IMPL`.
 
 ```
-- ZLib : prebuilt : <pkg.LIBDIR>
-- ZLib : system : <pkg.LINKLIBS>
-- ZLib : builtin : <pkg.TOP>
-- ZLib : not found
+Package-Echo zlib ;
 ```
 
-The same reporting applies to png, jpeg and FreeType. For SSL,
-`Jamconfigure` still prints `WITH_SSL` and `PT_SSL_IMPL`, including
-`nossl`. That is the caller's choice of backend. The selected stage
-prints the package line. `Package-Echo` is not called for either
-backend.
+```
+- zlib found [zlib.FOUND]: yes
+- zlib includes [zlib.INCLUDES]: <pkg.INCLUDES>
+- zlib defines [zlib.DEFINES]: <pkg.DEFINES>
+- zlib libs [zlib.LINKLIBS]: <pkg.LINKLIBS>
+- zlib library dir [zlib.LIBDIR]: <pkg.LIBDIR>
+- zlib link flags [zlib.LINKFLAGS]: <pkg.LINKFLAGS>
+- zlib target [zlib.TARGET]: <pkg.TARGET>
+```
+
+When nothing was found, `pkg.FOUND` prints `no` and the six variables
+are empty. The same reporting applies to png, jpeg and FreeType. For
+SSL, `Package-Echo` follows for the selected backend and prints that
+package's found flag. `nossl` has no package to print.
 
 ### Baseline
 
 `ZLib-Configure`, `Png-Configure`, `Jpeg-Configure`,
 `Freetype-Configure`, `OpenSsl-Configure`, `MbedTls-Configure` and
-`Builtin-Configure` print nothing. `Jamconfigure` calls `Package-Echo`
-after each of zlib, png, jpeg and FreeType, and for the selected SSL
-backend. It then prints `WITH_pkg : "<Name> found"` with the package
-name or `no`.
+`Builtin-Configure` return the package name and print nothing.
+`Jamconfigure` calls `Package-Echo` after each of zlib, png, jpeg and
+FreeType, and for the selected SSL backend. It then prints
+`WITH_pkg : "<Name> found"` with the package name or `no`. The
+found-line is what this task drops. `Package-Echo` prints `yes` or
+`no` from `pkg.FOUND`.
 
 ### zlib example
 
@@ -258,10 +273,7 @@ if ! $(WITH_ZLIB)
     WITH_ZLIB = [ Builtin-Configure zlib : $(PT_TOP) src zlib ] ;
 }
 
-if ! $(WITH_ZLIB)
-{
-    EchoOption WITH_ZLIB : "ZLib" : "not found" ;
-}
+Package-Echo zlib ;
 ```
 
 The same pattern applies to png, jpeg and FreeType. `--with-inline-xxx`

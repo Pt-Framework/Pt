@@ -8,7 +8,6 @@
 
 ## Open Tasks
 
-- [Reporting](jam-packages-interface.md#reporting): `*-Configure` and
-  `Builtin-Configure` print their own result line. `Jamconfigure` drops
-  `Package-Echo` and the found-line, and prints not-found when the
-  chain fails.
+- [Reporting](jam-packages-interface.md#reporting): `Package-Configure`
+  sets `pkg.FOUND`. `Package-Echo` prints that flag as `yes` or `no`
+  and the six variables. `Jamconfigure` drops the found-line.
