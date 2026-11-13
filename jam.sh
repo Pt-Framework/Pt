@@ -333,20 +333,23 @@ build_host_binary()
 
 initialize()
 {
-    _option=
-    for _argument in "$@"; do
-        shift
-        case "$_option" in
+    _state=
+    set --
+
+    while [ $# -gt 0 ]; do
+        case "$_state" in
             --header)
-                set -- "$@" --header "$_argument"
-                _option=
+                set -- "$@" --header "$1"
+                _state=
                 ;;
             *)
-                case "$_argument" in
-                    --header) _option=--header ;;
+                case "$1" in
+                    --header) _state=--header ;;
+                    *) ;;
                 esac
                 ;;
         esac
+        shift
     done
 
     install_snapshot "$@"
