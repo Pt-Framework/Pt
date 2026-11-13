@@ -43,7 +43,7 @@ Jambase does not load it. It provides:
 Builtin-Top pkg
 Builtin-SetTop pkg : value
 Builtin-Use pkg : dir +
-Builtin-Configure pkg
+Builtin-Configure pkg : dir +
 Builtin-SubInclude pkg
 Builtin-Set pkg : var : value
 Builtin-Get pkg : var
@@ -55,28 +55,23 @@ returns the package name when the package succeeds, empty otherwise.
 Presence is a directory check. There is no network access and no
 download. When the root exists the rule sets `pkg.TOP`, includes the
 package's `Jamconfigure`, and returns the package name when
-`pkg.TARGET` is set. It does not persist `pkg.TOP`. The parent calls
-`Builtin-Configure` when `Builtin-Use` succeeded.
+`pkg.TARGET` is set. It does not persist `pkg.TOP`.
 
 - If the directory is missing the rule returns empty.
 - If the package `Jamconfigure` is missing the rule calls `Exit`.
 - If the package `Jamconfigure` calls `Exit` the whole configure aborts.
 - If the package sets `pkg.TARGET` the rule returns the package name.
 
+`Builtin-Configure pkg : dir` calls `Builtin-Use`. On success it
+persists `pkg.TOP` and the six common variables via `Package-Configure`
+and returns the package name.
+
 The parent names the source path once, at configure:
 
 ```
-WITH_PNG = [ Builtin-Use png : $(PT_TOP) src libpng ] ;
-if $(WITH_PNG)
-{
-    Builtin-Configure png ;
-}
+WITH_PNG = [ Builtin-Configure png : $(PT_TOP) src libpng ] ;
 
 Package-Echo png ;
-if $(WITH_PNG)
-{
-    Package-Configure png ;
-}
 ```
 
 ## Target {#target}
@@ -253,28 +248,22 @@ option and without a failed earlier step the package is not builtin.
 When builtin is selected the package-specific `*-Configure` is not
 called. The source package has already published the six variables.
 
-The parent inverts the inline flag so `Builtin-Use` runs once. Prebuilt
-and system run only when the flag is absent. `Builtin-Configure`
-persists `pkg.TOP` when `Builtin-Use` succeeded:
+The parent inverts the inline flag so `Builtin-Configure` runs once.
+Prebuilt and system run only when the flag is absent:
 
 ```
 if ! $(WITH_PNG) && ! ( --with-inline-libpng in $(ARGV) )
 {
-    Prebuilt-Use png ;
+    if $(PT_WITH_PREBUILT)
+    {
+        Prebuilt-Use png ;
+    }
 
-    WITH_PNG = [ Png-Configure [ Package-Includes png ]
-                             : [ Package-Defines png ]
-                             : [ Package-LinkLibs png ]
-                             : [ Package-LibDir png ]
-                             : [ Package-LinkFlags png ] ] ;
+    WITH_PNG = [ Png-Configure png ] ;
 }
 
 if ! $(WITH_PNG)
 {
-    WITH_PNG = [ Builtin-Use png : $(PT_TOP) src libpng ] ;
-    if $(WITH_PNG)
-    {
-        Builtin-Configure png ;
-    }
+    WITH_PNG = [ Builtin-Configure png : $(PT_TOP) src libpng ] ;
 }
 ```

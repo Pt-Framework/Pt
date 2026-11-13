@@ -519,28 +519,17 @@ EchoOption --with-inline-zlib : "Using inline zlib" : [ HasOption --with-inline-
 
 if ! $(WITH_BUILTIN_ZLIB)
 {
-    Prebuilt-Use zlib ;
-
-    WITH_ZLIB = [ ZLib-Configure [ Package-Includes zlib ]
-                               : [ Package-Defines zlib ]
-                               : [ Package-LinkLibs zlib ]
-                               : [ Package-LibDir zlib ]
-                               : [ Package-LinkFlags zlib ] ] ;
-
-    if $(WITH_ZLIB)
+    if $(PT_WITH_PREBUILT)
     {
-        Package-Configure zlib ;
+        Prebuilt-Use zlib ;
     }
+
+    WITH_ZLIB = [ ZLib-Configure zlib ] ;
 }
 
 if ! $(WITH_ZLIB)
 {
-    WITH_ZLIB = [ Builtin-Use zlib : $(PT_TOP) src zlib ] ;
-    if $(WITH_ZLIB)
-    {
-        Builtin-Configure zlib ;
-        Package-Configure zlib ;
-    }
+    WITH_ZLIB = [ Builtin-Configure zlib : $(PT_TOP) src zlib ] ;
 }
 
 Package-Echo zlib ;
@@ -556,31 +545,21 @@ EchoOption --with-inline-libpng : "Using inline libpng" : [ HasOption --with-inl
 
 if ! $(WITH_PNG) && ! ( --with-inline-libpng in $(ARGV) )
 {
-    Prebuilt-Use png ;
+    if $(PT_WITH_PREBUILT)
+    {
+        Prebuilt-Use png ;
+    }
 
-    WITH_PNG = [ Png-Configure [ Package-Includes png ] :
-                               [ Package-Defines png ] :
-                               [ Package-LinkLibs png ] :
-                               [ Package-LibDir png ] :
-                               [ Package-LinkFlags png ] ] ;
+    WITH_PNG = [ Png-Configure png ] ;
 }
 
 if ! $(WITH_PNG)
 {
-    WITH_PNG = [ Builtin-Use png : $(PT_TOP) src libpng ] ;
-    if $(WITH_PNG)
-    {
-        Builtin-Configure png ;
-    }
+    WITH_PNG = [ Builtin-Configure png : $(PT_TOP) src libpng ] ;
 }
 
 Package-Echo png ;
 EchoOption WITH_PNG : "PNG found" : $(WITH_PNG:E="no") ;
-
-if $(WITH_PNG)
-{
-    Package-Configure png ;
-}
 
 #############################################################################
 # JPEG support with libjpeg
@@ -592,32 +571,21 @@ EchoOption --with-inline-libjpeg : "Using inline libjpeg" : [ HasOption --with-i
 
 if ! $(WITH_JPEG) && ! ( --with-inline-libjpeg in $(ARGV) )
 {
-    Prebuilt-Use jpeg ;
+    if $(PT_WITH_PREBUILT)
+    {
+        Prebuilt-Use jpeg ;
+    }
 
-    WITH_JPEG = [ Jpeg-Configure
-                    [ Package-Includes jpeg ]
-                  : [ Package-Defines jpeg ]
-                  : [ Package-LinkLibs jpeg ]
-                  : [ Package-LibDir jpeg ]
-                  : [ Package-LinkFlags jpeg ] ] ;
+    WITH_JPEG = [ Jpeg-Configure jpeg ] ;
 }
 
 if ! $(WITH_JPEG)
 {
-    WITH_JPEG = [ Builtin-Use jpeg : $(PT_TOP) src libjpeg ] ;
-    if $(WITH_JPEG)
-    {
-        Builtin-Configure jpeg ;
-    }
+    WITH_JPEG = [ Builtin-Configure jpeg : $(PT_TOP) src libjpeg ] ;
 }
 
 Package-Echo jpeg ;
 EchoOption WITH_JPEG : "JPEG found" : $(WITH_JPEG:E="no") ;
-
-if $(WITH_JPEG)
-{
-    Package-Configure jpeg ;
-}
 
 #############################################################################
 # Freetype support
@@ -629,32 +597,21 @@ EchoOption --with-inline-freetype : "Using inline Freetype" : [ HasOption --with
 
 if ! $(WITH_FREETYPE) && ! ( --with-inline-freetype in $(ARGV) )
 {
-    Prebuilt-Use freetype ;
+    if $(PT_WITH_PREBUILT)
+    {
+        Prebuilt-Use freetype ;
+    }
 
-    WITH_FREETYPE = [ Freetype-Configure
-                        [ Package-Includes freetype ]
-                      : [ Package-Defines freetype ]
-                      : [ Package-LinkLibs freetype ]
-                      : [ Package-LibDir freetype ]
-                      : [ Package-LinkFlags freetype ] ] ;
+    WITH_FREETYPE = [ Freetype-Configure freetype ] ;
 }
 
 if ! $(WITH_FREETYPE)
 {
-    WITH_FREETYPE = [ Builtin-Use freetype : $(PT_TOP) src freetype ] ;
-    if $(WITH_FREETYPE)
-    {
-        Builtin-Configure freetype ;
-    }
+    WITH_FREETYPE = [ Builtin-Configure freetype : $(PT_TOP) src freetype ] ;
 }
 
 Package-Echo freetype ;
 EchoOption WITH_FREETYPE : "Freetype found" : $(WITH_FREETYPE:E="no") ;
-
-if $(WITH_FREETYPE)
-{
-    Package-Configure freetype ;
-}
 
 #############################################################################
 # SSL libraries and includes
@@ -670,9 +627,8 @@ EchoOption --with-mbedtls : "Using mbedTLS" : [ HasOption --with-mbedtls ] ;
 
 if ! $(WITH_SSL) && --with-inline-openssl in $(ARGV)
 {
-    if [ Builtin-Use openssl : $(PT_TOP) src openssl ]
+    if [ Builtin-Configure openssl : $(PT_TOP) src openssl ]
     {
-        Builtin-Configure openssl ;
         WITH_SSL = yes ;
         PT_SSL_IMPL = openssl ;
     }
@@ -680,14 +636,12 @@ if ! $(WITH_SSL) && --with-inline-openssl in $(ARGV)
 
 if ! $(WITH_SSL) && --with-openssl in $(ARGV)
 {
-    Prebuilt-Use openssl ;
+    if $(PT_WITH_PREBUILT)
+    {
+        Prebuilt-Use openssl ;
+    }
 
-    if [ OpenSsl-Configure
-            [ Package-Includes openssl ]
-          : [ Package-Defines openssl ]
-          : [ Package-LinkLibs openssl ]
-          : [ Package-LibDir openssl ]
-          : [ Package-LinkFlags openssl ] ]
+    if [ OpenSsl-Configure openssl ]
     {
         WITH_SSL = yes ;
         PT_SSL_IMPL = openssl ;
@@ -696,9 +650,8 @@ if ! $(WITH_SSL) && --with-openssl in $(ARGV)
 
 if ! $(WITH_SSL) && --with-inline-mbedtls in $(ARGV)
 {
-    if [ Builtin-Use mbedtls : $(PT_TOP) src mbedtls ]
+    if [ Builtin-Configure mbedtls : $(PT_TOP) src mbedtls ]
     {
-        Builtin-Configure mbedtls ;
         WITH_SSL = yes ;
         PT_SSL_IMPL = mbedtls ;
     }
@@ -706,14 +659,12 @@ if ! $(WITH_SSL) && --with-inline-mbedtls in $(ARGV)
 
 if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
 {
-    Prebuilt-Use mbedtls ;
+    if $(PT_WITH_PREBUILT)
+    {
+        Prebuilt-Use mbedtls ;
+    }
 
-    if [ MbedTls-Configure
-            [ Package-Includes mbedtls ]
-          : [ Package-Defines mbedtls ]
-          : [ Package-LinkLibs mbedtls ]
-          : [ Package-LibDir mbedtls ]
-          : [ Package-LinkFlags mbedtls ] ]
+    if [ MbedTls-Configure mbedtls ]
     {
         WITH_SSL = yes ;
         PT_SSL_IMPL = mbedtls ;
@@ -722,14 +673,12 @@ if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
 
 if ! $(WITH_SSL)
 {
-    Prebuilt-Use openssl ;
+    if $(PT_WITH_PREBUILT)
+    {
+        Prebuilt-Use openssl ;
+    }
 
-    if [ OpenSsl-Configure
-            [ Package-Includes openssl ]
-          : [ Package-Defines openssl ]
-          : [ Package-LinkLibs openssl ]
-          : [ Package-LibDir openssl ]
-          : [ Package-LinkFlags openssl ] ]
+    if [ OpenSsl-Configure openssl ]
     {
         WITH_SSL = yes ;
         PT_SSL_IMPL = openssl ;
@@ -738,14 +687,12 @@ if ! $(WITH_SSL)
 
 if ! $(WITH_SSL)
 {
-    Prebuilt-Use mbedtls ;
+    if $(PT_WITH_PREBUILT)
+    {
+        Prebuilt-Use mbedtls ;
+    }
 
-    if [ MbedTls-Configure
-            [ Package-Includes mbedtls ]
-          : [ Package-Defines mbedtls ]
-          : [ Package-LinkLibs mbedtls ]
-          : [ Package-LibDir mbedtls ]
-          : [ Package-LinkFlags mbedtls ] ]
+    if [ MbedTls-Configure mbedtls ]
     {
         WITH_SSL = yes ;
         PT_SSL_IMPL = mbedtls ;
@@ -760,13 +707,11 @@ if ! $(WITH_SSL)
 if $(PT_SSL_IMPL) = openssl
 {
     Package-Echo openssl ;
-    Package-Configure openssl ;
 }
 
 if $(PT_SSL_IMPL) = mbedtls
 {
     Package-Echo mbedtls ;
-    Package-Configure mbedtls ;
 }
 
 Configure WITH_SSL ;

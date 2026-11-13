@@ -94,16 +94,26 @@ rule Builtin-Use ( pkg : dir + )
     return $(result) ;
 }
 
-# Builtin-Configure <pkg>
+# Builtin-Configure <pkg> : <dir>
 #
-# Persists pkg.TOP via Configure. Does not probe and does not decide
-# success. The caller invokes this when Builtin-Use has just
-# succeeded.
+# Selects the source package at dir via Builtin-Use. On success
+# persists pkg.TOP and the six common variables and returns pkg.
+# Returns empty when Builtin-Use does not set pkg.TARGET. Does not
+# probe.
 #
-rule Builtin-Configure ( pkg )
+rule Builtin-Configure ( pkg : dir + )
 {
-    local top = $(pkg).TOP ;
-    Configure $(top) ;
+    local result ;
+
+    if [ Builtin-Use $(pkg) : $(dir) ]
+    {
+        local top = $(pkg).TOP ;
+        Configure $(top) ;
+        Package-Configure $(pkg) ;
+        result = $(pkg) ;
+    }
+
+    return $(result) ;
 }
 
 # Builtin-SubInclude <pkg>

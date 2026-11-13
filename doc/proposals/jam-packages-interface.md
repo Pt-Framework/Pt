@@ -134,18 +134,20 @@ prebuilt and builtin.
 For each package the steps are independent `if`s. Each step runs only
 while `WITH_pkg` is still empty. The first success sets `WITH_pkg`.
 
-1. Builtin override: `--with-inline-xxx` is given and `Builtin-Use`
-   succeeds. This overrides every other source.
+1. Builtin override: `--with-inline-xxx` is given and
+   `Builtin-Configure pkg : dir` succeeds. This overrides every other
+   source.
 2. Prebuilt or system/custom: when `--with-prebuilt` is selected,
    `Jamconfigure` calls `Prebuilt-Load root` once after fetch.
-   `Prebuilt-Use` fills only still-empty flag variables when the
-   bundle contains the package (side effect only). Already set values
-   (including `-s` overrides) are left unchanged. Then the
-   package-specific `*-Configure` is called with the resulting current
-   values (prebuilt paths, `-s` hints, or empty for a system probe).
-   Custom `-s` settings are hints for the system probe, not a separate
-   source.
-3. Builtin fallback: `Builtin-Use` succeeds when nothing earlier did.
+   `Prebuilt-Use` runs only when `PT_WITH_PREBUILT` is set. It fills
+   still-empty flag variables when the bundle contains the package
+   (side effect only). Already set values (including `-s` overrides)
+   are left unchanged. Then the package-specific `*-Configure pkg`
+   reads the current package state (prebuilt paths, `-s` hints, or
+   empty for a system probe). Custom `-s` settings are hints for the
+   system probe. They sit in `pkg.*` before any rule runs.
+3. Builtin fallback: `Builtin-Configure pkg : dir` succeeds when
+   nothing earlier did.
 
 `Prebuilt-Use` returns the package name when the bundle contains it,
 empty otherwise. Its return value is not assigned to `WITH_pkg`. It
@@ -158,16 +160,21 @@ the package name when `pkg.TARGET` is set, empty otherwise. A configure
 error in the package `Jamconfigure` calls `Exit` and aborts. A missing
 root returns empty.
 
-A `*-Configure` rule receives the current flag values as hints. It does
-not know whether they came from a prebuilt bundle, a user override, or
-an empty system probe.
+`Builtin-Configure pkg : dir` calls `Builtin-Use`. On success it
+persists `pkg.TOP` and the six common variables via `Package-Configure`
+and returns the package name.
+
+A `*-Configure` rule takes the package name. It reads the current flag
+values from the accessors as hints. It does not know whether they came
+from a prebuilt bundle, a user override, or an empty system probe.
 
 It probes with `CheckBuildC++`. `FIncludes` of `INCLUDES` and `FLibPath`
 of `LIBDIR` appear only on the probe line, together with `LINKLIBS` and
 `LINKFLAGS`. On success it writes the five flag variables unmerged
 through the `Package-Set*` accessors (`LIBDIR` still raw, `LINKFLAGS`
-still extra flags) and returns the package name. On failure it returns
-empty and leaves the variables unchanged. It does not set `pkg.TARGET`.
+still extra flags), persists them with `Package-Configure`, and returns
+the package name. On failure it returns empty and leaves the variables
+unchanged. It does not set `pkg.TARGET`.
 
 `SetDependencyPath`, `DEPS_INCLUDES`, `DEPS_LIBDIR`,
 `CheckDependencyCompileC++`, `CheckDependencyLinkC++` and
@@ -178,10 +185,10 @@ detect a source package by a non-empty target. There is no separate
 `WITH_BUILTIN_xxx` flag.
 
 `Package-Echo` always runs so the configure output shows the option
-and the variable values. `Package-Configure` runs only when `WITH_pkg`
-is set. It persists the six variables that are already set; it does not
-probe and it does not decide success. An unfound package does not
-persist values for later build steps.
+and the variable values. `Package-Configure` is the persist primitive
+for the six names. `*-Configure` and `Builtin-Configure` call it on
+success. An unfound package does not persist values for later build
+steps.
 
 When builtin is selected the package-specific `*-Configure` is not
 called. The source package `Jamconfigure` has already published the
@@ -197,37 +204,26 @@ EchoOption --with-inline-zlib : "Using inline zlib"
 
 if ! $(WITH_ZLIB) && ! ( --with-inline-zlib in $(ARGV) )
 {
-    Prebuilt-Use zlib ;
+    if $(PT_WITH_PREBUILT)
+    {
+        Prebuilt-Use zlib ;
+    }
 
-    WITH_ZLIB = [ ZLib-Configure
-                    [ Package-Includes zlib ]
-                  : [ Package-Defines zlib ]
-                  : [ Package-LinkLibs zlib ]
-                  : [ Package-LibDir zlib ]
-                  : [ Package-LinkFlags zlib ] ] ;
+    WITH_ZLIB = [ ZLib-Configure zlib ] ;
 }
 
 if ! $(WITH_ZLIB)
 {
-    WITH_ZLIB = [ Builtin-Use zlib : $(PT_TOP) src zlib ] ;
-    if $(WITH_ZLIB)
-    {
-        Builtin-Configure zlib ;
-    }
+    WITH_ZLIB = [ Builtin-Configure zlib : $(PT_TOP) src zlib ] ;
 }
 
 Package-Echo zlib ;
 EchoOption WITH_ZLIB : "ZLib found" : $(WITH_ZLIB:E="no") ;
-
-if $(WITH_ZLIB)
-{
-    Package-Configure zlib ;
-}
 ```
 
 The same pattern applies to png, jpeg and FreeType. `--with-inline-xxx`
-skips prebuilt and system. `Builtin-Use` runs once as override or as
-fallback.
+skips prebuilt and system. `Builtin-Configure` runs once as override or
+as fallback.
 
 ### SSL backends
 
@@ -238,12 +234,12 @@ prebuilt or system backend.
 
 Independent `if`s, each `if ! $(WITH_SSL)`. Explicit flags run first:
 
-1. `--with-inline-openssl`: `Builtin-Use openssl` and `Builtin-Configure openssl`
-2. `--with-openssl`: `Prebuilt-Use openssl` and `OpenSsl-Configure`
-3. `--with-inline-mbedtls`: `Builtin-Use mbedtls` and `Builtin-Configure mbedtls`
-4. `--with-mbedtls`: `Prebuilt-Use mbedtls` and `MbedTls-Configure`
-5. Default openssl: `Prebuilt-Use openssl` and `OpenSsl-Configure`
-6. Default mbedtls: `Prebuilt-Use mbedtls` and `MbedTls-Configure`
+1. `--with-inline-openssl`: `Builtin-Configure openssl : dir`
+2. `--with-openssl`: `Prebuilt-Use openssl` and `OpenSsl-Configure openssl`
+3. `--with-inline-mbedtls`: `Builtin-Configure mbedtls : dir`
+4. `--with-mbedtls`: `Prebuilt-Use mbedtls` and `MbedTls-Configure mbedtls`
+5. Default openssl: `Prebuilt-Use openssl` and `OpenSsl-Configure openssl`
+6. Default mbedtls: `Prebuilt-Use mbedtls` and `MbedTls-Configure mbedtls`
 7. `PT_SSL_IMPL = nossl`
 
 Success sets `WITH_SSL` and `PT_SSL_IMPL` to `openssl` or `mbedtls`.

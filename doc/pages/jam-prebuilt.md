@@ -92,23 +92,23 @@ For zlib, png, jpeg and FreeType, configure looks for each library in this
 order:
 
 @verbatim
---with-inline-xxx  ->  Builtin-Use
+--with-inline-xxx  ->  Builtin-Configure
         |
         |  else
         v
-Prebuilt-Use (no-op unless --with-prebuilt)  ->  *-Configure probe
+Prebuilt-Use (only with --with-prebuilt)  ->  *-Configure pkg
         |
         |  else
         v
-Builtin-Use fallback
+Builtin-Configure fallback
 @endverbatim
 
-@c Prebuilt-Use fills only still-empty flag variables. @c *-Configure then
-probes those values: prebuilt paths, @c -s hints, or an empty system probe
-(pkg-config and compiler paths). There is no fallback from one platform
-folder to another. If the chosen folder is missing, configure reports an
-error. If the probe fails, zlib, png, jpeg and FreeType fall back to
-sources in the tree.
+@c Prebuilt-Use fills only still-empty flag variables. @c *-Configure pkg
+then reads those values: prebuilt paths, @c -s hints, or an empty system
+probe (pkg-config and compiler paths). There is no fallback from one
+platform folder to another. If the chosen folder is missing, configure
+reports an error. If the probe fails, zlib, png, jpeg and FreeType fall
+back to sources in the tree.
 
 OpenSSL and mbedTLS are the Pt-Ssl backends. Builtin runs only for
 @c --with-inline-openssl or @c --with-inline-mbedtls. @c --with-openssl and
@@ -252,17 +252,19 @@ different files on disk.
 
 @section jam-prebuilt-page-Configure Configure Integration
 
-Every package Configure rule has the same arguments:
+Every package Configure rule takes the package name:
 
 @verbatim
-*-Configure INCLUDES : DEFINES : LINKLIBS : LIBDIR : LINKFLAGS
+*-Configure pkg
 @endverbatim
 
-If any of those is set, pkg-config is skipped and the first link attempt uses
-the passed libraries. If all five are empty, pkg-config and name guessing
-run. On success the rule writes the five flags unmerged through
-@c Package-Set* (@c LIBDIR still raw, @c LINKFLAGS still extra flags) and
-returns the package name. It does not set @c pkg.TARGET.
+It reads the current @c pkg.* flag values as hints. If any of those is set,
+pkg-config is skipped and the first link attempt uses the stored libraries.
+If all five are empty, pkg-config and name guessing run. On success the
+rule writes the five flags unmerged through @c Package-Set* (@c LIBDIR
+still raw, @c LINKFLAGS still extra flags), persists them with
+@c Package-Configure, and returns the package name. It does not set
+@c pkg.TARGET.
 
 Jamconfigure calls @c Prebuilt-Load root once after fetch. That binds the
 bundle. @c Prebuilt-Use pkg fills still-empty @c pkg.* flag variables when
@@ -274,40 +276,28 @@ while @c WITH_pkg is empty:
 @code
 Load zlib.jam ;
 
-if ! $(WITH_ZLIB) && --with-inline-zlib in $(ARGV)
+if ! $(WITH_ZLIB) && ! ( --with-inline-zlib in $(ARGV) )
 {
-    WITH_ZLIB = [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ] ;
+    if $(PT_WITH_PREBUILT)
+    {
+        Prebuilt-Use zlib ;
+    }
+
+    WITH_ZLIB = [ ZLib-Configure zlib ] ;
 }
 
 if ! $(WITH_ZLIB)
 {
-    Prebuilt-Use zlib ;
-
-    WITH_ZLIB = [ ZLib-Configure
-                    [ Package-Includes zlib ]
-                  : [ Package-Defines zlib ]
-                  : [ Package-LinkLibs zlib ]
-                  : [ Package-LibDir zlib ]
-                  : [ Package-LinkFlags zlib ] ] ;
-}
-
-if ! $(WITH_ZLIB)
-{
-    WITH_ZLIB = [ Builtin-Use zlib : [ FDirName $(PT_TOP) src zlib ] ] ;
+    WITH_ZLIB = [ Builtin-Configure zlib : $(PT_TOP) src zlib ] ;
 }
 
 Package-Echo zlib ;
-
-if $(WITH_ZLIB)
-{
-    Package-Configure zlib ;
-}
 @endcode
 
-@c Package-Echo always prints the six variables. @c Package-Configure
-persists them only when the package was found. A builtin package
-@c Jamconfigure publishes the six variables, including @c pkg.TARGET.
-There is no separate @c WITH_BUILTIN_xxx flag.
+@c Package-Echo always prints the six variables. @c *-Configure and
+@c Builtin-Configure persist through @c Package-Configure when the package
+was found. A builtin package @c Jamconfigure publishes the six variables,
+including @c pkg.TARGET. There is no separate @c WITH_BUILTIN_xxx flag.
 
 OpenSSL is package @c openssl, mbedTLS is package @c mbedtls. Jamconfigure
 selects the Pt-Ssl backend with sequential @c if ! $(WITH_SSL) steps:

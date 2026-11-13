@@ -47,19 +47,25 @@ rule OpenSsl-ConfigureLink ( includes * : defines * : linklibs * : libdir * : li
     return $(used) ;
 }
 
-# OpenSsl-Configure INCLUDES : DEFINES : LINKLIBS : LIBDIR : LINKFLAGS
+# OpenSsl-Configure pkg
 #
-# Probes for a system OpenSSL installation by trying pkg-config first (if
-# no hints have been provided), then falling back to compile-probes with
-# toolset-neutral library flags.
+# Reads pkg.* as hints. Probes for a system OpenSSL installation by
+# trying pkg-config first (if no hints have been provided), then falling
+# back to compile-probes with toolset-neutral library flags.
 #
-# On success writes the five flag variables unmerged through Package-Set*
-# and returns openssl. On failure returns empty and leaves the variables
-# unchanged.
+# On success writes the five flag variables unmerged through Package-Set*,
+# persists them with Package-Configure, and returns pkg. On failure
+# returns empty and leaves the variables unchanged. Does not set
+# pkg.TARGET.
 
-rule OpenSsl-Configure ( includes * : defines * : linklibs * : libdir * : linkflags * )
+rule OpenSsl-Configure ( pkg )
 {
     local result ;
+    local includes  = [ Package-Includes $(pkg) ] ;
+    local defines   = [ Package-Defines $(pkg) ] ;
+    local linklibs  = [ Package-LinkLibs $(pkg) ] ;
+    local libdir    = [ Package-LibDir $(pkg) ] ;
+    local linkflags = [ Package-LinkFlags $(pkg) ] ;
 
     if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(defines) && ! $(linkflags)
     {
@@ -74,7 +80,7 @@ rule OpenSsl-Configure ( includes * : defines * : linklibs * : libdir * : linkfl
 
             if [ OpenSsl-Probe $(includes) : $(defines) : $(linklibs) : : $(linkflags) ]
             {
-                result = openssl ;
+                result = $(pkg) ;
             }
         }
     }
@@ -88,18 +94,19 @@ rule OpenSsl-Configure ( includes * : defines * : linklibs * : libdir * : linkfl
             if $(used)
             {
                 linklibs = $(used) ;
-                result = openssl ;
+                result = $(pkg) ;
             }
         }
     }
 
     if $(result)
     {
-        Package-SetIncludes openssl : $(includes) ;
-        Package-SetDefines openssl : $(defines) ;
-        Package-SetLinkLibs openssl : $(linklibs) ;
-        Package-SetLibDir openssl : $(libdir) ;
-        Package-SetLinkFlags openssl : $(linkflags) ;
+        Package-SetIncludes $(pkg) : $(includes) ;
+        Package-SetDefines $(pkg) : $(defines) ;
+        Package-SetLinkLibs $(pkg) : $(linklibs) ;
+        Package-SetLibDir $(pkg) : $(libdir) ;
+        Package-SetLinkFlags $(pkg) : $(linkflags) ;
+        Package-Configure $(pkg) ;
     }
 
     return $(result) ;

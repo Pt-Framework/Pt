@@ -67,19 +67,25 @@ rule ZLib-ConfigureLink ( includes * : defines * : linklibs * : libdir * : linkf
     return $(used) ;
 }
 
-# ZLib-Configure INCLUDES : DEFINES : LINKLIBS : LIBDIR : LINKFLAGS
+# ZLib-Configure pkg
 #
-# Probes for a system zlib installation by trying pkg-config first (if no
-# hints have been provided), then falling back to compile-probes with
-# toolset-neutral library flags.
+# Reads pkg.* as hints. Probes for a system zlib installation by trying
+# pkg-config first (if no hints have been provided), then falling back
+# to compile-probes with toolset-neutral library flags.
 #
-# On success writes the five flag variables unmerged through Package-Set*
-# and returns zlib. On failure returns empty and leaves the variables
-# unchanged.
+# On success writes the five flag variables unmerged through Package-Set*,
+# persists them with Package-Configure, and returns pkg. On failure
+# returns empty and leaves the variables unchanged. Does not set
+# pkg.TARGET.
 
-rule ZLib-Configure ( includes * : defines * : linklibs * : libdir * : linkflags * )
+rule ZLib-Configure ( pkg )
 {
     local result ;
+    local includes  = [ Package-Includes $(pkg) ] ;
+    local defines   = [ Package-Defines $(pkg) ] ;
+    local linklibs  = [ Package-LinkLibs $(pkg) ] ;
+    local libdir    = [ Package-LibDir $(pkg) ] ;
+    local linkflags = [ Package-LinkFlags $(pkg) ] ;
 
     if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(defines) && ! $(linkflags)
     {
@@ -94,7 +100,7 @@ rule ZLib-Configure ( includes * : defines * : linklibs * : libdir * : linkflags
 
             if [ ZLib-Probe $(includes) : $(defines) : $(linklibs) : : $(linkflags) ]
             {
-                result = zlib ;
+                result = $(pkg) ;
             }
         }
     }
@@ -108,18 +114,19 @@ rule ZLib-Configure ( includes * : defines * : linklibs * : libdir * : linkflags
             if $(used)
             {
                 linklibs = $(used) ;
-                result = zlib ;
+                result = $(pkg) ;
             }
         }
     }
 
     if $(result)
     {
-        Package-SetIncludes zlib : $(includes) ;
-        Package-SetDefines zlib : $(defines) ;
-        Package-SetLinkLibs zlib : $(linklibs) ;
-        Package-SetLibDir zlib : $(libdir) ;
-        Package-SetLinkFlags zlib : $(linkflags) ;
+        Package-SetIncludes $(pkg) : $(includes) ;
+        Package-SetDefines $(pkg) : $(defines) ;
+        Package-SetLinkLibs $(pkg) : $(linklibs) ;
+        Package-SetLibDir $(pkg) : $(libdir) ;
+        Package-SetLinkFlags $(pkg) : $(linkflags) ;
+        Package-Configure $(pkg) ;
     }
 
     return $(result) ;
