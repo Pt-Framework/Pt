@@ -131,6 +131,9 @@ unchanged):
   walked.
 - leaves `pkg.TARGET` empty
 
+`Prebuilt-Use` prints nothing. Filling hints is not a find. The
+following `*-Configure` decides the find.
+
 The fill is done through the `Package-Set*` accessors, but only when
 the corresponding variable is still empty. The existing `Prebuilt-*`
 primitive rules stay. They walk `prebuilt.<pkg>.DEPENDS` for include

@@ -64,14 +64,13 @@ package's `Jamconfigure`, and returns the package name when
 
 `Builtin-Configure pkg : dir` calls `Builtin-Use`. On success it
 persists `pkg.TOP` and the six common variables via `Package-Configure`
-and returns the package name.
+and returns the package name. It does not print. A missing directory
+returns empty.
 
 The parent names the source path once, at configure:
 
 ```
 WITH_PNG = [ Builtin-Configure png : $(PT_TOP) src libpng ] ;
-
-Package-Echo png ;
 ```
 
 ## Target {#target}
@@ -88,8 +87,9 @@ Package-SetTarget   png : png ;
 uses.) `Package-SetTarget` sets this package's library name.
 
 A non-empty `pkg.TARGET` is how `Builtin-Use` and consumers detect a
-builtin package. There is no separate status flag and no separate
-`WITH_BUILTIN_xxx`.
+builtin package. There is no separate status flag. `WITH_BUILTIN_xxx`
+holds the inline option during configure. It is not persisted and it
+is not how a consumer detects a builtin package.
 
 The package `Jamconfigure` uses `Builtin-Top` for its source root. It
 does not mention the parent tree (`PT_TOP`) or the relative tokens the
@@ -248,11 +248,15 @@ option and without a failed earlier step the package is not builtin.
 When builtin is selected the package-specific `*-Configure` is not
 called. The source package has already published the six variables.
 
-The parent inverts the inline flag so `Builtin-Configure` runs once.
-Prebuilt and system run only when the flag is absent:
+The parent stores the inline option and skips prebuilt and system
+while it is set. `Builtin-Configure` then runs once, as override or as
+fallback:
 
 ```
-if ! $(WITH_PNG) && ! ( --with-inline-libpng in $(ARGV) )
+WITH_BUILTIN_PNG = [ HasOption --with-inline-libpng ] ;
+EchoOption --with-inline-libpng : "Using inline libpng" : $(WITH_BUILTIN_PNG) ;
+
+if ! $(WITH_BUILTIN_PNG)
 {
     if $(PT_WITH_PREBUILT)
     {
