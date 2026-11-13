@@ -515,7 +515,7 @@ if $(PT_WITH_PREBUILT)
 Load zlib.jam ;
 
 WITH_BUILTIN_ZLIB = [ HasOption --with-inline-zlib ] ;
-EchoOption --with-inline-zlib : "Using inline zlib" : [ HasOption --with-inline-zlib ] ;
+EchoOption --with-inline-zlib : "Using inline zlib" : $(WITH_BUILTIN_ZLIB) ;
 
 if ! $(WITH_BUILTIN_ZLIB)
 {
@@ -541,9 +541,10 @@ EchoOption WITH_ZLIB : "ZLib found" : $(WITH_ZLIB:E="no") ;
 
 Load libpng.jam ;
 
-EchoOption --with-inline-libpng : "Using inline libpng" : [ HasOption --with-inline-libpng ] ;
+WITH_BUILTIN_PNG = [ HasOption --with-inline-libpng ] ;
+EchoOption --with-inline-libpng : "Using inline libpng" : $(WITH_BUILTIN_PNG) ;
 
-if ! $(WITH_PNG) && ! ( --with-inline-libpng in $(ARGV) )
+if ! $(WITH_BUILTIN_PNG)
 {
     if $(PT_WITH_PREBUILT)
     {
@@ -567,9 +568,10 @@ EchoOption WITH_PNG : "PNG found" : $(WITH_PNG:E="no") ;
 
 Load libjpeg.jam ;
 
-EchoOption --with-inline-libjpeg : "Using inline libjpeg" : [ HasOption --with-inline-libjpeg ] ;
+WITH_BUILTIN_JPEG = [ HasOption --with-inline-libjpeg ] ;
+EchoOption --with-inline-libjpeg : "Using inline libjpeg" : $(WITH_BUILTIN_JPEG) ;
 
-if ! $(WITH_JPEG) && ! ( --with-inline-libjpeg in $(ARGV) )
+if ! $(WITH_BUILTIN_JPEG)
 {
     if $(PT_WITH_PREBUILT)
     {
@@ -593,9 +595,10 @@ EchoOption WITH_JPEG : "JPEG found" : $(WITH_JPEG:E="no") ;
 
 Load freetype.jam ;
 
-EchoOption --with-inline-freetype : "Using inline Freetype" : [ HasOption --with-inline-freetype ] ;
+WITH_BUILTIN_FREETYPE = [ HasOption --with-inline-freetype ] ;
+EchoOption --with-inline-freetype : "Using inline Freetype" : $(WITH_BUILTIN_FREETYPE) ;
 
-if ! $(WITH_FREETYPE) && ! ( --with-inline-freetype in $(ARGV) )
+if ! $(WITH_BUILTIN_FREETYPE)
 {
     if $(PT_WITH_PREBUILT)
     {
