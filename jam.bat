@@ -36,10 +36,14 @@ if [%1]==[] goto init_parsed
 if defined INIT_STATE (
     set "INIT_ARGUMENT=%~1"
     setlocal EnableDelayedExpansion
-    set "INIT_HEADERS=!INIT_HEADERS! --header "!INIT_ARGUMENT!""
-    for /f "delims=" %%H in ("!INIT_HEADERS!") do (
+    if "!INIT_STATE!"=="--header" (
+        set "INIT_HEADERS=!INIT_HEADERS! --header "!INIT_ARGUMENT!""
+        for /f "delims=" %%H in ("!INIT_HEADERS!") do (
+            endlocal
+            set "INIT_HEADERS=%%H"
+        )
+    ) else (
         endlocal
-        set "INIT_HEADERS=%%H"
     )
     set "INIT_STATE="
 ) else (
