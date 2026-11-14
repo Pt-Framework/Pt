@@ -55,14 +55,14 @@ jobs:
             runtime_type: Debug
             runtime: MDd
             compiler: msvc
-          - os: macos-15
+          - os: macos-26
             profile: conan/prebuilt/profiles/macos-clang-arm64
             prebuilt_id: macos-arm64-clang
             build_type: Release
             runtime_type: ""
             runtime: ""
             compiler: apple-clang
-          - os: macos-15-intel
+          - os: macos-26-intel
             profile: conan/prebuilt/profiles/macos-clang-x64
             prebuilt_id: macos-x64-clang
             build_type: Release
