@@ -310,7 +310,7 @@ build_host_binary()
 
     case `uname -s` in
     Darwin)
-        FLAGS="-O2 -arch x86_64 -arch arm64 -mmacosx-version-min=11.0"
+        FLAGS="-O2 -arch x86_64 -arch arm64 -mmacosx-version-min=13.0"
         ;;
     *)
         FLAGS="-O2"
