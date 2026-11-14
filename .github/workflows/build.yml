@@ -30,7 +30,7 @@ jobs:
       - name: Build
         run: ./jam.sh -q -j8
 
-  MacOS-15-Debug:
+  MacOS-26-Debug:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v6
