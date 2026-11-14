@@ -76,7 +76,7 @@ jobs:
             host_id: linux-x64
             init: ./jam.sh init
             binary: jam/core/bin/linux-x64/jam
-          - os: macos-15
+          - os: macos-latest
             host_id: macos-universal
             init: ./jam.sh init
             binary: jam/core/bin/macos-universal/jam
