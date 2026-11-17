@@ -9,6 +9,7 @@
 #include <Pt/Http/Stream.h>
 #include <Pt/System/IOError.h>
 #include "WebSocketChannel.h"
+#include <Pt/Http/Message.h>
 
 #include <stdexcept>
 
@@ -18,56 +19,20 @@ namespace Http {
 
 namespace {
 
-bool isOws(char ch)
-{
-    return ch == ' ' || ch == '\t';
-}
-
-
-bool isProtocolToken(const std::string& name)
-{
-    if(name.empty())
-        return false;
-
-    for(std::size_t i = 0; i < name.size(); ++i)
-    {
-        const unsigned char ch = static_cast<unsigned char>(name[i]);
-        if(ch <= 32 || ch == 127 || ch == ',' || ch == '(' || ch == ')'
-           || ch == '<' || ch == '>' || ch == '@' || ch == ';'
-           || ch == ':' || ch == '\\' || ch == '"' || ch == '/'
-           || ch == '[' || ch == ']' || ch == '?' || ch == '='
-           || ch == '{' || ch == '}')
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
 std::string selectedProtocol(const Reply& reply)
 {
-    const char* field = reply.header().get("Sec-WebSocket-Protocol");
-    if( ! field || ! *field )
+    const MessageHeader::FieldIterator field =
+        reply.header().field("Sec-WebSocket-Protocol");
+    if(field == reply.header().end() || field->empty())
         return std::string();
 
-    const std::string text(field);
-    std::size_t left = 0;
-    std::size_t right = text.size();
-    while(left < right && isOws(text[left]))
-        ++left;
-    while(right > left && isOws(text[right - 1]))
-        --right;
+    MessageHeader::ValueIterator it = field->begin();
+    const MessageHeader::Value protocol = *it;
+    ++it;
+    if(it != field->end())
+        throw HttpError("WebSocket protocol is not one value");
 
-    const std::string name = text.substr(left, right - left);
-    if(name.empty())
-        return std::string();
-
-    if(name.find(',') != std::string::npos || ! isProtocolToken(name))
-        throw HttpError("WebSocket protocol is not one token");
-
-    return name;
+    return std::string(protocol.data(), protocol.size());
 }
 
 }

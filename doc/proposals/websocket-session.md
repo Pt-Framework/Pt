@@ -13,9 +13,8 @@ and the behavior it has today.
 
 ## Baseline
 
-A missing or invalid key is not yet 400. A version other than 13
-is not yet 426 with `Sec-WebSocket-Version: 13`. The handshake key
-and the masking key are not yet drawn from an unpredictable source.
+The handshake key and the masking key are not yet drawn from an
+unpredictable source.
 
 ## Client handshake {#client-handshake}
 
@@ -52,6 +51,32 @@ Accept is stored for the key actually sent by each client handshake.
 A missing or invalid `Sec-WebSocket-Key` is 400. A version other
 than 13 is 426 with `Sec-WebSocket-Version: 13`. The handshake
 responder writes those replies. No stream is opened.
+
+The request is an upgrade to `websocket` only when `Connection`
+lists the token `Upgrade` and `Upgrade` lists the token
+`websocket`. Both comparisons ignore ASCII case. Optional
+whitespace around either token is not part of the token. A
+`Connection` value that merely contains those letters is not an
+upgrade.
+
+The client, the service, and the session use
+`MessageHeader::isToken` for a subprotocol name. An empty name, a
+comma, a separator, whitespace, a control, or DEL is rejected
+before the name is stored or written. The client offers stored
+names in order. The service stores accepted names in preference
+order. The session reads the one list value selected on the 101.
+
+`Sec-WebSocket-Version` lists the token `13`. `Sec-WebSocket-Key`
+is one list value whose Base64 decoding is exactly sixteen bytes.
+Padding is part of that value. A value that is not valid Base64,
+or whose decoding has a different length, is not a key. The accept
+digest is one list value. The comparison is case-sensitive.
+
+The header reads these as list values. The WebSocket types do
+not trim, split, or lowercase a stored field themselves. The accept
+digest remains `WebSocketChannel::getAcceptKey`. It is a protocol
+calculation on a key that has already been read, and it needs no
+channel instance or open stream.
 
 ## Nonce {#nonce}
 

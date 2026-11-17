@@ -11,6 +11,7 @@ if $(WITH_SSL)
 Main Pt-Http-test : Pt-Http-test.cpp
                     ServerTest.cpp
                     ParserTest.cpp
+                    MessageHeaderTest.cpp
                     WebSocketTest.cpp
                     WebSocketBufferTest.cpp
                     ;

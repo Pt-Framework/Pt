@@ -22,9 +22,11 @@
 
     %MessageHeader stores fields in a fixed buffer. %set() replaces a
     field, %add() appends another value for the same name, and %get()
-    and %has() look up a name. %begin() and %end() walk the fields.
-    Keep-alive, chunked transfer coding, content length and Upgrade are
-    derived from those fields rather than being a second header model.
+    and %has() look up a name. %has(name, value) reports that a list
+    token appears for that name. %begin() and %end() walk the fields,
+    and a field walks its stored value as list values. Keep-alive,
+    chunked transfer coding, content length and Upgrade are derived
+    from those fields rather than being a second header model.
 
     %body() is a bidirectional stream on the message. Write to it to
     fill a request or a reply that will be sent, and read from it when

@@ -57,8 +57,10 @@ class WebSocketServlet;
 
     The handshake responder answers a WebSocket upgrade with 101,
     with 503 when no servlet is attached or the accepted-session
-    limit is already reached, or with 404 when the request is not a
-    WebSocket upgrade. The responder is released before the server
+    limit is already reached, with 400 when Sec-WebSocket-Key is
+    missing or invalid, with 426 and Sec-WebSocket-Version: 13 when
+    Sec-WebSocket-Version is not 13, or with 404 when the request is
+    not a WebSocket upgrade. The responder is released before the server
     opens the stream. It is not the session. %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
     name several values, in preference order. An empty list accepts

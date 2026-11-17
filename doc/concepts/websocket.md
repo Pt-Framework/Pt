@@ -356,7 +356,17 @@ object does not serve two streams at once.
 ## Handshake
 
 The handshake stays an HTTP exchange. The handshake responder is not
-the session.
+the session. It reads and writes header fields. It does not own a
+second parser for whitespace or lists. That grammar belongs to the
+HTTP header.
+
+The request is an upgrade to the protocol `websocket`, so `Upgrade`
+names that protocol and `Connection` lists `Upgrade`. The version
+field is the token `13`. The key field is one token whose Base64
+decoding is exactly sixteen bytes. A quoted string is not a key.
+The protocol field is a list of tokens. Names are case-sensitive.
+The reply carries the accept digest as one token. HTTP whitespace
+around a field is not part of its value.
 
 On the client, headers set before `beginConnect()` are kept.
 `endConnect()` accepts only status 101, and only when
@@ -365,13 +375,17 @@ missing or different Accept is a failed handshake. No stream is
 opened. The key and the masking key come from an unpredictable
 source.
 
-On the server, a missing or invalid key is 400. A version other than
-13 is 426 with `Sec-WebSocket-Version: 13`. No stream is opened.
+On the server, a request that is not an upgrade to `websocket` is
+not this protocol. A missing or invalid key is 400. A version other
+than 13 is 426 with `Sec-WebSocket-Version: 13`. No stream is
+opened.
 
 `addProtocol()` offers one subprotocol name. Several calls offer
 several names, in order. The selected name, if the server echoes one,
 is `protocol()` after the handshake. No echo means no protocol was
-agreed.
+agreed. The client, the service, and the session use one
+classification of a protocol name. A name that is not a token is
+rejected before it is written.
 
 ## Timeouts
 

@@ -9,6 +9,7 @@
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
+#include <Pt/Http/Message.h>
 
 #include <stdexcept>
 
@@ -85,21 +86,8 @@ void WebSocketService::onSessionClosed(WebSocketSession& session)
 
 void WebSocketService::addProtocol(const std::string& name)
 {
-    if(name.empty())
-        throw std::invalid_argument("WebSocket protocol name is empty");
-
-    for(std::size_t i = 0; i < name.size(); ++i)
-    {
-        const unsigned char ch = static_cast<unsigned char>(name[i]);
-        if(ch <= 32 || ch == 127 || ch == ',' || ch == '(' || ch == ')'
-           || ch == '<' || ch == '>' || ch == '@' || ch == ';'
-           || ch == ':' || ch == '\\' || ch == '"' || ch == '/'
-           || ch == '[' || ch == ']' || ch == '?' || ch == '='
-           || ch == '{' || ch == '}')
-        {
-            throw std::invalid_argument("WebSocket protocol name is not a token");
-        }
-    }
+    if( ! MessageHeader::isToken(name.c_str()) )
+        throw std::invalid_argument("WebSocket protocol name is not a token");
 
     _protocols.push_back(name);
 }

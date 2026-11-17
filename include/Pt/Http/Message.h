@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2012 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -42,6 +42,7 @@ namespace Pt {
 namespace Http {
 
 class Connection;
+class MessageHeader;
 
 /** @brief HTTP message header.
 
@@ -50,12 +51,18 @@ class Connection;
     %Reply. Callers do not usually construct a header on its own; they
     use %header() on the message the client or responder already holds.
 
-    Fields are names and values. %set() replaces the value for a name,
-    %add() appends another value for the same name, and %remove()
-    deletes it. %get() returns the value or a null pointer, %has()
-    reports presence, and %isSet() tests that a name has a particular
-    value. %begin() and %end() walk the fields as %Field values, each
-    with a name and a value pointer into the header's buffer.
+    Fields are names and stored values. %set() replaces the value for
+    a name, %add() appends another value for the same name, and
+    %remove() deletes it. %get() returns the stored value or a null
+    pointer. %has(name) reports presence. %has(name, value) reports
+    that a list token appears for that name, across every stored line
+    and after comma-splitting, and the comparison ignores ASCII case.
+    %isSet() compares the whole stored string. %field() returns an
+    iterator to the first field of that name, or %end() when the name
+    is absent. %begin() and %end() walk the fields as %FieldIterator.
+    Each field is one stored value. A comma-separated list stays
+    inside that value, and %begin() and %end() on the field walk it as
+    list values.
 
     Keep-alive, chunked transfer coding, content length and Upgrade are
     not a second header model: they are derived from those fields.
@@ -73,129 +80,294 @@ class Connection;
 class PT_HTTP_API MessageHeader : private Pt::NonCopyable
 {
     public:
-        /** @brief %Field of a HTTP header.
+        class Field;
+        class FieldIterator;
+        class Value;
+        class ValueIterator;
+
+        /** @brief One value of a list-based header field.
+
+            The value refers to bytes in the stored field. It is valid
+            for the life of that field view. %data() is not
+            null-terminated at %size().
         */
-        class Field
+        class PT_HTTP_API Value
         {
             public:
-                /** @brief Default constructor.
+                /** @brief Creates an empty value.
+                */
+                Value()
+                : _data(0)
+                , _size(0)
+                {}
+
+                /** @brief Returns the first byte of the value.
+                */
+                const char* data() const
+                { return _data; }
+
+                /** @brief Returns the number of bytes in the value.
+                */
+                std::size_t size() const
+                { return _size; }
+
+                /** @brief Returns true if the value contains no bytes.
+                */
+                bool empty() const
+                { return _size == 0; }
+
+                /** @brief Returns true if the value equals @a value.
+
+                    The comparison is case-sensitive.
+                */
+                bool equals(const char* value) const;
+
+                /** @brief Returns true if the value equals @a value.
+
+                    The comparison ignores ASCII case.
+                */
+                bool equalsIgnoreCase(const char* value) const;
+
+            private:
+                friend class ValueIterator;
+
+                Value(const char* data, std::size_t size)
+                : _data(data)
+                , _size(size)
+                {}
+
+            private:
+                const char* _data;
+                std::size_t _size;
+        };
+
+        /** @brief Iterator over the values of one header field.
+        */
+        class PT_HTTP_API ValueIterator
+        {
+            public:
+                /** @brief Creates the end iterator.
+                */
+                ValueIterator()
+                : _current(0)
+                , _end(0)
+                , _value()
+                {}
+
+                /** @brief Returns true if both iterators are at the same value.
+                */
+                bool operator==(const ValueIterator& other) const;
+
+                /** @brief Returns true if the iterators are not at the same value.
+                */
+                bool operator!=(const ValueIterator& other) const
+                { return ! operator==(other); }
+
+                /** @brief Advances to the next value.
+                */
+                ValueIterator& operator++();
+
+                /** @brief Returns the current value.
+                */
+                Value operator*() const
+                { return _value; }
+
+                /** @brief Returns the current value.
+                */
+                const Value* operator->() const
+                { return &_value; }
+
+            private:
+                friend class Field;
+
+                ValueIterator(const char* begin, const char* end);
+
+                void advance();
+
+            private:
+                const char* _current;
+                const char* _end;
+                Value _value;
+        };
+
+        /** @brief One field of an HTTP message header.
+
+            %Field is a name and one stored value. It is a view into
+            the header that holds it. The view is valid until that
+            header is modified. Callers obtain it from
+            %MessageHeader::field() or from a %FieldIterator, and use
+            it through that iterator. They do not keep it across a
+            change of the header.
+
+            %value() is the whole stored value, including commas and
+            optional whitespace. A comma-separated list is one stored
+            value. %begin() and %end() walk that stored value as list
+            values. A %Value is a view into the same stored bytes.
+            Reading it does not allocate. Empty values are skipped. A
+            value that is not a token ends the sequence.
+
+            A token is one or more visible ASCII characters other than
+            the separators `( ) < > @ , ; : \\ " / [ ] ? = { }` and
+            other than space, controls, and DEL.
+            %MessageHeader::isToken() reports that classification. A
+            field name is a token. A pseudo-header name begins with
+            `:` and is not a token.
+
+            @ingroup Pt-Http-Messages
+        */
+        class PT_HTTP_API Field
+        {
+            public:
+                /** @brief Creates an empty field.
                 */
                 Field()
                 : _name(0)
+                , _nameSize(0)
                 , _value(0)
-                {}
-
-                /** @brief Construct with field name and value.
-                */
-                Field(const char* f, const char* s)
-                : _name(f)
-                , _value(s)
+                , _valueSize(0)
                 {}
 
                 /** @brief Returns the field name.
+
+                    A missing field returns a null pointer.
                 */
                 const char* name() const
                 { return _name; }
 
-                 /** @brief Sets the field name.
+                /** @brief Returns the number of bytes in the field name.
                 */
-                void setName(const char* name)
-                { _name = name; }
+                std::size_t nameSize() const
+                { return _nameSize; }
 
-                /** @brief Returns the field value.
+                /** @brief Returns the stored field value.
+
+                    The value includes commas and optional whitespace.
+                    A missing field returns a null pointer.
                 */
                 const char* value() const
                 { return _value; }
 
-                /** @brief Sets the field value.
+                /** @brief Returns the number of bytes in the stored value.
                 */
-                void setValue(const char* value)
-                { _value = value; }
+                std::size_t valueSize() const
+                { return _valueSize; }
+
+                /** @brief Returns true if this field contains no list value.
+                */
+                bool empty() const
+                { return begin() == end(); }
+
+                /** @brief Returns the first value of this field.
+                */
+                ValueIterator begin() const;
+
+                /** @brief Returns the end of the value sequence.
+                */
+                ValueIterator end() const
+                { return ValueIterator(); }
+
+            private:
+                friend class FieldIterator;
+
+                Field(const char* name, std::size_t nameSize,
+                      const char* value, std::size_t valueSize)
+                : _name(name)
+                , _nameSize(nameSize)
+                , _value(value)
+                , _valueSize(valueSize)
+                {}
 
             private:
                 const char* _name;
+                std::size_t _nameSize;
                 const char* _value;
+                std::size_t _valueSize;
         };
 
-        /** @brief HTTP header field iterator.
+        /** @brief Iterator over the fields of a header.
         */
-        class ConstIterator
+        class FieldIterator
         {
             friend class MessageHeader;
 
             public:
-                /** @brief Default constructor.
+                /** @brief Creates the end iterator.
                 */
-                ConstIterator()
+                FieldIterator()
                 { }
-                 //! @internal
-                explicit ConstIterator(const char* p)
-                : current(p, p)
+
+                //! @internal
+                explicit FieldIterator(const char* p)
+                : _current(p, p ? std::strlen(p) : 0, p, 0)
                 {
                     fixup();
                 }
 
-                /** @brief Equal comparison.
+                /** @brief Returns true if both iterators are at the same field.
                 */
-                bool operator== (const ConstIterator& it) const
-                { return current.name() == it.current.name(); }
+                bool operator==(const FieldIterator& it) const
+                { return _current.name() == it._current.name(); }
 
-                /** @brief Inequal comparison.
+                /** @brief Returns true if the iterators are not at the same field.
                 */
-                bool operator!= (const ConstIterator& it) const
-                { return current.name() != it.current.name(); }
+                bool operator!=(const FieldIterator& it) const
+                { return _current.name() != it._current.name(); }
 
-                /** @brief Advance the iterator.
+                /** @brief Advances to the next field.
                 */
-                ConstIterator& operator++()
+                FieldIterator& operator++()
                 {
                     moveForward();
                     return *this;
                 }
 
-                /** @brief Advance the iterator.
+                /** @brief Advances to the next field.
                 */
-                ConstIterator operator++(int)
+                FieldIterator operator++(int)
                 {
-                    ConstIterator ret = *this;
+                    FieldIterator ret = *this;
                     moveForward();
                     return ret;
                 }
 
                 /** @brief Returns the header field.
                 */
-                const Field& operator*() const   
-                { return current; }
-                
+                const Field& operator*() const
+                { return _current; }
+
                 /** @brief Returns the header field.
                 */
-                const Field* operator->() const  
-                { return &current; }
+                const Field* operator->() const
+                { return &_current; }
 
             private:
                 //! @internal
                 void fixup()
                 {
-                    if( *current.name() )
+                    if( _current.name() && *_current.name() )
                     {
-                        current.setValue( current.name() + std::strlen(current.name()) + 1 );
+                        const char* value = _current.name()
+                                          + std::strlen(_current.name()) + 1;
+                        _current = Field(_current.name(),
+                                         std::strlen(_current.name()),
+                                         value, std::strlen(value));
                     }
                     else
                     {
-                        current.setName(0);
-                        current.setValue(0);
+                        _current = Field();
                     }
                 }
 
                 //! @internal
                 void moveForward()
                 {
-                    current.setName( current.value() + std::strlen(current.value()) + 1 );
+                    const char* name = _current.value() + _current.valueSize() + 1;
+                    _current = Field(name, std::strlen(name), name, 0);
                     fixup();
                 }
 
             private:
-                Field current;
+                Field _current;
         };
 
     public:
@@ -232,19 +404,38 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         bool has(const char* key) const
         { return get(key) != 0; }
 
+        /** @brief Returns true if @a value is a list token for @a key.
+
+            The search covers every stored line named @a key. A
+            comma-separated list is split. The comparison ignores
+            ASCII case.
+        */
+        bool has(const char* key, const char* value) const;
+
         /** @brief Returns true if the field is set to the value.
         */
         bool isSet(const char* key, const char* value) const;
 
         /** @brief Returns the begin of the header fields.
         */
-        ConstIterator begin() const
-        { return ConstIterator(_rawdata); }
+        FieldIterator begin() const
+        { return FieldIterator(_rawdata); }
 
         /** @brief Returns the end of the header fields.
         */
-        ConstIterator end() const
-        { return ConstIterator(); }
+        FieldIterator end() const
+        { return FieldIterator(); }
+
+        /** @brief Returns the first field named @a name.
+
+            A missing field compares equal to %end(). The iterator is
+            valid until the next modifying operation on this header.
+        */
+        FieldIterator field(const char* name) const;
+
+        /** @brief Returns true if @a value is one token.
+        */
+        static bool isToken(const char* value);
 
         /** @brief Returns the major HTTP version number.
         */
@@ -279,7 +470,7 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         /** @brief Sets the HTTP keep-alive header.
         */
         void setKeepAlive();
-        
+
         /** @brief Returns true if Connection and Upgrade request a protocol switch.
         */
         bool isUpgrade() const;
@@ -296,7 +487,7 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
 
     private:
         //! @internal
-        char* eptr() 
+        char* eptr()
         { return _rawdata + _endOffset; }
 
     private:
@@ -380,7 +571,7 @@ class MessageProgress
         //! @internal
         void setHeader()
         { _result |= Header; }
-        
+
         //! @internal
         void setBody()
         { _result |= Body; }
@@ -397,7 +588,7 @@ class MessageProgress
         unsigned long _result;
 };
 
-/** @internal 
+/** @internal
     @brief Output buffer for HTTP messages.
 */
 class MessageBuffer : public std::streambuf
@@ -408,11 +599,11 @@ class MessageBuffer : public std::streambuf
 
         //! @brief Destructor.
         ~MessageBuffer();
-       
+
         //! @brief Discards the buffered data.
         void discard()
-        { 
-            this->setp(_buffer, _buffer + _bufferSize); 
+        {
+            this->setp(_buffer, _buffer + _bufferSize);
             this->setg(0,0,0);
         }
 
@@ -513,11 +704,11 @@ class PT_HTTP_API Message
         //! @internal
         void setSending(bool b)
         { _isSending = b; }
-        
+
         //! @internal
         void setReceiving(bool b)
         { _isReceiving = b; }
-        
+
         //! @internal
         void setFinished(bool b)
         { _finished = b; }

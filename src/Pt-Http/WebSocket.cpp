@@ -23,31 +23,6 @@ namespace Pt {
 
 namespace Http {
 
-namespace {
-
-bool isProtocolToken(const std::string& name)
-{
-    if(name.empty())
-        return false;
-
-    for(std::size_t i = 0; i < name.size(); ++i)
-    {
-        const unsigned char ch = static_cast<unsigned char>(name[i]);
-        if(ch <= 32 || ch == 127 || ch == ',' || ch == '(' || ch == ')'
-           || ch == '<' || ch == '>' || ch == '@' || ch == ';'
-           || ch == ':' || ch == '\\' || ch == '"' || ch == '/'
-           || ch == '[' || ch == ']' || ch == '?' || ch == '='
-           || ch == '{' || ch == '}')
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-} // namespace
-
 WebSocket::WebSocket(Client& client)
 : _client(&client)
 , _channel(new WebSocketChannel())
@@ -85,7 +60,7 @@ const MessageHeader& WebSocket::header() const
 
 void WebSocket::addProtocol(const std::string& name)
 {
-    if( ! isProtocolToken(name) )
+    if( ! MessageHeader::isToken(name.c_str()) )
         throw std::invalid_argument("WebSocket protocol name is not a token");
 
     _protocols.push_back(name);
@@ -187,38 +162,35 @@ void WebSocket::onReply(Client& client)
         if( client.reply().statusCode() != 101 )
             throw HttpError("WebSocket handshake failed");
 
-        const char* received = client.reply().header().get("Sec-WebSocket-Accept");
-        if( ! received )
+        const MessageHeader::FieldIterator accept =
+            client.reply().header().field("Sec-WebSocket-Accept");
+        if(accept == client.reply().header().end() || accept->empty())
             throw HttpError("WebSocket handshake failed");
 
-        const std::string accept(received);
-        const std::size_t begin = accept.find_first_not_of(" \t");
-        const std::size_t end = accept.find_last_not_of(" \t");
-
-        if( begin == std::string::npos ||
-            accept.compare(begin, end - begin + 1, _acceptKey) != 0 )
+        MessageHeader::ValueIterator acceptIt = accept->begin();
+        const MessageHeader::Value acceptValue = *acceptIt;
+        ++acceptIt;
+        if( acceptIt != accept->end()
+            || ! acceptValue.equals(_acceptKey.c_str()) )
         {
             throw HttpError("WebSocket handshake failed");
         }
 
-        const char* echoed = client.reply().header().get("Sec-WebSocket-Protocol");
+        const MessageHeader::FieldIterator echoed =
+            client.reply().header().field("Sec-WebSocket-Protocol");
         std::string selected;
-        if(echoed && *echoed)
+        if(echoed != client.reply().header().end() && ! echoed->empty())
         {
-            const std::string field(echoed);
-            const std::size_t left = field.find_first_not_of(" \t");
-            const std::size_t right = field.find_last_not_of(" \t");
-            if(left == std::string::npos)
-                throw HttpError("WebSocket handshake failed");
-
-            selected = field.substr(left, right - left + 1);
-            if(selected.find(',') != std::string::npos || ! isProtocolToken(selected))
+            MessageHeader::ValueIterator protocolIt = echoed->begin();
+            const MessageHeader::Value protocol = *protocolIt;
+            ++protocolIt;
+            if(protocolIt != echoed->end())
                 throw HttpError("WebSocket handshake failed");
 
             bool offered = false;
             for(std::size_t i = 0; i < _protocols.size(); ++i)
             {
-                if(_protocols[i] == selected)
+                if( protocol.equals(_protocols[i].c_str()) )
                 {
                     offered = true;
                     break;
@@ -227,6 +199,8 @@ void WebSocket::onReply(Client& client)
 
             if( ! offered )
                 throw HttpError("WebSocket handshake failed");
+
+            selected.assign(protocol.data(), protocol.size());
         }
 
         _protocol = selected;

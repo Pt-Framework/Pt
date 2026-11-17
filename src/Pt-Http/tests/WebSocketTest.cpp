@@ -1155,7 +1155,7 @@ class AcceptService : public ProtocolService
                 PT_UNIT_ASSERT_EQUALS(request.available(), static_cast<std::size_t>(0));
 
                 std::size_t count = 0;
-                for(Pt::Http::MessageHeader::ConstIterator field = request.header().begin();
+                for(Pt::Http::MessageHeader::FieldIterator field = request.header().begin();
                     field != request.header().end(); ++field)
                 {
                     if(std::string(field->name()) == "X-Custom")
@@ -1451,6 +1451,10 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("AcceptList", *this, &WebSocketTest::AcceptList);
             registerMethod("AcceptRetry", *this, &WebSocketTest::AcceptRetry);
             registerMethod("AcceptVector", *this, &WebSocketTest::AcceptVector);
+            registerMethod("HandshakeKeyMissing", *this, &WebSocketTest::HandshakeKeyMissing);
+            registerMethod("HandshakeKeyInvalid", *this, &WebSocketTest::HandshakeKeyInvalid);
+            registerMethod("HandshakeVersionMissing", *this, &WebSocketTest::HandshakeVersionMissing);
+            registerMethod("HandshakeVersionOther", *this, &WebSocketTest::HandshakeVersionOther);
             registerMethod("HandshakeStatus", *this, &WebSocketTest::HandshakeStatus);
             registerMethod("EndAfterClosed", *this, &WebSocketTest::EndAfterClosed);
             registerMethod("PingAfterShutdown", *this, &WebSocketTest::PingAfterShutdown);
@@ -2701,7 +2705,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(socket.header().contentLength(), static_cast<std::size_t>(0));
 
             std::size_t customFields = 0;
-            for(Pt::Http::MessageHeader::ConstIterator field = socket.header().begin();
+            for(Pt::Http::MessageHeader::FieldIterator field = socket.header().begin();
                 field != socket.header().end(); ++field)
             {
                 if(std::string(field->name()) == "X-Custom")
@@ -2882,6 +2886,59 @@ class WebSocketTest : public Pt::Unit::TestSuite
             const char* accept = http.reply().header().get("Sec-WebSocket-Accept");
             PT_UNIT_ASSERT(accept != 0);
             PT_UNIT_ASSERT_EQUALS(std::string(accept), "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=");
+        }
+
+        void HandshakeKeyMissing()
+        {
+            checkHandshakeDecline(8185, "13", 0, 400u, false);
+        }
+
+        void HandshakeKeyInvalid()
+        {
+            checkHandshakeDecline(8186, "13", "YQ==", 400u, false);
+        }
+
+        void HandshakeVersionMissing()
+        {
+            checkHandshakeDecline(8187, 0, "dGhlIHNhbXBsZSBub25jZQ==", 426u, true);
+        }
+
+        void HandshakeVersionOther()
+        {
+            checkHandshakeDecline(8188, "12", "dGhlIHNhbXBsZSBub25jZQ==", 426u, true);
+        }
+
+        void checkHandshakeDecline(unsigned short port,
+                                   const char* version,
+                                   const char* key,
+                                   unsigned expectedStatus,
+                                   bool expectVersionHeader)
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", port);
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            HandshakeObserver observer(*_loop);
+            http.replyReceived() += Pt::slot(observer, &HandshakeObserver::onReply);
+            http.request().setUrl("/ws");
+            http.request().header().setUpgrade();
+            http.request().header().set("Upgrade", "websocket");
+            if(version)
+                http.request().header().set("Sec-WebSocket-Version", version);
+            if(key)
+                http.request().header().set("Sec-WebSocket-Key", key);
+            http.beginReceive();
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(http.reply().statusCode(), expectedStatus);
+            PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
+            if(expectVersionHeader)
+                PT_UNIT_ASSERT(http.reply().header().isSet("Sec-WebSocket-Version", "13"));
         }
 
         void HandshakeControl()

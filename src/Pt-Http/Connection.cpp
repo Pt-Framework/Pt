@@ -1442,7 +1442,7 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     formatInt(oit, header.versionMinor());
     os.write("\r\n", 2);
 
-    MessageHeader::ConstIterator it;
+    MessageHeader::FieldIterator it;
     for (it = header.begin(); it != header.end(); ++it)
     {
         os << it->name() << ": " << it->value() << "\r\n";
@@ -1505,7 +1505,7 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     os << reply.statusText();
     os.write("\r\n", 2);
 
-    MessageHeader::ConstIterator it;
+    MessageHeader::FieldIterator it;
     for(it = header.begin(); it != header.end(); ++it)
     {
         os << it->name() << ": " << it->value() << "\r\n";

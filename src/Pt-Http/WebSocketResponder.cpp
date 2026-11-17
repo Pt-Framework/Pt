@@ -1,115 +1,61 @@
-/*
- * Copyright (C) 2015 by Laurentiu-Gheorghe Crisan
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- */
+/* Copyright (C) 2015 by Laurentiu-Gheorghe Crisan
+   Copyright (C) 2026 by Marc Boris Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
+
 #include <Pt/Http/WebSocketResponder.h>
 #include <Pt/Http/WebSocketService.h>
 #include <Pt/Http/Request.h>
 #include "WebSocketChannel.h"
+#include <Pt/Http/Message.h>
+#include <Pt/Base64Codec.h>
 #include <string>
 #include <vector>
 
 namespace Pt {
 namespace Http {
 
-static bool isOws(char ch)
+static bool isWebSocketKey(const MessageHeader::Value& key)
 {
-    return ch == ' ' || ch == '\t';
-}
-
-
-static bool isProtocolToken(const std::string& name)
-{
-    if(name.empty())
+    if(key.size() != 24)
         return false;
 
-    for(std::size_t i = 0; i < name.size(); ++i)
+    const char* p = key.data();
+    std::size_t decoded = 0;
+
+    for(std::size_t i = 0; i < 24; i += 4)
     {
-        const unsigned char ch = static_cast<unsigned char>(name[i]);
-        if(ch <= 32 || ch == 127 || ch == ',' || ch == '(' || ch == ')'
-           || ch == '<' || ch == '>' || ch == '@' || ch == ';'
-           || ch == ':' || ch == '\\' || ch == '"' || ch == '/'
-           || ch == '[' || ch == ']' || ch == '?' || ch == '='
-           || ch == '{' || ch == '}')
-        {
+        const Pt::uint8_t a = Pt::fromBase64(p[i]);
+        const Pt::uint8_t b = Pt::fromBase64(p[i + 1]);
+        const Pt::uint8_t c = Pt::fromBase64(p[i + 2]);
+        const Pt::uint8_t d = Pt::fromBase64(p[i + 3]);
+        if(a > 63 || b > 63 || c > 64 || d > 64)
             return false;
+
+        const bool last = i + 4 == 24;
+        if(c == 64)
+        {
+            if( ! last || d != 64 )
+                return false;
+
+            ++decoded;
+        }
+        else if(d == 64)
+        {
+            if( ! last )
+                return false;
+
+            decoded += 2;
+        }
+        else
+        {
+            decoded += 3;
         }
     }
 
-    return true;
+    return decoded == 16;
 }
 
-
-static bool parseProtocols(const char* field, std::vector<std::string>& names)
-{
-    names.clear();
-    if( ! field || ! *field )
-        return true;
-
-    const std::string text(field);
-    std::size_t begin = 0;
-    while(begin <= text.size())
-    {
-        const std::size_t comma = text.find(',', begin);
-        const std::size_t end = comma == std::string::npos ? text.size() : comma;
-
-        std::size_t left = begin;
-        while(left < end && isOws(text[left]))
-            ++left;
-
-        std::size_t right = end;
-        while(right > left && isOws(text[right - 1]))
-            --right;
-
-        const std::string name = text.substr(left, right - left);
-        if( ! isProtocolToken(name) )
-            return false;
-
-        names.push_back(name);
-
-        if(comma == std::string::npos)
-            break;
-
-        begin = comma + 1;
-    }
-
-    return true;
-}
-
-
-static std::string toLower(const std::string& str)
-{
-    std::string lowerString = "";
-    std::locale loc;
-
-    for(size_t i = 0; i < str.size(); ++i)
-        lowerString += std::tolower(str[i], loc);
-
-    return lowerString;
-}
 
 WebSocketResponder::WebSocketResponder(Pt::Http::WebSocketService& s)
 : Pt::Http::Responder(s)
@@ -134,12 +80,8 @@ void WebSocketResponder::onBeginReply(const Pt::Http::Request& request, Pt::Http
 
 void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
 {
-    const char* connection = request.header().get("Connection");
-    const char* upgrade = request.header().get("Upgrade");
-    const std::string connectionValue = connection ? toLower(connection) : std::string();
-    const std::string upgradeValue = upgrade ? toLower(upgrade) : std::string();
-
-    if (connectionValue.find("upgrade") != std::string::npos && upgradeValue == "websocket")
+    const MessageHeader& header = request.header();
+    if( header.has("Connection", "upgrade") && header.has("Upgrade", "websocket") )
     {
         WebSocketService& service = static_cast<WebSocketService&>( this->service() );
         if( ! service.hasServlet()
@@ -151,8 +93,30 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
             return;
         }
 
-        std::vector<std::string> offered;
-        if( ! parseProtocols(request.header().get("Sec-WebSocket-Protocol"), offered) )
+        if( ! header.has("Sec-WebSocket-Version", "13") )
+        {
+            reply.setStatus(426, "Upgrade Required");
+            reply.header().set("Sec-WebSocket-Version", "13");
+            reply.header().set("Connection", "close");
+            setReady(true);
+            return;
+        }
+
+        const MessageHeader::FieldIterator key = header.field("Sec-WebSocket-Key");
+        MessageHeader::Value keyValue;
+        if(key != header.end())
+        {
+            MessageHeader::ValueIterator it = key->begin();
+            if(it != key->end())
+            {
+                keyValue = *it;
+                ++it;
+                if(it != key->end())
+                    keyValue = MessageHeader::Value();
+            }
+        }
+
+        if( keyValue.empty() || ! isWebSocketKey(keyValue) )
         {
             reply.setStatus(400, "Bad Request");
             reply.header().set("Connection", "close");
@@ -160,23 +124,28 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
             return;
         }
 
+        const MessageHeader::FieldIterator offered =
+            header.field("Sec-WebSocket-Protocol");
         const std::vector<std::string>& accepted = service.protocols();
         std::string selected;
-        if( ! accepted.empty() )
+        if(offered != header.end())
         {
-            for(std::size_t i = 0; i < offered.size() && selected.empty(); ++i)
+            for(MessageHeader::ValueIterator it = offered->begin();
+                it != offered->end() && selected.empty();
+                ++it)
             {
+
                 for(std::size_t n = 0; n < accepted.size(); ++n)
                 {
-                    if(offered[i] == accepted[n])
+                    if( it->equals(accepted[n].c_str()) )
                     {
-                        selected = offered[i];
+                        selected.assign(it->data(), it->size());
                         break;
                     }
                 }
             }
 
-            if(selected.empty())
+            if( ! accepted.empty() && selected.empty() )
             {
                 reply.setStatus(400, "Bad Request");
                 reply.header().set("Connection", "close");
@@ -184,12 +153,19 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
                 return;
             }
         }
+        else if( ! accepted.empty() )
+        {
+            reply.setStatus(400, "Bad Request");
+            reply.header().set("Connection", "close");
+            setReady(true);
+            return;
+        }
 
-        std::string key = request.header().get("Sec-WebSocket-Key");
         reply.setStatus(101, "Switching Protocols");
         reply.header().setUpgrade();
         reply.header().set("Upgrade", "websocket");
-        const std::string accept = WebSocketChannel::getAcceptKey(key);
+        const std::string keyText(keyValue.data(), keyValue.size());
+        const std::string accept = WebSocketChannel::getAcceptKey(keyText);
         reply.header().set("Sec-WebSocket-Accept", accept.c_str());
         if( ! selected.empty() )
             reply.header().set("Sec-WebSocket-Protocol", selected.c_str());
