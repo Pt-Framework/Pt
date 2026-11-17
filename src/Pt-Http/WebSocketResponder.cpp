@@ -81,7 +81,7 @@ void WebSocketResponder::onBeginReply(const Pt::Http::Request& request, Pt::Http
 void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
 {
     const MessageHeader& header = request.header();
-    if( header.has("Connection", "upgrade") && header.has("Upgrade", "websocket") )
+    if( header.matches("Connection", "upgrade") && header.matches("Upgrade", "websocket") )
     {
         WebSocketService& service = static_cast<WebSocketService&>( this->service() );
         if( ! service.hasServlet()
@@ -93,7 +93,7 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
             return;
         }
 
-        if( ! header.has("Sec-WebSocket-Version", "13") )
+        if( ! header.matches("Sec-WebSocket-Version", "13") )
         {
             reply.setStatus(426, "Upgrade Required");
             reply.header().set("Sec-WebSocket-Version", "13");

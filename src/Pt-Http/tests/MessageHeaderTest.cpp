@@ -18,6 +18,7 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
             registerMethod("Value", *this, &MessageHeaderTest::Value);
             registerMethod("Values", *this, &MessageHeaderTest::Values);
             registerMethod("HasValue", *this, &MessageHeaderTest::HasValue);
+            registerMethod("Contains", *this, &MessageHeaderTest::Contains);
             registerMethod("Empty", *this, &MessageHeaderTest::Empty);
             registerMethod("Upgrade", *this, &MessageHeaderTest::Upgrade);
             registerMethod("FieldName", *this, &MessageHeaderTest::FieldName);
@@ -34,7 +35,7 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
             Pt::Http::MessageHeader header;
             header.set("Sec-WebSocket-Version", " 13 ");
 
-            PT_UNIT_ASSERT( header.has("Sec-WebSocket-Version", "13") );
+            PT_UNIT_ASSERT( header.matches("Sec-WebSocket-Version", "13") );
 
             Pt::Http::MessageHeader::FieldIterator field =
                 header.field("sec-websocket-version");
@@ -54,9 +55,9 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
             header.set("Connection", "keep-alive, Upgrade");
             header.add("Connection", " close ");
 
-            PT_UNIT_ASSERT( header.has("Connection", "keep-alive") );
-            PT_UNIT_ASSERT( header.has("Connection", "Upgrade") );
-            PT_UNIT_ASSERT( header.has("Connection", "close") );
+            PT_UNIT_ASSERT( header.matches("Connection", "keep-alive") );
+            PT_UNIT_ASSERT( header.matches("Connection", "Upgrade") );
+            PT_UNIT_ASSERT( header.matches("Connection", "close") );
 
             Pt::Http::MessageHeader::FieldIterator field =
                 header.field("Connection");
@@ -64,7 +65,7 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
 
             Pt::Http::MessageHeader::ValueIterator it = field->begin();
             PT_UNIT_ASSERT(it != field->end());
-            PT_UNIT_ASSERT( it->equalsIgnoreCase("Keep-Alive") );
+            PT_UNIT_ASSERT( it->matches("Keep-Alive") );
 
             ++it;
             PT_UNIT_ASSERT(it != field->end());
@@ -88,18 +89,38 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
             header.set("Connection", "keep-alive, Upgrade");
 
             PT_UNIT_ASSERT( header.has("Connection") );
-            PT_UNIT_ASSERT( header.has("Connection", "upgrade") );
-            PT_UNIT_ASSERT( header.has("CONNECTION", "Keep-Alive") );
-            PT_UNIT_ASSERT( ! header.has("Connection", "websocket") );
-            PT_UNIT_ASSERT( ! header.has("Upgrade", "websocket") );
+            PT_UNIT_ASSERT( header.matches("Connection", "upgrade") );
+            PT_UNIT_ASSERT( header.matches("CONNECTION", "Keep-Alive") );
+            PT_UNIT_ASSERT( ! header.matches("Connection", "websocket") );
+            PT_UNIT_ASSERT( ! header.matches("Upgrade", "websocket") );
             PT_UNIT_ASSERT( ! header.isSet("Connection", "upgrade") );
 
             header.add("Connection", "close");
-            PT_UNIT_ASSERT( header.has("Connection", "close") );
+            PT_UNIT_ASSERT( header.matches("Connection", "close") );
 
             header.set("Upgrade", "");
             PT_UNIT_ASSERT( header.has("Upgrade") );
-            PT_UNIT_ASSERT( ! header.has("Upgrade", "websocket") );
+            PT_UNIT_ASSERT( ! header.matches("Upgrade", "websocket") );
+        }
+
+        void Contains()
+        {
+            Pt::Http::MessageHeader header;
+            header.set("Connection", "keep-alive, Upgrade");
+
+            PT_UNIT_ASSERT( header.matches("Connection", "Keep-Alive") );
+            PT_UNIT_ASSERT( header.contains("Connection", "keep-alive") );
+            PT_UNIT_ASSERT( ! header.contains("Connection", "Keep-Alive") );
+            PT_UNIT_ASSERT( header.contains("Connection", "Upgrade") );
+
+            header.add("Connection", "close");
+            PT_UNIT_ASSERT( header.contains("Connection", "close") );
+            PT_UNIT_ASSERT( ! header.contains("Connection", "Close") );
+
+            header.set("X-Name", "Foo");
+            PT_UNIT_ASSERT( header.isSet("X-Name", "Foo") );
+            PT_UNIT_ASSERT( ! header.isSet("X-Name", "foo") );
+            PT_UNIT_ASSERT( ! header.isSet("Connection", "upgrade") );
         }
 
         void Empty()
@@ -110,7 +131,7 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
             Pt::Http::MessageHeader::FieldIterator field = header.field("Upgrade");
             PT_UNIT_ASSERT(field != header.end());
             PT_UNIT_ASSERT( field->empty() );
-            PT_UNIT_ASSERT( ! header.has("Upgrade", "websocket") );
+            PT_UNIT_ASSERT( ! header.matches("Upgrade", "websocket") );
             PT_UNIT_ASSERT(header.field("Missing") == header.end());
         }
 

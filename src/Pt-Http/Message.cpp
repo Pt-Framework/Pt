@@ -126,7 +126,7 @@ bool MessageHeader::Value::equals(const char* value) const
 }
 
 
-bool MessageHeader::Value::equalsIgnoreCase(const char* value) const
+bool MessageHeader::Value::matches(const char* value) const
 {
     if( ! value )
         return false;
@@ -277,7 +277,7 @@ MessageHeader::FieldIterator MessageHeader::field(const char* name) const
 }
 
 
-bool MessageHeader::has(const char* key, const char* value) const
+bool MessageHeader::matches(const char* key, const char* value) const
 {
     for(FieldIterator it = begin(); it != end(); ++it)
     {
@@ -286,7 +286,25 @@ bool MessageHeader::has(const char* key, const char* value) const
 
         for(ValueIterator vit = it->begin(); vit != it->end(); ++vit)
         {
-            if( vit->equalsIgnoreCase(value) )
+            if( vit->matches(value) )
+                return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool MessageHeader::contains(const char* key, const char* value) const
+{
+    for(FieldIterator it = begin(); it != end(); ++it)
+    {
+        if(compareIgnoreCase(key, it->name()) != 0)
+            continue;
+
+        for(ValueIterator vit = it->begin(); vit != it->end(); ++vit)
+        {
+            if( vit->equals(value) )
                 return true;
         }
     }
@@ -297,10 +315,13 @@ bool MessageHeader::has(const char* key, const char* value) const
 
 bool MessageHeader::isSet(const char* key, const char* value) const
 {
+    if( ! value )
+        return false;
+
     const char* h = get(key);
     if (h == 0)
         return false;
-    return compareIgnoreCase(h, value) == 0;
+    return std::strcmp(h, value) == 0;
 }
 
 
@@ -378,7 +399,7 @@ void MessageHeader::remove(const char* key)
 
 bool MessageHeader::isChunked() const
 {
-    return has("Transfer-Encoding", "chunked");
+    return matches("Transfer-Encoding", "chunked");
 }
 
 
@@ -404,7 +425,7 @@ bool MessageHeader::isKeepAlive() const
             && versionMinor() >= 1;
     }
 
-    return has("Connection", "keep-alive");
+    return matches("Connection", "keep-alive");
 }
 
 void MessageHeader::setKeepAlive()
@@ -415,7 +436,7 @@ void MessageHeader::setKeepAlive()
 
 bool MessageHeader::isUpgrade() const
 {
-    if( ! has("Connection", "upgrade") )
+    if( ! matches("Connection", "upgrade") )
         return false;
 
     const FieldIterator protocol = field("Upgrade");

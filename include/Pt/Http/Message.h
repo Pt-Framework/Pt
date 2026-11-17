@@ -54,12 +54,14 @@ class MessageHeader;
     Fields are names and stored values. %set() replaces the value for
     a name, %add() appends another value for the same name, and
     %remove() deletes it. %get() returns the stored value or a null
-    pointer. %has(name) reports presence. %has(name, value) reports
-    that a list token appears for that name, across every stored line
-    and after comma-splitting, and the comparison ignores ASCII case.
-    %isSet() compares the whole stored string. %field() returns an
-    iterator to the first field of that name, or %end() when the name
-    is absent. %begin() and %end() walk the fields as %FieldIterator.
+    pointer. %has(name) reports presence. %matches(name, value)
+    reports that a list token appears for that name, across every
+    stored line and after comma-splitting, and the comparison ignores
+    ASCII case. %contains(name, value) is the same walk with an exact
+    comparison. %isSet() compares the whole first stored string
+    exactly. %field() returns an iterator to the first field of that
+    name, or %end() when the name is absent. %begin() and %end() walk
+    the fields as %FieldIterator.
     Each field is one stored value. A comma-separated list stays
     inside that value, and %begin() and %end() on the field walk it as
     list values.
@@ -122,11 +124,11 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
                 */
                 bool equals(const char* value) const;
 
-                /** @brief Returns true if the value equals @a value.
+                /** @brief Returns true if the value matches @a value.
 
                     The comparison ignores ASCII case.
                 */
-                bool equalsIgnoreCase(const char* value) const;
+                bool matches(const char* value) const;
 
             private:
                 friend class ValueIterator;
@@ -404,15 +406,26 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         bool has(const char* key) const
         { return get(key) != 0; }
 
-        /** @brief Returns true if @a value is a list token for @a key.
+        /** @brief Returns true if one of the values for @a key matches @a value.
 
             The search covers every stored line named @a key. A
             comma-separated list is split. The comparison ignores
             ASCII case.
         */
-        bool has(const char* key, const char* value) const;
+        bool matches(const char* key, const char* value) const;
 
-        /** @brief Returns true if the field is set to the value.
+        /** @brief Returns true if one of the values for @a key equals @a value.
+
+            The search covers every stored line named @a key. A
+            comma-separated list is split. The comparison is
+            case-sensitive.
+        */
+        bool contains(const char* key, const char* value) const;
+
+        /** @brief Returns true if the value equals @a value.
+
+            The comparison uses the whole stored string and is
+            case-sensitive.
         */
         bool isSet(const char* key, const char* value) const;
 
