@@ -12,7 +12,6 @@
 #include <Pt/TextStream.h>
 #include <Pt/System/EventLoop.h>
 #include <cstring>
-#include <ctime>
 #include <exception>
 #include <sstream>
 #include <stdexcept>
@@ -75,7 +74,6 @@ WebSocketChannel::WebSocketChannel()
 , _clientMask(false)
 , _maxMessageSize(1024 * 1024)
 , _closeTimeout(10000)
-, _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
 , _inputPending(false)
 , _outputPending(false)
 , _isPingPending(false)
@@ -114,6 +112,20 @@ std::string WebSocketChannel::getAcceptKey(const std::string& key)
     Pt::BasicTextOStream<char, char> base64(encoded, new Pt::Base64Codec());
     base64.write(reinterpret_cast<const char*>(digest.data()),
                  static_cast<std::streamsize>(digest.size()));
+    base64.flush();
+    return encoded.str();
+}
+
+
+std::string WebSocketChannel::createKey()
+{
+    Pt::uint8_t nonce[16];
+    _random.get(nonce, sizeof(nonce));
+
+    std::ostringstream encoded;
+    Pt::BasicTextOStream<char, char> base64(encoded, new Pt::Base64Codec());
+    base64.write(reinterpret_cast<const char*>(nonce),
+                 static_cast<std::streamsize>(sizeof(nonce)));
     base64.flush();
     return encoded.str();
 }
@@ -859,9 +871,7 @@ void WebSocketChannel::onBeginOutput(Output& out)
     char maskBytes[4];
     if(_clientMask)
     {
-        _maskSeed = _maskSeed * 1664525u + 1013904223u;
-        Pt::uint32_t mask = _maskSeed;
-        std::memcpy(maskBytes, &mask, 4);
+        _random.get(reinterpret_cast<Pt::uint8_t*>(maskBytes), 4);
         std::memcpy(header + headerLen, maskBytes, 4);
         headerLen += 4;
     }

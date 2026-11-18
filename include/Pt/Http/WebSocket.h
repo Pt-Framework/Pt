@@ -457,8 +457,6 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
     private:
         void parseUrl(const std::string& url, const std::string& origin);
 
-        static std::string createKey();
-
         void onRequestSent(Client& client);
 
         void onReply(Client& client);

@@ -11,11 +11,6 @@ constructed. The model is
 states the handshake rules the implementation still has to follow,
 and the behavior it has today.
 
-## Baseline
-
-The handshake key and the masking key are not yet drawn from an
-unpredictable source.
-
 ## Client handshake {#client-handshake}
 
 `WebSocket::header()` refers directly to `Client::request().header()`.
@@ -81,5 +76,4 @@ channel instance or open stream.
 ## Nonce {#nonce}
 
 The handshake key and the masking key come from an unpredictable
-source. The key is not derived from the clock. The masking key is
-not a linear congruential sequence seeded from the clock.
+source.

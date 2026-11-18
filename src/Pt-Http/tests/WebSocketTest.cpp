@@ -1443,6 +1443,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("ProtocolRejected", *this, &WebSocketTest::ProtocolRejected);
             registerMethod("ProtocolHeader", *this, &WebSocketTest::ProtocolHeader);
             registerMethod("HandshakeHeaders", *this, &WebSocketTest::HandshakeHeaders);
+            registerMethod("HandshakeKey", *this, &WebSocketTest::HandshakeKey);
             registerMethod("AcceptMissing", *this, &WebSocketTest::AcceptMissing);
             registerMethod("AcceptEmpty", *this, &WebSocketTest::AcceptEmpty);
             registerMethod("AcceptWrong", *this, &WebSocketTest::AcceptWrong);
@@ -2724,6 +2725,47 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.endConnect();
             PT_UNIT_ASSERT_EQUALS(_copied, "https://header.test");
             PT_UNIT_ASSERT_EQUALS(_offered, "chat");
+        }
+
+        void HandshakeKey()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8190);
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http1(*_loop, ep);
+            Pt::Http::WebSocket socket1(http1);
+            socket1.beginConnect("/ws");
+
+            const char* field1 = socket1.header().get("Sec-WebSocket-Key");
+            PT_UNIT_ASSERT(field1 != 0);
+            const std::string key1(field1);
+            PT_UNIT_ASSERT(isHandshakeNonce(key1));
+
+            Pt::Http::Client http2(*_loop, ep);
+            Pt::Http::WebSocket socket2(http2);
+            socket2.beginConnect("/ws");
+
+            const char* field2 = socket2.header().get("Sec-WebSocket-Key");
+            PT_UNIT_ASSERT(field2 != 0);
+            const std::string key2(field2);
+            PT_UNIT_ASSERT(isHandshakeNonce(key2));
+            PT_UNIT_ASSERT(key1 != key2);
+        }
+
+        static bool isHandshakeNonce(const std::string& key)
+        {
+            if(key.size() != 24)
+                return false;
+
+            std::istringstream in(key);
+            Pt::BasicTextIStream<char, char> decoder(in, new Pt::Base64Codec());
+            char decoded[17];
+            decoder.read(decoded, 17);
+            return decoder.gcount() == 16;
         }
 
         void ProtocolHeader()

@@ -13,6 +13,7 @@
 #include <Pt/IOError.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Timer.h>
+#include <Pt/System/Random.h>
 #include <deque>
 #include <exception>
 #include <string>
@@ -35,6 +36,8 @@ class WebSocketChannel : public Channel
         ~WebSocketChannel();
 
         static std::string getAcceptKey(const std::string& key);
+
+        std::string createKey();
 
         void setMaxMessageSize(std::size_t maxSize);
 
@@ -382,7 +385,7 @@ class WebSocketChannel : public Channel
         Timeout       _pingTimeout;
         Timeout       _closeTimeout;
         Timeouts      _timeouts;
-        Pt::uint32_t  _maskSeed;
+        System::Random _random;
 
         WebSocketMessage _incoming;
         WebSocketBuffer  _wsbuf;

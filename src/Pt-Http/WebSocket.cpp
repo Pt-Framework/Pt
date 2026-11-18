@@ -10,12 +10,8 @@
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Message.h>
-#include <Pt/TextStream.h>
-#include <Pt/Base64Codec.h>
 #include <Pt/System/Uri.h>
 #include "WebSocketChannel.h"
-#include <sstream>
-#include <ctime>
 #include <stdexcept>
 #include <vector>
 
@@ -92,7 +88,7 @@ void WebSocket::beginConnect(const std::string& url, const std::string& origin)
     request.header().set("Upgrade", "websocket");
     request.header().set("Sec-WebSocket-Version", "13");
 
-    const std::string key = createKey();
+    const std::string key = _channel->createKey();
     _acceptKey = WebSocketChannel::getAcceptKey(key);
     request.header().set("Sec-WebSocket-Key", key.c_str());
 
@@ -400,23 +396,6 @@ void WebSocket::parseUrl(const std::string& url, const std::string& /*origin*/)
         _path += "?" + uri.query();
 }
 
-
-std::string WebSocket::createKey()
-{
-    std::srand( static_cast<unsigned int>(std::time(0)) );
-
-    std::stringstream ss;
-    Pt::BasicTextOStream<char, char> stream(ss, new Pt::Base64Codec());
-
-    for(int i = 0; i < 4; ++i)
-    {
-        Pt::uint32_t val = static_cast<Pt::uint32_t>(std::rand());
-        stream.write( reinterpret_cast<char*>(&val), 4 );
-    }
-
-    stream.flush();
-    return ss.str();
-}
 
 } // namespace Http
 
