@@ -267,35 +267,56 @@ if $(PT_SYSTEM) = posix
     # Random number generator
     #
 
-    WITH_GETENTROPY = [ CheckBuildC++ "#include <unistd.h>"
-                                      "int main() { unsigned char b[1];"
-                                      "return getentropy(b, 1); }" ] ;
-
-    if ! $(WITH_GETENTROPY)
+    WITH_RANDOM = [ CheckBuildC++ "#include <unistd.h>"
+                                  "int main() { unsigned char b[1];"
+                                  "return getentropy(b, 1); }" ] ;
+    if $(WITH_RANDOM)
     {
-        WITH_GETENTROPY = [ CheckBuildC++ "#include <sys/random.h>"
-                                          "int main() { unsigned char b[1];"
-                                          "return getentropy(b, 1); }" ] ;
+        WITH_GETENTROPY = yes ;
     }
 
-    if ! $(WITH_GETENTROPY)
+    if ! $(WITH_RANDOM)
     {
-        WITH_GETRANDOM = [ CheckBuildC++ "#include <sys/random.h>"
-                                         "int main() { unsigned char b[1];"
-                                         "return (int) getrandom(b, 1, 0); }" ] ;
+        WITH_RANDOM = [ CheckBuildC++ "#include <sys/random.h>"
+                                      "int main() { unsigned char b[1];"
+                                      "return getentropy(b, 1); }" ] ;
+        if $(WITH_RANDOM)
+        {
+            WITH_GETENTROPY = yes ;
+            WITH_GETENTROPY_SYS_RANDOM = yes ;
+        }
+    }
+
+    if ! $(WITH_RANDOM)
+    {
+        WITH_RANDOM = [ CheckBuildC++ "#include <sys/random.h>"
+                                      "int main() { unsigned char b[1];"
+                                      "return (int) getrandom(b, 1, 0); }" ] ;
+        if $(WITH_RANDOM)
+        {
+            WITH_GETRANDOM = yes ;
+        }
     }
 
     if $(WITH_GETENTROPY)
     {
-        EchoOption WITH_GETENTROPY : "getentropy" : $(WITH_GETENTROPY:E="no") ;
+        EchoOption WITH_GETENTROPY : "Using getentropy" : $(WITH_GETENTROPY:E="no") ;
         Configure WITH_GETENTROPY ;
     }
-    else if $(WITH_GETRANDOM)
+
+    if $(WITH_GETENTROPY_SYS_RANDOM)
+    {
+        EchoOption WITH_GETENTROPY_SYS_RANDOM : "Using getentropy from sys/random.h" : $(WITH_GETENTROPY_SYS_RANDOM:E="no") ;
+        Configure WITH_GETENTROPY_SYS_RANDOM ;
+    }
+
+    if $(WITH_GETRANDOM)
     {
         EchoOption WITH_GETRANDOM : "getrandom" : $(WITH_GETRANDOM:E="no") ;
         Configure WITH_GETRANDOM ;
     }
-    else
+
+    if ! $(WITH_RANDOM)
     {
         EchoOption WITH_URANDOM : "/dev/urandom" : "yes" ;
         Configure WITH_URANDOM ;

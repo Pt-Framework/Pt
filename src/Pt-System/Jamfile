@@ -14,6 +14,11 @@ if $(WITH_GETENTROPY)
     SubDirC++Flags [ FDefines WITH_GETENTROPY ] ;
 }
 
+if $(WITH_GETENTROPY_SYS_RANDOM)
+{
+    SubDirC++Flags [ FDefines WITH_GETENTROPY_SYS_RANDOM ] ;
+}
+
 if $(WITH_GETRANDOM)
 {
     SubDirC++Flags [ FDefines WITH_GETRANDOM ] ;
@@ -62,6 +67,7 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           MainLoop.cpp
                           Mutex.cpp
                           Path.cpp
+                          Random.cpp
                           Pipe.cpp
                           Process.cpp
                           Selectable.cpp

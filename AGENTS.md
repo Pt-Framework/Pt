@@ -106,6 +106,9 @@ must serve many applications, platforms, and user requirements.
 - For threads, mutexes, semaphores, condition variables, queues, subprocesses, clocks, system time and monotonic ticks read:
   `.github/instructions/pt-system-api-concurrency.instructions.md`
 
+- For unpredictable random bytes, random integers and the OS CSPRNG read:
+  `.github/instructions/pt-system-api-random.instructions.md`
+
 - For file and directory operations, paths and FileDevice read:
   `.github/instructions/pt-system-api-filesystem.instructions.md`
 

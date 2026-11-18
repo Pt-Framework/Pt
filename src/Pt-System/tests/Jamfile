@@ -11,6 +11,7 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   PathTest.cpp
                   PipeTest.cpp
                   ProcessTest.cpp
+                  RandomTest.cpp
                   SerialDeviceTest.cpp
                   TarTest.cpp
                   ThreadTest.cpp

@@ -27,8 +27,8 @@ namespace Pt {
 
     This module is the portable operating-system layer for a process. It
     covers the file system, threads and processes, event loops, I/O
-    devices, logging, shared libraries, plugins, tar archives, and the
-    clock.
+    devices, logging, shared libraries, plugins, tar archives, the clock,
+    and random bytes.
 */
 namespace System {
 
@@ -57,6 +57,7 @@ namespace System {
     class Pipe;
     class PluginId;
     class Process;
+    class Random;
     class ReadWriteMutex;
     class Selectable;
     class Semaphore;

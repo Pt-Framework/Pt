@@ -12,7 +12,7 @@
     This module is the portable operating-system layer for a process.
     This chapter covers the file system, threads and processes, event
     loops, I/O devices, logging, shared libraries, plugins, tar archives,
-    and the clock.
+    the clock, and random bytes.
 */
 
 /** @defgroup Pt-System-FileSystem File System Access
