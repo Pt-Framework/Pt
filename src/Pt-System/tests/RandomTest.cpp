@@ -18,8 +18,8 @@ class RandomTest : public Pt::Unit::TestSuite
             this->registerMethod("Get", *this, &RandomTest::Get);
             this->registerMethod("GetZero", *this, &RandomTest::GetZero);
             this->registerMethod("GetNullBuffer", *this, &RandomTest::GetNullBuffer);
-            this->registerMethod("GetUInt32Range", *this, &RandomTest::GetUInt32Range);
-            this->registerMethod("GetUInt64Range", *this, &RandomTest::GetUInt64Range);
+            this->registerMethod("GetValue", *this, &RandomTest::GetValue);
+            this->registerMethod("GetRange", *this, &RandomTest::GetRange);
             this->registerMethod("TwoInstances", *this, &RandomTest::TwoInstances);
         }
 
@@ -59,29 +59,31 @@ class RandomTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_THROW(rnd.get(0, 1), std::invalid_argument);
         }
 
-        void GetUInt32Range()
+        void GetValue()
         {
             Pt::System::Random rnd;
-            PT_UNIT_ASSERT_EQUALS(rnd.getUInt32(1), 0);
-            PT_UNIT_ASSERT_THROW(rnd.getUInt32(0), std::invalid_argument);
+            Pt::uint32_t a = rnd.get<Pt::uint32_t>();
+            Pt::uint32_t b = rnd.get<Pt::uint32_t>();
+            PT_UNIT_ASSERT(a != b);
 
-            for(unsigned i = 0; i < 1000; ++i)
-            {
-                Pt::uint32_t x = rnd.getUInt32(6);
-                PT_UNIT_ASSERT(x < 6);
-            }
+            Pt::uint64_t c = rnd.get<Pt::uint64_t>();
+            Pt::uint64_t d = rnd.get<Pt::uint64_t>();
+            PT_UNIT_ASSERT(c != d);
         }
 
-        void GetUInt64Range()
+        void GetRange()
         {
             Pt::System::Random rnd;
-            PT_UNIT_ASSERT_EQUALS(rnd.getUInt64(1), 0);
-            PT_UNIT_ASSERT_THROW(rnd.getUInt64(0), std::invalid_argument);
+            PT_UNIT_ASSERT_EQUALS(rnd.get<Pt::uint32_t>(1), 0);
+            PT_UNIT_ASSERT_THROW(rnd.get<Pt::uint32_t>(0), std::invalid_argument);
 
             for(unsigned i = 0; i < 1000; ++i)
             {
-                Pt::uint64_t x = rnd.getUInt64(6);
+                Pt::uint32_t x = rnd.get<Pt::uint32_t>(6);
                 PT_UNIT_ASSERT(x < 6);
+
+                Pt::uint64_t y = rnd.get<Pt::uint64_t>(6);
+                PT_UNIT_ASSERT(y < 6);
             }
         }
 
