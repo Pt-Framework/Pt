@@ -9,6 +9,16 @@ if $(WITH_MACH_CLOCK)
     SubDirC++Flags [ FDefines WITH_MACH_CLOCK ] ;
 }
 
+if $(WITH_GETENTROPY)
+{
+    SubDirC++Flags [ FDefines WITH_GETENTROPY ] ;
+}
+
+if $(WITH_GETRANDOM)
+{
+    SubDirC++Flags [ FDefines WITH_GETRANDOM ] ;
+}
+
 if $(WITH_POSIX_SELECT)
 {
     SubDirC++Flags [ FDefines PT_WITH_POSIX_SELECT ] ;

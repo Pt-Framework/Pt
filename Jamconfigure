@@ -104,16 +104,29 @@ if $(PT_SYSTEM) = win32
         PSAPI_LINKLIBS = -lPsapi ;
 
         WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
-                                        "#include <Psapi.h>"
-                                        "int main() { PROCESS_MEMORY_COUNTERS pmc;"
-                                        "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
-                                        "return 0; }"
-                                        : ""
-                                        : $(PSAPI_LINKLIBS) ] ;
+                                     "#include <Psapi.h>"
+                                     "int main() { PROCESS_MEMORY_COUNTERS pmc;"
+                                     "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
+                                     "return 0; }"
+                                    : ""
+                                    : $(PSAPI_LINKLIBS) ] ;
     }
 
     EchoOption PSAPI_LINKLIBS : "Psapi libs" ;
     PT_SYSTEM_LINKLIBS += $(PSAPI_LINKLIBS) ;
+
+    BCRYPT_LINKLIBS ?= [ FLinkLibs bcrypt ] ;
+
+    WITH_BCRYPT = [ CheckBuildC++ "#include <windows.h>"
+                                  "#include <bcrypt.h>"
+                                  "int main() { BCRYPT_ALG_HANDLE h = 0;"
+                                  "BCryptOpenAlgorithmProvider(&h,"
+                                  "BCRYPT_RNG_ALGORITHM, 0, 0); return 0; }"
+                                 : ""
+                                 : $(BCRYPT_LINKLIBS) ] ;
+
+    EchoOption BCRYPT_LINKLIBS : "BCrypt libs" ;
+    PT_SYSTEM_LINKLIBS += $(BCRYPT_LINKLIBS) ;
 }
 
 #
@@ -249,6 +262,44 @@ if $(PT_SYSTEM) = posix
     }
 
     EchoOption M_LINKLIBS : "Math libs" ;
+
+    #
+    # Random number generator
+    #
+
+    WITH_GETENTROPY = [ CheckBuildC++ "#include <unistd.h>"
+                                      "int main() { unsigned char b[1];"
+                                      "return getentropy(b, 1); }" ] ;
+
+    if ! $(WITH_GETENTROPY)
+    {
+        WITH_GETENTROPY = [ CheckBuildC++ "#include <sys/random.h>"
+                                          "int main() { unsigned char b[1];"
+                                          "return getentropy(b, 1); }" ] ;
+    }
+
+    if ! $(WITH_GETENTROPY)
+    {
+        WITH_GETRANDOM = [ CheckBuildC++ "#include <sys/random.h>"
+                                         "int main() { unsigned char b[1];"
+                                         "return (int) getrandom(b, 1, 0); }" ] ;
+    }
+
+    if $(WITH_GETENTROPY)
+    {
+        EchoOption WITH_GETENTROPY : "getentropy" : $(WITH_GETENTROPY:E="no") ;
+        Configure WITH_GETENTROPY ;
+    }
+    else if $(WITH_GETRANDOM)
+    {
+        EchoOption WITH_GETRANDOM : "getrandom" : $(WITH_GETRANDOM:E="no") ;
+        Configure WITH_GETRANDOM ;
+    }
+    else
+    {
+        EchoOption WITH_URANDOM : "/dev/urandom" : "yes" ;
+        Configure WITH_URANDOM ;
+    }
 
     PT_SYSTEM_LINKLIBS +=  $(POSIX_CLOCK_LINKLIBS) $(PTHREAD_LINKLIBS) $(DL_LINKLIBS) ;
 }
