@@ -634,12 +634,24 @@ void WebSocketChannel::onInput()
 
         if(n == 0)
         {
-            onProtocolAborted();
-            return;
+            std::streambuf* buf = stream->buffer();
+            if( ! buf || buf->in_avail() <= 0 )
+            {
+                onProtocolAborted();
+                return;
+            }
         }
 
         for(;;)
         {
+            bool want = _state == CloseSent
+                     || (_state == Open && _receive.isPending());
+            if( ! want )
+            {
+                _inputPending = false;
+                return;
+            }
+
             const Frame* frame = _wsbuf.import();
             if( ! frame )
             {
@@ -763,6 +775,9 @@ bool WebSocketChannel::onData(const Frame& frame)
 {
     if( ! _receive.isPending() )
     {
+        if(_state != CloseSent)
+            return false;
+
         _wsbuf.discard();
         return true;
     }

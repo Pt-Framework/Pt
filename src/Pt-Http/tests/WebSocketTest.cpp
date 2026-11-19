@@ -821,6 +821,85 @@ class FeedSession : public Pt::Http::WebSocketSession
 typedef Pt::Http::BasicWebSocketService<FeedSession> FeedService;
 
 
+class TwoFeedSession : public Pt::Http::WebSocketSession
+{
+    public:
+        TwoFeedSession(Pt::Http::WebSocketService& service,
+                       Pt::Http::Stream& stream,
+                       const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        , _second(false)
+        {
+            outputReady() += Pt::slot(*this, &TwoFeedSession::onOutputReady);
+            outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            outgoing().body() << "one";
+            beginSend();
+        }
+
+    private:
+        void onOutputReady(Pt::Http::WebSocketSession&)
+        {
+            Pt::Http::WebSocketProgress progress = endSend();
+            if( ! progress.finished() )
+            {
+                beginSend();
+                return;
+            }
+
+            if(_second)
+                return;
+
+            _second = true;
+            outgoing().clear();
+            outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            outgoing().body() << "two";
+            beginSend();
+        }
+
+    private:
+        bool _second;
+};
+
+typedef Pt::Http::BasicWebSocketService<TwoFeedSession> TwoFeedService;
+
+
+class DataThenCloseSession : public Pt::Http::WebSocketSession
+{
+    public:
+        DataThenCloseSession(Pt::Http::WebSocketService& service,
+                             Pt::Http::Stream& stream,
+                             const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            outputReady() += Pt::slot(*this, &DataThenCloseSession::onOutputReady);
+            shutdownReady() += Pt::slot(*this, &DataThenCloseSession::onShutdownReady);
+            outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            outgoing().body() << "hello";
+            beginSend();
+        }
+
+    private:
+        void onOutputReady(Pt::Http::WebSocketSession&)
+        {
+            Pt::Http::WebSocketProgress progress = endSend();
+            if( ! progress.finished() )
+            {
+                beginSend();
+                return;
+            }
+
+            beginShutdown();
+        }
+
+        void onShutdownReady(Pt::Http::WebSocketSession&)
+        {
+            endShutdown();
+        }
+};
+
+typedef Pt::Http::BasicWebSocketService<DataThenCloseSession> DataThenCloseService;
+
+
 class PongSession : public Pt::Http::WebSocketSession
 {
     public:
@@ -1401,6 +1480,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _deferredCloseService(0)
         {
             _waitTimer.timeout() += Pt::slot(*this, &WebSocketTest::onHttpTimeoutWait);
+            _deferTimer.timeout() += Pt::slot(*this, &WebSocketTest::onDeferredWait);
 
             registerMethod("Text", *this, &WebSocketTest::Text);
             registerMethod("Accepted", *this, &WebSocketTest::Accepted);
@@ -1415,6 +1495,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("NullSession", *this, &WebSocketTest::NullSession);
             registerMethod("ConstructFails", *this, &WebSocketTest::ConstructFails);
             registerMethod("Push", *this, &WebSocketTest::Push);
+            registerMethod("UnreadIncoming", *this, &WebSocketTest::UnreadIncoming);
+            registerMethod("DeferredReceive", *this, &WebSocketTest::DeferredReceive);
+            registerMethod("UnreadBeforeClose", *this, &WebSocketTest::UnreadBeforeClose);
             registerMethod("Pong", *this, &WebSocketTest::Pong);
             registerMethod("SessionPong", *this, &WebSocketTest::SessionPong);
             registerMethod("SessionShutdown", *this, &WebSocketTest::SessionShutdown);
@@ -1511,6 +1594,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         {
             _exitTimer.detach();
             _waitTimer.detach();
+            _deferTimer.detach();
             delete _loop;
             _loop = 0;
         }
@@ -1926,6 +2010,163 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _type = socket.incoming().type();
             _received = true;
             _loop->exit();
+        }
+
+    protected:
+        void UnreadIncoming()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8061);
+
+            Pt::Http::Server server(*_loop, ep);
+            PushService service;
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client client(*_loop, ep);
+            Pt::Http::WebSocket socket(client);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onPushConnected);
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onUnreadIncomingInput);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_received);
+            _message.assign( std::istreambuf_iterator<char>( socket.incoming().body() ),
+                             std::istreambuf_iterator<char>() );
+            PT_UNIT_ASSERT_EQUALS(_message, "feed");
+            PT_UNIT_ASSERT_EQUALS(socket.incoming().type(),
+                                  Pt::Http::WebSocketMessage::Text);
+        }
+
+        void onUnreadIncomingInput(Pt::Http::WebSocket& socket)
+        {
+            socket.endReceive();
+            _received = true;
+            _loop->exit();
+        }
+
+    protected:
+        void DeferredReceive()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8062);
+
+            Pt::Http::Server server(*_loop, ep);
+            TwoFeedService service;
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client client(*_loop, ep);
+            Pt::Http::WebSocket socket(client);
+            _limitSocket = &socket;
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onDeferredReceiveConnected);
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onDeferredReceiveInput);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_received);
+            PT_UNIT_ASSERT(_finished);
+            PT_UNIT_ASSERT_EQUALS(_message, "onetwo");
+            _limitSocket = 0;
+        }
+
+        void onDeferredReceiveConnected(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            _deferTimer.setActive(*_loop);
+            _deferTimer.start(100);
+        }
+
+        void onDeferredReceiveInput(Pt::Http::WebSocket& socket)
+        {
+            socket.endReceive();
+            _message.append( std::istreambuf_iterator<char>( socket.incoming().body() ),
+                             std::istreambuf_iterator<char>() );
+            socket.incoming().clear();
+
+            if( ! _received )
+            {
+                _received = true;
+                _deferTimer.start(10);
+                return;
+            }
+
+            _finished = true;
+            _loop->exit();
+        }
+
+    protected:
+        void UnreadBeforeClose()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8063);
+
+            Pt::Http::Server server(*_loop, ep);
+            DataThenCloseService service;
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client client(*_loop, ep);
+            Pt::Http::WebSocket socket(client);
+            _limitSocket = &socket;
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onDeferredReceiveConnected);
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onUnreadBeforeCloseInput);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onUnreadBeforeCloseClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_received);
+            PT_UNIT_ASSERT(_closed);
+            PT_UNIT_ASSERT_EQUALS(_message, "hello");
+            PT_UNIT_ASSERT_EQUALS(_type, Pt::Http::WebSocketMessage::Text);
+            _limitSocket = 0;
+        }
+
+        void onUnreadBeforeCloseInput(Pt::Http::WebSocket& socket)
+        {
+            socket.endReceive();
+            _received = true;
+            _deferTimer.start(10);
+        }
+
+        void onUnreadBeforeCloseClosed(Pt::Http::WebSocket& socket)
+        {
+            socket.close();
+            _closed = true;
+            _loop->exit();
+        }
+
+        void onDeferredWait()
+        {
+            _deferTimer.stop();
+
+            if( ! _limitSocket )
+                return;
+
+            if(_received)
+            {
+                Pt::Http::WebSocketMessage& incoming = _limitSocket->incoming();
+                if( incoming.available() > 0 )
+                {
+                    _message.assign( std::istreambuf_iterator<char>( incoming.body() ),
+                                     std::istreambuf_iterator<char>() );
+                    _type = incoming.type();
+                    incoming.clear();
+                }
+
+                if( ! _finished )
+                    _limitSocket->beginReceive();
+
+                return;
+            }
+
+            _limitSocket->beginReceive();
         }
 
     protected:
@@ -3826,6 +4067,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         Pt::System::MainLoop* _loop;
         Pt::System::Timer _exitTimer;
         Pt::System::Timer _waitTimer;
+        Pt::System::Timer _deferTimer;
         std::string _message;
         std::string _offered;
         std::string _copied;

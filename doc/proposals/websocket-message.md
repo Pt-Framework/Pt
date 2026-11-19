@@ -169,7 +169,9 @@ limit. No socket, no loop, no channel.
 
 The input pump runs only for an outstanding `beginReceive` or for a
 locally initiated shutdown waiting for the peer close. No input is
-started from `open`. A receive delivers data frames through `incoming`.
+started from `open`. A completed receive stops import until the next
+`beginReceive()`; already-read bytes stay in the stream buffer and
+are delivered by the next `onInput`. A receive delivers data frames through `incoming`.
 It also handles ping, pong, and close internally. Ping enqueues a pong.
 Pong runs the pong notification. Neither becomes `incoming` or emits
 `inputReady`. A received close does not complete the receive and does not

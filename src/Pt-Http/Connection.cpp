@@ -261,9 +261,20 @@ void Connection::setStreamTimeout(std::size_t ms)
 void Connection::beginInput()
 {
     if(_ssl)
+    {
         _sslbuf.import();
 
-    _sockbuf.beginRead();
+        if(_sslbuf.in_avail() > 0)
+        {
+            setInputReady();
+            return;
+        }
+    }
+
+    if( _sockbuf.in_avail() )
+        setInputReady();
+    else
+        _sockbuf.beginRead();
 }
 
 
