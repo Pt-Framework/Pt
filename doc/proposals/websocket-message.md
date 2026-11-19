@@ -181,8 +181,12 @@ deliver an incomplete data message.
 does not require the receive to be idle, and `beginReceive` does not
 require the shutdown to be consumed by `endShutdown`. The two hold the
 input independently. While only the shutdown holds it, ping and pong
-are handled internally and data is discarded; while a receive also
-holds it, data is delivered as usual until the peer close arrives.
+are handled internally and data is discarded. That discard includes
+payload still in `incoming()` when the application has not consumed
+it; copy or read that body before `beginShutdown()` lets the pump
+continue. While a receive also holds input, data is delivered as usual
+until the peer close arrives. In `Open`, a completed receive leaves
+the body in `incoming()` until the next `beginReceive()`.
 
 The engine never cancels an outstanding input to start an output, or
 an outstanding output to start an input. `Stream` already allows one
