@@ -776,7 +776,7 @@ bool WebSocketChannel::onData(const Frame& frame)
     if( ! _receive.isPending() )
     {
         if(_state != CloseSent)
-            return false;
+            return true;
 
         _wsbuf.discard();
         return true;
