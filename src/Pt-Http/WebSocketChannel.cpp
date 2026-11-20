@@ -699,9 +699,7 @@ void WebSocketChannel::onInput()
                 return;
             }
 
-            if( ! onFrame(*frame) )
-                return;
-
+            onFrame(*frame);
             if( ! sentry )
                 return;
         }
@@ -717,7 +715,7 @@ void WebSocketChannel::onInput()
 }
 
 
-bool WebSocketChannel::onFrame(const Frame& frame)
+void WebSocketChannel::onFrame(const Frame& frame)
 {
     unsigned opcode = frame.opcode();
 
@@ -729,40 +727,39 @@ bool WebSocketChannel::onFrame(const Frame& frame)
 
     switch(opcode)
     {
-        case 0x09: return onPing(frame);
-        case 0x0A: return onPong(frame);
-        case 0x08: return onPeerClose(frame);
+        case 0x09: onPing(frame); break;
+        case 0x0A: onPong(frame); break;
+        case 0x08: onPeerClose(frame); break;
         case 0x01:
         case 0x02:
-        case 0x00: return onData(frame);
+        case 0x00: onData(frame); break;
         default:   throw WebSocketError(1002);
     }
 }
 
 
-bool WebSocketChannel::onPing(const Frame& frame)
+void WebSocketChannel::onPing(const Frame& frame)
 {
     if(_state != Open)
-        return true;
+        return;
 
     if( _pong.isPending() )
     {
         if(_outputPending && ! _outputQueue.empty() && _outputQueue.front() == &_pong)
-            return true;
+            return;
 
         _pong.set(0x0A, frame.data(), frame.size());
-        return true;
+        return;
     }
 
     _pong.reset();
     _pong.begin();
     _pong.set(0x0A, frame.data(), frame.size());
     enqueue(_pong);
-    return true;
 }
 
 
-bool WebSocketChannel::onPong(const Frame& frame)
+void WebSocketChannel::onPong(const Frame& frame)
 {
     const char* data = frame.data();
     _pongData.assign(data ? data : "", frame.size());
@@ -770,11 +767,10 @@ bool WebSocketChannel::onPong(const Frame& frame)
     _pingTimeout.end();
 
     _pongReceived.send(_pongData);
-    return true;
 }
 
 
-bool WebSocketChannel::onPeerClose(const Frame& frame)
+void WebSocketChannel::onPeerClose(const Frame& frame)
 {
     // Peer close frame. Echo a close if we have not sent one.
 
@@ -809,19 +805,18 @@ bool WebSocketChannel::onPeerClose(const Frame& frame)
         enqueueClose(_closeCode, _closeReason);
 
     onProtocolDone();
-    return false;
 }
 
 
-bool WebSocketChannel::onData(const Frame& frame)
+void WebSocketChannel::onData(const Frame& frame)
 {
     if( ! _receive.isPending() )
     {
         if(_state != CloseSent)
-            return true;
+            return;
 
         _wsbuf.discard();
-        return true;
+        return;
     }
 
     unsigned opcode = frame.opcode();
@@ -843,7 +838,6 @@ bool WebSocketChannel::onData(const Frame& frame)
         _receiveProgress.setBody();
 
     _receive.setReady();
-    return true;
 }
 
 
@@ -979,15 +973,12 @@ void WebSocketChannel::onOutput()
         _outputQueue.pop_front();
         out->discard();
 
-        if( ! _outputQueue.empty() )
-            onBeginOutput( *_outputQueue.front() );
-
-        if( ! sentry )
-            return;
-
         out->setReady();
         if( ! sentry )
             return;
+
+        if( ! _outputQueue.empty() )
+            onBeginOutput( *_outputQueue.front() );
     }
     catch(...)
     {

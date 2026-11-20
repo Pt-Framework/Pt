@@ -334,15 +334,15 @@ class WebSocketChannel : public Channel
 
         void onInputError(std::exception_ptr error);
 
-        bool onFrame(const Frame& frame);
+        void onFrame(const Frame& frame);
 
-        bool onPing(const Frame& frame);
+        void onPing(const Frame& frame);
 
-        bool onPong(const Frame& frame);
+        void onPong(const Frame& frame);
 
-        bool onPeerClose(const Frame& frame);
+        void onPeerClose(const Frame& frame);
 
-        bool onData(const Frame& frame);
+        void onData(const Frame& frame);
 
         void onProtocolError(std::exception_ptr error, unsigned code);
 
