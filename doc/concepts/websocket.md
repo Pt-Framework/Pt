@@ -275,7 +275,9 @@ operations reports the end.
 An I/O error on an outstanding receive or send stores the exception
 and leaves the stream open. The ready signal of that transfer runs,
 and the matching end throws `IOError`. A protocol violation throws
-`WebSocketError`, which is an I/O error. The other direction is
+`WebSocketError`, which is an I/O error. A throw from a ready slot
+leaves the event loop. The engine does not store it as a transfer
+failure and does not set close code 1006. The other direction is
 unaffected. On the client, the application calls `close()`. On the
 session, an `IOError` from a ready slot closes the session. The
 direction that failed keeps the reason: a later `beginSend()`,

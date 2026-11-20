@@ -15,6 +15,7 @@
 #include "Pt/Http/WebSocketService.h"
 #include "Pt/Http/WebSocketServlet.h"
 #include "Pt/Http/WebSocketSession.h"
+#include "Pt/Http/WebSocketError.h"
 #include "Pt/Http/Client.h"
 #include "Pt/Http/HttpError.h"
 #include "Pt/Http/Request.h"
@@ -788,6 +789,30 @@ class PushSession : public Pt::Http::WebSocketSession
 };
 
 typedef Pt::Http::BasicWebSocketService<PushSession> PushService;
+
+
+class LongPushSession : public Pt::Http::WebSocketSession
+{
+    public:
+        LongPushSession(Pt::Http::WebSocketService& service,
+                        Pt::Http::Stream& stream,
+                        const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            outputReady() += Pt::slot(*this, &LongPushSession::onOutputReady);
+            outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            outgoing().body() << std::string(64, 'x');
+            beginSend();
+        }
+
+    private:
+        void onOutputReady(Pt::Http::WebSocketSession&)
+        {
+            endSend();
+        }
+};
+
+typedef Pt::Http::BasicWebSocketService<LongPushSession> LongPushService;
 
 
 class FeedSession : public Pt::Http::WebSocketSession
@@ -1756,6 +1781,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("PingIntervalWithoutReceive", *this, &WebSocketTest::PingIntervalWithoutReceive);
             registerMethod("PingIntervalResetByInbound", *this, &WebSocketTest::PingIntervalResetByInbound);
             registerMethod("PingIntervalYieldsToBeginPing", *this, &WebSocketTest::PingIntervalYieldsToBeginPing);
+            registerMethod("InputReadyThrows", *this, &WebSocketTest::InputReadyThrows);
+            registerMethod("OutputReadyThrows", *this, &WebSocketTest::OutputReadyThrows);
+            registerMethod("ReceiveErrorLeavesLoop", *this, &WebSocketTest::ReceiveErrorLeavesLoop);
         }
 
         void setUp()
@@ -4211,6 +4239,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
         void onIntervalPong(Pt::Http::WebSocket&, const std::string&)
         {
+            if(_pong)
+                return;
+
             _pong = true;
             _waitTimer.setActive(*_loop);
             _waitTimer.start(100);
@@ -4377,6 +4408,124 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _pong = true;
             if(_pingReady)
                 _loop->exit();
+        }
+
+    protected:
+        void InputReadyThrows()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8106);
+
+            Pt::Http::Server server(*_loop, ep);
+            PushService service;
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onPushConnected);
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onInputReadyThrows);
+            socket.beginConnect("/ws");
+
+            bool thrown = false;
+            try
+            {
+                _loop->run();
+            }
+            catch(const std::runtime_error& error)
+            {
+                PT_UNIT_ASSERT_EQUALS(std::string(error.what()), "input ready slot failed");
+                thrown = true;
+            }
+
+            PT_UNIT_ASSERT(thrown);
+            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 0u);
+            socket.beginReceive();
+        }
+
+        void onInputReadyThrows(Pt::Http::WebSocket& socket)
+        {
+            socket.endReceive();
+            throw std::runtime_error("input ready slot failed");
+        }
+
+    protected:
+        void OutputReadyThrows()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8107);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnected);
+            socket.outputReady() += Pt::slot(*this, &WebSocketTest::onOutputReadyThrows);
+            socket.beginConnect("/ws");
+
+            bool thrown = false;
+            try
+            {
+                _loop->run();
+            }
+            catch(const std::runtime_error& error)
+            {
+                PT_UNIT_ASSERT_EQUALS(std::string(error.what()), "output ready slot failed");
+                thrown = true;
+            }
+
+            PT_UNIT_ASSERT(thrown);
+            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 0u);
+            socket.beginPing();
+        }
+
+        void onOutputReadyThrows(Pt::Http::WebSocket& socket)
+        {
+            socket.endSend();
+            throw std::runtime_error("output ready slot failed");
+        }
+
+    protected:
+        void ReceiveErrorLeavesLoop()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8108);
+
+            Pt::Http::Server server(*_loop, ep);
+            LongPushService service;
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setMaxMessageSize(16);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onPushConnected);
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onReceiveErrorInput);
+            socket.beginConnect("/ws");
+
+            bool thrown = false;
+            try
+            {
+                _loop->run();
+            }
+            catch(const Pt::Http::WebSocketError&)
+            {
+                thrown = true;
+            }
+            catch(const Pt::System::IOError&)
+            {
+                thrown = true;
+            }
+
+            PT_UNIT_ASSERT(thrown);
+        }
+
+        void onReceiveErrorInput(Pt::Http::WebSocket& socket)
+        {
+            socket.endReceive();
         }
 
     private:

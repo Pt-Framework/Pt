@@ -147,26 +147,29 @@ class WebSocketChannel : public Channel
                     _error = std::exception_ptr();
                 }
 
-                bool setReady()
+                void setFinished()
                 {
                     if(_state != Pending)
-                        return false;
+                        return;
 
                     _state = Ready;
-                    _ready.send();
-                    return true;
                 }
 
-                bool setFailed(std::exception_ptr error)
+                void setFailed(std::exception_ptr error)
                 {
                     if(_state != Pending)
-                        return false;
+                        return;
 
                     _error = error;
-                    return setReady();
+                    _state = Ready;
                 }
 
-                void finish()
+                void setReady()
+                {
+                    _ready.send();
+                }
+
+                void end()
                 {
                     _state = Idle;
 
