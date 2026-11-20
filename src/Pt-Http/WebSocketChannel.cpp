@@ -663,62 +663,10 @@ void WebSocketChannel::onInput()
 
     Sentry sentry(_sentry);
 
+    std::size_t n = 0;
     try
     {
-        std::size_t n = stream->endInput();
-
-        if(_state >= Finish)
-        {
-            _inputPending = false;
-            return;
-        }
-
-        if(n == 0)
-        {
-            std::streambuf* buf = stream->buffer();
-            if( ! buf || buf->in_avail() <= 0 )
-            {
-                onProtocolAborted();
-                return;
-            }
-        }
-
-        for(;;)
-        {
-            bool want = _state == CloseSent
-                     || (_state == Open && _receive.isPending());
-            if( ! want )
-            {
-                _inputPending = false;
-                break;
-            }
-
-            const Frame* frame = _wsbuf.import();
-            if( ! frame )
-            {
-                _inputPending = false;
-                onBeginInput();
-                return;
-            }
-
-            onFrame(*frame);
-            if( ! sentry )
-                return;
-
-            if( _receive.isReady() )
-            {
-                _inputPending = false;
-                break;
-            }
-        }
-    }
-    catch(const WebSocketError& e)
-    {
-        if( ! sentry )
-            return;
-
-        onProtocolError( std::current_exception(), e.code() );
-        return;
+        n = stream->endInput();
     }
     catch(const System::IOError&)
     {
@@ -732,14 +680,110 @@ void WebSocketChannel::onInput()
     if( ! sentry )
         return;
 
-    if( _receive.isReady() )
-        _receive.setReady();
-
-    if( ! sentry )
+    if(_state >= Finish)
+    {
+        _inputPending = false;
         return;
+    }
 
-    if(_state == CloseSent)
-        onBeginInput();
+    if(n == 0)
+    {
+        std::streambuf* buf = stream->buffer();
+        if( ! buf || buf->in_avail() <= 0 )
+        {
+            _inputPending = false;
+            onProtocolAborted();
+            return;
+        }
+    }
+
+    const bool wasReady = _receive.isReady();
+
+    for(;;)
+    {
+        bool want = _state == CloseSent
+                 || (_state == Open && _receive.isPending());
+        if( ! want )
+        {
+            _inputPending = false;
+            return;
+        }
+
+        const Frame* frame = 0;
+        try
+        {
+            frame = _wsbuf.import();
+        }
+        catch(const WebSocketError& e)
+        {
+            if( ! sentry )
+                return;
+
+            onProtocolError( std::current_exception(), e.code() );
+            return;
+        }
+
+        if( ! frame )
+        {
+            _inputPending = false;
+            try
+            {
+                onBeginInput();
+            }
+            catch(const System::IOError&)
+            {
+                if( ! sentry )
+                    return;
+
+                onInputError( std::current_exception() );
+            }
+            return;
+        }
+
+        try
+        {
+            onFrame(*frame);
+        }
+        catch(const WebSocketError& e)
+        {
+            if( ! sentry )
+                return;
+
+            onProtocolError( std::current_exception(), e.code() );
+            return;
+        }
+
+        if( ! sentry )
+            return;
+
+        if( ! _receive.isReady() )
+            continue;
+
+        if(wasReady)
+            continue;
+
+        _inputPending = false;
+        _receive.setReady();
+        if( ! sentry )
+            return;
+
+        if(_state == CloseSent)
+        {
+            try
+            {
+                onBeginInput();
+            }
+            catch(const System::IOError&)
+            {
+                if( ! sentry )
+                    return;
+
+                onInputError( std::current_exception() );
+            }
+        }
+
+        return;
+    }
 }
 
 
