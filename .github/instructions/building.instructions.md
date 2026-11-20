@@ -5,7 +5,7 @@ description: "Build system & setup"
 # Building with Jam
 
 - The Pt project uses a custom jam-based build.
-- Windows: `jam.bat`, Linux/macOS: `jam.sh`.
+- Windows: `jam.bat <Options>`, Linux/macOS: `jam.sh <Options>`.
 - `jam.bat` is located in the top level directory.
 - All platforms use the same basic jam arguments.
 - Some platforms may have additional platform-specific options.
@@ -17,7 +17,7 @@ description: "Build system & setup"
 - ALWAYS check the exit code of the actual standalone build command to determine build success.
 - ALWAYS check the exit code after every build command — no exceptions.
 - NEVER rely on build output alone.
-- ALWAYS run the build command without any further processing.
+- ALWAYS run the build command without piping or otherwise processing its output.
 - ALWAYS perform a full global build to verify that dependent modules are not broken.
 - NEVER only build the local module or test target.
 
