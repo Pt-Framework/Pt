@@ -706,10 +706,16 @@ void WebSocketChannel::onInput()
     }
     catch(const WebSocketError& e)
     {
+        if( ! sentry )
+            return;
+
         onProtocolError(std::current_exception(), e.code());
     }
     catch(...)
     {
+        if( ! sentry )
+            return;
+
         onInputError( std::current_exception() );
     }
 }
@@ -977,11 +983,14 @@ void WebSocketChannel::onOutput()
         if( ! sentry )
             return;
 
-        if( ! _outputQueue.empty() )
+        if( ! _outputPending && ! _outputQueue.empty() )
             onBeginOutput( *_outputQueue.front() );
     }
     catch(...)
     {
+        if( ! sentry )
+            return;
+
         onOutputError( std::current_exception() );
     }
 }
