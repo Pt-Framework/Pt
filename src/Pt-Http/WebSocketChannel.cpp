@@ -27,6 +27,39 @@ const std::size_t MaxFramePayload = 4096;
 } // namespace
 
 ///////////////////////////////////////////////////////////////////////
+// WebSocketChannel::Sentry
+///////////////////////////////////////////////////////////////////////
+
+class WebSocketChannel::Sentry
+{
+    public:
+        Sentry(Sentry*& sentry)
+        : _deleted(false)
+        , _sentry(sentry)
+        {
+            sentry = this;
+        }
+
+        ~Sentry()
+        {
+            if( ! _deleted )
+                this->detach();
+        }
+
+        bool operator!() const
+        { return _deleted; }
+
+        void detach()
+        {
+            _sentry = 0;
+            _deleted = true;
+        }
+
+        bool _deleted;
+        Sentry*& _sentry;
+};
+
+///////////////////////////////////////////////////////////////////////
 // WebSocketChannel::Output
 ///////////////////////////////////////////////////////////////////////
 
@@ -71,6 +104,7 @@ void WebSocketChannel::Output::discard()
 
 WebSocketChannel::WebSocketChannel()
 : Channel()
+, _sentry(0)
 , _clientMask(false)
 , _maxMessageSize(1024 * 1024)
 , _closeTimeout(10000)
@@ -96,6 +130,9 @@ WebSocketChannel::WebSocketChannel()
 
 WebSocketChannel::~WebSocketChannel()
 {
+    if(_sentry)
+        _sentry->detach();
+
     close();
 }
 
@@ -622,6 +659,8 @@ void WebSocketChannel::onInput()
     if( ! stream )
         return;
 
+    Sentry sentry(_sentry);
+
     try
     {
         std::size_t n = stream->endInput();
@@ -661,6 +700,9 @@ void WebSocketChannel::onInput()
             }
 
             if( ! onFrame(*frame) )
+                return;
+
+            if( ! sentry )
                 return;
         }
     }
@@ -920,6 +962,8 @@ void WebSocketChannel::onOutput()
     if( ! stream )
         return;
 
+    Sentry sentry(_sentry);
+
     try
     {
         stream->endOutput();
@@ -938,7 +982,12 @@ void WebSocketChannel::onOutput()
         if( ! _outputQueue.empty() )
             onBeginOutput( *_outputQueue.front() );
 
+        if( ! sentry )
+            return;
+
         out->setReady();
+        if( ! sentry )
+            return;
     }
     catch(...)
     {

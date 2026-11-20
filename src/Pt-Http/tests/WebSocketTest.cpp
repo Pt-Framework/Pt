@@ -1504,6 +1504,149 @@ class ReadyExceptionService : public Pt::Http::WebSocketService
         std::size_t _released;
 };
 
+
+class CloseFromReceiveSession : public Pt::Http::WebSocketSession
+{
+    public:
+        CloseFromReceiveSession(Pt::Http::WebSocketService& service,
+                                Pt::Http::Stream& stream,
+                                const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            inputReady() += Pt::slot(*this, &CloseFromReceiveSession::onInputReady);
+            beginReceive();
+        }
+
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
+        {
+            endReceive();
+            close();
+        }
+};
+
+class CloseFromReceiveService : public Pt::Http::WebSocketService
+{
+    public:
+        explicit CloseFromReceiveService(Pt::System::EventLoop& loop)
+        : _loop(&loop)
+        , _opened(0)
+        , _released(0)
+        {}
+
+        std::size_t live() const
+        { return _opened - _released; }
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            ++_opened;
+            return new CloseFromReceiveSession(*this, stream, reply);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            ++_released;
+            delete session;
+            _loop->exit();
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+        std::size_t _opened;
+        std::size_t _released;
+};
+
+
+class CloseFromPongSession : public Pt::Http::WebSocketSession
+{
+    public:
+        CloseFromPongSession(Pt::Http::WebSocketService& service,
+                             Pt::Http::Stream& stream,
+                             const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            pong() += Pt::slot(*this, &CloseFromPongSession::onPong);
+            beginPing();
+            beginReceive();
+        }
+
+    private:
+        void onPong(Pt::Http::WebSocketSession&, const std::string&)
+        {
+            close();
+        }
+};
+
+class CloseFromPongService : public Pt::Http::WebSocketService
+{
+    public:
+        explicit CloseFromPongService(Pt::System::EventLoop& loop)
+        : _loop(&loop)
+        , _opened(0)
+        , _released(0)
+        {}
+
+        std::size_t live() const
+        { return _opened - _released; }
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            ++_opened;
+            return new CloseFromPongSession(*this, stream, reply);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            ++_released;
+            delete session;
+            _loop->exit();
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+        std::size_t _opened;
+        std::size_t _released;
+};
+
+
+class DestroyOnReceive : public Pt::Connectable
+{
+    public:
+        DestroyOnReceive(Pt::Http::WebSocket*& socket,
+                         Pt::System::EventLoop& loop,
+                         bool& received)
+        : _socket(&socket)
+        , _loop(&loop)
+        , _received(&received)
+        {}
+
+        void onConnected(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+        }
+
+        void onInputReady(Pt::Http::WebSocket& socket)
+        {
+            socket.endReceive();
+            *_received = true;
+            delete *_socket;
+            *_socket = 0;
+            _loop->exit();
+        }
+
+    private:
+        Pt::Http::WebSocket** _socket;
+        Pt::System::EventLoop* _loop;
+        bool* _received;
+};
+
 class WebSocketTest : public Pt::Unit::TestSuite
                     , public Pt::Connectable
 {
@@ -1561,6 +1704,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("CloseHandshake", *this, &WebSocketTest::CloseHandshake);
             registerMethod("Close", *this, &WebSocketTest::Close);
             registerMethod("CloseReceive", *this, &WebSocketTest::CloseReceive);
+            registerMethod("CloseFromReceive", *this, &WebSocketTest::CloseFromReceive);
+            registerMethod("DestroyFromReceive", *this, &WebSocketTest::DestroyFromReceive);
+            registerMethod("CloseFromPong", *this, &WebSocketTest::CloseFromPong);
             registerMethod("CloseDestructor", *this, &WebSocketTest::CloseDestructor);
             registerMethod("CloseNoFrame", *this, &WebSocketTest::CloseNoFrame);
             registerMethod("BeginTwice", *this, &WebSocketTest::BeginTwice);
@@ -2672,6 +2818,75 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
             PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 1006u);
             _loop->exit();
+        }
+
+    protected:
+        void CloseFromReceive()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8065);
+
+            Pt::Http::Server server(*_loop, ep);
+            CloseFromReceiveService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnected);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+        }
+
+        void DestroyFromReceive()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8066);
+
+            Pt::Http::Server server(*_loop, ep);
+            PushService service;
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket* socket = new Pt::Http::WebSocket(http);
+            DestroyOnReceive destroy(socket, *_loop, _received);
+            socket->connected() += Pt::slot(destroy, &DestroyOnReceive::onConnected);
+            socket->inputReady() += Pt::slot(destroy, &DestroyOnReceive::onInputReady);
+            socket->beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_received);
+            PT_UNIT_ASSERT(socket == 0);
+        }
+
+        void CloseFromPong()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8067);
+
+            Pt::Http::Server server(*_loop, ep);
+            CloseFromPongService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedSessionPong);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
         }
 
     protected:

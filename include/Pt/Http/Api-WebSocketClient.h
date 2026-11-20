@@ -93,6 +93,7 @@
     %shutdownReady(). Without either, a peer close is not seen.
     Destruction of the stream detaches the channel. It ends an
     outstanding send or receive. The owner deletes this socket.
+    Destroying it from a ready slot is safe.
     The handshake uses the timeout of the client. After the upgrade
     that timeout is stopped. %setIdleTimeout() bounds inbound
     silence, %setPingInterval() a keepalive ping after inbound

@@ -262,7 +262,8 @@ or release.
 
 `close()` unbinds the stream, cancels pending operations without
 their ready signals, and emits nothing. On the session, `close()`
-then calls `onSessionClosed`, which releases the session.
+then calls `onSessionClosed`, which releases the session. The
+engine returns if the facade is destroyed during a ready signal.
 An idle timeout and a read that returns no bytes take the same
 protocol-end path, with close code 1006.
 

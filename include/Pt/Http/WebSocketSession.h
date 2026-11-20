@@ -101,6 +101,7 @@ class WebSocketChannel;
     %closed() does not unbind or release. A session that connects
     no %closed() slot is still released. An %IOError from a ready
     slot closes the session and does not reach the event loop.
+    %close() is safe from a ready slot of this session.
     After %shutdownReady() returns, the session closes. Call
     %endShutdown() from that signal to observe an error. The
     servlet also releases remaining sessions when it is destroyed.
@@ -291,8 +292,9 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             Does not block and emits nothing. Unbinds the stream.
             The servlet then releases this session. A call from
-            %closed() does not unbind or release. %beginSend()
-            and %beginReceive() then throw. No close frame leaves
+            %closed() does not unbind or release. Safe to call from
+            a ready slot of this session. %beginSend() and
+            %beginReceive() then throw. No close frame leaves
             %closeCode() at 1006.
         */
         void close();

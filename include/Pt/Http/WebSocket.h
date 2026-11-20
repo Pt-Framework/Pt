@@ -170,7 +170,7 @@ class WebSocketChannel;
     the code at 1006. %close() releases the stream and writes no
     frame. It does not block and emits nothing. The destructor calls
     it. Destruction of the stream detaches the channel. The owner
-    deletes this socket.
+    deletes this socket. Destroying it from a ready slot is safe.
 
     On the server the application does not construct this type. The
     server facade is %WebSocketSession, which exposes the same
@@ -190,6 +190,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         explicit WebSocket(Client& client);
 
         /** @brief Calls %close().
+
+            Safe to destroy this socket from a ready slot.
         */
         ~WebSocket();
 
@@ -359,8 +361,9 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         /** @brief Releases the stream and writes no frame.
 
             Does not block and emits nothing. The destructor calls
-            this. %beginSend() and %beginReceive() then throw. No
-            close frame leaves %closeCode() at 1006.
+            this. Safe to call from a ready slot. %beginSend() and
+            %beginReceive() then throw. No close frame leaves
+            %closeCode() at 1006.
         */
         void close();
 

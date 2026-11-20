@@ -378,6 +378,9 @@ class WebSocketChannel : public Channel
         void setCloseCode(unsigned code, const std::string& reason);
 
     private:
+        class Sentry;
+
+        Sentry*       _sentry;
         bool          _clientMask;
         std::size_t   _maxMessageSize;
         Timeout       _idleTimeout;
