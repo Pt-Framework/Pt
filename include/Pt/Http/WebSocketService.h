@@ -367,8 +367,7 @@ class PT_HTTP_API WebSocketService : public Service
         /** @brief Releases @a session through the attached servlet.
 
             Returns when no servlet is attached. The servlet removes
-            the session from its list when present and calls
-            %releaseSession().
+            the session from its live list when present.
         */
         void onSessionClosed(WebSocketSession& session);
 

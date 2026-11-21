@@ -96,15 +96,14 @@ class WebSocketChannel;
     send when progress is not finished. %closed() runs when the
     engine has ended the protocol and no local shutdown is
     outstanding. The stream stays bound for that call. After
-    %closed() returns, the servlet releases the session. The
-    destructor unbinds the stream. A call to %close() from
-    %closed() does not unbind or release. A session that connects
-    no %closed() slot is still released. An %IOError from a ready
-    slot closes the session and does not reach the event loop.
-    %close() is safe from a ready slot of this session.
-    After %shutdownReady() returns, the session closes. Call
-    %endShutdown() from that signal to observe an error. The
-    servlet also releases remaining sessions when it is destroyed.
+    %closed() returns, the session closes. The destructor unbinds
+    the stream. A session that connects no %closed() slot is still
+    released. An %IOError from a ready slot closes the session and
+    does not reach the event loop. %close() is safe from a ready
+    slot of this session. After %shutdownReady() returns, the
+    session closes. Call %endShutdown() from that signal to observe
+    an error. The servlet also releases remaining sessions when it
+    is destroyed.
 
     %beginReceive() starts frame processing. Until then, incoming
     frames stay in the stream. Control frames are processed while a
@@ -291,8 +290,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Releases the stream and writes no frame.
 
             Does not block and emits nothing. Unbinds the stream.
-            The servlet then releases this session. A call from
-            %closed() does not unbind or release. Safe to call from
+            The servlet then releases this session. Safe to call from
             a ready slot of this session. %beginSend() and
             %beginReceive() then throw. No close frame leaves
             %closeCode() at 1006.
@@ -342,9 +340,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Returns the signal emitted when the engine has ended the protocol.
 
             No local shutdown is outstanding. The stream stays bound
-            for this call. After it returns, the servlet releases the
-            session. The destructor unbinds the stream. A call to
-            %close() from this signal does not unbind or release.
+            for this call. After it returns, the session closes.
         */
         Pt::Signal<WebSocketSession&>& closed()
         { return _closed; }
@@ -375,7 +371,6 @@ class PT_HTTP_API WebSocketSession : public Connectable
         WebSocketService* _service;
         WebSocketChannel* _channel;
         std::string _protocol;
-        bool _inClosed;
         Pt::Signal<WebSocketSession&> _inputReady;
         Pt::Signal<WebSocketSession&> _outputReady;
         Pt::Signal<WebSocketSession&> _pingReady;

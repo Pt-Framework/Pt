@@ -201,7 +201,6 @@ class RecordSession : public Pt::Http::WebSocketSession
                 *_closeCode = closeCode();
 
             *_closed = true;
-            _exitLoop->exit();
             close();
         }
 
@@ -257,6 +256,7 @@ class RecordService : public Pt::Http::WebSocketService
         {
             ++_released;
             delete session;
+            _loop->exit();
         }
 
     private:
@@ -1640,6 +1640,172 @@ class CloseFromPongService : public Pt::Http::WebSocketService
 };
 
 
+class CloseFromShutdownSession : public Pt::Http::WebSocketSession
+{
+    public:
+        CloseFromShutdownSession(Pt::Http::WebSocketService& service,
+                                 Pt::Http::Stream& stream,
+                                 const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            shutdownReady() += Pt::slot(*this, &CloseFromShutdownSession::onShutdownReady);
+            beginShutdown();
+        }
+
+    private:
+        void onShutdownReady(Pt::Http::WebSocketSession&)
+        {
+            endShutdown();
+            close();
+            close();
+        }
+};
+
+class CloseFromShutdownService : public Pt::Http::WebSocketService
+{
+    public:
+        explicit CloseFromShutdownService(Pt::System::EventLoop& loop)
+        : _loop(&loop)
+        , _opened(0)
+        , _released(0)
+        {}
+
+        std::size_t live() const
+        { return _opened - _released; }
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            ++_opened;
+            return new CloseFromShutdownSession(*this, stream, reply);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            ++_released;
+            delete session;
+            _loop->exit();
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+        std::size_t _opened;
+        std::size_t _released;
+};
+
+
+class CloseFromClosedSession : public Pt::Http::WebSocketSession
+{
+    public:
+        CloseFromClosedSession(Pt::Http::WebSocketService& service,
+                               Pt::Http::Stream& stream,
+                               const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            closed() += Pt::slot(*this, &CloseFromClosedSession::onClosed);
+            beginReceive();
+        }
+
+    private:
+        void onClosed(Pt::Http::WebSocketSession&)
+        {
+            close();
+        }
+};
+
+class CloseFromClosedService : public Pt::Http::WebSocketService
+{
+    public:
+        explicit CloseFromClosedService(Pt::System::EventLoop& loop)
+        : _loop(&loop)
+        , _opened(0)
+        , _released(0)
+        {}
+
+        std::size_t live() const
+        { return _opened - _released; }
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            ++_opened;
+            return new CloseFromClosedSession(*this, stream, reply);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            ++_released;
+            delete session;
+            _loop->exit();
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+        std::size_t _opened;
+        std::size_t _released;
+};
+
+
+class CloseTwiceSession : public Pt::Http::WebSocketSession
+{
+    public:
+        CloseTwiceSession(Pt::Http::WebSocketService& service,
+                          Pt::Http::Stream& stream,
+                          const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            inputReady() += Pt::slot(*this, &CloseTwiceSession::onInputReady);
+            beginReceive();
+        }
+
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
+        {
+            endReceive();
+            close();
+            close();
+        }
+};
+
+class CloseTwiceService : public Pt::Http::WebSocketService
+{
+    public:
+        explicit CloseTwiceService(Pt::System::EventLoop& loop)
+        : _loop(&loop)
+        , _opened(0)
+        , _released(0)
+        {}
+
+        std::size_t live() const
+        { return _opened - _released; }
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            ++_opened;
+            return new CloseTwiceSession(*this, stream, reply);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            ++_released;
+            delete session;
+            _loop->exit();
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+        std::size_t _opened;
+        std::size_t _released;
+};
+
+
 class DestroyOnReceive : public Pt::Connectable
 {
     public:
@@ -1732,6 +1898,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("CloseFromReceive", *this, &WebSocketTest::CloseFromReceive);
             registerMethod("DestroyFromReceive", *this, &WebSocketTest::DestroyFromReceive);
             registerMethod("CloseFromPong", *this, &WebSocketTest::CloseFromPong);
+            registerMethod("CloseFromShutdown", *this, &WebSocketTest::CloseFromShutdown);
+            registerMethod("CloseFromClosed", *this, &WebSocketTest::CloseFromClosed);
+            registerMethod("CloseTwice", *this, &WebSocketTest::CloseTwice);
             registerMethod("CloseDestructor", *this, &WebSocketTest::CloseDestructor);
             registerMethod("CloseNoFrame", *this, &WebSocketTest::CloseNoFrame);
             registerMethod("BeginTwice", *this, &WebSocketTest::BeginTwice);
@@ -1981,22 +2150,25 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             Pt::Http::Server server(*_loop, ep);
             ReceiveService service;
-            Pt::Http::WebSocketServlet sockets(service);
 
-            Pt::Http::MapUrl mapUrl("/ws", service);
-            server.addServlet(mapUrl);
+            {
+                Pt::Http::WebSocketServlet sockets(service);
+                Pt::Http::MapUrl mapUrl("/ws", service);
+                server.addServlet(mapUrl);
 
-            Pt::Http::Client http(*_loop, ep);
-            Pt::Http::WebSocket socket(http);
-            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedClose);
-            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onAutoReleaseShutdown);
-            socket.beginConnect("/ws");
+                Pt::Http::Client http(*_loop, ep);
+                Pt::Http::WebSocket socket(http);
+                socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedClose);
+                socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onAutoReleaseShutdown);
+                socket.beginConnect("/ws");
 
-            _loop->run();
+                _loop->run();
 
-            PT_UNIT_ASSERT(_shutdownReady);
+                PT_UNIT_ASSERT(_shutdownReady);
+                PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+            }
+
             PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
-            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
         }
 
         void onAutoReleaseShutdown(Pt::Http::WebSocket& socket)
@@ -2909,6 +3081,73 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Http::Client http(*_loop, ep);
             Pt::Http::WebSocket socket(http);
             socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedSessionPong);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+        }
+
+        void CloseFromShutdown()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8110);
+
+            Pt::Http::Server server(*_loop, ep);
+            CloseFromShutdownService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedSessionShutdown);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+        }
+
+        void CloseFromClosed()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8111);
+
+            Pt::Http::Server server(*_loop, ep);
+            CloseFromClosedService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedClose);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onShutdownReady);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+        }
+
+        void CloseTwice()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8112);
+
+            Pt::Http::Server server(*_loop, ep);
+            CloseTwiceService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnected);
             socket.beginConnect("/ws");
 
             _loop->run();

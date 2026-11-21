@@ -121,18 +121,17 @@
     %outputReady() runs when data bytes were sent. A ping or a pong
     does not emit those signals. %closed() runs when the engine
     has ended the protocol and no local shutdown is outstanding.
-    After that signal returns the servlet releases the session. The
-    destructor unbinds the stream. An %IOError from a ready slot
-    closes the session. After %shutdownReady() returns the session
-    closes. %close() from %closed() does not release. The
+    After that signal returns the session closes. The destructor
+    unbinds the stream. An %IOError from a ready slot closes the
+    session. After %shutdownReady() returns the session closes. The
     session does not own the stream or the connection.
 
     %WebSocketServlet owns the live sessions of one service. The
     service owns the endpoint policy and the allocator. Construct the
     servlet with the service and destroy it before the
     service. The destructor releases every session it still owns
-    through %onSessionClosed() while the derived service is fully
-    constructed. The derived service destructor has not run yet, so
+    while the derived service is fully constructed. The derived
+    service destructor has not run yet, so
     the virtual release call and the allocator are still there.
     Constructing a second servlet for the same service throws
     %std::logic_error.
@@ -169,10 +168,10 @@
     same allocator, as %onGetResponder() and %onReleaseResponder()
     must match. A pool, or any other detach, lives in the derived
     service. Return null from %onGetSession() to decline the upgrade.
-    The servlet releases a session through %onSessionClosed() after
-    %closed(), when %close() is called, and from its destructor
-    for every remaining session it owns. The service does not keep
-    a session list. It counts the sessions %getSession() returned.
+    The servlet releases a session after %closed(), when %close()
+    is called, and from its destructor for every remaining session
+    it owns. The service does not keep a session list. It counts
+    the sessions %getSession() returned.
 */
 
 #endif

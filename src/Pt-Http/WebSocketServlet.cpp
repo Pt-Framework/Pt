@@ -6,6 +6,9 @@
 #include <Pt/Http/WebSocketService.h>
 #include <Pt/Http/WebSocketSession.h>
 #include <Pt/Http/Stream.h>
+#include <Pt/System/EventLoop.h>
+#include <Pt/Signal.h>
+#include <Pt/Slot.h>
 
 #include <algorithm>
 
@@ -15,6 +18,7 @@ namespace Http {
 
 WebSocketServlet::WebSocketServlet(WebSocketService& service)
 : _service(&service)
+, _loop(0)
 {
     _service->attach(*this);
 }
@@ -22,8 +26,25 @@ WebSocketServlet::WebSocketServlet(WebSocketService& service)
 
 WebSocketServlet::~WebSocketServlet()
 {
+    if(_loop)
+    {
+        _loop->eventReceived() -= Pt::slot(*this, &WebSocketServlet::onSessionsClosed);
+        _loop = 0;
+    }
+
+    while( ! _closing.empty() )
+    {
+        WebSocketSession* session = _closing.back();
+        _closing.pop_back();
+        _service->releaseSession(session);
+    }
+
     while( ! _sessions.empty() )
-        onSessionClosed( *_sessions.back() );
+    {
+        WebSocketSession* session = _sessions.back();
+        _sessions.pop_back();
+        _service->releaseSession(session);
+    }
 
     if(_service)
         _service->detach(*this);
@@ -44,6 +65,13 @@ void WebSocketServlet::accept(Stream& stream,
         return;
     }
 
+    if( ! _loop )
+    {
+        _loop = stream.loop();
+        if(_loop)
+            _loop->eventReceived() += Pt::slot(*this, &WebSocketServlet::onSessionsClosed);
+    }
+
     _sessions.push_back(session);
 }
 
@@ -57,7 +85,21 @@ void WebSocketServlet::onSessionClosed(WebSocketSession& session)
         return;
 
     _sessions.erase(it);
-    _service->releaseSession(&session);
+    _closing.push_back(&session);
+
+    if(_loop)
+        _loop->commitEvent( SessionsClosedEvent() );
+}
+
+
+void WebSocketServlet::onSessionsClosed(const SessionsClosedEvent&)
+{
+    while( ! _closing.empty() )
+    {
+        WebSocketSession* session = _closing.back();
+        _closing.pop_back();
+        _service->releaseSession(session);
+    }
 }
 
 } // namespace Http

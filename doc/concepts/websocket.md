@@ -254,18 +254,17 @@ On the client, the application calls `close()` after `closed()`.
 The destructor calls `close()`.
 
 On the session, `closed()` notifies the application. After that
-signal returns, the session calls
-`WebSocketServlet::onSessionClosed`. That releases the session.
-The destructor unbinds the stream. A `closed()` slot need not call
-`close()`. A call to `close()` during `closed()` does not unbind
-or release.
+signal returns, the session closes. A `closed()` slot need not call
+`close()`. A session that connects no `closed()` slot is still
+released.
 
 `close()` unbinds the stream, cancels pending operations without
 their ready signals, and emits nothing. On the session, `close()`
-then calls `onSessionClosed`, which releases the session. The
-engine returns if the facade is destroyed during a ready signal.
-An idle timeout and a read that returns no bytes take the same
-protocol-end path, with close code 1006.
+moves the session off the servlet live list onto a closing list
+and posts an empty event. The event handler releases whatever is
+on that list. The servlet destructor releases remaining sessions
+on both lists. An idle timeout and a read that returns no bytes
+take the same protocol-end path, with close code 1006.
 
 One event has one reporter. An outstanding shutdown reports the
 handshake. An I/O or protocol error on an outstanding receive
@@ -302,22 +301,20 @@ slots in the constructor after its members are initialized, and
 starts the first `beginReceive()` there.
 
 The servlet owns every live session. `closed()` notifies the
-application. After that signal returns,
-`WebSocketServlet::onSessionClosed` releases the session. The
-destructor unbinds the stream. A `closed()` slot need not call
-`close()`. A call to `close()` during `closed()` does not unbind
-or release. A session that connects no `closed()` slot is still
-released.
+application. After that signal returns, the session closes. A
+`closed()` slot need not call `close()`. A session that connects
+no `closed()` slot is still released.
 
-`close()` unbinds the stream and calls `onSessionClosed`. That is
-the local abort: an `IOError` from a ready slot, the return of
-`shutdownReady()`, or the application ending the stream. The
-destructor unbinds the stream and does not release the session
-again. A domain object that holds
-a session reference drops it in `closed()`, because the servlet
-releases after that signal. `close()` during construction unbinds
-the stream. The session is not listed. `accept()` releases it
-through `releaseSession()`.
+`close()` unbinds the stream and asks the servlet to release the
+session. That is the local abort: an `IOError` from a ready slot,
+the return of `shutdownReady()`, or the application ending the
+stream. The servlet moves the session to a closing list and posts
+an empty event. The event carries no session pointer. The handler
+releases every session on that list. The destructor unbinds the
+stream and does not release the session again. A domain object
+that holds a session reference drops it in `closed()`. `close()`
+during construction unbinds the stream. The session is not listed.
+`accept()` releases it through `releaseSession()`.
 
 The session does not store the opening request or reply. Both are
 valid only for the call that creates the session. `protocol()` is the

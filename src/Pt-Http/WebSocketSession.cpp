@@ -44,7 +44,6 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
 : _service(&service)
 , _channel(0)
 , _protocol(selectedProtocol(reply))
-, _inClosed(false)
 {
     _channel = new WebSocketChannel();
     _channel->open(stream, false);
@@ -131,9 +130,6 @@ void WebSocketSession::endShutdown()
 
 void WebSocketSession::close()
 {
-    if(_inClosed)
-        return;
-
     _channel->close();
     _service->onSessionClosed(*this);
 }
@@ -211,11 +207,8 @@ void WebSocketSession::onShutdownReady()
 
 void WebSocketSession::onClosed()
 {
-    _inClosed = true;
     _closed.send(*this);
-    _inClosed = false;
-
-    _service->onSessionClosed(*this);
+    close();
 }
 
 

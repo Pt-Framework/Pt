@@ -17,16 +17,17 @@ application. It is not an error. `inputReady()` and `outputReady()`
 do not run for it. `endReceive()` and `endSend()` do not report it.
 Outstanding send and receive stay pending.
 
-After `closed()` returns, the session calls
-`WebSocketServlet::onSessionClosed`. That releases the session.
-The destructor unbinds the stream. A `closed()` slot need not call
-`close()`. A call to `close()` during `closed()` does not unbind
-or release. A session that connects no `closed()` slot is still
-released.
+After `closed()` returns, the session closes. A `closed()` slot
+need not call `close()`. A session that connects no `closed()`
+slot is still released.
 
-`close()` unbinds the stream and calls `onSessionClosed`. That is
-the local abort. `closed()` does not run for it. The destructor
-unbinds and does not release again.
+`close()` unbinds the stream and does not destroy the session.
+The servlet moves it from the live list to a closing list and
+posts an empty event. The event carries no session pointer. The
+handler releases every session on the closing list. Extra or
+stale events find the list empty. `closed()` does not run for a
+local `close()`. The destructor unbinds and does not release
+again.
 
 An `IOError` from a ready slot, including `WebSocketError`, closes
 the session and does not reach the event loop. After
@@ -34,15 +35,18 @@ the session and does not reach the event loop. After
 `endShutdown()` to observe a handshake error. `close()` remains the
 explicit abort from the constructor, a kick, or the application.
 
-`WebSocketServlet::onSessionClosed` is the only release. It is
-idempotent: a session already gone from the list is ignored. The
-servlet destructor releases remaining sessions through it.
+`WebSocketServlet::onSessionClosed` queues that release. A session
+already gone from the live list is ignored. The servlet destructor
+releases remaining sessions on both lists.
 
 A domain object that holds a session reference drops it in
-`closed()`, because the servlet releases after that signal.
+`closed()`.
 
 `close()` during construction unbinds the stream. The session is
 not listed. `accept()` releases it through `releaseSession()`.
+
+`size()` is the live list. `socketCount()` drops when
+`releaseSession()` destroys the session.
 
 ## Session ready {#session-ready}
 

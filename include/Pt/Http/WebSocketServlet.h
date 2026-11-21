@@ -6,11 +6,17 @@
 #define PT_HTTP_WEBSOCKETSERVLET_H
 
 #include <Pt/Http/Api.h>
+#include <Pt/Connectable.h>
+#include <Pt/Event.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 #include <cstddef>
 
 namespace Pt {
+
+namespace System {
+class EventLoop;
+}
 
 namespace Http {
 
@@ -49,9 +55,9 @@ class WebSocketSession;
     Construct it with the %WebSocketService and destroy it before
     that service. The constructor attaches this servlet, so the
     handshake can accept upgrades. The destructor detaches it and
-    releases every remaining session through %onSessionClosed().
-    That order is required. The service destructor cannot release
-    sessions, because by then the derived object is already gone.
+    releases every remaining session. That order is required. The
+    service destructor cannot release sessions, because by then the
+    derived object is already gone.
 
     One service has one active servlet. Constructing a second
     %WebSocketServlet for the same service throws %std::logic_error.
@@ -68,9 +74,13 @@ class WebSocketSession;
 
     @ingroup Pt-Http-WebSocket-Server
 */
-class PT_HTTP_API WebSocketServlet : private NonCopyable
+class PT_HTTP_API WebSocketServlet : public Connectable
+                                   , private NonCopyable
 {
     friend class WebSocketService;
+
+    class SessionsClosedEvent : public BasicEvent<SessionsClosedEvent>
+    { };
 
     public:
         /** @brief Attaches this servlet to @a service.
@@ -104,9 +114,13 @@ class PT_HTTP_API WebSocketServlet : private NonCopyable
 
         void onSessionClosed(WebSocketSession& session);
 
+        void onSessionsClosed(const SessionsClosedEvent&);
+
     private:
-        WebSocketService* _service;
+        WebSocketService*              _service;
         std::vector<WebSocketSession*> _sessions;
+        std::vector<WebSocketSession*> _closing;
+        System::EventLoop*             _loop;
 };
 
 } // namespace Http
