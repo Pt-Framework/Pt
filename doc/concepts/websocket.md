@@ -160,9 +160,12 @@ receive with that error, writes its close frame, and does not wait
 for the peer to answer. The stream stays bound. `closeCode()` is the
 code of the violation. A later `beginReceive()` throws the same
 error. When no receive is outstanding, `closed()` runs. During a
-local close handshake the outstanding shutdown reports the error.
-The engine does not wait for the peer close. `closeCode()` stays
-the local code.
+local close handshake a protocol or I/O error is reported by the
+outstanding shutdown. An outstanding receive stays pending, as after
+a peer close. A protocol error still writes the local close frame
+before `shutdownReady()`. An I/O error does not wait. The engine
+does not wait for the peer close. `closeCode()` stays the local
+code.
 
 ## Control plane
 
@@ -270,8 +273,9 @@ on both lists. An idle timeout and a read that returns no bytes
 take the same protocol-end path, with close code 1006.
 
 One event has one reporter. An outstanding shutdown reports the
-handshake. An I/O or protocol error on an outstanding receive
-reports that receive. `closed()` runs when neither of those
+handshake, including a protocol or I/O error while waiting for the
+peer close. In `Open`, an I/O or protocol error on an outstanding
+receive reports that receive. `closed()` runs when neither of those
 operations reports the end.
 
 An I/O error on an outstanding receive or send stores the exception

@@ -1526,6 +1526,68 @@ class OversizedSendSession : public Pt::Http::WebSocketSession
         Pt::System::Timer _send;
 };
 
+class InvalidUtf8SendSession : public Pt::Http::WebSocketSession
+{
+    public:
+        InvalidUtf8SendSession(Pt::Http::WebSocketService& service,
+                               Pt::Http::Stream& stream,
+                               const Pt::Http::Reply& reply,
+                               Pt::System::EventLoop& loop)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            outputReady() += Pt::slot(*this, &InvalidUtf8SendSession::onOutputReady);
+            _send.setActive(loop);
+            _send.timeout() += Pt::slot(*this, &InvalidUtf8SendSession::onSend);
+            _send.start(50);
+        }
+
+        ~InvalidUtf8SendSession()
+        {
+            _send.detach();
+        }
+
+    private:
+        void onSend()
+        {
+            outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            const char bad = '\xff';
+            outgoing().body().write(&bad, 1);
+            beginSend();
+        }
+
+        void onOutputReady(Pt::Http::WebSocketSession&)
+        {
+            endSend();
+        }
+
+        Pt::System::Timer _send;
+};
+
+class InvalidUtf8SendService : public Pt::Http::WebSocketService
+{
+    public:
+        explicit InvalidUtf8SendService(Pt::System::EventLoop& loop)
+        : _loop(&loop)
+        {}
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new InvalidUtf8SendSession(*this, stream, reply, *_loop);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+};
+
+
 class OversizedSendService : public Pt::Http::WebSocketService
 {
     public:
@@ -2060,6 +2122,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("ReceiveDuringShutdown", *this, &WebSocketTest::ReceiveDuringShutdown);
             registerMethod("ProtocolFailure", *this, &WebSocketTest::ProtocolFailure);
             registerMethod("ProtocolFailureDuringShutdown", *this, &WebSocketTest::ProtocolFailureDuringShutdown);
+            registerMethod("ProtocolFailureDuringShutdownUtf8", *this, &WebSocketTest::ProtocolFailureDuringShutdownUtf8);
             registerMethod("ProtocolFailureReceiveDuringShutdown", *this, &WebSocketTest::ProtocolFailureReceiveDuringShutdown);
             registerMethod("ReadyExceptionReleases", *this, &WebSocketTest::ReadyExceptionReleases);
             registerMethod("IdleTimeoutTwice", *this, &WebSocketTest::IdleTimeoutTwice);
@@ -4514,7 +4577,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Http::Client http(*_loop, ep);
             Pt::Http::WebSocket socket(http);
             socket.setMaxMessageSize(16);
-            socket.setCloseTimeout(200);
+            socket.setCloseTimeout(0);
             socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocolFailureDuringShutdown);
             socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onProtocolFailureDuringShutdownReady);
             socket.beginConnect("/ws");
@@ -4548,6 +4611,32 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.close();
             _shutdownReady = true;
             _loop->exit();
+        }
+
+    protected:
+        void ProtocolFailureDuringShutdownUtf8()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8117);
+
+            Pt::Http::Server server(*_loop, ep);
+            InvalidUtf8SendService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setCloseTimeout(0);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocolFailureDuringShutdown);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onProtocolFailureDuringShutdownReady);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_rejected);
+            PT_UNIT_ASSERT(_shutdownReady);
+            PT_UNIT_ASSERT_EQUALS(_status, 1007u);
         }
 
     protected:

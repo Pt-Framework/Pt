@@ -210,8 +210,10 @@ Its ready signal runs after the peer close has arrived and the local
 close frame has been written. The stream stays bound. Then
 `endShutdown` returns the operation to idle or throws its stored I/O
 error. A protocol violation while waiting for the peer close fails
-that shutdown with `WebSocketError`. The engine does not wait for
-the peer close. The application calls `close()`.
+that shutdown with `WebSocketError` after the local close frame has
+been written. An I/O error in that phase fails it immediately. An
+outstanding receive stays pending. The engine does not wait for the
+peer close. The application calls `close()`.
 
 ## Pong visible {#pong-visible}
 

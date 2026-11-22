@@ -362,6 +362,9 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
     if(_outputFailure)
         std::rethrow_exception(_outputFailure);
 
+    // A failure from before the shutdown must not decide its outcome.
+    _inputFailure = std::exception_ptr();
+
     _shutdown.begin();
 
     setCloseCode(code, reason);
@@ -430,7 +433,11 @@ void WebSocketChannel::onProtocolDone()
 
     if( _shutdown.isPending() )
     {
-        _shutdown.setFinished();
+        if(_inputFailure)
+            _shutdown.setFailed(_inputFailure);
+        else
+            _shutdown.setFinished();
+
         _shutdown.setReady();
         return;
     }
@@ -938,10 +945,9 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code, 
     if(_state == CloseSent)
     {
         _inputPending = false;
+        _inputFailure = error;
         onProtocolFinished();
         enqueueClose(_closeCode, _closeReason);
-        _state = Done;
-        _shutdown.setFailed(error);
 
         try
         {
@@ -955,7 +961,7 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code, 
         if( ! sentry )
             return;
 
-        _shutdown.setReady();
+        onProtocolDone();
         return;
     }
 
@@ -1001,6 +1007,15 @@ void WebSocketChannel::onInputError(std::exception_ptr error)
 
     _inputFailure = error;
     _inputPending = false;
+
+    if(_state == CloseSent)
+    {
+        onProtocolFinished();
+        _state = Done;
+        _shutdown.setFailed(error);
+        _shutdown.setReady();
+        return;
+    }
 
     if( _receive.isPending() )
     {
