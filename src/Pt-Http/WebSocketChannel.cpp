@@ -1170,7 +1170,10 @@ void WebSocketChannel::onOutputError(std::exception_ptr error, Sentry& sentry)
     if( ! sentry )
         return;
 
-    onProtocolDone();
+    if(_state < Finish)
+        onProtocolAborted();
+    else
+        onProtocolDone();
 }
 
 } // namespace Http
