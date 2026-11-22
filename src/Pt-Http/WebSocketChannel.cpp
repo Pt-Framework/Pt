@@ -935,6 +935,30 @@ void WebSocketChannel::onData(const Frame& frame)
 
 void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code, Sentry& sentry)
 {
+    if(_state == CloseSent)
+    {
+        _inputPending = false;
+        onProtocolFinished();
+        enqueueClose(_closeCode, _closeReason);
+        _state = Done;
+        _shutdown.setFailed(error);
+
+        try
+        {
+            onBeginOutput();
+        }
+        catch(const System::IOError&)
+        {
+            onOutputError( std::current_exception(), sentry );
+        }
+
+        if( ! sentry )
+            return;
+
+        _shutdown.setReady();
+        return;
+    }
+
     if(_state != Open)
         return;
 

@@ -1489,6 +1489,68 @@ class DropTcpService : public Pt::Http::WebSocketService
         Pt::System::EventLoop* _loop;
 };
 
+
+class OversizedSendSession : public Pt::Http::WebSocketSession
+{
+    public:
+        OversizedSendSession(Pt::Http::WebSocketService& service,
+                             Pt::Http::Stream& stream,
+                             const Pt::Http::Reply& reply,
+                             Pt::System::EventLoop& loop)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            outputReady() += Pt::slot(*this, &OversizedSendSession::onOutputReady);
+            _send.setActive(loop);
+            _send.timeout() += Pt::slot(*this, &OversizedSendSession::onSend);
+            _send.start(50);
+        }
+
+        ~OversizedSendSession()
+        {
+            _send.detach();
+        }
+
+    private:
+        void onSend()
+        {
+            outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            outgoing().body() << std::string(64, 'x');
+            beginSend();
+        }
+
+        void onOutputReady(Pt::Http::WebSocketSession&)
+        {
+            endSend();
+        }
+
+        Pt::System::Timer _send;
+};
+
+class OversizedSendService : public Pt::Http::WebSocketService
+{
+    public:
+        explicit OversizedSendService(Pt::System::EventLoop& loop)
+        : _loop(&loop)
+        {}
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new OversizedSendSession(*this, stream, reply, *_loop);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+};
+
+
 class ReceiveSession : public Pt::Http::WebSocketSession
 {
     public:
@@ -1997,6 +2059,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("CloseTimeoutHandshake", *this, &WebSocketTest::CloseTimeoutHandshake);
             registerMethod("ReceiveDuringShutdown", *this, &WebSocketTest::ReceiveDuringShutdown);
             registerMethod("ProtocolFailure", *this, &WebSocketTest::ProtocolFailure);
+            registerMethod("ProtocolFailureDuringShutdown", *this, &WebSocketTest::ProtocolFailureDuringShutdown);
+            registerMethod("ProtocolFailureReceiveDuringShutdown", *this, &WebSocketTest::ProtocolFailureReceiveDuringShutdown);
             registerMethod("ReadyExceptionReleases", *this, &WebSocketTest::ReadyExceptionReleases);
             registerMethod("IdleTimeoutTwice", *this, &WebSocketTest::IdleTimeoutTwice);
             registerMethod("PingIntervalPong", *this, &WebSocketTest::PingIntervalPong);
@@ -4433,6 +4497,99 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
             socket.outgoing().body() << std::string(64, 'x');
             socket.beginSend();
+        }
+
+    protected:
+        void ProtocolFailureDuringShutdown()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8115);
+
+            Pt::Http::Server server(*_loop, ep);
+            OversizedSendService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setMaxMessageSize(16);
+            socket.setCloseTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocolFailureDuringShutdown);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onProtocolFailureDuringShutdownReady);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_rejected);
+            PT_UNIT_ASSERT(_shutdownReady);
+            PT_UNIT_ASSERT_EQUALS(_status, 1009u);
+        }
+
+        void onConnectedProtocolFailureDuringShutdown(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginShutdown();
+        }
+
+        void onProtocolFailureDuringShutdownReady(Pt::Http::WebSocket& socket)
+        {
+            try
+            {
+                socket.endShutdown();
+            }
+            catch(const Pt::Http::WebSocketError& e)
+            {
+                _rejected = true;
+                _status = e.code();
+            }
+
+            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 1000u);
+            socket.close();
+            _shutdownReady = true;
+            _loop->exit();
+        }
+
+    protected:
+        void ProtocolFailureReceiveDuringShutdown()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8116);
+
+            Pt::Http::Server server(*_loop, ep);
+            OversizedSendService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setMaxMessageSize(16);
+            socket.setCloseTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocolFailureReceiveDuringShutdown);
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onProtocolFailureReceiveDuringShutdownInput);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onProtocolFailureDuringShutdownReady);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_rejected);
+            PT_UNIT_ASSERT(_shutdownReady);
+            PT_UNIT_ASSERT( ! _received );
+            PT_UNIT_ASSERT_EQUALS(_status, 1009u);
+        }
+
+        void onConnectedProtocolFailureReceiveDuringShutdown(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+            socket.beginShutdown();
+        }
+
+        void onProtocolFailureReceiveDuringShutdownInput(Pt::Http::WebSocket& socket)
+        {
+            socket.endReceive();
+            _received = true;
         }
 
     protected:

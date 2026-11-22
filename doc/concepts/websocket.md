@@ -159,7 +159,10 @@ unusable from that point, so the engine completes an outstanding
 receive with that error, writes its close frame, and does not wait
 for the peer to answer. The stream stays bound. `closeCode()` is the
 code of the violation. A later `beginReceive()` throws the same
-error. When no receive is outstanding, `closed()` runs.
+error. When no receive is outstanding, `closed()` runs. During a
+local close handshake the outstanding shutdown reports the error.
+The engine does not wait for the peer close. `closeCode()` stays
+the local code.
 
 ## Control plane
 

@@ -354,6 +354,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         /** @brief Completes the shutdown started by %beginShutdown().
 
             @throw %std::logic_error if the shutdown is not ready.
+            @throw %WebSocketError if a protocol violation ended the
+            handshake.
             @throw %IOError if the close handshake failed.
         */
         void endShutdown();
