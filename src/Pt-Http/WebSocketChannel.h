@@ -366,7 +366,7 @@ class WebSocketChannel : public Channel
 
         void onOutput();
 
-        void onOutputError(std::exception_ptr error);
+        void onOutputError(std::exception_ptr error, Sentry& sentry);
 
     private:
         void onIdleTimeout();

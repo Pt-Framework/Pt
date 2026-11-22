@@ -532,6 +532,8 @@ void WebSocketChannel::onIdleTimeout()
 
 void WebSocketChannel::onPingDelay()
 {
+    Sentry sentry(_sentry);
+
     if(_state != Open)
         return;
 
@@ -556,7 +558,7 @@ void WebSocketChannel::onPingDelay()
     }
     catch(const System::IOError&)
     {
-        onOutputError( std::current_exception() );
+        onOutputError( std::current_exception(), sentry );
     }
 }
 
@@ -767,7 +769,7 @@ void WebSocketChannel::onInput()
         }
         catch(const System::IOError&)
         {
-            onOutputError( std::current_exception() );
+            onOutputError( std::current_exception(), sentry );
         }
 
         if( ! sentry )
@@ -955,7 +957,7 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code, 
     }
     catch(const System::IOError&)
     {
-        onOutputError( std::current_exception() );
+        onOutputError( std::current_exception(), sentry );
     }
 
     if( ! sentry )
@@ -1107,7 +1109,7 @@ void WebSocketChannel::onOutput()
         if( ! sentry )
             return;
 
-        onOutputError( std::current_exception() );
+        onOutputError( std::current_exception(), sentry );
         return;
     }
 
@@ -1124,12 +1126,12 @@ void WebSocketChannel::onOutput()
     }
     catch(const System::IOError&)
     {
-        onOutputError( std::current_exception() );
+        onOutputError( std::current_exception(), sentry );
     }
 }
 
 
-void WebSocketChannel::onOutputError(std::exception_ptr error)
+void WebSocketChannel::onOutputError(std::exception_ptr error, Sentry& sentry)
 {
     if(_state == Closed)
         return;
@@ -1142,7 +1144,7 @@ void WebSocketChannel::onOutputError(std::exception_ptr error)
         return;
 
     Output* out = _outputQueue.front();
-    _outputQueue.pop_front();
+    _outputQueue.clear();
     out->setFailed(error);
 
     if(out == &_closeOut && _shutdown.isPending())
@@ -1156,13 +1158,20 @@ void WebSocketChannel::onOutputError(std::exception_ptr error)
 
     if(out == &_pong || (out == &_ping && ! _isPingPending))
     {
-        onProtocolAborted();
+        if(_state < Finish)
+            onProtocolAborted();
+        else
+            onProtocolDone();
+
         return;
     }
 
     out->setReady();
-}
+    if( ! sentry )
+        return;
 
+    onProtocolDone();
+}
 
 } // namespace Http
 
