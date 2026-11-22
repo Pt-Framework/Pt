@@ -331,6 +331,8 @@ class WebSocketChannel : public Channel
         };
 
     private:
+        class Sentry;
+
         void onBeginInput();
 
         void onInput();
@@ -347,7 +349,7 @@ class WebSocketChannel : public Channel
 
         void onData(const Frame& frame);
 
-        void onProtocolError(std::exception_ptr error, unsigned code);
+        void onProtocolError(std::exception_ptr error, unsigned code, Sentry& sentry);
 
         void onProtocolFinished();
 
@@ -381,8 +383,6 @@ class WebSocketChannel : public Channel
         void setCloseCode(unsigned code, const std::string& reason);
 
     private:
-        class Sentry;
-
         Sentry*       _sentry;
         bool          _clientMask;
         std::size_t   _maxMessageSize;

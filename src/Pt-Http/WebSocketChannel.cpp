@@ -733,7 +733,7 @@ void WebSocketChannel::onInput()
             if( ! sentry )
                 return;
 
-            onProtocolError( std::current_exception(), e.code() );
+            onProtocolError( std::current_exception(), e.code(), sentry );
             return;
         }
         catch(const System::IOError&)
@@ -754,7 +754,7 @@ void WebSocketChannel::onInput()
             if( ! sentry )
                 return;
 
-            onProtocolError( std::current_exception(), e.code() );
+            onProtocolError( std::current_exception(), e.code(), sentry );
             return;
         }
 
@@ -931,7 +931,7 @@ void WebSocketChannel::onData(const Frame& frame)
 }
 
 
-void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
+void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code, Sentry& sentry)
 {
     if(_state != Open)
         return;
@@ -958,10 +958,10 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
         onOutputError( std::current_exception() );
     }
 
-    if( ! _sentry )
+    if( ! sentry )
         return;
 
-    if( _receive.isReady() )
+    if(receivePending)
         _receive.setReady();
     else
         onProtocolDone();
@@ -1063,7 +1063,16 @@ void WebSocketChannel::onBeginOutput()
         }
     }
 
-    stream->beginOutput();
+    try
+    {
+        stream->beginOutput();
+    }
+    catch(const System::IOError&)
+    {
+        _outputFailure = std::current_exception();
+        throw;
+    }
+
     _outputPending = true;
 }
 
@@ -1115,9 +1124,6 @@ void WebSocketChannel::onOutput()
     }
     catch(const System::IOError&)
     {
-        if( ! sentry )
-            return;
-
         onOutputError( std::current_exception() );
     }
 }
@@ -1141,6 +1147,8 @@ void WebSocketChannel::onOutputError(std::exception_ptr error)
 
     if(out == &_closeOut && _shutdown.isPending())
     {
+        onProtocolFinished();
+        _state = Done;
         _shutdown.setFailed(error);
         _shutdown.setReady();
         return;
