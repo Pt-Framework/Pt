@@ -257,7 +257,8 @@ When no local shutdown is outstanding, that protocol end is
 do not run.
 
 On the client, the application calls `close()` after `closed()`.
-The destructor calls `close()`.
+The destructor calls `close()`. After `close()`, `beginConnect()`
+starts a new handshake on the same socket.
 
 On the session, `closed()` notifies the application. After that
 signal returns, the session closes. A `closed()` slot need not call
@@ -391,11 +392,12 @@ than 13 is 426 with `Sec-WebSocket-Version: 13`. No stream is
 opened.
 
 `addProtocol()` offers one subprotocol name. Several calls offer
-several names, in order. The selected name, if the server echoes one,
-is `protocol()` after the handshake. No echo means no protocol was
-agreed. The client, the service, and the session use one
-classification of a protocol name. A name that is not a token is
-rejected before it is written.
+several names, in order. `clearProtocols()` drops them. The names
+remain for later `beginConnect()` calls. The selected name, if the
+server echoes one, is `protocol()` after the handshake. No echo
+means no protocol was agreed. The client, the service, and the
+session use one classification of a protocol name. A name that is
+not a token is rejected before it is written.
 
 ## Timeouts
 

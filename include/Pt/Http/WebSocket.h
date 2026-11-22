@@ -113,10 +113,14 @@ class WebSocketChannel;
     failed.
     %addProtocol() offers one Sec-WebSocket-Protocol name before
     %beginConnect(). Several calls offer several names, in order.
-    After a finished handshake %protocol() is the single name the
-    server echoed, or empty when the server selected none. An echo
-    that was not offered fails the handshake. After that success
-    the socket no longer uses the client for messages.
+    The names remain until %clearProtocols(). After a finished
+    handshake %protocol() is the single name the server echoed, or
+    empty when the server selected none. An echo that was not
+    offered fails the handshake. After that success the socket no
+    longer uses the client for messages. %close() unbinds the
+    stream. A later %beginConnect() starts a new handshake on the
+    same socket. %beginConnect() throws if a handshake is still
+    pending or a stream is still bound.
 
     The socket owns two %WebSocketMessage objects, %incoming() and
     %outgoing(), the way a client owns a request and a reply. Set
@@ -169,8 +173,10 @@ class WebSocketChannel;
     report the handshake that ended the stream. No close frame leaves
     the code at 1006. %close() releases the stream and writes no
     frame. It does not block and emits nothing. The destructor calls
-    it. Destruction of the stream detaches the channel. The owner
-    deletes this socket. Destroying it from a ready slot is safe.
+    it. A later %beginConnect() starts a new handshake on this
+    socket. Destruction of the stream detaches the channel. The
+    owner deletes this socket. Destroying it from a ready slot is
+    safe.
 
     On the server the application does not construct this type. The
     server facade is %WebSocketSession, which exposes the same
@@ -218,20 +224,28 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             request body. A nonempty @a origin replaces an existing
             Origin header. Upgrade fields and the protocol offer are
             set by the socket; body-framing fields are reset for the
-            empty GET.
+            empty GET. After a finished handshake call %close()
+            before this.
+
+            @throw %std::logic_error if a handshake is still pending
+            or a stream is still bound.
         */
         void beginConnect(const std::string& url,
                           const std::string& origin = std::string());
 
         /** @brief Offers one Sec-WebSocket-Protocol name.
 
-            Several calls offer several names, in order. The offer is
-            sent by the next %beginConnect().
+            Several calls offer several names, in order. The names
+            remain for later %beginConnect() calls.
 
             @throw %std::invalid_argument if @a name is empty or is
             not a single protocol token.
         */
         void addProtocol(const std::string& name);
+
+        /** @brief Drops every offered protocol name.
+        */
+        void clearProtocols();
 
         /** @brief Returns the protocol name echoed by the server.
 
@@ -365,7 +379,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             Does not block and emits nothing. The destructor calls
             this. Safe to call from a ready slot. %beginSend() and
             %beginReceive() then throw. No close frame leaves
-            %closeCode() at 1006.
+            %closeCode() at 1006. A later %beginConnect() starts a
+            new handshake on this socket.
         */
         void close();
 

@@ -66,8 +66,9 @@
     Sec-WebSocket-Version 13 and Sec-WebSocket-Key, and sends it
     through the client. %addProtocol() offers one
     Sec-WebSocket-Protocol name before that send. Several calls
-    offer several names, in order. The protocol offer is built from
-    these names rather than a manually prepared protocol field.
+    offer several names, in order. The names remain until
+    %clearProtocols(). The protocol offer is built from these names
+    rather than a manually prepared protocol field.
 
     The server confirms the handshake with Sec-WebSocket-Accept:
     the Base64-encoded SHA-1 digest of the transmitted key followed
@@ -84,10 +85,12 @@
     or empty when the server selected none. An echo that was not
     offered fails the handshake. After that success the socket no
     longer uses the client for messages. A client masks every frame
-    it writes.
+    it writes. %beginConnect() throws if a handshake is still
+    pending or a stream is still bound. After %close(), a later
+    %beginConnect() starts a new handshake on the same socket.
 
     %close() releases the stream and writes no frame. The destructor
-    calls it. The application learns that the stream has ended from
+    calls it. A later %beginConnect() is then allowed. The application learns that the stream has ended from
     the outstanding operation: an outstanding receive completes with
     an error, and an outstanding shutdown completes through
     %shutdownReady(). Without either, a peer close is not seen.

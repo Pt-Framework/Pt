@@ -58,8 +58,9 @@ The client, the service, and the session use
 `MessageHeader::isToken` for a subprotocol name. An empty name, a
 comma, a separator, whitespace, a control, or DEL is rejected
 before the name is stored or written. The client offers stored
-names in order. The service stores accepted names in preference
-order. The session reads the one list value selected on the 101.
+names in order. `clearProtocols()` drops them. The service stores
+accepted names in preference order. The session reads the one list
+value selected on the 101.
 
 `Sec-WebSocket-Version` lists the token `13`. `Sec-WebSocket-Key`
 is one list value whose Base64 decoding is exactly sixteen bytes.

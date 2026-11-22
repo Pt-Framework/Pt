@@ -26,6 +26,12 @@ WebSocket::WebSocket(Client& client)
 , _error()
 , _connecting(false)
 {
+    _channel->inputReady() += Pt::slot(*this, &WebSocket::onInputReady);
+    _channel->outputReady() += Pt::slot(*this, &WebSocket::onOutputReady);
+    _channel->pingReady() += Pt::slot(*this, &WebSocket::onPingReady);
+    _channel->shutdownReady() += Pt::slot(*this, &WebSocket::onShutdownReady);
+    _channel->closed() += Pt::slot(*this, &WebSocket::onClosed);
+    _channel->pong() += Pt::slot(*this, &WebSocket::onPong);
 }
 
 
@@ -63,10 +69,22 @@ void WebSocket::addProtocol(const std::string& name)
 }
 
 
+void WebSocket::clearProtocols()
+{
+    _protocols.clear();
+}
+
+
 void WebSocket::beginConnect(const std::string& url, const std::string& origin)
 {
     if( ! _client )
         throw std::logic_error("WebSocket has no client");
+
+    if(_connecting)
+        throw std::logic_error("WebSocket handshake is still pending");
+
+    if(_channel->isOpen())
+        throw std::logic_error("WebSocket is already open");
 
     _error = std::exception_ptr();
     _acceptKey.clear();
@@ -203,12 +221,6 @@ void WebSocket::onReply(Client& client)
 
         Stream& stream = client.upgrade();
         _channel->open(stream, true);
-        _channel->inputReady() += Pt::slot(*this, &WebSocket::onInputReady);
-        _channel->outputReady() += Pt::slot(*this, &WebSocket::onOutputReady);
-        _channel->pingReady() += Pt::slot(*this, &WebSocket::onPingReady);
-        _channel->shutdownReady() += Pt::slot(*this, &WebSocket::onShutdownReady);
-        _channel->closed() += Pt::slot(*this, &WebSocket::onClosed);
-        _channel->pong() += Pt::slot(*this, &WebSocket::onPong);
     }
     catch(...)
     {
