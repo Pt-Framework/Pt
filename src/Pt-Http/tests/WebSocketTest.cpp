@@ -1436,6 +1436,59 @@ class CloseNowService : public Pt::Http::WebSocketService
         }
 };
 
+
+class DropTcpSession : public Pt::Http::WebSocketSession
+{
+    public:
+        DropTcpSession(Pt::Http::WebSocketService& service,
+                       Pt::Http::Stream& stream,
+                       const Pt::Http::Reply& reply,
+                       Pt::System::EventLoop& loop)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            _drop.setActive(loop);
+            _drop.timeout() += Pt::slot(*this, &DropTcpSession::onDrop);
+            _drop.start(50);
+        }
+
+        ~DropTcpSession()
+        {
+            _drop.detach();
+        }
+
+    private:
+        void onDrop()
+        {
+            close();
+        }
+
+        Pt::System::Timer _drop;
+};
+
+class DropTcpService : public Pt::Http::WebSocketService
+{
+    public:
+        explicit DropTcpService(Pt::System::EventLoop& loop)
+        : _loop(&loop)
+        {}
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new DropTcpSession(*this, stream, reply, *_loop);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+};
+
 class ReceiveSession : public Pt::Http::WebSocketSession
 {
     public:
@@ -1863,6 +1916,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _limitSocket(0)
         , _limitClient(0)
         , _deferredCloseService(0)
+        , _ioWait(0)
         {
             _waitTimer.timeout() += Pt::slot(*this, &WebSocketTest::onHttpTimeoutWait);
             _deferTimer.timeout() += Pt::slot(*this, &WebSocketTest::onDeferredWait);
@@ -1953,6 +2007,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("InputReadyThrows", *this, &WebSocketTest::InputReadyThrows);
             registerMethod("OutputReadyThrows", *this, &WebSocketTest::OutputReadyThrows);
             registerMethod("ReceiveErrorLeavesLoop", *this, &WebSocketTest::ReceiveErrorLeavesLoop);
+            registerMethod("ShutdownWriteError", *this, &WebSocketTest::ShutdownWriteError);
+            registerMethod("DeferredReceiveOneSignal", *this, &WebSocketTest::DeferredReceiveOneSignal);
+            registerMethod("PeerCloseClosedOnce", *this, &WebSocketTest::PeerCloseClosedOnce);
         }
 
         void setUp()
@@ -1975,6 +2032,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _limitSocket = 0;
             _limitClient = 0;
             _deferredCloseService = 0;
+            _ioWait = 0;
             _message.clear();
             _offered.clear();
             _copied.clear();
@@ -4767,6 +4825,155 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.endReceive();
         }
 
+    protected:
+        void ShutdownWriteError()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8112);
+
+            Pt::Http::Server server(*_loop, ep);
+            DropTcpService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            Pt::System::Timer wait;
+            wait.timeout() += Pt::slot(*this, &WebSocketTest::onShutdownWriteWait);
+            _ioWait = &wait;
+            _limitSocket = &socket;
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onDeadPeerConnected);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onShutdownWriteReady);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onDeadPeerClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_rejected);
+            _limitSocket = 0;
+            _ioWait = 0;
+        }
+
+        void onDeadPeerConnected(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            _ioWait->setActive(*_loop);
+            _ioWait->start(200);
+        }
+
+        void onShutdownWriteWait()
+        {
+            _ioWait->stop();
+            Pt::Http::WebSocket& socket = *_limitSocket;
+            try
+            {
+                socket.beginShutdown();
+            }
+            catch(const Pt::System::IOError&)
+            {
+                _rejected = true;
+                PT_UNIT_ASSERT_THROW(socket.beginSend(), Pt::System::IOError);
+                _loop->exit();
+            }
+        }
+
+        void onShutdownWriteReady(Pt::Http::WebSocket& socket)
+        {
+            try
+            {
+                socket.endShutdown();
+            }
+            catch(const Pt::System::IOError&)
+            {
+                _rejected = true;
+            }
+        }
+
+        void onDeadPeerClosed(Pt::Http::WebSocket&)
+        {
+            _closed = true;
+            _loop->exit();
+        }
+
+    protected:
+        void DeferredReceiveOneSignal()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8113);
+
+            Pt::Http::Server server(*_loop, ep);
+            PushService service;
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            Pt::System::Timer wait;
+            wait.timeout() += Pt::slot(*this, &WebSocketTest::onDeferredOneWait);
+            _ioWait = &wait;
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onDeferredOneConnected);
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onDeferredOneInput);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(_status, 1u);
+            _ioWait = 0;
+        }
+
+        void onDeferredOneConnected(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+            socket.beginShutdown();
+        }
+
+        void onDeferredOneInput(Pt::Http::WebSocket&)
+        {
+            ++_status;
+            if(_status == 1 && _ioWait)
+            {
+                _ioWait->setActive(*_loop);
+                _ioWait->start(150);
+            }
+        }
+
+        void onDeferredOneWait()
+        {
+            _ioWait->stop();
+            _loop->exit();
+        }
+
+    protected:
+        void PeerCloseClosedOnce()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8114);
+
+            Pt::Http::Server server(*_loop, ep);
+            ShutdownService service(_shutdownReady, _closed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onPushConnected);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onPeerCloseOnce);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(_status, 1u);
+            PT_UNIT_ASSERT(_closed);
+        }
+
+        void onPeerCloseOnce(Pt::Http::WebSocket&)
+        {
+            ++_status;
+            _closed = true;
+            _loop->exit();
+        }
+
     private:
         Pt::System::MainLoop* _loop;
         Pt::System::Timer _exitTimer;
@@ -4793,6 +5000,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         Pt::Http::WebSocket* _limitSocket;
         Pt::Http::Client* _limitClient;
         DeferredCloseService* _deferredCloseService;
+        Pt::System::Timer* _ioWait;
 };
 
 Pt::Unit::RegisterTest<WebSocketTest> register_HttpWebSocketTest;
