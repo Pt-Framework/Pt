@@ -360,7 +360,7 @@ class WebSocketChannel : public Channel
 
         void enqueueClose(unsigned code, const std::string& reason);
 
-        void onBeginOutput(Output& out);
+        void onBeginOutput();
 
         void onOutput();
 

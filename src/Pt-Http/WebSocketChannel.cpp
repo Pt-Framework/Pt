@@ -253,6 +253,7 @@ void WebSocketChannel::beginSend(bool finished)
 
     _send.set(opcode, fin);
     enqueue(_send);
+    onBeginOutput();
 }
 
 
@@ -326,7 +327,7 @@ void WebSocketChannel::beginPing(const char* payload, std::size_t n)
     _ping.begin();
     _ping.set(0x09, payload, n);
     enqueue(_ping);
-
+    onBeginOutput();
     _pingTimeout.begin();
 }
 
@@ -370,6 +371,7 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
     _closeTimeout.begin();
 
     enqueueClose(code, reason);
+    onBeginOutput();
     onBeginInput();
 }
 
@@ -547,6 +549,15 @@ void WebSocketChannel::onPingDelay()
 
     if(_pingTimeout.duration() != 0)
         _pingDelay.end();
+
+    try
+    {
+        onBeginOutput();
+    }
+    catch(const System::IOError&)
+    {
+        onOutputError( std::current_exception() );
+    }
 }
 
 
@@ -587,9 +598,6 @@ void WebSocketChannel::enqueue(Output& out)
     }
 
     _outputQueue.push_back(&out);
-
-    if( ! _outputPending )
-        onBeginOutput( *_outputQueue.front() );
 }
 
 
@@ -701,8 +709,8 @@ void WebSocketChannel::onInput()
 
     for(;;)
     {
-        bool want = _state == CloseSent
-                 || (_state == Open && _receive.isPending());
+        bool want = (_state == CloseSent) ||
+                    (_state == Open && _receive.isPending());
         if( ! want )
         {
             _inputPending = false;
@@ -713,6 +721,12 @@ void WebSocketChannel::onInput()
         try
         {
             frame = _wsbuf.import();
+            if( ! frame )
+            {
+                _inputPending = false;
+                onBeginInput();
+                return;
+            }
         }
         catch(const WebSocketError& e)
         {
@@ -722,21 +736,12 @@ void WebSocketChannel::onInput()
             onProtocolError( std::current_exception(), e.code() );
             return;
         }
-
-        if( ! frame )
+        catch(const System::IOError&)
         {
-            _inputPending = false;
-            try
-            {
-                onBeginInput();
-            }
-            catch(const System::IOError&)
-            {
-                if( ! sentry )
-                    return;
+            if( ! sentry )
+                return;
 
-                onInputError( std::current_exception() );
-            }
+            onInputError( std::current_exception() );
             return;
         }
 
@@ -751,6 +756,18 @@ void WebSocketChannel::onInput()
 
             onProtocolError( std::current_exception(), e.code() );
             return;
+        }
+
+        if( ! sentry )
+            return;
+
+        try
+        {
+            onBeginOutput();
+        }
+        catch(const System::IOError&)
+        {
+            onOutputError( std::current_exception() );
         }
 
         if( ! sentry )
@@ -930,11 +947,24 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
     {
         _state = Done;
         _receive.setFailed(error);
-        _receive.setReady();
-        return;
     }
 
-    onProtocolDone();
+    try
+    {
+        onBeginOutput();
+    }
+    catch(const System::IOError&)
+    {
+        onOutputError( std::current_exception() );
+    }
+
+    if( ! _sentry )
+        return;
+
+    if( _receive.isReady() )
+        _receive.setReady();
+    else
+        onProtocolDone();
 }
 
 
@@ -961,8 +991,13 @@ void WebSocketChannel::onInputError(std::exception_ptr error)
 }
 
 
-void WebSocketChannel::onBeginOutput(Output& out)
+void WebSocketChannel::onBeginOutput()
 {
+    if(_outputPending || _outputQueue.empty() || _outputFailure)
+        return;
+
+    Output& out = *_outputQueue.front();
+
     Stream* stream = this->stream();
     std::streambuf* buf = stream ? stream->buffer() : 0;
     if( ! buf )
@@ -1028,8 +1063,8 @@ void WebSocketChannel::onBeginOutput(Output& out)
         }
     }
 
-    _outputPending = true;
     stream->beginOutput();
+    _outputPending = true;
 }
 
 
@@ -1076,8 +1111,7 @@ void WebSocketChannel::onOutput()
 
     try
     {
-        if( ! _outputPending && ! _outputQueue.empty() )
-            onBeginOutput( *_outputQueue.front() );
+        onBeginOutput();
     }
     catch(const System::IOError&)
     {
@@ -1104,6 +1138,20 @@ void WebSocketChannel::onOutputError(std::exception_ptr error)
     Output* out = _outputQueue.front();
     _outputQueue.pop_front();
     out->setFailed(error);
+
+    if(out == &_closeOut && _shutdown.isPending())
+    {
+        _shutdown.setFailed(error);
+        _shutdown.setReady();
+        return;
+    }
+
+    if(out == &_pong || (out == &_ping && ! _isPingPending))
+    {
+        onProtocolAborted();
+        return;
+    }
+
     out->setReady();
 }
 
