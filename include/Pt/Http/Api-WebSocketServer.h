@@ -122,9 +122,13 @@
     does not emit those signals. %closed() runs when the engine
     has ended the protocol and no local shutdown is outstanding.
     After that signal returns the session closes. The destructor
-    unbinds the stream. An %IOError from a ready slot closes the
-    session. After %shutdownReady() returns the session closes. The
-    session does not own the stream or the connection.
+    unbinds the stream. An %IOError from %inputReady(),
+    %outputReady(), %pingReady() or %shutdownReady() closes the
+    session and does not reach the event loop. %closed() and
+    %pong() are notifications. An %IOError from those slots
+    reaches the event loop. After %shutdownReady() returns the
+    session closes. The session does not own the stream or the
+    connection.
 
     %WebSocketServlet owns the live sessions of one service. The
     service owns the endpoint policy and the allocator. Construct the

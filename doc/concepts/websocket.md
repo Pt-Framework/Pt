@@ -278,7 +278,10 @@ and the matching end throws `IOError`. A protocol violation throws
 leaves the event loop. The engine does not store it as a transfer
 failure and does not set close code 1006. The other direction is
 unaffected. On the client, the application calls `close()`. On the
-session, an `IOError` from a ready slot closes the session. The
+session, an `IOError` from `inputReady()`, `outputReady()`,
+`pingReady()`, or `shutdownReady()` closes the session. `closed()`
+and `pong()` are notifications; an `IOError` from those slots
+reaches the event loop. The
 direction that failed keeps the reason: a later `beginSend()`,
 `beginPing()`, or `beginShutdown()` throws the write failure, and a
 later `beginReceive()` throws the read failure.

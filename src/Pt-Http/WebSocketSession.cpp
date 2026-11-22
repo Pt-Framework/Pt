@@ -214,14 +214,7 @@ void WebSocketSession::onClosed()
 
 void WebSocketSession::onPong(const std::string& payload)
 {
-    try
-    {
-        _pong.send(*this, payload);
-    }
-    catch(const System::IOError&)
-    {
-        close();
-    }
+    _pong.send(*this, payload);
 }
 
 } // namespace Http

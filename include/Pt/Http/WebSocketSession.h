@@ -98,12 +98,16 @@ class WebSocketChannel;
     outstanding. The stream stays bound for that call. After
     %closed() returns, the session closes. The destructor unbinds
     the stream. A session that connects no %closed() slot is still
-    released. An %IOError from a ready slot closes the session and
-    does not reach the event loop. %close() is safe from a ready
-    slot of this session. After %shutdownReady() returns, the
-    session closes. Call %endShutdown() from that signal to observe
-    an error. The servlet also releases remaining sessions when it
-    is destroyed.
+    released. An %IOError from %inputReady(), %outputReady(),
+    %pingReady() or %shutdownReady() closes the session and does
+    not reach the event loop. Call %endReceive(), %endSend(),
+    %endPing() or %endShutdown() from those signals to observe a
+    transfer error. %closed() and %pong() are notifications, not
+    transfers. An %IOError from those slots reaches the event
+    loop. %close() is safe from a ready slot of this session.
+    After %shutdownReady() returns, the session closes. Call
+    %endShutdown() from that signal to observe an error. The
+    servlet also releases remaining sessions when it is destroyed.
 
     %beginReceive() starts frame processing. Until then, incoming
     frames stay in the stream. Control frames are processed while a
@@ -340,7 +344,8 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Returns the signal emitted when the engine has ended the protocol.
 
             No local shutdown is outstanding. The stream stays bound
-            for this call. After it returns, the session closes.
+            for this call. After it returns, the session closes. An
+            %IOError from this slot reaches the event loop.
         */
         Pt::Signal<WebSocketSession&>& closed()
         { return _closed; }
@@ -349,7 +354,8 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             The payload contains arbitrary bytes and is valid for the
             duration of the signal call. A pong does not change
-            %incoming() or emit %inputReady().
+            %incoming() or emit %inputReady(). An %IOError from this
+            slot reaches the event loop.
         */
         Pt::Signal<WebSocketSession&, const std::string&>& pong()
         { return _pong; }
