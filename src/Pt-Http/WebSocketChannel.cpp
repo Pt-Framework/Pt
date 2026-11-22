@@ -1021,13 +1021,6 @@ void WebSocketChannel::onInputError(std::exception_ptr error)
     {
         _receive.setFailed(error);
         _receive.setReady();
-        return;
-    }
-
-    if( _shutdown.isPending() )
-    {
-        _shutdown.setFailed(error);
-        _shutdown.setReady();
     }
 }
 
