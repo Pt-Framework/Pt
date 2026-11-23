@@ -278,7 +278,7 @@ Load zlib.jam ;
 
 if ! $(WITH_ZLIB) && ! ( --with-inline-zlib in $(ARGV) )
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable zlib ;
     }

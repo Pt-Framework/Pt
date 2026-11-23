@@ -273,7 +273,7 @@ rule GetOption
 #
 # Returns yes when an option is present in ARGV, with or without =value.
 #
-# PT_PREBUILT_LOCAL = [ HasOption --prebuilt-local ] ;
+# PREBUILT_LOCAL = [ HasOption --prebuilt-local ] ;
 #
 rule HasOption
 {

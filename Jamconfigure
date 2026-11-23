@@ -538,17 +538,17 @@ if ! $(WITH_ATOMICS)
 Load prebuilt.jam ;
 Load builtin.jam ;
 
-PT_WITH_PREBUILT = [ HasOption --with-prebuilt ] ;
-PT_PREBUILT_ID ?= [ GetOption --with-prebuilt ] ;
-PT_PREBUILT_LOCAL = [ HasOption --prebuilt-local ] ;
-PT_PREBUILT_RELEASE ?= prebuilt-1 ;
-PT_PREBUILT_URL_BASE = "https://github.com/Pt-Framework/Pt/releases/download" ;
-PT_PREBUILT_URL_BASE = "$(PT_PREBUILT_URL_BASE)/$(PT_PREBUILT_RELEASE)" ;
+WITH_PREBUILT = [ HasOption --with-prebuilt ] ;
+PREBUILT_ID ?= [ GetOption --with-prebuilt ] ;
+PREBUILT_LOCAL = [ HasOption --prebuilt-local ] ;
+PREBUILT_RELEASE ?= prebuilt-1 ;
+PREBUILT_URL_BASE = "https://github.com/Pt-Framework/Pt/releases/download" ;
+PREBUILT_URL_BASE = "$(PREBUILT_URL_BASE)/$(PREBUILT_RELEASE)" ;
 
-EchoOption --prebuilt-local : "Local prebuilt" : $(PT_PREBUILT_LOCAL:E="no") ;
-EchoOption --with-prebuilt=<id> : "Enable prebuilt" : $(PT_WITH_PREBUILT:E="no") ;
+EchoOption --prebuilt-local : "Local prebuilt" : $(PREBUILT_LOCAL:E="no") ;
+EchoOption --with-prebuilt=<id> : "Enable prebuilt" : $(WITH_PREBUILT:E="no") ;
 
-if $(PT_WITH_PREBUILT)
+if $(WITH_PREBUILT)
 {
     local abi ;
     if $(TARGET_OS:L) in nt win32 windows
@@ -560,15 +560,15 @@ if $(PT_WITH_PREBUILT)
         }
     }
 
-    PT_PREBUILT_ID ?= [ Prebuilt-Id $(abi) ] ;
-    PT_PREBUILT_ROOT = [ FDirName $(PT_TOP) prebuilt $(PT_PREBUILT_ID) ] ;
-    EchoOption PT_PREBUILT_ID : "Using prebuilt" ;
+    PREBUILT_ID ?= [ Prebuilt-Id $(abi) ] ;
+    PT_PREBUILT_ROOT = [ FDirName $(PT_TOP) prebuilt $(PREBUILT_ID) ] ;
+    EchoOption PREBUILT_ID : "Using prebuilt" ;
 
-    if ! $(PT_PREBUILT_LOCAL)
+    if ! $(PREBUILT_LOCAL)
     {
-        local url = $(PT_PREBUILT_URL_BASE)/$(PT_PREBUILT_ID:S=.zip) ;
+        local url = $(PREBUILT_URL_BASE)/$(PREBUILT_ID:S=.zip) ;
         Prebuilt-Fetch-Url $(url) : $(PT_PREBUILT_ROOT) ;
-        EchoOption PT_PREBUILT_RELEASE : "Fetched prebuilt" ;
+        EchoOption PREBUILT_RELEASE : "Fetched prebuilt" ;
     }
 
     Configure PT_PREBUILT_ROOT ;
@@ -592,7 +592,7 @@ EchoOption --with-inline-zlib : "Using inline zlib" : $(WITH_BUILTIN_ZLIB:E=no) 
 
 if ! $(WITH_BUILTIN_ZLIB)
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable zlib ;
     }
@@ -618,7 +618,7 @@ EchoOption --with-inline-libpng : "Using inline libpng" : $(WITH_BUILTIN_PNG) ;
 
 if ! $(WITH_BUILTIN_PNG)
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable png ;
     }
@@ -644,7 +644,7 @@ EchoOption --with-inline-libjpeg : "Using inline libjpeg" : $(WITH_BUILTIN_JPEG)
 
 if ! $(WITH_BUILTIN_JPEG)
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable jpeg ;
     }
@@ -670,7 +670,7 @@ EchoOption --with-inline-freetype : "Using inline Freetype" : $(WITH_BUILTIN_FRE
 
 if ! $(WITH_BUILTIN_FREETYPE)
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable freetype ;
     }
@@ -708,7 +708,7 @@ if ! $(WITH_SSL) && --with-inline-openssl in $(ARGV)
 
 if ! $(WITH_SSL) && --with-openssl in $(ARGV)
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable openssl ;
     }
@@ -731,7 +731,7 @@ if ! $(WITH_SSL) && --with-inline-mbedtls in $(ARGV)
 
 if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable mbedtls ;
     }
@@ -745,7 +745,7 @@ if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
 
 if ! $(WITH_SSL)
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable openssl ;
     }
@@ -759,7 +759,7 @@ if ! $(WITH_SSL)
 
 if ! $(WITH_SSL)
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable mbedtls ;
     }

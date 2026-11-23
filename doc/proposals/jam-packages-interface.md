@@ -148,7 +148,7 @@ how a consumer detects the package.
    source.
 2. Prebuilt or system/custom: when `--with-prebuilt` is selected,
    `Jamconfigure` calls `Prebuilt-Import root` once after fetch.
-   `Prebuilt-Enable` runs only when `PT_WITH_PREBUILT` is set. It fills
+   `Prebuilt-Enable` runs only when `WITH_PREBUILT` is set. It fills
    still-empty flag variables when the bundle contains the package
    (side effect only). Already set values (including `-s` overrides)
    are left unchanged. Then the package-specific `*-Configure pkg`
@@ -249,7 +249,7 @@ EchoOption --with-inline-zlib : "Using inline zlib" : $(WITH_BUILTIN_ZLIB) ;
 
 if ! $(WITH_BUILTIN_ZLIB)
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable zlib ;
     }

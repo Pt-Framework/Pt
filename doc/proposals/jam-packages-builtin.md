@@ -254,7 +254,7 @@ EchoOption --with-inline-libpng : "Using inline libpng" : $(WITH_BUILTIN_PNG) ;
 
 if ! $(WITH_BUILTIN_PNG)
 {
-    if $(PT_WITH_PREBUILT)
+    if $(WITH_PREBUILT)
     {
         Prebuilt-Enable png ;
     }
