@@ -46,7 +46,7 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
 , _channel(0)
 , _protocol(selectedProtocol(reply))
 {
-    Pt::AutoPtr guard( new WebSocketChannel() );
+    Pt::AutoPtr<WebSocketChannel> guard( new WebSocketChannel() );
 
     _channel = guard.get();
     _channel->open(stream, false);

@@ -924,16 +924,22 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
         conn->setTimeout(Connection::WaitInfinite);
         conn->setKeepAliveTimeout(Connection::WaitInfinite);
 
+        bool accepted = false;
+
         try
         {
             Stream& stream = conn->openStream(protocol);
-
-            if( ! service->onUpgrade(stream, handler->request(), handler->reply()) )
-                throw AccessFailed("stream not accepted");
+            accepted = service->onUpgrade(stream,
+                                          handler->request(),
+                                          handler->reply());
         }
         catch(const std::exception& e)
         {
             PT_LOG_WARN( "upgrade failed " << protocol << "): " << e.what() );
+        }
+
+        if( ! accepted )
+        {
             delete conn;
             delete handler;
             continue;
