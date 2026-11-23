@@ -46,15 +46,16 @@ rule Prebuilt-Id ( abi ? )
     return $(id) ;
 }
 
-# Prebuilt-Fetch <url> : <root>
+# Prebuilt-Fetch-Url <url> : <root> : <headers>
 #
 # Download <url> when <url>.manifest differs from the sidecar
 # root.manifest. root is the prefix directory. The sidecar sits
 # next to root, not inside it, so replacing the tree leaves it in
-# place. Detects curl and tar itself. Returns root when fetched,
-# empty when up to date.
+# place. <headers> is an optional list of Name: value lines for
+# both downloads. Detects curl and tar itself. Returns root when
+# fetched, empty when up to date.
 #
-rule Prebuilt-Fetch ( url : root )
+rule Prebuilt-Fetch-Url ( url : root : headers * )
 {
     Fetch-Configure ;
 
@@ -63,7 +64,7 @@ rule Prebuilt-Fetch ( url : root )
     local archiveTmp    = $(root).tmp ;
     local fetched       = ;
 
-    Fetch-Url "$(url).manifest" : $(manifestTmp) ;
+    Fetch-Url "$(url).manifest" : $(manifestTmp) : $(headers) ;
     local remoteContent = [ FILE_GET_CONTENTS $(manifestTmp) ] ;
 
     local localContent = ;
@@ -74,7 +75,7 @@ rule Prebuilt-Fetch ( url : root )
 
     if $(remoteContent) != $(localContent)
     {
-        Fetch-Url $(url) : $(archiveTmp) ;
+        Fetch-Url $(url) : $(archiveTmp) : $(headers) ;
         Fetch-RmDir $(root) ;
         Fetch-Unzip $(archiveTmp) : $(root) ;
         FILE_REMOVE $(manifestLocal) ;

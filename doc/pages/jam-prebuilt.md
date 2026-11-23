@@ -353,11 +353,12 @@ file is @c prebuilt.jam. Toolset helpers stay in the project:
   Builds the platform folder name from @c TARGET_OS, @c TARGET_OSPLAT and
   @c TOOLSET, with an optional extra suffix such as @c md.
 
-- @c Prebuilt-Fetch ( url : root ) \n
+- @c Prebuilt-Fetch-Url ( url : root : headers * ) \n
   Downloads @c url when the remote @c url.manifest differs from the sidecar
   @c root.manifest next to @c root. Replaces @c root with the unzipped
-  archive and leaves the sidecar in place. Any download failure exits.
-  Detects curl and tar itself.
+  archive and leaves the sidecar in place. @c headers is an optional list of
+  @c Name: value lines applied to both downloads of that bundle. Any download
+  failure exits. Detects curl and tar itself.
 
 - @c Prebuilt-Import ( root ) \n
   Binds the bundle at @c root, sets @c prebuilt.ROOT, includes @c prebuilt.jam,

@@ -13,6 +13,9 @@ FETCH_JAM = true ;
 # distributions. tar transparently handles .zip and .tar.*
 # archives.
 #
+# Extra HTTP headers are a per-call list of Name: value lines on
+# Fetch-Url. Fetch-HeaderFlags maps them to the current downloader.
+#
 # Directory creation reuses the MKDIR variable configured by
 # ConfigureMkDir in configure.jam.
 
@@ -74,12 +77,31 @@ rule Fetch-MkDir ( dir )
     }
 }
 
-# Fetch-Url <url> : <dest>
+# Fetch-HeaderFlags <headers>
+#
+# Maps HTTP header lines (Name: value) to extra flags for the
+# current downloader. Empty when <headers> is empty. Today the
+# downloader is curl: one --header "Name: value" per line.
+#
+rule Fetch-HeaderFlags ( headers * )
+{
+    local flags ;
+
+    for local h in $(headers)
+    {
+        flags += "--header \"$(h)\"" ;
+    }
+
+    return $(flags) ;
+}
+
+# Fetch-Url <url> : <dest> : <headers>
 #
 # Downloads <url> to <dest>, creating the parent directory if
-# necessary. Aborts the build with Exit on failure.
+# necessary. <headers> is an optional list of Name: value lines
+# for this request. Aborts the build with Exit on failure.
 #
-rule Fetch-Url ( url : dest )
+rule Fetch-Url ( url : dest : headers * )
 {
     if ! $(FETCH_CURL)
     {
@@ -88,7 +110,8 @@ rule Fetch-Url ( url : dest )
 
     Fetch-MkDir $(dest:D) ;
 
-    local cmd = "$(FETCH_CURL) -fsSL -o \"$(dest)\" \"$(url)\"" ;
+    local flags = [ Fetch-HeaderFlags $(headers) ] ;
+    local cmd = "$(FETCH_CURL) -fsSL $(flags:J=" ") -o \"$(dest)\" \"$(url)\"" ;
 
     if ! [ TryCommand $(cmd) ]
     {

@@ -567,7 +567,7 @@ if $(PT_WITH_PREBUILT)
     if ! $(PT_PREBUILT_LOCAL)
     {
         local url = $(PT_PREBUILT_URL_BASE)/$(PT_PREBUILT_ID:S=.zip) ;
-        Prebuilt-Fetch $(url) : $(PT_PREBUILT_ROOT) ;
+        Prebuilt-Fetch-Url $(url) : $(PT_PREBUILT_ROOT) ;
         EchoOption PT_PREBUILT_RELEASE : "Fetched prebuilt" ;
     }
 
