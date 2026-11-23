@@ -30,7 +30,7 @@ WebSocket::WebSocket(Client& client)
     _channel->outputReady() += Pt::slot(*this, &WebSocket::onOutputReady);
     _channel->pingReady() += Pt::slot(*this, &WebSocket::onPingReady);
     _channel->shutdownReady() += Pt::slot(*this, &WebSocket::onShutdownReady);
-    _channel->closed() += Pt::slot(*this, &WebSocket::onClosed);
+    _channel->peerClosed() += Pt::slot(*this, &WebSocket::onPeerClosed);
     _channel->pong() += Pt::slot(*this, &WebSocket::onPong);
 }
 
@@ -376,7 +376,7 @@ void WebSocket::onShutdownReady()
 }
 
 
-void WebSocket::onClosed()
+void WebSocket::onPeerClosed()
 {
     _closed.send(*this);
 }

@@ -116,8 +116,9 @@ Connection::~Connection()
 {
     while( ! _streams.empty() )
     {
-        _streams.back()->close();
-        //delete _streams.back();
+        Stream* stream = _streams.back();
+        _streams.pop_back();
+        delete stream;
     }
 
     close();

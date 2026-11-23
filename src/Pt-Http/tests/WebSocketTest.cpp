@@ -224,7 +224,7 @@ class RecordSession : public Pt::Http::WebSocketSession
         {
             inputReady() += Pt::slot(*this, &RecordSession::onInputReady);
             outputReady() += Pt::slot(*this, &RecordSession::onOutputReady);
-            closed() += Pt::slot(*this, &RecordSession::onClosed);
+            peerClosed() += Pt::slot(*this, &RecordSession::onClosed);
             beginReceive();
         }
 
@@ -576,7 +576,7 @@ class DeferredCloseSession : public Pt::Http::WebSocketSession
         {
             inputReady() += Pt::slot(*this, &DeferredCloseSession::onInputReady);
             outputReady() += Pt::slot(*this, &DeferredCloseSession::onOutputReady);
-            closed() += Pt::slot(*this, &DeferredCloseSession::onClosed);
+            peerClosed() += Pt::slot(*this, &DeferredCloseSession::onClosed);
         }
 
         void beginDeferredReceive()
@@ -699,7 +699,7 @@ class PartialCloseSession : public Pt::Http::WebSocketSession
         {
             inputReady() += Pt::slot(*this, &PartialCloseSession::onInputReady);
             outputReady() += Pt::slot(*this, &PartialCloseSession::onOutputReady);
-            closed() += Pt::slot(*this, &PartialCloseSession::onClosed);
+            peerClosed() += Pt::slot(*this, &PartialCloseSession::onClosed);
             beginReceive();
         }
 
@@ -1931,7 +1931,7 @@ class CloseFromClosedSession : public Pt::Http::WebSocketSession
                                const Pt::Http::Reply& reply)
         : Pt::Http::WebSocketSession(service, stream, reply)
         {
-            closed() += Pt::slot(*this, &CloseFromClosedSession::onClosed);
+            peerClosed() += Pt::slot(*this, &CloseFromClosedSession::onClosed);
             beginReceive();
         }
 
@@ -2091,6 +2091,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _limitClient(0)
         , _deferredCloseService(0)
         , _ioWait(0)
+        , _server(0)
         {
             _waitTimer.timeout() += Pt::slot(*this, &WebSocketTest::onHttpTimeoutWait);
             _deferTimer.timeout() += Pt::slot(*this, &WebSocketTest::onDeferredWait);
@@ -2190,6 +2191,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("ShutdownWriteError", *this, &WebSocketTest::ShutdownWriteError);
             registerMethod("DeferredReceiveOneSignal", *this, &WebSocketTest::DeferredReceiveOneSignal);
             registerMethod("PeerCloseClosedOnce", *this, &WebSocketTest::PeerCloseClosedOnce);
+            registerMethod("ServerCancelReleases", *this, &WebSocketTest::ServerCancelReleases);
         }
 
         void setUp()
@@ -2213,6 +2215,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _limitClient = 0;
             _deferredCloseService = 0;
             _ioWait = 0;
+            _server = 0;
             _message.clear();
             _offered.clear();
             _copied.clear();
@@ -4840,6 +4843,39 @@ class WebSocketTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void ServerCancelReleases()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8046);
+
+            Pt::Http::Server server(*_loop, ep);
+            _server = &server;
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedServerCancel);
+
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(service.socketCount(), static_cast<std::size_t>(0));
+        }
+
+        void onConnectedServerCancel(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            _server->cancel();
+            _loop->exit();
+        }
+
+    protected:
         void IdleTimeoutTwice()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8045);
@@ -5383,6 +5419,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         Pt::Http::Client* _limitClient;
         DeferredCloseService* _deferredCloseService;
         Pt::System::Timer* _ioWait;
+        Pt::Http::Server* _server;
 };
 
 Pt::Unit::RegisterTest<WebSocketTest> register_HttpWebSocketTest;

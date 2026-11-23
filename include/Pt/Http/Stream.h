@@ -48,14 +48,14 @@ class Channel;
     to that protocol. Application code uses %WebSocket on the client
     and %WebSocketSession on the server.
 
-    %close() ends this stream. It calls %Channel::onDetachStream()
-    when a channel is still bound, and then leaves the connection.
-    That call does not close this stream again and does not emit a
-    protocol signal. While this stream is the only stream of the
-    connection, closing it also closes the connection. The server deletes that
-    connection on its event loop, after the close that requested it
-    has returned. The destructor calls %close(). The channel object
-    stays, and its stream pointer is null.
+    %close() asks the connection to end this stream. The connection
+    deletes it. The destructor releases a still-bound channel and
+    does not close the connection. Destroying the connection deletes
+    its streams the same way and does not send %Connection::closed().
+    While this stream is the only stream of the connection, ending
+    it also closes the connection. The server deletes that connection
+    on its event loop, after the close that requested it has returned.
+    The channel object stays, and its stream pointer is null.
 
     %buffer() is the stream buffer of the connection. A channel
     formats into that buffer and extracts from it. The stream does not
@@ -94,10 +94,10 @@ class PT_HTTP_API Stream : public Connectable
     friend class Channel;
 
     public:
-        /** @brief Calls %close().
+        /** @brief Releases a still-bound channel.
 
-            Ends this stream. Closes the connection while this stream
-            is its only stream. Detaches a still-bound channel.
+            Does not close the connection and does not delete this
+            stream. The connection deletes it.
         */
         ~Stream();
 
@@ -116,11 +116,11 @@ class PT_HTTP_API Stream : public Connectable
         const std::string& protocol() const
         { return _protocolName; }
 
-        /** @brief Ends this stream.
+        /** @brief Asks the connection to end this stream.
 
-            Closes the connection while this stream is its only stream.
-            Detaches a still-bound channel without closing this stream
-            again.
+            The connection deletes this stream and releases a
+            still-bound channel. It closes itself when no stream
+            remains. Does nothing when the connection is already gone.
         */
         void close();
 

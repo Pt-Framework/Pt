@@ -491,7 +491,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         void onShutdownReady();
 
-        void onClosed();
+        void onPeerClosed();
 
         void onPong(const std::string& payload);
 

@@ -180,9 +180,9 @@ class Connection : public Connectable
         Signal<Connection&>& closed()
         { return _closed; }
 
-        // Detaches a stream closed by its session. The connection
-        // deletes it with the other streams. Closes this connection
-        // when no stream remains, then sends closed().
+        // Deletes a stream closed by its channel. The stream
+        // destructor releases a still-bound channel. Closes this
+        // connection when no stream remains, then sends closed().
         void closeStream(Stream& stream);
 
         // Cancels the I/O of the open stream. Does not close it.

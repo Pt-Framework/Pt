@@ -119,14 +119,17 @@
     directly, and the same ready signals as %WebSocket.
     %inputReady() runs when data bytes were received.
     %outputReady() runs when data bytes were sent. A ping or a pong
-    does not emit those signals. %closed() runs when the engine
+    does not emit those signals. %peerClosed() runs when the engine
     has ended the protocol and no local shutdown is outstanding.
-    After that signal returns the session closes. The destructor
-    unbinds the stream. An %IOError from %inputReady(),
+    After that signal returns the session closes. Closing the
+    stream ends the bind. %released() runs when that bind has ended.
+    The stream is gone. After that signal returns, the servlet
+    releases the session. An %IOError from %inputReady(),
     %outputReady(), %pingReady() or %shutdownReady() closes the
-    session and does not reach the event loop. %closed() and
-    %pong() are notifications. An %IOError from those slots
-    reaches the event loop. After %shutdownReady() returns the
+    session and does not reach the event loop. %peerClosed(),
+    %released() and %pong() are notifications. An %IOError from
+    those slots reaches the event loop. After %shutdownReady()
+    returns the
     session closes. The session does not own the stream or the
     connection.
 
@@ -172,7 +175,7 @@
     same allocator, as %onGetResponder() and %onReleaseResponder()
     must match. A pool, or any other detach, lives in the derived
     service. Return null from %onGetSession() to decline the upgrade.
-    The servlet releases a session after %closed(), when %close()
+    The servlet releases a session after %released(), when %close()
     is called, and from its destructor for every remaining session
     it owns. The service does not keep a session list. It counts
     the sessions %getSession() returned.

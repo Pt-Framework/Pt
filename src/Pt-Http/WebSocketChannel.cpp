@@ -133,6 +133,7 @@ WebSocketChannel::~WebSocketChannel()
     if(_sentry)
         _sentry->detach();
 
+    _released.disconnect();
     close();
 }
 
@@ -442,7 +443,7 @@ void WebSocketChannel::onProtocolDone()
         return;
     }
 
-    _closed.send();
+    _peerClosed.send();
 }
 
 
@@ -471,8 +472,6 @@ void WebSocketChannel::onProtocolAborted()
 
 void WebSocketChannel::onClose()
 {
-    // Stream is gone. Every operation becomes Closed. No signals.
-
     if(_state < Finish)
         setCloseCode(1006, std::string());
 
@@ -495,6 +494,12 @@ void WebSocketChannel::onClose()
     _timeouts.detach();
     _incoming.clear();
     _state = Closed;
+}
+
+
+void WebSocketChannel::onRelease()
+{
+    _released.send();
 }
 
 

@@ -53,15 +53,15 @@ processing from HTTP messages to a channel:
 5. The server closes a stream that has no bound channel.
 
 The server owns the connection and the stream. A channel owns neither socket
-nor connection; it binds exclusively to the stream. `Channel::close()` calls
-`Stream::close()`. `Stream::close()` cancels that stream, calls
-`Channel::onDetachStream()` when a channel is still bound, and then detaches
-the stream from the connection. `onDetachStream()` runs `onClose()` and drops
-the stream pointer. It does not close the stream. Neither call emits
-`closed()`. While that stream is the only stream of the connection, closing it
-also closes the connection. The owner deletes the connection in the
-`Connection::closed()` slot, so that call returns after the connection
-is gone. Closing the connection does not delete the stream.
+nor connection; it binds exclusively to the stream. `Channel::close()` closes
+the stream. The connection deletes that stream. The stream destructor releases
+the channel through `detachStream()`. The channel drops its stream pointer
+there. Neither side closes the other again. Neither call emits `closed()`.
+While that stream is the only stream of the connection, ending it also closes
+the connection. The owner deletes the connection in the `Connection::closed()`
+slot, so that call returns after the connection is gone. Destroying the
+connection deletes its streams and does not send `closed()`. The owner is
+already destroying it.
 
 ## Protocol Transitions
 

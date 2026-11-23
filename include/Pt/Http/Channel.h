@@ -40,14 +40,15 @@ class Stream;
 
     %open() is protected because the derived type owns the handshake.
     %shutdown() on that type writes the shutdown frame. %close() is
-    public. It releases the stream and does not write a frame. A close
-    that starts here calls %Stream::close(). A close that starts at
-    the stream calls %onDetachStream(). That call runs %onClose() and
-    drops the stream pointer. It does not close the stream. Neither
-    path emits a protocol signal.
+    public. It closes the bound stream and does not write a frame.
+    The connection deletes that stream. The stream destructor
+    releases this channel through %detachStream(). That call runs
+    %onClose(), drops the stream pointer, and calls %onRelease().
+    It does not close the stream. Neither call emits a protocol
+    signal.
 
     The destructor calls %close(). Destroying the stream calls
-    %onDetachStream(). The channel object stays, and %stream() is null.
+    %detachStream(). The channel object stays, and %stream() is null.
     %isOpen() is false after either side ends.
 
     @ingroup Pt-Http-Servers
@@ -63,10 +64,10 @@ class PT_HTTP_API Channel : private NonCopyable
         bool isOpen() const
         { return _stream != 0; }
 
-        /** @brief Releases the bound stream.
+        /** @brief Closes the bound stream.
 
-            Does nothing when no stream is bound. Closes the stream.
-            Does not write a protocol frame.
+            Does nothing when no stream is bound. Does not write a
+            protocol frame. The stream ends the bind.
         */
         void close();
 
@@ -99,19 +100,28 @@ class PT_HTTP_API Channel : private NonCopyable
 
         /** @brief Cleans up before the stream pointer is dropped.
 
-            Called by %onDetachStream() while this channel still holds
+            Called by %detachStream() while this channel still holds
             the stream pointer. Not called when no stream is bound.
             The stream is still attached to its connection.
         */
         virtual void onClose();
 
+        /** @brief Notifies that the stream has ended the bind.
+
+            Called by %detachStream() after the stream pointer has
+            been dropped. Not called when no stream was bound. Does
+            not close the stream.
+        */
+        virtual void onRelease();
+
     private:
         /** @brief Drops the stream after the stream detaches.
 
-            Does nothing when no stream is bound. Runs %onClose() and
-            drops the stream pointer. Does not close the stream.
+            Does nothing when no stream is bound. Runs %onClose(),
+            drops the stream pointer, and runs %onRelease(). Does
+            not close the stream.
         */
-        void onDetachStream(Stream& stream);
+        void detachStream(Stream& stream);
 
     private:
         Stream* _stream;

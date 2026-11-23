@@ -94,11 +94,16 @@ class WebSocketChannel : public Channel
         Signal<>& shutdownReady()
         { return _shutdown.ready(); }
 
-        Signal<>& closed()
-        { return _closed; }
+        Signal<>& peerClosed()
+        { return _peerClosed; }
+
+        Signal<>& released()
+        { return _released; }
 
     protected:
         virtual void onClose();
+
+        virtual void onRelease();
 
     private:
         class Operation
@@ -421,7 +426,8 @@ class WebSocketChannel : public Channel
         State       _state;
         unsigned    _closeCode;
         std::string _closeReason;
-        Signal<>    _closed;
+        Signal<>    _peerClosed;
+        Signal<>    _released;
 };
 
 } // namespace Http

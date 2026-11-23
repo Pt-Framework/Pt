@@ -12,22 +12,25 @@ states the ready surface.
 
 ## Session close {#session-close}
 
-The servlet owns every live session. `closed()` notifies the
-application. It is not an error. `inputReady()` and `outputReady()`
-do not run for it. `endReceive()` and `endSend()` do not report it.
-Outstanding send and receive stay pending.
+The servlet owns every live session. `peerClosed()` notifies the
+application that the engine has ended the protocol. It is not an
+error. `inputReady()` and `outputReady()` do not run for it.
+`endReceive()` and `endSend()` do not report it. Outstanding send
+and receive stay pending. The stream stays bound.
 
-After `closed()` returns, the session closes. A `closed()` slot
-need not call `close()`. A session that connects no `closed()`
-slot is still released.
+After `peerClosed()` returns, the session closes. A `peerClosed()`
+slot need not call `close()`. A session that connects no
+`peerClosed()` slot is still released.
 
-`close()` unbinds the stream and does not destroy the session.
-The servlet moves it from the live list to a closing list and
-posts an empty event. The event carries no session pointer. The
-handler releases every session on the closing list. Extra or
-stale events find the list empty. `closed()` does not run for a
-local `close()`. The destructor unbinds and does not release
-again.
+`close()` closes the stream and does not destroy the session.
+The stream ends the bind. The servlet moves the session from the
+live list to a closing list and posts an empty event. The event
+carries no session pointer. The handler releases every session on
+the closing list. Extra or stale events find the list empty.
+`peerClosed()` does not run for a local `close()`. `released()`
+runs when the bind has ended, including a local `close()` and
+destruction of the connection. The destructor closes a stream
+that is still bound and does not release again.
 
 An `IOError` from a ready slot, including `WebSocketError`, closes
 the session and does not reach the event loop. After
@@ -40,7 +43,7 @@ already gone from the live list is ignored. The servlet destructor
 releases remaining sessions on both lists.
 
 A domain object that holds a session reference drops it in
-`closed()`.
+`released()`.
 
 `close()` during construction unbinds the stream. The session is
 not listed. `accept()` releases it through `releaseSession()`.
@@ -58,7 +61,8 @@ Signal<WebSocketSession&>& inputReady();
 Signal<WebSocketSession&>& outputReady();
 Signal<WebSocketSession&>& pingReady();
 Signal<WebSocketSession&>& shutdownReady();
-Signal<WebSocketSession&>& closed();
+Signal<WebSocketSession&>& peerClosed();
+Signal<WebSocketSession&>& released();
 Signal<WebSocketSession&, const std::string&>& pong();
 ```
 

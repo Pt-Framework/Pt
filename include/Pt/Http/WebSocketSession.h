@@ -93,16 +93,18 @@ class WebSocketChannel;
     finished. A ping does not emit %inputReady(). A pong runs
     %pong() and does not change %incoming(). %outputReady() runs
     when data bytes were sent. Call %endSend() and continue the
-    send when progress is not finished. %closed() runs when the
+    send when progress is not finished. %peerClosed() runs when the
     engine has ended the protocol and no local shutdown is
     outstanding. The stream stays bound for that call. After
-    %closed() returns, the session closes. The destructor unbinds
-    the stream. A session that connects no %closed() slot is still
-    released. An %IOError from %inputReady(), %outputReady(),
-    %pingReady() or %shutdownReady() closes the session and does
-    not reach the event loop. Call %endReceive(), %endSend(),
-    %endPing() or %endShutdown() from those signals to observe a
-    transfer error. %closed() and %pong() are notifications, not
+    %peerClosed() returns, the session closes. Closing the stream
+    ends the bind. %released() runs when that bind has ended. The
+    stream is gone. After %released() returns, the servlet releases
+    this session. A session that connects no slot is still released.
+    An %IOError from %inputReady(), %outputReady(), %pingReady() or
+    %shutdownReady() closes the session and does not reach the event
+    loop. Call %endReceive(), %endSend(), %endPing() or
+    %endShutdown() from those signals to observe a transfer error.
+    %peerClosed(), %released() and %pong() are notifications, not
     transfers. An %IOError from those slots reaches the event
     loop. %close() is safe from a ready slot of this session.
     After %shutdownReady() returns, the session closes. Call
@@ -293,11 +295,11 @@ class PT_HTTP_API WebSocketSession : public Connectable
         */
         void endShutdown();
 
-        /** @brief Releases the stream and writes no frame.
+        /** @brief Closes the stream and writes no frame.
 
-            Does not block and emits nothing. Unbinds the stream.
-            The servlet then releases this session. Safe to call from
-            a ready slot of this session. %beginSend() and
+            Does not block and emits nothing. The stream ends the
+            bind, and the servlet releases this session. Safe to call
+            from a ready slot of this session. %beginSend() and
             %beginReceive() then throw. No close frame leaves
             %closeCode() at 1006.
         */
@@ -313,7 +315,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
         /** @brief Returns true when a stream is bound.
 
-            False after %close(). True during %closed().
+            False after %close() and during %released().
         */
         bool isOpen() const;
 
@@ -349,8 +351,18 @@ class PT_HTTP_API WebSocketSession : public Connectable
             for this call. After it returns, the session closes. An
             %IOError from this slot reaches the event loop.
         */
-        Pt::Signal<WebSocketSession&>& closed()
-        { return _closed; }
+        Pt::Signal<WebSocketSession&>& peerClosed()
+        { return _peerClosed; }
+
+        /** @brief Returns the signal emitted when the bind has ended.
+
+            The stream is gone. After this signal returns, the servlet
+            releases this session. A local %close(), a ready-slot
+            error, and destruction of the connection emit it. An
+            %IOError from this slot reaches the event loop.
+        */
+        Pt::Signal<WebSocketSession&>& released()
+        { return _released; }
 
         /** @brief Returns the signal emitted for a received pong.
 
@@ -371,7 +383,9 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
         void onShutdownReady();
 
-        void onClosed();
+        void onPeerClosed();
+
+        void onReleased();
 
         void onPong(const std::string& payload);
 
@@ -383,7 +397,8 @@ class PT_HTTP_API WebSocketSession : public Connectable
         Pt::Signal<WebSocketSession&> _outputReady;
         Pt::Signal<WebSocketSession&> _pingReady;
         Pt::Signal<WebSocketSession&> _shutdownReady;
-        Pt::Signal<WebSocketSession&> _closed;
+        Pt::Signal<WebSocketSession&> _peerClosed;
+        Pt::Signal<WebSocketSession&> _released;
         Pt::Signal<WebSocketSession&, const std::string&> _pong;
 };
 

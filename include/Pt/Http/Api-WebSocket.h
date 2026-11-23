@@ -151,10 +151,10 @@
     A pending transfer is cancelled and the buffer is discarded.
     The framed stream is not resumed. %beginSend() and
     %beginReceive() then throw. When the engine ends the protocol,
-    %closed() runs on the client and on the session.
-    The application calls %close() on the client, or after
-    %endShutdown(). After %closed() the servlet releases the
-    session.
+    %closed() runs on the client and %peerClosed() runs on the
+    session. The application calls %close() on the client, or after
+    %endShutdown(). %released() runs on the session when the bind
+    has ended. After that signal the servlet releases the session.
     %closeCode() and %closeReason() report the handshake that ended
     the stream. No close frame leaves the code at 1006.
     The handshake uses the HTTP timeout of the client or the

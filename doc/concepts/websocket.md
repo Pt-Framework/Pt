@@ -260,18 +260,23 @@ On the client, the application calls `close()` after `closed()`.
 The destructor calls `close()`. After `close()`, `beginConnect()`
 starts a new handshake on the same socket.
 
-On the session, `closed()` notifies the application. After that
-signal returns, the session closes. A `closed()` slot need not call
-`close()`. A session that connects no `closed()` slot is still
-released.
+On the session, `peerClosed()` notifies the application. After
+that signal returns, the session closes. A `peerClosed()` slot
+need not call `close()`. A session that connects no
+`peerClosed()` slot is still released.
 
-`close()` unbinds the stream, cancels pending operations without
-their ready signals, and emits nothing. On the session, `close()`
-moves the session off the servlet live list onto a closing list
-and posts an empty event. The event handler releases whatever is
-on that list. The servlet destructor releases remaining sessions
-on both lists. An idle timeout and a read that returns no bytes
-take the same protocol-end path, with close code 1006.
+`close()` closes the stream, cancels pending operations without
+their ready signals, and emits nothing. The stream ends the bind.
+On the session, that releases the session. `released()` runs when
+the bind has ended and the stream is gone. After that signal
+returns, the servlet moves the session off the live list onto a
+closing list and posts an empty event. The event handler releases
+whatever is on that list. Destroying the connection closes the
+stream the same way, so `released()` runs without `peerClosed()`.
+The servlet destructor
+releases remaining sessions on both lists. An idle timeout and a
+read that returns no bytes take the same protocol-end path, with
+close code 1006.
 
 One event has one reporter. An outstanding shutdown reports the
 handshake, including a protocol or I/O error while waiting for the
@@ -306,25 +311,30 @@ local code was already set. No close frame leaves the code at 1006.
 
 The session is a concrete I/O facade. It exposes the same ready
 signals as `WebSocket`, with `WebSocketSession&`: `inputReady()`,
-`outputReady()`, `pingReady()`, `shutdownReady()`, `closed()`, and
-`pong()`. The application derives it to hold domain state, connects
+`outputReady()`, `pingReady()`, `shutdownReady()`, `peerClosed()`,
+`released()`, and `pong()`. The application derives it to hold
+domain state, connects
 slots in the constructor after its members are initialized, and
 starts the first `beginReceive()` there.
 
-The servlet owns every live session. `closed()` notifies the
-application. After that signal returns, the session closes. A
-`closed()` slot need not call `close()`. A session that connects
-no `closed()` slot is still released.
+The servlet owns every live session. `peerClosed()` notifies the
+application that the engine has ended the protocol. After that
+signal returns, the session closes. A `peerClosed()` slot need
+not call `close()`. A session that connects no `peerClosed()`
+slot is still released. `released()` notifies the application
+that the bind has ended. A domain object that holds a session
+reference drops it there.
 
-`close()` unbinds the stream and asks the servlet to release the
-session. That is the local abort: an `IOError` from a ready slot,
-the return of `shutdownReady()`, or the application ending the
-stream. The servlet moves the session to a closing list and posts
-an empty event. The event carries no session pointer. The handler
-releases every session on that list. The destructor unbinds the
-stream and does not release the session again. A domain object
-that holds a session reference drops it in `closed()`. `close()`
-during construction unbinds the stream. The session is not listed.
+`close()` closes the stream. The stream ends the bind, and the
+servlet releases the session. That is the local abort: an
+`IOError` from a ready slot, the return of `shutdownReady()`, or
+the application ending the stream. The servlet moves the session
+to a closing list and posts an empty event. The event carries no
+session pointer. The handler releases every session on that list.
+Destroying the connection closes the stream and releases the
+session the same way. The destructor closes a stream that is still
+bound and does not release the session again. `close()`
+during construction closes the stream. The session is not listed.
 `accept()` releases it through `releaseSession()`.
 
 The session does not store the opening request or reply. Both are

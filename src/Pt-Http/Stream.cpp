@@ -22,7 +22,15 @@ Stream::Stream(Connection& connection, const std::string& protocol)
 
 Stream::~Stream()
 {
-    close();
+    cancel();
+
+    _connection = 0;
+
+    Channel* channel = _channel;
+    _channel = 0;
+
+    if(channel)
+        channel->detachStream(*this);
 }
 
 
@@ -44,23 +52,10 @@ void Stream::detachChannel(Channel& channel)
 
 void Stream::close()
 {
-    if( ! _connection && ! _channel )
+    if( ! _connection )
         return;
 
-    cancel();
-
-    Connection* connection = _connection;
-    _connection = 0;
-
-    Channel* channel = _channel;
-    _channel = 0;
-
-    if(channel)
-        channel->onDetachStream(*this);
-
-    // NOTE: Connection owns and deletes the stream
-    if(connection)
-        connection->closeStream(*this);
+    _connection->closeStream(*this);
 }
 
 

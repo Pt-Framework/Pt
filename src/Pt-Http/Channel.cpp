@@ -49,17 +49,24 @@ void Channel::close()
 }
 
 
-void Channel::onDetachStream(Stream&)
+void Channel::detachStream(Stream&)
 {
     if( ! _stream )
         return;
 
     onClose();
+
     _stream = 0;
+    onRelease();
 }
 
 
 void Channel::onClose()
+{
+}
+
+
+void Channel::onRelease()
 {
 }
 

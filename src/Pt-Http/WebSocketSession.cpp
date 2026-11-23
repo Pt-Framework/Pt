@@ -57,7 +57,8 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
     _channel->outputReady() += Pt::slot(*this, &WebSocketSession::onOutputReady);
     _channel->pingReady() += Pt::slot(*this, &WebSocketSession::onPingReady);
     _channel->shutdownReady() += Pt::slot(*this, &WebSocketSession::onShutdownReady);
-    _channel->closed() += Pt::slot(*this, &WebSocketSession::onClosed);
+    _channel->peerClosed() += Pt::slot(*this, &WebSocketSession::onPeerClosed);
+    _channel->released() += Pt::slot(*this, &WebSocketSession::onReleased);
     _channel->pong() += Pt::slot(*this, &WebSocketSession::onPong);
 }
 
@@ -131,7 +132,6 @@ void WebSocketSession::endShutdown()
 void WebSocketSession::close()
 {
     _channel->close();
-    _service->onSessionClosed(*this);
 }
 
 
@@ -205,10 +205,17 @@ void WebSocketSession::onShutdownReady()
 }
 
 
-void WebSocketSession::onClosed()
+void WebSocketSession::onPeerClosed()
 {
-    _closed.send(*this);
+    _peerClosed.send(*this);
     close();
+}
+
+
+void WebSocketSession::onReleased()
+{
+    _released.send(*this);
+    _service->onSessionClosed(*this);
 }
 
 
