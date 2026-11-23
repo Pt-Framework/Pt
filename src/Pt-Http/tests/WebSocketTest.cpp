@@ -5267,6 +5267,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             {
                 _rejected = true;
             }
+
+            _loop->exit();
         }
 
         void onDeadPeerClosed(Pt::Http::WebSocket&)
