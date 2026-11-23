@@ -105,8 +105,8 @@ class WebSocketChannel;
     loop. Call %endReceive(), %endSend(), %endPing() or
     %endShutdown() from those signals to observe a transfer error.
     %peerClosed(), %released() and %pong() are notifications, not
-    transfers. An %IOError from those slots reaches the event
-    loop. %close() is safe from a ready slot of this session.
+    transfers. Those slots do not throw. %close() is safe from a
+    ready slot of this session.
     After %shutdownReady() returns, the session closes. Call
     %endShutdown() from that signal to observe an error. The
     servlet also releases remaining sessions when it is destroyed.
@@ -348,8 +348,8 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Returns the signal emitted when the engine has ended the protocol.
 
             No local shutdown is outstanding. The stream stays bound
-            for this call. After it returns, the session closes. An
-            %IOError from this slot reaches the event loop.
+            for this call. After it returns, the session closes.
+            The slot does not throw.
         */
         Pt::Signal<WebSocketSession&>& peerClosed()
         { return _peerClosed; }
@@ -358,8 +358,8 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             The stream is gone. After this signal returns, the servlet
             releases this session. A local %close(), a ready-slot
-            error, and destruction of the connection emit it. An
-            %IOError from this slot reaches the event loop.
+            error, and destruction of the connection emit it. The
+            slot does not throw.
         */
         Pt::Signal<WebSocketSession&>& released()
         { return _released; }

@@ -127,8 +127,8 @@
     releases the session. An %IOError from %inputReady(),
     %outputReady(), %pingReady() or %shutdownReady() closes the
     session and does not reach the event loop. %peerClosed(),
-    %released() and %pong() are notifications. An %IOError from
-    those slots reaches the event loop. After %shutdownReady()
+    %released() and %pong() are notifications. Those slots do
+    not throw. After %shutdownReady()
     returns the
     session closes. The session does not own the stream or the
     connection.

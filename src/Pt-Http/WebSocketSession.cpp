@@ -8,6 +8,7 @@
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
 #include <Pt/System/IOError.h>
+#include <Pt/SmartPtr.h>
 #include "WebSocketChannel.h"
 #include <Pt/Http/Message.h>
 
@@ -45,7 +46,9 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
 , _channel(0)
 , _protocol(selectedProtocol(reply))
 {
-    _channel = new WebSocketChannel();
+    Pt::AutoPtr guard( new WebSocketChannel() );
+
+    _channel = guard.get();
     _channel->open(stream, false);
     _channel->setMaxMessageSize(_service->maxMessageSize());
     _channel->setIdleTimeout(_service->idleTimeout());
@@ -60,6 +63,8 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
     _channel->peerClosed() += Pt::slot(*this, &WebSocketSession::onPeerClosed);
     _channel->released() += Pt::slot(*this, &WebSocketSession::onReleased);
     _channel->pong() += Pt::slot(*this, &WebSocketSession::onPong);
+
+    guard.release();
 }
 
 
@@ -207,14 +212,32 @@ void WebSocketSession::onShutdownReady()
 
 void WebSocketSession::onPeerClosed()
 {
-    _peerClosed.send(*this);
+    try
+    {
+        _peerClosed.send(*this);
+    }
+    catch(...)
+    {
+        close();
+        throw;
+    }
+
     close();
 }
 
 
 void WebSocketSession::onReleased()
 {
-    _released.send(*this);
+    try
+    {
+        _released.send(*this);
+    }
+    catch(...)
+    {
+        _service->onSessionClosed(*this);
+        throw;
+    }
+
     _service->onSessionClosed(*this);
 }
 
