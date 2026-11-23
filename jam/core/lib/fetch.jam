@@ -111,7 +111,7 @@ rule Fetch-Url ( url : dest : headers * )
     Fetch-MkDir $(dest:D) ;
 
     local flags = [ Fetch-HeaderFlags $(headers) ] ;
-    local cmd = "$(FETCH_CURL) -fsSL $(flags:J=" ") -o \"$(dest)\" \"$(url)\"" ;
+    local cmd = "$(FETCH_CURL) -fsSL" $(flags) "-o \"$(dest)\" \"$(url)\"" ;
 
     if ! [ TryCommand $(cmd) ]
     {
