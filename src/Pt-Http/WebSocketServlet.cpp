@@ -51,18 +51,18 @@ WebSocketServlet::~WebSocketServlet()
 }
 
 
-void WebSocketServlet::accept(Stream& stream,
+bool WebSocketServlet::accept(Stream& stream,
                               const Request& request,
                               const Reply& reply)
 {
     WebSocketSession* session = _service->getSession(stream, request, reply);
     if( ! session )
-        return;
+        return false;
 
     if( ! session->isOpen() )
     {
         _service->releaseSession(session);
-        return;
+        return false;
     }
 
     if( ! _loop )
@@ -73,6 +73,7 @@ void WebSocketServlet::accept(Stream& stream,
     }
 
     _sessions.push_back(session);
+    return true;
 }
 
 

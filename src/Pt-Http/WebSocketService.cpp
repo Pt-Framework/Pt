@@ -111,14 +111,14 @@ void WebSocketService::onReleaseResponder(Responder* responder)
 }
 
 
-void WebSocketService::onUpgrade(Stream& stream,
+bool WebSocketService::onUpgrade(Stream& stream,
                                  const Request& request,
                                  const Reply& reply)
 {
     if( ! _servlet )
-        return;
+        return false;
 
-    _servlet->accept(stream, request, reply);
+    return _servlet->accept(stream, request, reply);
 }
 
 } // namespace Http

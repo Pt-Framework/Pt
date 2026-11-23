@@ -55,7 +55,8 @@
     server calls %Service::onUpgrade() with that stream, the request,
     and the reply. A client
     obtains the stream it already owns with %Client::upgrade().
-    Binding a %Channel accepts the upgrade. WebSocket is the
+    %Service::onUpgrade() returns true when the service keeps the
+    stream. WebSocket is the
     framed protocol on that path: a handshake that is still HTTP,
     then messages on the same connection for as long as the stream
     lasts.

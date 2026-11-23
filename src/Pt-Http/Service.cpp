@@ -63,10 +63,11 @@ void Service::releaseResponder(Responder* responder)
 }
 
 
-void Service::onUpgrade(Stream& /*stream*/,
+bool Service::onUpgrade(Stream& /*stream*/,
                         const Request& /*request*/,
                         const Reply& /*reply*/)
 {
+    return false;
 }
 
 }

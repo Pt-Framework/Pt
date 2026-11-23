@@ -331,7 +331,7 @@ class PT_HTTP_API WebSocketService : public Service
             Implemented by this class. A derived service uses
             %onGetSession() instead.
         */
-        virtual void onUpgrade(Stream& stream,
+        virtual bool onUpgrade(Stream& stream,
                                const Request& request,
                                const Reply& reply) final;
 

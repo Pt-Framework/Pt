@@ -26,8 +26,8 @@ class Stream;
     %Service::onUpgrade() receives the stream the server already owns,
     with the request and the reply of the finished 101. A
     derived channel constructs itself with that stream, or calls %open() from
-    its own accept method. After %onUpgrade() returns, a stream with no channel
-    is declined and the server closes it. On the client, %Client::upgrade()
+    its own accept method. %onUpgrade() returns false to decline the stream,
+    and the server closes it. On the client, %Client::upgrade()
     returns the stream the client already owns, and the derived channel opens
     that stream after the 101 reply.
 

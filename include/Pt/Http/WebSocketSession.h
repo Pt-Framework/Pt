@@ -130,11 +130,11 @@ class WebSocketChannel;
     the data-message limit are copied from the %WebSocketService
     before the derived constructor runs.
     Closing the session closes the stream. The session does not own
-    the stream or the connection. The destructor unbinds the stream
+    the stream or the connection. The destructor closes the stream
     and does not release the session again. A derived constructor
     that throws still runs this destructor, so a failed construction
     does not leave an accepted stream without an owner. %close()
-    during construction unbinds the stream. The servlet does not
+    during construction closes the stream. The servlet does not
     list that session and releases it after construction returns.
 
     Ping, shutdown and close stay control operations on this type.
@@ -155,7 +155,7 @@ class WebSocketChannel;
     so the idle timeout copied from the %WebSocketService is the only
     bound on that wait. %shutdownReady() reports the completed handshake;
     call %endShutdown() from that signal to observe an error. After
-    the signal returns the session closes. %close() unbinds the stream
+    the signal returns the session closes. %close() closes the stream
     and writes no frame. The
     servlet then releases this session. The destructor unbinds the
     stream. %beginSend() and %beginReceive() then throw. No close

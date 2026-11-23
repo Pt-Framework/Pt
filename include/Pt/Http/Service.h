@@ -62,9 +62,10 @@ class Reply;
     %onUpgrade() on the server thread with the %Stream it owns, the
     request that opened the upgrade, and the reply that finished it.
     Those two references are valid until the call returns. The
-    responder has already been released. Binding a %Channel to
-    that stream accepts the upgrade. The empty base implementation
-    leaves the stream unbound, and the server closes it.
+    responder has already been released. %onUpgrade() returns true
+    when the service keeps the stream. It returns false to decline
+    it, and the server closes it. The stream stays alive until that
+    call returns.
     %Stream::protocol() is the value of the request's Upgrade header.
     The stream buffer is %Stream::buffer(). %beginInput() and
     %beginOutput() transfer that buffer.
@@ -114,11 +115,12 @@ class PT_HTTP_API Service : private NonCopyable
             Runs on the server thread with the %Stream the server owns.
             @a request and @a reply are the exchange that finished the
             101. They are valid until this call returns. The responder
-            has already been released. Bind a %Channel to @a stream to
-            accept it. The empty implementation leaves the stream
-            unbound, and the server closes it.
+            has already been released. Return true when this service
+            keeps @a stream. Return false to decline it. The server
+            then closes the stream. The stream stays alive until this
+            call returns.
         */
-        virtual void onUpgrade(Stream& stream,
+        virtual bool onUpgrade(Stream& stream,
                                const Request& request,
                                const Reply& reply);
 

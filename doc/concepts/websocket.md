@@ -208,7 +208,7 @@ remains the limit without a finished transfer.
 
 Ending a WebSocket is three events. `shutdown()` is the close
 handshake the application starts. `closed()` is the lifetime event
-when the engine ends the protocol. `close()` unbinds the stream.
+when the engine ends the protocol. `close()` closes the stream.
 
 ```cpp
 void shutdown(unsigned code = 1000,

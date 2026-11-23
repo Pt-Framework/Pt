@@ -42,8 +42,8 @@ class Channel;
     A %Channel is the external peer. The stream stores one channel
     pointer, and the channel stores one stream pointer. Binding that
     peer accepts the upgrade. A second bind throws %std::logic_error.
-    On the server, a stream that still has no channel after
-    %onUpgrade() returns is declined, and the server closes it.
+    On the server, %Service::onUpgrade() returns false to decline
+    the stream, and the server closes it.
     A WebSocket formats frames into %buffer(). The bind is internal
     to that protocol. Application code uses %WebSocket on the client
     and %WebSocketSession on the server.
@@ -75,13 +75,14 @@ class Channel;
     the stream. A service that does not bind a channel declines it.
 
     @code
-    void onUpgrade(Pt::Http::Stream& stream,
+    bool onUpgrade(Pt::Http::Stream& stream,
                    const Pt::Http::Request&,
                    const Pt::Http::Reply&)
     {
         _channel.open(stream);
         stream.inputReady() += Pt::slot(onInput);
         stream.beginInput();
+        return true;
     }
     @endcode
 

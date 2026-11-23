@@ -110,7 +110,7 @@ class PT_HTTP_API WebSocketServlet : public Connectable
         { return _sessions.size(); }
 
     private:
-        void accept(Stream& stream, const Request& request, const Reply& reply);
+        bool accept(Stream& stream, const Request& request, const Reply& reply);
 
         void onSessionClosed(WebSocketSession& session);
 

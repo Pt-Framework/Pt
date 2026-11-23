@@ -927,10 +927,9 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
         try
         {
             Stream& stream = conn->openStream(protocol);
-            service->onUpgrade(stream, handler->request(), handler->reply());
 
-            if( ! stream.channel() )
-                throw std::logic_error("stream not accepted");
+            if( ! service->onUpgrade(stream, handler->request(), handler->reply()) )
+                throw AccessFailed("stream not accepted");
         }
         catch(const std::exception& e)
         {

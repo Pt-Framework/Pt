@@ -45,7 +45,7 @@ releases remaining sessions on both lists.
 A domain object that holds a session reference drops it in
 `released()`.
 
-`close()` during construction unbinds the stream. The session is
+`close()` during construction closes the stream. The session is
 not listed. `accept()` releases it through `releaseSession()`.
 
 `size()` is the live list. `socketCount()` drops when
