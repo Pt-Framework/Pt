@@ -155,8 +155,9 @@
     session. The application calls %close() on the client, or after
     %endShutdown(). %released() runs on the session when the bind
     has ended. After that signal the servlet releases the session.
-    %closeCode() and %closeReason() report the handshake that ended
-    the stream. No close frame leaves the code at 1006.
+    %closeCode() and %closeReason() report the close frame received
+    from the peer; the code and reason passed to %shutdown() are only
+    sent. No close frame leaves the code at 1006 and the reason empty.
     The handshake uses the HTTP timeout of the client or the
     server. A finished 101 stops it on the connection. After that,
     a data message larger than the configured limit, inbound

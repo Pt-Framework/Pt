@@ -158,9 +158,10 @@ class WebSocketChannel;
     the signal returns the session closes. %close() closes the stream
     and writes no frame. The
     servlet then releases this session. The destructor unbinds the
-    stream. %beginSend() and %beginReceive() then throw. No close
-    frame leaves the code at 1006. %closeCode() and %closeReason()
-    report the handshake that ended the stream.
+    stream. %beginSend() and %beginReceive() then throw. %closeCode()
+    and %closeReason() report the close frame received from the peer;
+    the code and reason passed to %beginShutdown() are only sent. No
+    close frame leaves the code at 1006 and the reason empty.
 
     @ingroup Pt-Http-WebSocket-Server
 */
@@ -318,6 +319,8 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Returns the close reason of the handshake that ended the stream.
 
             This is the reason of the close frame received from the peer.
+            It is empty if the stream ended without one, even when
+            %beginShutdown() sent a reason.
         */
         const std::string& closeReason() const;
 
