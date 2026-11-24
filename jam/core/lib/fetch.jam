@@ -30,6 +30,12 @@ rule Fetch-Configure
 {
     if ! $(FETCH_CONFIGURED)
     {
+        if ! $(FETCH_CURL)
+            && [ TryCommand "C:\\Windows\\System32\\curl.exe --version" ]
+        {
+            FETCH_CURL = "C:\\Windows\\System32\\curl.exe" ;
+        }
+
         if ! $(FETCH_CURL) && [ TryCommand "curl --version" ]
         {
             FETCH_CURL = "curl" ;
@@ -38,7 +44,7 @@ rule Fetch-Configure
         Configure  FETCH_CURL : $(FETCH_CURL) ;
         EchoOption FETCH_CURL : "Download tool" ;
 
-        if ! $(FETCH_TAR) 
+        if ! $(FETCH_TAR)
             && [ TryCommand "C:\\Windows\\System32\\tar.exe --version" ]
         {
             FETCH_TAR = "C:\\Windows\\System32\\tar.exe" ;
@@ -65,12 +71,12 @@ rule Fetch-Configure
 rule Fetch-MkDir ( dir )
 {
     local parent = $(dir:P) ;
-    
+
     if $(parent) && $(parent) != $(dir)
     {
         Fetch-MkDir $(parent) ;
     }
-    
+
     if ! [ FILE_IS_DIR $(dir) ]
     {
         FILE_MKDIR $(dir) ;
