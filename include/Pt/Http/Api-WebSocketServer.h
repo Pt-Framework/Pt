@@ -79,8 +79,8 @@
     limit is already reached, with 400 when Sec-WebSocket-Key is
     missing or invalid, with 426 and Sec-WebSocket-Version: 13 when
     Sec-WebSocket-Version is not 13, or with 404 when the request is
-    not a WebSocket upgrade. The responder is released before the server
-    opens the stream. It is not the session. %addProtocol() names one
+    not a WebSocket upgrade. The responder is not the session.
+    %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
     name several values, in preference order. An empty list accepts
     the upgrade and selects no name. A non-empty list selects the
@@ -88,11 +88,14 @@
     offers none of them is answered with 400. %setMaxSockets(),
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
-    of the %WebSocketService. They apply before a servlet is
-    constructed.
-    The handshake reads the session limit and %socketCount() there.
-    %socketCount() is the number of sessions %getSession() returned
-    and %releaseSession() has not yet released. A missing servlet is
+    of the %WebSocketService.
+    The handshake takes a place from the session limit before it
+    checks the request. The limit covers %socketCount() and the
+    handshakes that hold a place. A place stays taken until the server
+    releases the responder, which is after it has handed over the
+    stream. %socketCount() is the number of sessions %getSession()
+    returned and %releaseSession() has not yet released. A missing
+    servlet is
     still 503 when %maxSockets() is zero. The session base copies the
     idle, ping-interval, ping and close timeouts and the data-message
     limit onto the connection before the derived constructor runs.

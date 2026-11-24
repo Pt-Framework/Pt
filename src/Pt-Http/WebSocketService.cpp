@@ -90,6 +90,76 @@ std::size_t WebSocketService::socketCount() const
 }
 
 
+std::size_t WebSocketService::idleTimeout() const
+{
+    System::MutexLock lock(_mutex);
+    return _idleTimeout;
+}
+
+
+void WebSocketService::setIdleTimeout(std::size_t ms)
+{
+    System::MutexLock lock(_mutex);
+    _idleTimeout = ms;
+}
+
+
+std::size_t WebSocketService::pingInterval() const
+{
+    System::MutexLock lock(_mutex);
+    return _pingInterval;
+}
+
+
+void WebSocketService::setPingInterval(std::size_t ms)
+{
+    System::MutexLock lock(_mutex);
+    _pingInterval = ms;
+}
+
+
+std::size_t WebSocketService::pingTimeout() const
+{
+    System::MutexLock lock(_mutex);
+    return _pingTimeout;
+}
+
+
+void WebSocketService::setPingTimeout(std::size_t ms)
+{
+    System::MutexLock lock(_mutex);
+    _pingTimeout = ms;
+}
+
+
+std::size_t WebSocketService::closeTimeout() const
+{
+    System::MutexLock lock(_mutex);
+    return _closeTimeout;
+}
+
+
+void WebSocketService::setCloseTimeout(std::size_t ms)
+{
+    System::MutexLock lock(_mutex);
+    _closeTimeout = ms;
+}
+
+
+std::size_t WebSocketService::maxMessageSize() const
+{
+    System::MutexLock lock(_mutex);
+    return _maxMessageSize;
+}
+
+
+void WebSocketService::setMaxMessageSize(std::size_t n)
+{
+    System::MutexLock lock(_mutex);
+    _maxMessageSize = n;
+}
+
+
 void WebSocketService::addProtocol(const std::string& name)
 {
     if( ! MessageHeader::isToken(name.c_str()) )
@@ -114,15 +184,18 @@ std::vector<std::string> WebSocketService::protocols() const
 }
 
 
-bool WebSocketService::selectProtocol(const MessageHeader::Field& offered,
-                                      std::string& selected) const
+bool WebSocketService::selectProtocol(const MessageHeader& header, std::string& selected) const
 {
     System::MutexLock lock(_mutex);
 
     if( _protocols.empty() )
         return true;
 
-    for(MessageHeader::ValueIterator it = offered.begin(); it != offered.end(); ++it)
+    const MessageHeader::FieldIterator offered = header.field("Sec-WebSocket-Protocol");
+    if(offered == header.end())
+        return false;
+
+    for(MessageHeader::ValueIterator it = offered->begin(); it != offered->end(); ++it)
     {
         for(std::size_t n = 0; n < _protocols.size(); ++n)
         {

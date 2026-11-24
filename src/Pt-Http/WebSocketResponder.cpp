@@ -142,7 +142,7 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
     }
 
     std::string protocol;
-    if( ! service.selectProtocol(*header.field("Sec-WebSocket-Protocol"), protocol) )
+    if( ! service.selectProtocol(header, protocol) )
     {
         reply.setStatus(400, "Bad Request");
         reply.header().set("Connection", "close");

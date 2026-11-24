@@ -42,8 +42,7 @@ class WebSocketServlet;
 
     The example is the usual server setup. The mapping servlet and
     the session owner are different objects. The setters are
-    endpoint policy of this service. They apply before a servlet is
-    constructed.
+    endpoint policy of this service.
 
     @code
     typedef Pt::Http::BasicWebSocketService<EchoSession> EchoService;
@@ -70,7 +69,7 @@ class WebSocketServlet;
     offers none of them is answered with 400. %setMaxSockets(),
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
-    of this service. They apply before a servlet is constructed.
+    of this service.
     The handshake takes a place from the session limit before it
     checks the request. The handshake responder holds that place until
     it is released. For a rejected handshake that is right after the
@@ -78,7 +77,7 @@ class WebSocketServlet;
     the stream and %getSession() has counted
     the session. Between these two steps the upgrade is counted
     twice, so the limit is reached early and never late. The counters,
-    the servlet and the protocol list
+    the servlet, the protocol list and the policy values
     are guarded by a mutex, because the handshake may run in a server
     thread while %getSession() and %releaseSession() run in the
     thread of the server loop. The session base
@@ -183,9 +182,7 @@ class PT_HTTP_API WebSocketService : public Service
         /** @brief Returns the maximum number of live sessions.
 
             Zero means no limit. The limit covers live sessions and
-            handshakes that are about to become one. This is endpoint
-            policy of this service. It applies before a servlet is
-            constructed.
+            handshakes that are about to become one.
         */
         std::size_t maxSockets() const;
 
@@ -194,107 +191,82 @@ class PT_HTTP_API WebSocketService : public Service
             A handshake above this limit is answered with 503.
             The limit covers live sessions and handshakes that are
             about to become one. Zero means no limit. A missing
-            servlet is still 503 when this limit is zero. This is
-            endpoint policy of this service. It applies before a
-            servlet is constructed.
+            servlet is still 503 when this limit is zero.
         */
         void setMaxSockets(std::size_t n);
 
         /** @brief Returns the idle timeout in milliseconds.
 
-            Zero means the idle timeout is disabled. This is endpoint
-            policy of this service. It applies before a servlet is
-            constructed.
+            Zero means the idle timeout is disabled.
         */
-        std::size_t idleTimeout() const
-        { return _idleTimeout; }
+        std::size_t idleTimeout() const;
 
         /** @brief Sets the idle timeout in milliseconds.
 
             An accepted socket is closed after @a ms without an
             incoming frame. Incoming data, a received ping, and a
             received pong restart it. Sending does not. Zero disables
-            it. This is endpoint policy of this service. It applies
-            before a servlet is constructed.
+            it.
         */
-        void setIdleTimeout(std::size_t ms)
-        { _idleTimeout = ms; }
+        void setIdleTimeout(std::size_t ms);
 
         /** @brief Returns the ping interval in milliseconds.
 
-            Zero means the engine does not write keepalive pings. This
-            is endpoint policy of this service. It applies before a
-            servlet is constructed.
+            Zero means the engine does not write keepalive pings.
         */
-        std::size_t pingInterval() const
-        { return _pingInterval; }
+        std::size_t pingInterval() const;
 
         /** @brief Sets the ping interval in milliseconds.
 
             An accepted socket writes a keepalive ping after @a ms
             without an incoming frame. Incoming data, a received ping,
             and a received pong restart it. Sending does not. Zero
-            disables it. This is endpoint policy of this service. It
-            applies before a servlet is constructed.
+            disables it.
         */
-        void setPingInterval(std::size_t ms)
-        { _pingInterval = ms; }
+        void setPingInterval(std::size_t ms);
 
         /** @brief Returns the ping timeout in milliseconds.
 
-            Zero means an unanswered ping has no deadline. This is
-            endpoint policy of this service. It applies before a
-            servlet is constructed.
+            Zero means an unanswered ping has no deadline.
         */
-        std::size_t pingTimeout() const
-        { return _pingTimeout; }
+        std::size_t pingTimeout() const;
 
         /** @brief Sets the ping timeout in milliseconds.
 
             An accepted socket is closed if a ping is unanswered for
             @a ms. The wait starts at %beginPing() and at a keepalive
-            ping. Zero disables it. This is endpoint policy of this
-            service. It applies before a servlet is constructed.
+            ping. Zero disables it.
         */
-        void setPingTimeout(std::size_t ms)
-        { _pingTimeout = ms; }
+        void setPingTimeout(std::size_t ms);
 
         /** @brief Returns the close timeout in milliseconds.
 
             Zero leaves a close handshake unbounded. The default is
-            ten seconds. This is endpoint policy of this service. It
-            applies before a servlet is constructed.
+            ten seconds.
         */
-        std::size_t closeTimeout() const
-        { return _closeTimeout; }
+        std::size_t closeTimeout() const;
 
         /** @brief Sets the close timeout in milliseconds.
 
             An accepted socket is closed if a close handshake is
             unanswered for @a ms. Zero leaves the wait unbounded.
-            The default is ten seconds. This is endpoint policy of
-            this service. It applies before a servlet is constructed.
+            The default is ten seconds.
         */
-        void setCloseTimeout(std::size_t ms)
-        { _closeTimeout = ms; }
+        void setCloseTimeout(std::size_t ms);
 
         /** @brief Returns the maximum data message size in bytes.
 
-            Zero means the limit is disabled. This is endpoint policy
-            of this service. It applies before a servlet is constructed.
+            Zero means the limit is disabled.
         */
-        std::size_t maxMessageSize() const
-        { return _maxMessageSize; }
+        std::size_t maxMessageSize() const;
 
         /** @brief Sets the maximum data message size in bytes.
 
             A larger data message closes the socket. Zero disables the
             limit. The count is the declared payload from the first
-            data opcode to FIN. This is endpoint policy of this
-            service. It applies before a servlet is constructed.
+            data opcode to FIN.
         */
-        void setMaxMessageSize(std::size_t n)
-        { _maxMessageSize = n; }
+        void setMaxMessageSize(std::size_t n);
 
         /** @brief True when a servlet is attached.
 
@@ -386,10 +358,13 @@ class PT_HTTP_API WebSocketService : public Service
         */
         void onSessionClosed(WebSocketSession& session);
 
-        /** @brief Takes a place for a handshake that is about to send the 101.
+        /** @brief Takes a place for a handshake.
 
-            Returns false when no servlet is attached or the sessions
-            and pending handshakes already reach %maxSockets().
+            Called before the request is checked, so a rejected
+            handshake keeps the place until its responder is
+            destroyed. Returns false when no servlet is attached or
+            the sessions and pending handshakes already reach
+            %maxSockets().
         */
         bool reservePending();
 
@@ -399,13 +374,13 @@ class PT_HTTP_API WebSocketService : public Service
 
         /** @brief Selects the first offered name that is accepted.
 
-            @a offered is the Sec-WebSocket-Protocol field, or the
-            empty field when the request has none. Returns false when
-            names are configured and none is offered. Otherwise
-            returns true, and @a selected is the match or empty when
+            Reads the Sec-WebSocket-Protocol field of @a header.
+            Returns false when names are configured and none of them
+            is offered, which includes a missing field. Otherwise
+            returns true, and @a selected is the match, or empty when
             no names are configured. The comparison is case-sensitive.
         */
-        bool selectProtocol(const MessageHeader::Field& offered, std::string& selected) const;
+        bool selectProtocol(const MessageHeader& header, std::string& selected) const;
 
     private:
         mutable System::Mutex    _mutex;
