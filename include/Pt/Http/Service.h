@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2012 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -62,7 +62,7 @@ class Reply;
     %onUpgrade() on the server thread with the %Stream it owns, the
     request that opened the upgrade, and the reply that finished it.
     Those two references are valid until the call returns. The
-    responder has already been released. %onUpgrade() returns true
+    responder is released after the call returns. %onUpgrade() returns true
     when the service keeps the stream. It returns false to decline
     it, and the server closes it. The stream stays alive until that
     call returns.
@@ -96,7 +96,7 @@ class PT_HTTP_API Service : private NonCopyable
         /** @brief Creates a responder to handle request received by a server.
         */
         Responder* getResponder(const Request&);
-        
+
         /** @brief Destroys a responder created by a server.
         */
         void releaseResponder(Responder*);
@@ -105,7 +105,7 @@ class PT_HTTP_API Service : private NonCopyable
         /** @brief Creates a responder to handle request received by a server.
         */
         virtual Responder* onGetResponder(const Request&) = 0;
-        
+
         /** @brief Destroys a responder created by a server.
         */
         virtual void onReleaseResponder(Responder*) = 0;

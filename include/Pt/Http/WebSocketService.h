@@ -61,13 +61,13 @@ class WebSocketServlet;
     when no servlet is attached or the session limit is reached, with
     400 when Sec-WebSocket-Key is missing or invalid, or with 426 and
     Sec-WebSocket-Version: 13 when Sec-WebSocket-Version is not 13.
-    The responder is released before the server
-    opens the stream. It is not the session. %addProtocol() names one
+    The responder is not the session. %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
     name several values, in preference order. An empty list accepts
     the upgrade and selects no name. A non-empty list selects the
     first offered name that is also accepted, and a request that
-    offers none of them is answered with 400. %setMaxSockets(),
+    offers none of them is answered with 400. %addProtocol(),
+    %clearProtocols(), %setMaxSockets(),
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
     of this service. They apply before a servlet is constructed.
@@ -374,8 +374,7 @@ class PT_HTTP_API WebSocketService : public Service
 
         void detach(WebSocketServlet& servlet);
 
-        WebSocketServlet* servlet()
-        { return _servlet; }
+        WebSocketServlet* servlet() const;
 
         /** @brief Takes a place for a handshake that is about to send the 101.
 

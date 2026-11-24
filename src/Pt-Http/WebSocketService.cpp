@@ -58,8 +58,14 @@ void WebSocketService::detach(WebSocketServlet& servlet)
 
 bool WebSocketService::hasServlet() const
 {
+    return servlet() != 0;
+}
+
+
+WebSocketServlet* WebSocketService::servlet() const
+{
     System::MutexLock lock(_mutex);
-    return _servlet != 0;
+    return _servlet;
 }
 
 
@@ -138,10 +144,11 @@ void WebSocketService::releaseSession(WebSocketSession* session)
 
 void WebSocketService::onSessionClosed(WebSocketSession& session)
 {
-    if( ! _servlet )
+    WebSocketServlet* servlet = this->servlet();
+    if( ! servlet )
         return;
 
-    _servlet->onSessionClosed(session);
+    servlet->onSessionClosed(session);
 }
 
 
@@ -176,10 +183,11 @@ bool WebSocketService::onUpgrade(Stream& stream,
                                  const Request& request,
                                  const Reply& reply)
 {
-    if( ! _servlet )
+    WebSocketServlet* servlet = this->servlet();
+    if( ! servlet )
         return false;
 
-    return _servlet->accept(stream, request, reply);
+    return servlet->accept(stream, request, reply);
 }
 
 } // namespace Http
