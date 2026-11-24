@@ -426,6 +426,8 @@ class WebSocketChannel : public Channel
         State       _state;
         unsigned    _closeCode;
         std::string _closeReason;
+        unsigned    _localCode;
+        std::string _localReason;
         Signal<>    _peerClosed;
         Signal<>    _released;
 };

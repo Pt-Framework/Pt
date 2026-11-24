@@ -164,8 +164,8 @@ local close handshake a protocol or I/O error is reported by the
 outstanding shutdown. An outstanding receive stays pending, as after
 a peer close. A protocol error still writes the local close frame
 before `shutdownReady()`. An I/O error does not wait. The engine
-does not wait for the peer close. `closeCode()` stays the local
-code.
+does not wait for the peer close. `closeCode()` is 1006, because no
+close frame was received.
 
 ## Control plane
 
@@ -299,10 +299,13 @@ direction that failed keeps the reason: a later `beginSend()`,
 `beginPing()`, or `beginShutdown()` throws the write failure, and a
 later `beginReceive()` throws the read failure.
 
-`closeCode()` and `closeReason()` are the values from the handshake
-that ended the stream. A local `shutdown()` keeps the values passed
-to it when the peer sends none. An empty peer close is 1005 unless a
-local code was already set. No close frame leaves the code at 1006.
+`closeCode()` and `closeReason()` are the values of the first close
+frame received from the peer, as in RFC 6455 section 7.1.5. They are
+0 until that is known. A peer close without a status is 1005. The
+code passed to a local `shutdown()` is only written to the wire and
+never reported. No close frame leaves the code at 1006. A protocol
+violation found while reading in `Open` is the exception: the code of
+the violation is the close code.
 
 ## Session
 

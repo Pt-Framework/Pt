@@ -1191,6 +1191,55 @@ class ShutdownService : public Pt::Http::WebSocketService
 };
 
 
+class PeerCloseSession : public Pt::Http::WebSocketSession
+{
+    public:
+        PeerCloseSession(Pt::Http::WebSocketService& service,
+                         Pt::Http::Stream& stream,
+                         const Pt::Http::Reply& reply,
+                         unsigned code,
+                         const std::string& reason)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            shutdownReady() += Pt::slot(*this, &PeerCloseSession::onShutdownReady);
+            beginShutdown(code, reason);
+        }
+
+    private:
+        void onShutdownReady(Pt::Http::WebSocketSession&)
+        {
+            endShutdown();
+        }
+};
+
+
+class PeerCloseService : public Pt::Http::WebSocketService
+{
+    public:
+        PeerCloseService(unsigned code, const std::string& reason)
+        : _code(code)
+        , _reason(reason)
+        {}
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new PeerCloseSession(*this, stream, reply, _code, _reason);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        unsigned _code;
+        std::string _reason;
+};
+
+
 class ProtocolSession : public Pt::Http::WebSocketSession
 {
     public:
@@ -2124,6 +2173,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("Empty", *this, &WebSocketTest::Empty);
             registerMethod("Large", *this, &WebSocketTest::Large);
             registerMethod("CloseHandshake", *this, &WebSocketTest::CloseHandshake);
+            registerMethod("CloseHandshakePeerCode", *this, &WebSocketTest::CloseHandshakePeerCode);
             registerMethod("Close", *this, &WebSocketTest::Close);
             registerMethod("CloseReceive", *this, &WebSocketTest::CloseReceive);
             registerMethod("CloseFromReceive", *this, &WebSocketTest::CloseFromReceive);
@@ -3367,6 +3417,49 @@ class WebSocketTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void CloseHandshakePeerCode()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8130);
+
+            Pt::Http::Server server(*_loop, ep);
+            PeerCloseService service(1001, "going away");
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedPeerCode);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onPeerCodeShutdownReady);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_shutdownReady);
+            PT_UNIT_ASSERT_EQUALS(_status, 1001u);
+            PT_UNIT_ASSERT_EQUALS(_message, std::string("going away"));
+        }
+
+        void onConnectedPeerCode(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginShutdown(1000, "done");
+            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 0u);
+            PT_UNIT_ASSERT(socket.closeReason().empty());
+        }
+
+        void onPeerCodeShutdownReady(Pt::Http::WebSocket& socket)
+        {
+            socket.endShutdown();
+            _status = socket.closeCode();
+            _message = socket.closeReason();
+            socket.close();
+            _shutdownReady = true;
+            _loop->exit();
+        }
+
+    protected:
         void Close()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8031);
@@ -3720,6 +3813,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(1006), std::invalid_argument);
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(1015), std::invalid_argument);
             socket.beginShutdown();
+            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 0u);
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(), std::logic_error);
             socket.beginReceive();
             _loop->exit();
@@ -4733,7 +4827,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->run();
 
             PT_UNIT_ASSERT(_rejected);
-            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 1000u);
+            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 1006u);
+            PT_UNIT_ASSERT(socket.closeReason().empty());
         }
 
         void onConnectedCloseTimeout(Pt::Http::WebSocket& socket)
@@ -4915,7 +5010,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
                 _status = e.code();
             }
 
-            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 1000u);
+            PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 1006u);
             socket.close();
             _shutdownReady = true;
             _loop->exit();

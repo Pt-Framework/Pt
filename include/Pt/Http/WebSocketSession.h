@@ -306,10 +306,18 @@ class PT_HTTP_API WebSocketSession : public Connectable
         void close();
 
         /** @brief Returns the close status code of the handshake that ended the stream.
+
+            This is the code of the close frame received from the peer,
+            1005 if it had none, and 1006 if the stream ended without
+            one. The code of a local %beginShutdown() is not reported.
+            A protocol violation found while reading reports its own
+            code. It is 0 until the code is known.
         */
         unsigned closeCode() const;
 
         /** @brief Returns the close reason of the handshake that ended the stream.
+
+            This is the reason of the close frame received from the peer.
         */
         const std::string& closeReason() const;
 

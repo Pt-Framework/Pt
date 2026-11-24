@@ -113,6 +113,7 @@ WebSocketChannel::WebSocketChannel()
 , _isPingPending(false)
 , _state(Closed)
 , _closeCode(0)
+, _localCode(0)
 {
     _timeouts.add(_idleTimeout);
     _timeouts.add(_pingDelay);
@@ -184,6 +185,8 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
     _state = Open;
     _closeCode = 0;
     _closeReason.clear();
+    _localCode = 0;
+    _localReason.clear();
 
     _receive.open();
     _send.open();
@@ -364,7 +367,8 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
 
     _shutdown.begin();
 
-    setCloseCode(code, reason);
+    _localCode = code;
+    _localReason = reason;
     _state = CloseSent;
 
     _timeouts.cancel();
@@ -902,7 +906,7 @@ void WebSocketChannel::onPeerClose(const Frame& frame)
     if(reply)
         enqueueClose(_closeCode, std::string());
     else
-        enqueueClose(_closeCode, _closeReason);
+        enqueueClose(_localCode, _localReason);
 
     onProtocolDone();
 }
@@ -947,8 +951,9 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code, 
     {
         _inputPending = false;
         _inputFailure = error;
+        setCloseCode(1006, std::string());
         onProtocolFinished();
-        enqueueClose(_closeCode, _closeReason);
+        enqueueClose(_localCode, _localReason);
 
         try
         {
@@ -1011,6 +1016,7 @@ void WebSocketChannel::onInputError(std::exception_ptr error)
 
     if(_state == CloseSent)
     {
+        setCloseCode(1006, std::string());
         onProtocolFinished();
         _state = Done;
         _shutdown.setFailed(error);
