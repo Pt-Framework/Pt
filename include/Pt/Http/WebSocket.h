@@ -296,8 +296,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
             @throw %std::logic_error if a send is outstanding, the
             handshake is not finished, or a shutdown is queued.
-            @throw %std::invalid_argument if the type is %Unknown, or
-            the body is larger than %setMaxMessageSize().
+            @throw %std::invalid_argument if the type is %Unknown.
             @throw %IOError if a previous write failed.
         */
         void beginSend(bool finished = true);
@@ -434,10 +433,12 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         Pt::Signal<WebSocket&, const std::string&>& pong()
         { return _pong; }
 
-        /** @brief Closes the stream when a data message exceeds @a maxSize.
+        /** @brief Closes the stream when a received data message exceeds @a maxSize.
 
             Zero disables the limit. The count is the declared payload
-            of one data message from the first data opcode to FIN.
+            of one data message from the first data opcode to FIN. The
+            limit applies to received messages only. Sent messages are
+            not limited.
         */
         void setMaxMessageSize(std::size_t maxSize);
 

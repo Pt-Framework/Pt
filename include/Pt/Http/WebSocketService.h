@@ -260,9 +260,10 @@ class PT_HTTP_API WebSocketService : public Service
 
         /** @brief Sets the maximum data message size in bytes.
 
-            A larger data message closes the socket. Zero disables the
-            limit. The count is the declared payload from the first
-            data opcode to FIN.
+            A larger received data message closes the socket. Zero
+            disables the limit. The count is the declared payload from
+            the first data opcode to FIN. The limit applies to received
+            messages only. Sent messages are not limited.
         */
         void setMaxMessageSize(std::size_t n);
 

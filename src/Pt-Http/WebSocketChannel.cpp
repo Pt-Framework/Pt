@@ -233,10 +233,6 @@ void WebSocketChannel::beginSend(bool finished)
         WebSocketMessage::Type type = msg.type();
         if(type != WebSocketMessage::Text && type != WebSocketMessage::Binary)
             throw std::invalid_argument("WebSocket message type");
-
-        std::size_t n = msg.pending();
-        if(_maxMessageSize != 0 && n > _maxMessageSize)
-            throw std::invalid_argument("WebSocket message too large");
     }
 
     _send.begin();
