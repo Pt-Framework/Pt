@@ -59,6 +59,9 @@ This chapter covers:
 @subsection Pt-System-Page-Timer Timers
 @copydetails Pt::System::Timer
 
+@subsection Pt-System-Page-Yield Deferred Execution
+@copydetails Pt::System::Yield
+
 @subsection Pt-System-Page-EventSource Event Sources
 @copydetails Pt::System::EventSource
 

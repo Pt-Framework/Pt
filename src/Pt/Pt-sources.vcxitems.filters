@@ -516,6 +516,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-System\Selectable.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-System\Yield.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-System\Semaphore.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
@@ -2526,6 +2529,9 @@
       <Filter>Pt-System</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\System\Selectable.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\System\Yield.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\System\Semaphore.h">

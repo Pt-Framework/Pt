@@ -23,7 +23,9 @@
     A %Selectable attaches with setActive so the loop can wait for it.
     detach() removes it and cancels outstanding operations. %Timer is
     not a %Selectable. It registers with setActive and emits timeout
-    at an interval.
+    at an interval. %Yield is a %Selectable that emits a signal
+    in a later turn of the loop, so a handler can defer work until its
+    own stack has unwound. %AsyncYield does the same for a coroutine.
 
     %EventSource sends events to %EventSink objects in other threads.
     %Signal is not thread-safe. %EventSource is.

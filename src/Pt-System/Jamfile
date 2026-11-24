@@ -78,6 +78,7 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           TarWriter.cpp
                           Thread.cpp
                           Timer.cpp
+                          Yield.cpp
                           Uri.cpp
                           UriQuery.cpp
                           ConsoleChannel.cpp

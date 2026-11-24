@@ -525,6 +525,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-System\Process.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-System\Selectable.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-System\Semaphore.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-System\Yield.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-System\SerialChannel.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-System\SerialDevice.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-System\SystemError.cpp" />
@@ -919,6 +920,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\System\Selectable.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\System\Semaphore.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\System\SerialDevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\System\Yield.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\System\SystemError.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\System\Thread.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\System\Timer.h" />

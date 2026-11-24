@@ -6,8 +6,8 @@
 #define PT_HTTP_WEBSOCKETSERVLET_H
 
 #include <Pt/Http/Api.h>
+#include <Pt/System/Yield.h>
 #include <Pt/Connectable.h>
-#include <Pt/Event.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 #include <cstddef>
@@ -52,12 +52,20 @@ class WebSocketSession;
     server.addServlet(mapUrl);
     @endcode
 
-    Construct it with the %WebSocketService and destroy it before
+    Construct it with the %WebSocketService, and destroy it before
     that service. The constructor attaches this servlet, so the
     handshake can accept upgrades. The destructor detaches it and
     releases every remaining session. That order is required. The
     service destructor cannot release sessions, because by then the
     derived object is already gone.
+
+    A session that closes is released later on the event loop, after
+    the slot that closed it has returned. The servlet takes that loop
+    from the stream of its first upgrade, which is the loop of the
+    %Server, and does not own it. An upgrade whose stream runs on
+    another loop is declined. When the loop is destroyed first, loop()
+    is null and the servlet keeps its sessions until detach() or the
+    destructor releases them. The next upgrade binds the servlet again.
 
     One service has one active servlet. Constructing a second
     %WebSocketServlet for the same service throws %std::logic_error.
@@ -79,9 +87,6 @@ class PT_HTTP_API WebSocketServlet : public Connectable
 {
     friend class WebSocketService;
 
-    class SessionsClosedEvent : public BasicEvent<SessionsClosedEvent>
-    { };
-
     public:
         /** @brief Attaches this servlet to @a service.
 
@@ -93,6 +98,17 @@ class PT_HTTP_API WebSocketServlet : public Connectable
         /** @brief Detaches this servlet and releases its remaining sessions.
         */
         ~WebSocketServlet();
+
+        /** @brief Returns the event loop taken from the first upgrade, or null.
+        */
+        System::EventLoop* loop() const;
+
+        /** @brief Releases the sessions and forgets the event loop.
+
+            The next upgrade binds the servlet again. Must not be
+            called from a slot of one of its sessions.
+        */
+        void detach();
 
         /** @brief Returns the service this servlet was constructed with.
         */
@@ -110,17 +126,18 @@ class PT_HTTP_API WebSocketServlet : public Connectable
         { return _sessions.size(); }
 
     private:
+        // Binds the loop of the stream, throws std::logic_error for another loop.
         bool accept(Stream& stream, const Request& request, const Reply& reply);
 
         void onSessionClosed(WebSocketSession& session);
 
-        void onSessionsClosed(const SessionsClosedEvent&);
+        void onSessionsClosed();
 
     private:
         WebSocketService*              _service;
         std::vector<WebSocketSession*> _sessions;
         std::vector<WebSocketSession*> _closing;
-        System::EventLoop*             _loop;
+        System::Yield                  _release;
 };
 
 } // namespace Http

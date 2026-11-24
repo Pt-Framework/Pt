@@ -23,6 +23,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#ifdef _WIN32
+// windows.h first checks that Pt/System/Yield.h copes with the Yield() macro
+#define NOMINMAX
+#include <windows.h>
+#endif
+
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -34,6 +40,7 @@
 #include <new>
 
 #include "Pt/System/Selectable.h"
+#include "Pt/System/Yield.h"
 #include "Pt/System/Thread.h"
 #include "Pt/System/Mutex.h"
 
@@ -207,6 +214,13 @@ class EventLoopTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "SelectableTest", *this, &EventLoopTest::SelectableTest);
             Pt::Unit::TestSuite::registerMethod( "DispatchTest", *this, &EventLoopTest::DispatchTest);
             Pt::Unit::TestSuite::registerMethod( "CoalesceTest", *this, &EventLoopTest::CoalesceTest);
+            Pt::Unit::TestSuite::registerMethod( "YieldTest", *this, &EventLoopTest::YieldTest);
+            Pt::Unit::TestSuite::registerMethod( "YieldCoalesce", *this, &EventLoopTest::YieldCoalesce);
+            Pt::Unit::TestSuite::registerMethod( "YieldInactive", *this, &EventLoopTest::YieldInactive);
+            Pt::Unit::TestSuite::registerMethod( "YieldOtherLoop", *this, &EventLoopTest::YieldOtherLoop);
+            Pt::Unit::TestSuite::registerMethod( "YieldCancel", *this, &EventLoopTest::YieldCancel);
+            Pt::Unit::TestSuite::registerMethod( "YieldAgain", *this, &EventLoopTest::YieldAgain);
+            Pt::Unit::TestSuite::registerMethod( "YieldDestroy", *this, &EventLoopTest::YieldDestroy);
             Pt::Unit::TestSuite::registerMethod( "MaxAlloc", *this, &EventLoopTest::MaxAlloc);
             //Pt::Unit::TestSuite::registerMethod( "LoopBenchmark", *this, &EventLoopTest::LoopBenchmark);
 #if __cplusplus >= 202002L
@@ -217,6 +231,11 @@ class EventLoopTest : public Pt::Unit::TestSuite
         void setUp()
         {
             _cnt = 0;
+            _yielded = 0;
+            _inRun = false;
+            _yieldInRun = false;
+            _exitLoop = 0;
+            _yield = 0;
         }
 
     private:
@@ -273,6 +292,159 @@ class EventLoopTest : public Pt::Unit::TestSuite
         void onE1(const E1&)
         {
             ++_cnt;
+        }
+
+        void YieldTest()
+        {
+            Pt::System::MainLoop el;
+
+            Pt::System::Yield yield;
+            yield.ready() += Pt::slot(*this, &EventLoopTest::onYielded);
+            yield.setActive(el);
+            _exitLoop = &el;
+
+            _inRun = true;
+            yield.run();
+            _inRun = false;
+
+            PT_UNIT_ASSERT_EQUALS(_yielded, 0);
+
+            el.run();
+
+            PT_UNIT_ASSERT_EQUALS(_yielded, 1);
+            PT_UNIT_ASSERT( ! _yieldInRun );
+        }
+
+        void YieldCoalesce()
+        {
+            Pt::System::MainLoop el;
+
+            Pt::System::Yield yield;
+            yield.ready() += Pt::slot(*this, &EventLoopTest::onYielded);
+            yield.setActive(el);
+
+            yield.run();
+            yield.run();
+            yield.run();
+
+            Pt::System::Timer exitTimer;
+            exitTimer.setActive(el);
+            exitTimer.start(200);
+            exitTimer.timeout() += Pt::slot(el, &Pt::System::EventLoop::exit);
+
+            el.run();
+
+            PT_UNIT_ASSERT_EQUALS(_yielded, 1);
+        }
+
+        void YieldInactive()
+        {
+            Pt::System::Yield yield;
+
+            PT_UNIT_ASSERT( ! yield.loop() );
+            PT_UNIT_ASSERT_THROW(yield.run(), std::logic_error);
+
+            Pt::System::MainLoop el;
+            yield.setActive(el);
+            PT_UNIT_ASSERT(yield.loop() == &el);
+
+            yield.detach();
+            PT_UNIT_ASSERT( ! yield.loop() );
+            PT_UNIT_ASSERT_THROW(yield.run(), std::logic_error);
+        }
+
+        void YieldOtherLoop()
+        {
+            Pt::System::MainLoop first;
+            Pt::System::MainLoop second;
+
+            Pt::System::Yield yield;
+            yield.setActive(first);
+            yield.setActive(first);
+
+            PT_UNIT_ASSERT_THROW(yield.setActive(second), std::logic_error);
+            PT_UNIT_ASSERT(yield.loop() == &first);
+
+            yield.detach();
+            yield.setActive(second);
+            PT_UNIT_ASSERT(yield.loop() == &second);
+        }
+
+        void YieldCancel()
+        {
+            Pt::System::MainLoop el;
+
+            Pt::System::Yield yield;
+            yield.ready() += Pt::slot(*this, &EventLoopTest::onYielded);
+            yield.setActive(el);
+
+            yield.run();
+            yield.cancel();
+
+            Pt::System::Timer exitTimer;
+            exitTimer.setActive(el);
+            exitTimer.start(200);
+            exitTimer.timeout() += Pt::slot(el, &Pt::System::EventLoop::exit);
+
+            el.run();
+
+            PT_UNIT_ASSERT_EQUALS(_yielded, 0);
+        }
+
+        void YieldAgain()
+        {
+            Pt::System::MainLoop el;
+
+            Pt::System::Yield yield;
+            yield.ready() += Pt::slot(*this, &EventLoopTest::onYieldedAgain);
+            yield.setActive(el);
+            _exitLoop = &el;
+            _yield = &yield;
+
+            yield.run();
+            el.run();
+
+            PT_UNIT_ASSERT_EQUALS(_yielded, 3);
+        }
+
+        void YieldDestroy()
+        {
+            Pt::System::MainLoop el;
+
+            {
+                Pt::System::Yield yield;
+                yield.ready() += Pt::slot(*this, &EventLoopTest::onYielded);
+                yield.setActive(el);
+                yield.run();
+            }
+
+            Pt::System::Timer exitTimer;
+            exitTimer.setActive(el);
+            exitTimer.start(200);
+            exitTimer.timeout() += Pt::slot(el, &Pt::System::EventLoop::exit);
+
+            el.run();
+
+            PT_UNIT_ASSERT_EQUALS(_yielded, 0);
+        }
+
+        void onYielded()
+        {
+            ++_yielded;
+
+            if(_inRun)
+                _yieldInRun = true;
+
+            if(_exitLoop)
+                _exitLoop->exit();
+        }
+
+        void onYieldedAgain()
+        {
+            if(++_yielded < 3)
+                _yield->run();
+            else
+                _exitLoop->exit();
         }
 
         void onE2(const E2&)
@@ -361,6 +533,11 @@ class EventLoopTest : public Pt::Unit::TestSuite
 
         private:
             int _cnt;
+            int _yielded;
+            bool _inRun;
+            bool _yieldInRun;
+            Pt::System::EventLoop* _exitLoop;
+            Pt::System::Yield* _yield;
 };
 
 Pt::Unit::RegisterTest<EventLoopTest> register_EventLoopTest;

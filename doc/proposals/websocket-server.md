@@ -24,9 +24,10 @@ slot need not call `close()`. A session that connects no
 
 `close()` closes the stream and does not destroy the session.
 The stream ends the bind. The servlet moves the session from the
-live list to a closing list and posts an empty event. The event
-carries no session pointer. The handler releases every session on
-the closing list. Extra or stale events find the list empty.
+live list to a closing list and requests a later turn of the loop
+through a `System::Yield`. The request carries no session pointer.
+The handler releases every session on the closing list. Several
+requests coalesce and a stale request finds the list empty.
 `peerClosed()` does not run for a local `close()`. `released()`
 runs when the bind has ended, including a local `close()` and
 destruction of the connection. The destructor closes a stream
@@ -38,7 +39,8 @@ the session and does not reach the event loop. After
 `endShutdown()` to observe a handshake error. `close()` remains the
 explicit abort from the constructor, a kick, or the application.
 
-`WebSocketServlet::onSessionClosed` queues that release. A session
+`WebSocketServlet::onSessionClosed` queues that release on the loop
+of the servlet. A session
 already gone from the live list is ignored. The servlet destructor
 releases remaining sessions on both lists.
 

@@ -385,6 +385,7 @@
     <ClInclude Include="..\..\include\Pt\System\Selectable.h" />
     <ClInclude Include="..\..\include\Pt\System\Semaphore.h" />
     <ClInclude Include="..\..\include\Pt\System\SerialDevice.h" />
+    <ClInclude Include="..\..\include\Pt\System\Yield.h" />
     <ClInclude Include="..\..\include\Pt\System\SystemError.h" />
     <ClInclude Include="..\..\include\Pt\System\Thread.h" />
     <ClInclude Include="..\..\include\Pt\System\Timer.h" />
@@ -1718,6 +1719,7 @@
     <ClCompile Include="..\Pt-System\Process.cpp" />
     <ClCompile Include="..\Pt-System\Selectable.cpp" />
     <ClCompile Include="..\Pt-System\Semaphore.cpp" />
+    <ClCompile Include="..\Pt-System\Yield.cpp" />
     <ClCompile Include="..\Pt-System\SerialChannel.cpp" />
     <ClCompile Include="..\Pt-System\SerialDevice.cpp" />
     <ClCompile Include="..\Pt-System\SystemError.cpp" />

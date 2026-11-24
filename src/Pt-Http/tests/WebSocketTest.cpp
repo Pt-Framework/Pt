@@ -2101,6 +2101,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("NoScope", *this, &WebSocketTest::NoScope);
             registerMethod("Scope", *this, &WebSocketTest::Scope);
             registerMethod("SecondScope", *this, &WebSocketTest::SecondScope);
+            registerMethod("BindLoop", *this, &WebSocketTest::BindLoop);
+            registerMethod("DetachReleases", *this, &WebSocketTest::DetachReleases);
             registerMethod("PeerClose", *this, &WebSocketTest::PeerClose);
             registerMethod("AutoRelease", *this, &WebSocketTest::AutoRelease);
             registerMethod("DataBeforeClose", *this, &WebSocketTest::DataBeforeClose);
@@ -2357,6 +2359,59 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void createScope(Pt::Http::WebSocketService& service)
         {
             Pt::Http::WebSocketServlet scope(service);
+        }
+
+    protected:
+        void BindLoop()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8202);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            PT_UNIT_ASSERT( ! sockets.loop() );
+            PT_UNIT_ASSERT( service.hasServlet() );
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIdle);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(sockets.loop() == _loop);
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(1));
+        }
+
+        void DetachReleases()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8203);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIdle);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(1));
+
+            sockets.detach();
+
+            PT_UNIT_ASSERT( ! sockets.loop() );
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
         }
 
     protected:

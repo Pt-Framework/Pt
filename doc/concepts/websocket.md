@@ -353,6 +353,14 @@ live sessions. It must outlive every session and end before the
 service. When the servlet ends, it releases its remaining sessions
 while the derived service is still fully constructed.
 
+The servlet takes the event loop from the stream of its first
+upgrade, which is the loop of the `Server`, and does not own it.
+Closed sessions are released on that loop after the closing slot has
+returned, through a `System::Yield`. `detach()` releases the sessions
+and forgets the loop, and the next upgrade binds the servlet again.
+`accept()` throws `std::logic_error` for a stream served by another
+loop, and the server declines the upgrade.
+
 `getSession()` creates a session and counts it. `releaseSession()`
 destroys it and drops the count. The two must match, including the
 allocator. A null return from `getSession()` declines the upgrade

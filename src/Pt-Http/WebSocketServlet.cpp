@@ -6,11 +6,11 @@
 #include <Pt/Http/WebSocketService.h>
 #include <Pt/Http/WebSocketSession.h>
 #include <Pt/Http/Stream.h>
-#include <Pt/System/EventLoop.h>
 #include <Pt/Signal.h>
 #include <Pt/Slot.h>
 
 #include <algorithm>
+#include <stdexcept>
 
 namespace Pt {
 
@@ -18,26 +18,30 @@ namespace Http {
 
 WebSocketServlet::WebSocketServlet(WebSocketService& service)
 : _service(&service)
-, _loop(0)
 {
+    _release.ready() += Pt::slot(*this, &WebSocketServlet::onSessionsClosed);
     _service->attach(*this);
 }
 
 
 WebSocketServlet::~WebSocketServlet()
 {
-    if(_loop)
-    {
-        _loop->eventReceived() -= Pt::slot(*this, &WebSocketServlet::onSessionsClosed);
-        _loop = 0;
-    }
+    detach();
 
-    while( ! _closing.empty() )
-    {
-        WebSocketSession* session = _closing.back();
-        _closing.pop_back();
-        _service->releaseSession(session);
-    }
+    if(_service)
+        _service->detach(*this);
+}
+
+
+System::EventLoop* WebSocketServlet::loop() const
+{
+    return _release.loop();
+}
+
+
+void WebSocketServlet::detach()
+{
+    _release.detach();
 
     while( ! _sessions.empty() )
     {
@@ -46,8 +50,12 @@ WebSocketServlet::~WebSocketServlet()
         _service->releaseSession(session);
     }
 
-    if(_service)
-        _service->detach(*this);
+    while( ! _closing.empty() )
+    {
+        WebSocketSession* session = _closing.back();
+        _closing.pop_back();
+        _service->releaseSession(session);
+    }
 }
 
 
@@ -55,6 +63,19 @@ bool WebSocketServlet::accept(Stream& stream,
                               const Request& request,
                               const Reply& reply)
 {
+    System::EventLoop* loop = stream.loop();
+    if( ! loop )
+        throw std::logic_error("No event loop");
+
+    if( ! _release.loop() )
+    {
+        _release.setActive(*loop);
+    }
+    else if( _release.loop() != loop )
+    {
+        throw std::logic_error("Invalid event loop");
+    }
+
     WebSocketSession* session = _service->getSession(stream, request, reply);
     if( ! session )
         return false;
@@ -63,13 +84,6 @@ bool WebSocketServlet::accept(Stream& stream,
     {
         _service->releaseSession(session);
         return false;
-    }
-
-    if( ! _loop )
-    {
-        _loop = stream.loop();
-        if(_loop)
-            _loop->eventReceived() += Pt::slot(*this, &WebSocketServlet::onSessionsClosed);
     }
 
     _sessions.push_back(session);
@@ -85,15 +99,18 @@ void WebSocketServlet::onSessionClosed(WebSocketSession& session)
     if(it == _sessions.end())
         return;
 
-    _sessions.erase(it);
+    _closing.reserve(_closing.size() + 1);
     _closing.push_back(&session);
 
-    if(_loop)
-        _loop->commitEvent( SessionsClosedEvent() );
+    _sessions.erase(it);
+
+    // the loop is gone when it was destroyed before this servlet
+    if( _release.loop() )
+        _release.run();
 }
 
 
-void WebSocketServlet::onSessionsClosed(const SessionsClosedEvent&)
+void WebSocketServlet::onSessionsClosed()
 {
     while( ! _closing.empty() )
     {

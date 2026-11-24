@@ -18,3 +18,5 @@ description: "Event loops, timers and console applications"
   `include/Pt/System/Timer.h`
 - Attach operations to an event loop:
   `include/Pt/System/Selectable.h`
+- Defer a signal to a later turn of the event loop:
+  `include/Pt/System/Yield.h`

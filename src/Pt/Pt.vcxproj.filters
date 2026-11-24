@@ -2529,6 +2529,9 @@
     <ClInclude Include="..\..\include\Pt\System\Selectable.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Yield.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\System\Semaphore.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
@@ -5399,6 +5402,9 @@
       <Filter>Pt-System</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-System\Selectable.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-System\Yield.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-System\Semaphore.cpp">
