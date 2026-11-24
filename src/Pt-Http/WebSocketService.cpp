@@ -5,7 +5,7 @@
 
 #include <Pt/Http/WebSocketService.h>
 #include <Pt/Http/WebSocketServlet.h>
-#include <Pt/Http/WebSocketResponder.h>
+#include "WebSocketResponder.h"
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
@@ -20,6 +20,7 @@ namespace Http {
 WebSocketService::WebSocketService()
 : _servlet(0)
 , _socketCount(0)
+, _pending(0)
 , _maxSockets(1024)
 , _idleTimeout(0)
 , _pingInterval(0)
@@ -37,6 +38,8 @@ WebSocketService::~WebSocketService()
 
 void WebSocketService::attach(WebSocketServlet& servlet)
 {
+    System::MutexLock lock(_mutex);
+
     if(_servlet)
         throw std::logic_error("WebSocket service already has a servlet");
 
@@ -46,8 +49,62 @@ void WebSocketService::attach(WebSocketServlet& servlet)
 
 void WebSocketService::detach(WebSocketServlet& servlet)
 {
+    System::MutexLock lock(_mutex);
+
     if(_servlet == &servlet)
         _servlet = 0;
+}
+
+
+bool WebSocketService::hasServlet() const
+{
+    System::MutexLock lock(_mutex);
+    return _servlet != 0;
+}
+
+
+std::size_t WebSocketService::maxSockets() const
+{
+    System::MutexLock lock(_mutex);
+    return _maxSockets;
+}
+
+
+void WebSocketService::setMaxSockets(std::size_t n)
+{
+    System::MutexLock lock(_mutex);
+    _maxSockets = n;
+}
+
+
+std::size_t WebSocketService::socketCount() const
+{
+    System::MutexLock lock(_mutex);
+    return _socketCount;
+}
+
+
+bool WebSocketService::reservePending()
+{
+    System::MutexLock lock(_mutex);
+
+    if( ! _servlet )
+        return false;
+
+    if(_maxSockets != 0 && _socketCount + _pending >= _maxSockets)
+        return false;
+
+    ++_pending;
+    return true;
+}
+
+
+void WebSocketService::releasePending()
+{
+    System::MutexLock lock(_mutex);
+
+    if(_pending > 0)
+        --_pending;
 }
 
 
@@ -57,7 +114,10 @@ WebSocketSession* WebSocketService::getSession(Stream& stream,
 {
     WebSocketSession* session = onGetSession(stream, request, reply);
     if(session)
+    {
+        System::MutexLock lock(_mutex);
         ++_socketCount;
+    }
 
     return session;
 }
@@ -70,6 +130,7 @@ void WebSocketService::releaseSession(WebSocketSession* session)
 
     onReleaseSession(session);
 
+    System::MutexLock lock(_mutex);
     if(_socketCount > 0)
         --_socketCount;
 }

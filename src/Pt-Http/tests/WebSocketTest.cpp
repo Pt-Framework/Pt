@@ -2194,6 +2194,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("DeferredReceiveOneSignal", *this, &WebSocketTest::DeferredReceiveOneSignal);
             registerMethod("PeerCloseClosedOnce", *this, &WebSocketTest::PeerCloseClosedOnce);
             registerMethod("ServerCancelReleases", *this, &WebSocketTest::ServerCancelReleases);
+            registerMethod("LimitNullSessionReleases", *this, &WebSocketTest::LimitNullSessionReleases);
+            registerMethod("LimitConstructFailsReleases", *this, &WebSocketTest::LimitConstructFailsReleases);
+            registerMethod("LimitInvalidHandshake", *this, &WebSocketTest::LimitInvalidHandshake);
         }
 
         void setUp()
@@ -3104,6 +3107,119 @@ class WebSocketTest : public Pt::Unit::TestSuite
                 _status = _limitClient->reply().statusCode();
 
             _loop->exit();
+        }
+
+    protected:
+        void LimitNullSessionReleases()
+        {
+            checkLimitReleases<NullService>(8301);
+        }
+
+        void LimitConstructFailsReleases()
+        {
+            checkLimitReleases<ThrowService>(8302);
+        }
+
+        // A handshake whose session is declined or fails to construct
+        // must give its place back, so the next handshake is accepted.
+        template <typename ServiceT>
+        void checkLimitReleases(unsigned short port)
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", port);
+
+            Pt::Http::Server server(*_loop, ep);
+            ServiceT service;
+            service.setMaxSockets(1);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client first(*_loop, ep);
+            Pt::Http::WebSocket socket(first);
+
+            Pt::Http::Client second(*_loop, ep);
+            Pt::Http::WebSocket again(second);
+            _limitSocket = &again;
+            _limitClient = &second;
+
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onSlotFirstConnected);
+            again.connected() += Pt::slot(*this, &WebSocketTest::onSlotSecondConnected);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(_status, 101u);
+            _limitSocket = 0;
+            _limitClient = 0;
+        }
+
+        void onSlotFirstConnected(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onSlotFirstClosed);
+            socket.beginReceive();
+        }
+
+        void onSlotFirstClosed(Pt::Http::WebSocket& socket)
+        {
+            socket.close();
+            _limitSocket->beginConnect("/ws");
+        }
+
+        void onSlotSecondConnected(Pt::Http::WebSocket& socket)
+        {
+            try
+            {
+                socket.endConnect();
+            }
+            catch(const std::exception&)
+            {}
+
+            _status = _limitClient->reply().statusCode();
+            _loop->exit();
+        }
+
+        // At the limit, even an invalid handshake is answered with 503.
+        void LimitInvalidHandshake()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8303);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            service.setMaxSockets(1);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client first(*_loop, ep);
+            Pt::Http::WebSocket socket(first);
+
+            Pt::Http::Client invalid(*_loop, ep);
+            HandshakeObserver observer(*_loop);
+            invalid.replyReceived() += Pt::slot(observer, &HandshakeObserver::onReply);
+            invalid.request().setUrl("/ws");
+            invalid.request().header().setUpgrade();
+            invalid.request().header().set("Upgrade", "websocket");
+            invalid.request().header().set("Sec-WebSocket-Version", "13");
+            _limitClient = &invalid;
+
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onInvalidFirstConnected);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(invalid.reply().statusCode(), 503u);
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(1));
+            _limitClient = 0;
+        }
+
+        void onInvalidFirstConnected(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            _limitClient->beginReceive();
         }
 
     protected:

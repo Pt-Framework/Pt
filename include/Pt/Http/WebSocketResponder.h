@@ -40,6 +40,10 @@ class WebSocketService;
 
 /** @brief Responder for the WebSocket handshake.
 
+    A valid handshake takes a place from the session limit of the
+    service right before the 101 is sent. The responder holds that
+    place until it is destroyed.
+
     @ingroup Pt-Http-WebSocket-Server
 */
 class PT_HTTP_API WebSocketResponder : public Pt::Http::Responder
@@ -48,6 +52,10 @@ class PT_HTTP_API WebSocketResponder : public Pt::Http::Responder
         /** @brief Constructs the responder for @a s.
         */
         WebSocketResponder(Pt::Http::WebSocketService& s);
+
+        /** @brief Gives back the place held by the handshake.
+        */
+        ~WebSocketResponder();
 
     protected:
         virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop);
@@ -58,6 +66,8 @@ class PT_HTTP_API WebSocketResponder : public Pt::Http::Responder
 
         virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop);
 
+    private:
+        bool _reserved;
 };
 
 }}

@@ -11,6 +11,7 @@
 #include <Pt/Http/WebSocketSession.h>
 #include <Pt/Allocator.h>
 #include <Pt/Connectable.h>
+#include <Pt/System/Mutex.h>
 #include <string>
 #include <vector>
 #include <cstddef>
@@ -56,11 +57,11 @@ class WebSocketServlet;
     @endcode
 
     The handshake responder answers a WebSocket upgrade with 101,
-    with 503 when no servlet is attached or the accepted-session
-    limit is already reached, with 400 when Sec-WebSocket-Key is
-    missing or invalid, with 426 and Sec-WebSocket-Version: 13 when
-    Sec-WebSocket-Version is not 13, or with 404 when the request is
-    not a WebSocket upgrade. The responder is released before the server
+    with 404 when the request is not a WebSocket upgrade, with 503
+    when no servlet is attached or the session limit is reached, with
+    400 when Sec-WebSocket-Key is missing or invalid, or with 426 and
+    Sec-WebSocket-Version: 13 when Sec-WebSocket-Version is not 13.
+    The responder is released before the server
     opens the stream. It is not the session. %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
     name several values, in preference order. An empty list accepts
@@ -70,7 +71,16 @@ class WebSocketServlet;
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
     of this service. They apply before a servlet is constructed.
-    The handshake reads the session limit here. The session base
+    The handshake takes a place from the session limit before it
+    checks the request. The handshake responder holds that place until
+    it is released. For a rejected handshake that is right after the
+    reply. For an accepted one it is until the server has delivered
+    the stream and %getSession() has counted
+    the session. Between these two steps the upgrade is counted
+    twice, so the limit is reached early and never late. The counters
+    are guarded by a mutex, because the handshake may run in a server
+    thread while %getSession() and %releaseSession() run in the
+    thread of the server loop. The session base
     copies the idle, ping-interval, ping and close timeouts and the
     data-message limit onto the connection before the derived
     constructor runs. A missing
@@ -134,6 +144,7 @@ class PT_HTTP_API WebSocketService : public Service
 {
     friend class WebSocketSession;
     friend class WebSocketServlet;
+    friend class WebSocketResponder;
 
     public:
         /** @brief Default constructor.
@@ -168,21 +179,23 @@ class PT_HTTP_API WebSocketService : public Service
 
         /** @brief Returns the maximum number of live sessions.
 
-            Zero means no limit. This is endpoint policy of this
-            service. It applies before a servlet is constructed.
+            Zero means no limit. The limit covers live sessions and
+            handshakes that are about to become one. This is endpoint
+            policy of this service. It applies before a servlet is
+            constructed.
         */
-        std::size_t maxSockets() const
-        { return _maxSockets; }
+        std::size_t maxSockets() const;
 
         /** @brief Sets the maximum number of live sessions.
 
-            A handshake above this limit is answered with 503. Zero
-            means no limit. A missing servlet is still 503 when this
-            limit is zero. This is endpoint policy of this service.
-            It applies before a servlet is constructed.
+            A handshake above this limit is answered with 503.
+            The limit covers live sessions and handshakes that are
+            about to become one. Zero means no limit. A missing
+            servlet is still 503 when this limit is zero. This is
+            endpoint policy of this service. It applies before a
+            servlet is constructed.
         */
-        void setMaxSockets(std::size_t n)
-        { _maxSockets = n; }
+        void setMaxSockets(std::size_t n);
 
         /** @brief Returns the idle timeout in milliseconds.
 
@@ -285,18 +298,18 @@ class PT_HTTP_API WebSocketService : public Service
             A missing servlet is a separate state from a zero
             %maxSockets().
         */
-        bool hasServlet() const
-        { return _servlet != 0; }
+        bool hasServlet() const;
 
         /** @brief Returns the number of counted sessions.
 
             A session is counted when %getSession() returns it, and
             dropped when %releaseSession() releases it. A null return
-            is not counted. Zero is not a reached limit. A missing
-            servlet is a separate state, read with %hasServlet().
+            is not counted. A handshake that has not yet become a
+            session is not counted. Zero is not a reached limit. A
+            missing servlet is a separate state, read with
+            %hasServlet().
         */
-        std::size_t socketCount() const
-        { return _socketCount; }
+        std::size_t socketCount() const;
 
         /** @brief Creates a session and counts a non-null result.
 
@@ -364,6 +377,17 @@ class PT_HTTP_API WebSocketService : public Service
         WebSocketServlet* servlet()
         { return _servlet; }
 
+        /** @brief Takes a place for a handshake that is about to send the 101.
+
+            Returns false when no servlet is attached or the sessions
+            and pending handshakes already reach %maxSockets().
+        */
+        bool reservePending();
+
+        /** @brief Gives back a place taken by %reservePending().
+        */
+        void releasePending();
+
         /** @brief Releases @a session through the attached servlet.
 
             Returns when no servlet is attached. The servlet removes
@@ -372,8 +396,10 @@ class PT_HTTP_API WebSocketService : public Service
         void onSessionClosed(WebSocketSession& session);
 
     private:
+        mutable System::Mutex    _mutex;
         WebSocketServlet*        _servlet;
         std::size_t              _socketCount;
+        std::size_t              _pending;
         std::size_t              _maxSockets;
         std::size_t              _idleTimeout;
         std::size_t              _pingInterval;
