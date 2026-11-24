@@ -39,8 +39,7 @@ class WebSocketSession;
 
     The example registers the servlet before the server starts taking
     upgrades. The three setters are endpoint policy of the service.
-    They apply before this servlet is constructed. Destroy the servlet
-    before the service.
+    Destroy the servlet before the service.
 
     @code
     EchoService service;
@@ -74,8 +73,10 @@ class WebSocketSession;
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize(). The handshake takes
     a place from the session limit of the service before it checks
-    the request. %socketCount() is the number of sessions %getSession() returned
-    and %releaseSession() has not yet released. The session base
+    the request. The limit covers %socketCount() and the handshakes
+    that hold a place. %socketCount() is the number of sessions
+    %getSession() returned and %releaseSession() has not yet
+    released. The session base
     copies the idle, ping-interval, ping and close timeouts and the
     data-message limit from the service onto the connection before
     the derived constructor runs.
