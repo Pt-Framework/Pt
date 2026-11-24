@@ -8,6 +8,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Service.h>
+#include <Pt/Http/Message.h>
 #include <Pt/Http/WebSocketSession.h>
 #include <Pt/Allocator.h>
 #include <Pt/Connectable.h>
@@ -66,8 +67,7 @@ class WebSocketServlet;
     name several values, in preference order. An empty list accepts
     the upgrade and selects no name. A non-empty list selects the
     first offered name that is also accepted, and a request that
-    offers none of them is answered with 400. %addProtocol(),
-    %clearProtocols(), %setMaxSockets(),
+    offers none of them is answered with 400. %setMaxSockets(),
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
     of this service. They apply before a servlet is constructed.
@@ -77,7 +77,8 @@ class WebSocketServlet;
     reply. For an accepted one it is until the server has delivered
     the stream and %getSession() has counted
     the session. Between these two steps the upgrade is counted
-    twice, so the limit is reached early and never late. The counters
+    twice, so the limit is reached early and never late. The counters,
+    the servlet and the protocol list
     are guarded by a mutex, because the handshake may run in a server
     thread while %getSession() and %releaseSession() run in the
     thread of the server loop. The session base
@@ -159,9 +160,11 @@ class PT_HTTP_API WebSocketService : public Service
         ~WebSocketService();
 
         /** @brief Returns accepted Sec-WebSocket-Protocol names in preference order.
+
+            Returns a copy, because the list may change in another
+            thread while a handshake reads it.
         */
-        const std::vector<std::string>& protocols() const
-        { return _protocols; }
+        std::vector<std::string> protocols() const;
 
         /** @brief Adds one accepted Sec-WebSocket-Protocol name.
 
@@ -376,6 +379,13 @@ class PT_HTTP_API WebSocketService : public Service
 
         WebSocketServlet* servlet() const;
 
+        /** @brief Releases @a session through the attached servlet.
+
+            Returns when no servlet is attached. The servlet removes
+            the session from its live list when present.
+        */
+        void onSessionClosed(WebSocketSession& session);
+
         /** @brief Takes a place for a handshake that is about to send the 101.
 
             Returns false when no servlet is attached or the sessions
@@ -387,12 +397,15 @@ class PT_HTTP_API WebSocketService : public Service
         */
         void releasePending();
 
-        /** @brief Releases @a session through the attached servlet.
+        /** @brief Selects the first offered name that is accepted.
 
-            Returns when no servlet is attached. The servlet removes
-            the session from its live list when present.
+            @a offered is the Sec-WebSocket-Protocol field, or the
+            empty field when the request has none. Returns false when
+            names are configured and none is offered. Otherwise
+            returns true, and @a selected is the match or empty when
+            no names are configured. The comparison is case-sensitive.
         */
-        void onSessionClosed(WebSocketSession& session);
+        bool selectProtocol(const MessageHeader::Field& offered, std::string& selected) const;
 
     private:
         mutable System::Mutex    _mutex;

@@ -90,6 +90,55 @@ std::size_t WebSocketService::socketCount() const
 }
 
 
+void WebSocketService::addProtocol(const std::string& name)
+{
+    if( ! MessageHeader::isToken(name.c_str()) )
+        throw std::invalid_argument("WebSocket protocol name is not a token");
+
+    System::MutexLock lock(_mutex);
+    _protocols.push_back(name);
+}
+
+
+void WebSocketService::clearProtocols()
+{
+    System::MutexLock lock(_mutex);
+    _protocols.clear();
+}
+
+
+std::vector<std::string> WebSocketService::protocols() const
+{
+    System::MutexLock lock(_mutex);
+    return _protocols;
+}
+
+
+bool WebSocketService::selectProtocol(const MessageHeader::Field& offered,
+                                      std::string& selected) const
+{
+    System::MutexLock lock(_mutex);
+
+    if( _protocols.empty() )
+        return true;
+
+    for(MessageHeader::ValueIterator it = offered.begin(); it != offered.end(); ++it)
+    {
+        for(std::size_t n = 0; n < _protocols.size(); ++n)
+        {
+            const std::string& protocol = _protocols[n];
+            if(protocol.size() == it->size() && protocol.compare(0, it->size(), it->data(), it->size()) == 0)
+            {
+                selected = protocol;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
 bool WebSocketService::reservePending()
 {
     System::MutexLock lock(_mutex);
@@ -149,21 +198,6 @@ void WebSocketService::onSessionClosed(WebSocketSession& session)
         return;
 
     servlet->onSessionClosed(session);
-}
-
-
-void WebSocketService::addProtocol(const std::string& name)
-{
-    if( ! MessageHeader::isToken(name.c_str()) )
-        throw std::invalid_argument("WebSocket protocol name is not a token");
-
-    _protocols.push_back(name);
-}
-
-
-void WebSocketService::clearProtocols()
-{
-    _protocols.clear();
 }
 
 

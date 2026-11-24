@@ -12,7 +12,6 @@
 #include <Pt/Base64Codec.h>
 
 #include <string>
-#include <vector>
 
 namespace Pt {
 
@@ -142,32 +141,17 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         return;
     }
 
-    const MessageHeader::FieldIterator offered = header.field("Sec-WebSocket-Protocol");
-    const std::vector<std::string>& accepted = service.protocols();
-    const std::string* selected = 0;
-    if( offered != header.end() )
-    {
-        for(MessageHeader::ValueIterator it = offered->begin();
-            it != offered->end() && ! selected; ++it)
-        {
-            for(std::size_t n = 0; n < accepted.size(); ++n)
-            {
-                if( it->equals(accepted[n].c_str()) )
-                {
-                    selected = &accepted[n];
-                    break;
-                }
-            }
-        }
-    }
-
-    if( ! accepted.empty() && ! selected )
+    std::string protocol;
+    if( ! service.selectProtocol(*header.field("Sec-WebSocket-Protocol"), protocol) )
     {
         reply.setStatus(400, "Bad Request");
         reply.header().set("Connection", "close");
         setReady(true);
         return;
     }
+
+    if( ! protocol.empty() )
+        reply.header().set("Sec-WebSocket-Protocol", protocol.c_str());
 
     reply.setStatus(101, "Switching Protocols");
     reply.header().setUpgrade();
@@ -176,9 +160,6 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
     const std::string keyText(keyValue.data(), keyValue.size());
     const std::string accept = WebSocketChannel::getAcceptKey(keyText);
     reply.header().set("Sec-WebSocket-Accept", accept.c_str());
-
-    if(selected)
-        reply.header().set("Sec-WebSocket-Protocol", selected->c_str());
 
     setReady(true);
 }
