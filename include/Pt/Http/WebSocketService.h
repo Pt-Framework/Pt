@@ -72,12 +72,10 @@ class WebSocketServlet;
     of this service.
     The handshake takes a place from the session limit before it
     checks the request. The handshake responder holds that place until
-    it is released. For a rejected handshake that is right after the
-    reply. For an accepted one it is until the server has delivered
-    the stream and %getSession() has counted
-    the session. Between these two steps the upgrade is counted
-    twice, so the limit is reached early and never late. The counters,
-    the servlet, the protocol list and the policy values
+    the server releases it, which is after the server has handed over
+    the stream. Between %getSession() and that release the upgrade is
+    counted twice, so the limit is reached early and never late. The
+    counters, the servlet, the protocol list and the policy values
     are guarded by a mutex, because the handshake may run in a server
     thread while %getSession() and %releaseSession() run in the
     thread of the server loop. The session base
