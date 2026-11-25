@@ -16,6 +16,10 @@ FETCH_JAM = true ;
 # Extra HTTP headers are a per-call list of Name: value lines on
 # Fetch-Url. Fetch-HeaderFlags maps them to the current downloader.
 #
+# Fetch commands and their output are not written to the configure
+# log, because URLs and HTTP headers can carry credentials. On
+# failure only the error message is logged.
+#
 # Directory creation reuses the MKDIR variable configured by
 # ConfigureMkDir in configure.jam.
 
@@ -105,7 +109,9 @@ rule Fetch-HeaderFlags ( headers * )
 #
 # Downloads <url> to <dest>, creating the parent directory if
 # necessary. <headers> is an optional list of Name: value lines
-# for this request. Aborts the build with Exit on failure.
+# for this request. Aborts the build with Exit on failure and
+# writes that message to the configure log. The command itself
+# is not logged.
 #
 rule Fetch-Url ( url : dest : headers * )
 {
@@ -119,9 +125,14 @@ rule Fetch-Url ( url : dest : headers * )
     local flags = [ Fetch-HeaderFlags $(headers) ] ;
     local cmd = "$(FETCH_CURL) -fsSL" $(flags) "-o \"$(dest)\" \"$(url)\"" ;
 
-    if ! [ TryCommand $(cmd) ]
+    # EXEC reads only the first list element. Join so flags and the
+    # URL reach curl.
+    local result = [ EXEC $(cmd:J=" ") ] ;
+    if $(result[1]) != 0
     {
-        Exit "Error: download failed:" $(url) ;
+        local message = "Error: download failed:" $(url) ;
+        ConfigureLog $(message:J=" ") ;
+        Exit $(message) ;
     }
 }
 
@@ -159,7 +170,8 @@ rule Fetch-RmDir ( dir )
 #
 # Extracts <archive> into <dest-dir>, creating it if necessary.
 # tar transparently handles .zip and .tar.* archives. Aborts the
-# build with Exit on failure.
+# build with Exit on failure and writes that message to the
+# configure log. The command itself is not logged.
 #
 rule Fetch-Unzip ( archive : dest )
 {
@@ -172,9 +184,12 @@ rule Fetch-Unzip ( archive : dest )
 
     local cmd = "$(FETCH_TAR) -xf \"$(archive)\" -C \"$(dest)\"" ;
 
-    if ! [ TryCommand $(cmd) ]
+    local result = [ EXEC $(cmd:J=" ") ] ;
+    if $(result[1]) != 0
     {
-        Exit "Error: extraction failed:" $(archive) ;
+        local message = "Error: extraction failed:" $(archive) ;
+        ConfigureLog $(message:J=" ") ;
+        Exit $(message) ;
     }
 }
 
