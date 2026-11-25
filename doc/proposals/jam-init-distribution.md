@@ -244,13 +244,15 @@ tags (`v*`) and prebuilt-dependency tags (`prebuilt-*`). The default
 https://github.com/Pt-Framework/Pt/releases/download
 ```
 
-The release publishes these assets:
+The release publishes these assets. The archive and checksum names do
+not contain the version, so the same file name exists on every Jam
+release:
 
 ```text
 jam.sh
 jam.bat
-jam-<major>.<minor>.<patch>.tar.gz
-jam-<major>.<minor>.<patch>.tar.gz.sha256
+jam.tar.gz
+jam.tar.gz.sha256
 ```
 
 The archive has a single top-level `core/` directory whose layout
@@ -262,11 +264,22 @@ The entry scripts in the release already contain that pin. The bootstrap
 fetches only the archive:
 
 ```text
-<JAM_DIST_ROOT>/jam-<major>.<minor>.<patch>/jam-<major>.<minor>.<patch>.tar.gz
+<JAM_DIST_ROOT>/jam-<major>.<minor>.<patch>/jam.tar.gz
 ```
 
+The stable asset name is what makes a latest download URL possible:
+
+```text
+https://github.com/Pt-Framework/Pt/releases/latest/download/jam.tar.gz
+```
+
+That URL follows whichever release GitHub marks latest. `init` does
+not use it. A pinned install always requests the tag named by the pin.
+Framework tags and prebuilt tags share the repository latest pointer
+and do not publish `jam.tar.gz`.
+
 The SHA-256 sidecar is a release asset for manual verification. It is
-one line of hexadecimal digest, two spaces, and the archive file name,
+one line of hexadecimal digest, two spaces, and `jam.tar.gz`,
 terminated by LF.
 
 ## Distribution initialization {#distribution-initialization}
@@ -274,7 +287,7 @@ terminated by LF.
 `JAM_DIST_ROOT` identifies the HTTP(S) base URL for snapshot assets.
 When it is unset, the entry scripts use their embedded default. Setting
 it selects a mirror that serves the same
-`jam-<version>/jam-<version>.tar.gz` layout.
+`jam-<version>/jam.tar.gz` layout.
 
 `init` downloads the complete pinned package when `core/` is absent
 or the pin does not match `meta/version`, stages it in a temporary

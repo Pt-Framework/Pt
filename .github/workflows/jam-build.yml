@@ -148,15 +148,15 @@ jobs:
               printf '%s  %s\n' "$size" "$path"
             done > "$tmp"
           mv "$tmp" jam/core/meta/contents
-          tar -C jam --exclude='*.o' --exclude='*.obj' -czf "dist/jam-${JAM_VERSION}.tar.gz" core
-          (cd dist && sha256sum "jam-${JAM_VERSION}.tar.gz" > "jam-${JAM_VERSION}.tar.gz.sha256")
+          tar -C jam --exclude='*.o' --exclude='*.obj' -czf dist/jam.tar.gz core
+          (cd dist && sha256sum jam.tar.gz > jam.tar.gz.sha256)
           sed -i "s/^JAM_PIN=.*/JAM_PIN=${JAM_VERSION}/" jam.sh
           sed -i "s/set \"JAM_PIN=[^\"]*\"/set \"JAM_PIN=${JAM_VERSION}\"/" jam.bat
           grep -q "^JAM_PIN=${JAM_VERSION}$" jam.sh
           grep -q "set \"JAM_PIN=${JAM_VERSION}\"" jam.bat
           cp jam.sh jam.bat dist/
 
-          list=$(tar tzf "dist/jam-${JAM_VERSION}.tar.gz")
+          list=$(tar tzf dist/jam.tar.gz)
           echo "$list" | grep -qx 'core/Jambase'
           echo "$list" | grep -qx 'core/meta/format'
           echo "$list" | grep -qx 'core/meta/version'
@@ -171,11 +171,11 @@ jobs:
             exit 1
           fi
 
-          sidecar="dist/jam-${JAM_VERSION}.tar.gz.sha256"
+          sidecar=dist/jam.tar.gz.sha256
           digest=$(awk 'NR==1 { print $1 }' "$sidecar")
           name=$(awk 'NR==1 { print $2 }' "$sidecar")
           extra=$(sed -n '2p' "$sidecar")
-          if [ -n "$extra" ] || [ "$name" != "jam-${JAM_VERSION}.tar.gz" ] \
+          if [ -n "$extra" ] || [ "$name" != "jam.tar.gz" ] \
               || ! [[ "$digest" =~ ^[0-9a-f]{64}$ ]]; then
             echo "Invalid SHA-256 sidecar:" >&2
             cat "$sidecar" >&2
@@ -193,8 +193,8 @@ jobs:
           files: |
             dist/jam.sh
             dist/jam.bat
-            dist/jam-${{ env.JAM_VERSION }}.tar.gz
-            dist/jam-${{ env.JAM_VERSION }}.tar.gz.sha256
+            dist/jam.tar.gz
+            dist/jam.tar.gz.sha256
           prerelease: false
           make_latest: false
         env:

@@ -36,7 +36,7 @@ the user sets. The scripts embed a snapshot pin and a default
 @c JAM_DIST_ROOT of
 @c https://github.com/Pt-Framework/Pt/releases/download. Setting
 @c JAM_DIST_ROOT selects a mirror that serves the same
-@c jam-4.0.0/jam-4.0.0.tar.gz layout.
+@c jam-<version>/jam.tar.gz layout.
 
 The scripts select a host ID and start the host binary under
 @c JAM_ROOT/core/bin, in the subdirectory named by that host ID,

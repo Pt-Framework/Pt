@@ -134,8 +134,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-set "ARCHIVE=%INCOMING%\jam-%JAM_PIN%.tar.gz"
-set "ARCHIVE_URL=%JAM_DIST_ROOT%/jam-%JAM_PIN%/jam-%JAM_PIN%.tar.gz"
+set "ARCHIVE=%INCOMING%\jam.tar.gz"
+set "ARCHIVE_URL=%JAM_DIST_ROOT%/jam-%JAM_PIN%/jam.tar.gz"
 
 where curl.exe >nul 2>&1
 if errorlevel 1 (

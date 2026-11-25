@@ -240,8 +240,8 @@ install_snapshot()
         exit 1
     }
 
-    ARCHIVE="$INCOMING/jam-$JAM_PIN.tar.gz"
-    URL="$JAM_DIST_ROOT/jam-$JAM_PIN/jam-$JAM_PIN.tar.gz"
+    ARCHIVE="$INCOMING/jam.tar.gz"
+    URL="$JAM_DIST_ROOT/jam-$JAM_PIN/jam.tar.gz"
     if ! download_archive "$URL" "$ARCHIVE" "$@"; then
         echo "Could not download \"$URL\"." >&2
         rm -rf "$INCOMING"
