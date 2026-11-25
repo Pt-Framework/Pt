@@ -60,9 +60,8 @@ prebuilt root instead of system or vendrized inline sources.
 Windows always has an ABI tag. Other OS omit it until an ABI split exists.
 
 - Default cache: `prebuilt/<id>/`
-- Release tag: `PREBUILT_RELEASE`, form `prebuilt-YYYY.MM.N`
-  (`MM` always two digits, `N` starts at `0` each month). The pinned
-  default stays `prebuilt-1` until the first tag of that form is published.
+- Release tag: `PREBUILT_RELEASE` (default `prebuilt-2026.11.0`), form
+  `prebuilt-YYYY.MM.N` (`MM` always two digits, `N` starts at `0` each month).
 - Fetch URL: `https://github.com/Pt-Framework/Pt/releases/download/$(PREBUILT_RELEASE)/$(id).tar.gz`
   The matching manifest is the same URL with `.manifest` appended.
 

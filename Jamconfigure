@@ -541,7 +541,7 @@ Load builtin.jam ;
 WITH_PREBUILT = [ HasOption --with-prebuilt ] ;
 PREBUILT_ID ?= [ GetOption --with-prebuilt ] ;
 PREBUILT_LOCAL = [ HasOption --prebuilt-local ] ;
-PREBUILT_RELEASE ?= prebuilt-1 ;
+PREBUILT_RELEASE ?= prebuilt-2026.11.0 ;
 PREBUILT_URL_BASE = "https://github.com/Pt-Framework/Pt/releases/download" ;
 PREBUILT_URL_BASE = "$(PREBUILT_URL_BASE)/$(PREBUILT_RELEASE)" ;
 
@@ -566,7 +566,7 @@ if $(WITH_PREBUILT)
 
     if ! $(PREBUILT_LOCAL)
     {
-        local url = $(PREBUILT_URL_BASE)/$(PREBUILT_ID:S=.zip) ;
+        local url = $(PREBUILT_URL_BASE)/$(PREBUILT_ID:S=.tar.gz) ;
         Prebuilt-Fetch-Url $(url) : $(PT_PREBUILT_ROOT) ;
         EchoOption PREBUILT_RELEASE : "Fetched prebuilt" ;
     }

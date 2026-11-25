@@ -64,11 +64,10 @@ setting and that Windows suffix are separate: on Linux and macOS the same
 folder is used for both debug and release builds.
 
 The default location is @c prebuilt/<name> in the project root. The download
-uses the release tag @c PREBUILT_RELEASE. Published tags have the form
-@c prebuilt-YYYY.MM.N: the month is always two digits, and @c N starts at
-@c 0 for the first bundle of that month. The pinned default stays
-@c prebuilt-1 until the first tag of that form is published. The archive
-URL ends with the tag and the platform name:
+uses the release tag @c PREBUILT_RELEASE (default @c prebuilt-2026.11.0).
+Published tags have the form @c prebuilt-YYYY.MM.N: the month is always two
+digits, and @c N starts at @c 0 for the first bundle of that month. The
+archive URL ends with the tag and the platform name:
 
 @verbatim
 https://github.com/Pt-Framework/Pt/releases/download/<PREBUILT_RELEASE>/<name>.tar.gz
