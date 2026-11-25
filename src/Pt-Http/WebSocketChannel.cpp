@@ -626,7 +626,7 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
     if(_outputPending && ! _outputQueue.empty() && _outputQueue.front() == &_closeOut)
         return;
 
-    if( ! WebSocketBuffer::isValidCloseCode(code) )
+    if(code == 0 || code == 1005 || code == 1006 || code == 1015)
         code = 1000;
 
     char payload[125];
