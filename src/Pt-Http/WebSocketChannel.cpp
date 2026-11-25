@@ -880,9 +880,6 @@ void WebSocketChannel::onPeerClose(const Frame& frame)
     const char* data = frame.data();
     std::size_t n = frame.size();
 
-    if(n == 1)
-        throw WebSocketError(1002);
-
     if(n >= 2)
     {
         Pt::uint16_t be = 0;

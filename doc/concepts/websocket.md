@@ -149,8 +149,10 @@ the engine holds ahead of the application is flow control. That limit
 is later.
 
 RSV bits without a negotiated extension, a reserved opcode, a
-continuation with no open message, and a masking error each fail the
-stream with close code 1002. An extension, if one is added later, is
+continuation with no open message, a masking error, and a close
+frame whose status code must not appear on the wire each fail the
+stream with close code 1002. Valid close codes are 1000 to 1003,
+1007 to 1014, and 3000 to 4999. An extension, if one is added later, is
 negotiated at the handshake and applied by the engine before the body
 is visible.
 

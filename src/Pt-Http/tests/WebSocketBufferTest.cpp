@@ -75,6 +75,9 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
 
             Pt::Unit::TestSuite::registerMethod("Utf8", *this,
                 &WebSocketBufferTest::Utf8);
+
+            Pt::Unit::TestSuite::registerMethod("CloseCode", *this,
+                &WebSocketBufferTest::CloseCode);
         }
 
         void assertFails(Pt::Http::WebSocketBuffer& ws, unsigned code)
@@ -668,6 +671,63 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(frame != 0);
             PT_UNIT_ASSERT_EQUAL(wsOpen.sbumpc(), 0xC3);
             assertFails(wsOpen, 1007u);
+        }
+
+        static std::string closeFrame(unsigned code)
+        {
+            std::string bytes;
+            bytes.push_back(static_cast<char>(0x88));
+            bytes.push_back(static_cast<char>(2));
+            bytes.push_back(static_cast<char>(code >> 8));
+            bytes.push_back(static_cast<char>(code & 0xFF));
+            return bytes;
+        }
+
+        void CloseCode()
+        {
+            const unsigned valid[] = { 1000, 1001, 1003, 1007, 1011, 1014, 3000, 4999 };
+            for(std::size_t i = 0; i < sizeof(valid) / sizeof(valid[0]); ++i)
+            {
+                std::stringbuf buf( closeFrame(valid[i]) );
+                Pt::Http::WebSocketBuffer ws(buf);
+                ws.setMasking(false);
+
+                const Pt::Http::Frame* frame = ws.import();
+                PT_UNIT_ASSERT(frame != 0);
+                PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Control);
+                PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x08u);
+                PT_UNIT_ASSERT_EQUAL(frame->size(), std::size_t(2));
+            }
+
+            const unsigned invalid[] = { 0, 999, 1004, 1005, 1006, 1015, 1016, 2999, 5000 };
+            for(std::size_t i = 0; i < sizeof(invalid) / sizeof(invalid[0]); ++i)
+            {
+                std::stringbuf buf( closeFrame(invalid[i]) );
+                Pt::Http::WebSocketBuffer ws(buf);
+                ws.setMasking(false);
+                assertFails(ws, 1002u);
+            }
+
+            std::string empty;
+            empty.push_back(static_cast<char>(0x88));
+            empty.push_back(static_cast<char>(0));
+
+            std::stringbuf bufEmpty(empty);
+            Pt::Http::WebSocketBuffer wsEmpty(bufEmpty);
+            wsEmpty.setMasking(false);
+            const Pt::Http::Frame* frame = wsEmpty.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT_EQUAL(frame->size(), std::size_t(0));
+
+            std::string one;
+            one.push_back(static_cast<char>(0x88));
+            one.push_back(static_cast<char>(1));
+            one.push_back(static_cast<char>(0x03));
+
+            std::stringbuf bufOne(one);
+            Pt::Http::WebSocketBuffer wsOne(bufOne);
+            wsOne.setMasking(false);
+            assertFails(wsOne, 1002u);
         }
 };
 

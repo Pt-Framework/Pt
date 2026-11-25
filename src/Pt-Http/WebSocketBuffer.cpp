@@ -11,6 +11,17 @@ namespace Pt {
 
 namespace Http {
 
+namespace {
+
+bool isValidCloseCode(unsigned code)
+{
+    return (code >= 1000 && code <= 1003)
+        || (code >= 1007 && code <= 1014)
+        || (code >= 3000 && code <= 4999);
+}
+
+} // namespace
+
 Frame::Frame()
 : _opcode(0)
 , _fin(false)
@@ -564,6 +575,11 @@ WebSocketBuffer::State WebSocketBuffer::onControlPayload()
     if(_frame.header().opcode() == 0x08 && size > 0)
     {
         if(size == 1)
+            fail(1002);
+
+        Pt::uint16_t be = 0;
+        std::memcpy(&be, _frame.at(0), 2);
+        if( ! isValidCloseCode( Pt::beToHost(be) ) )
             fail(1002);
 
         const char* reason = _frame.at(2);
