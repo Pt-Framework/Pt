@@ -64,12 +64,18 @@ setting and that Windows suffix are separate: on Linux and macOS the same
 folder is used for both debug and release builds.
 
 The default location is @c prebuilt/<name> in the project root. The download
-uses the release tag @c PREBUILT_RELEASE (default @c prebuilt-1). The zip URL
-is:
+uses the release tag @c PREBUILT_RELEASE. Published tags have the form
+@c prebuilt-YYYY.MM.N: the month is always two digits, and @c N starts at
+@c 0 for the first bundle of that month. The pinned default stays
+@c prebuilt-1 until the first tag of that form is published. The archive
+URL ends with the tag and the platform name:
 
 @verbatim
-https://github.com/Pt-Framework/Pt/releases/download/<PREBUILT_RELEASE>/<name>.zip
+https://github.com/Pt-Framework/Pt/releases/download/<PREBUILT_RELEASE>/<name>.tar.gz
 @endverbatim
+
+The manifest is the same URL with @c .manifest appended, for example
+@c windows-x64-msvc-md.tar.gz.manifest.
 
 Settings made explicitly always win. If any of the dotted package flags
 (@c pkg.INCLUDES, @c pkg.DEFINES, @c pkg.LINKLIBS, @c pkg.LIBDIR,
@@ -117,7 +123,7 @@ configure probes openssl, then mbedtls, then @c nossl.
 
 @section jam-prebuilt-page-Layout Bundle Directory Layout
 
-One platform is one directory and one zip. Each library lives in its own
+One platform is one directory and one tar.gz archive. Each library lives in its own
 subdirectory, named after @c prebuilt.PACKAGES (@c zlib, @c png, @c jpeg,
 @c freetype, @c openssl).
 
@@ -174,7 +180,7 @@ Unknown fields are ignored by Jam.
 Bundle-wide variables:
 
 - @c prebuilt.VERSION is the file format version. The project requires @c 1.
-- @c prebuilt.ID is the same string as the directory and zip name.
+- @c prebuilt.ID is the same string as the directory and archive name.
 - @c prebuilt.PACKAGES lists the package names that have dotted keys.
 
 Per-package variables use the form @c prebuilt.<pkg>.<FIELD>. Omit empty
@@ -185,7 +191,7 @@ never raw flags (@c -l, @c -I, @c -D, @c -framework, @c /LIBPATH):
   (@c zlib, @c png16, @c ssl @c crypto). Not @c -lssl or @c zlib.lib.
 - @c prebuilt.<pkg>.DEPENDS: other packages in this bundle that
   this one needs.
-- @c prebuilt.<pkg>.SYSLIBS: OS linker names that are not in the zip
+- @c prebuilt.<pkg>.SYSLIBS: OS linker names that are not in the archive
   (@c crypt32, @c ws2_32). Jam applies @c FLinkLibs.
 - @c prebuilt.<pkg>.FRAMEWORKS: macOS framework names.
 - @c prebuilt.<pkg>.DEFINES: preprocessor tokens, not @c -D.
@@ -460,7 +466,7 @@ A generator, including one driven by Conan in CI, writes the same layout:
 - Complete @c lib/ and @c bin/ directories, without sorting or moving files
 - Do not emit @c pkg.INCLUDES / @c pkg.LINKLIBS from the generator;
   @c Prebuilt-Enable fills those from the layout
-- Windows: two zips, @c windows-x64-msvc-md and @c windows-x64-msvc-mdd
+- Windows: two archives, @c windows-x64-msvc-md and @c windows-x64-msvc-mdd
 - macOS / Linux: one folder name without a runtime suffix until a second
   variant exists
 - Check: @c zlib/include/zlib.h, @c zlib/lib/zlib.lib or @c libz.a, @c bin/

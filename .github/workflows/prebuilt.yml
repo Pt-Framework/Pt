@@ -3,13 +3,8 @@ name: Prebuilt Dependencies
 on:
   workflow_dispatch:
     inputs:
-      versionCode:
-        description: 'Version code'
-        required: false
-        default: '1'
-        type: string
       replace:
-        description: 'Replace existing'
+        description: 'Replace the newest release of this month'
         required: false
         default: false
         type: boolean
@@ -19,19 +14,40 @@ jobs:
     runs-on: windows-2022
     permissions:
       contents: read
-    env:
-      PREBUILT_TAG: prebuilt-${{ inputs.versionCode }}
+    outputs:
+      prebuilt_tag: ${{ steps.tag.outputs.prebuilt_tag }}
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Check tag does not exist
-        if: ${{ !inputs.replace }}
+      - name: Choose CalVer tag
+        id: tag
         shell: bash
         run: |
-          if gh release view "${{ env.PREBUILT_TAG }}" >/dev/null 2>&1; then
-            echo "Release ${{ env.PREBUILT_TAG }} already exists. Increment versionCode or enable replace." >&2
-            exit 1
+          month=$(date -u +%Y.%m)
+          prefix="prebuilt-${month}."
+          highest=-1
+          while IFS= read -r tag; do
+            case "$tag" in
+              "$prefix"[0-9]*)
+                n=${tag#"$prefix"}
+                case "$n" in
+                  *[!0-9]*) continue ;;
+                esac
+                if [ "$n" -gt "$highest" ]; then
+                  highest=$n
+                fi
+                ;;
+            esac
+          done < <(gh release list --limit 200 --json tagName --jq '.[].tagName')
+
+          if [ "$highest" -lt 0 ]; then
+            tag="${prefix}0"
+          elif [ "${{ inputs.replace }}" = "true" ]; then
+            tag="${prefix}${highest}"
+          else
+            tag="${prefix}$((highest + 1))"
           fi
+
+          echo "prebuilt_tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Release tag: $tag"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -77,7 +93,7 @@ jobs:
 
     env:
       CONAN_HOME: ${{ github.workspace }}/.conan2
-      PREBUILT_TAG: prebuilt-${{ inputs.versionCode }}
+      PREBUILT_TAG: ${{ needs.preflight.outputs.prebuilt_tag }}
       PREBUILT_ID: ${{ matrix.prebuilt_id }}
       EXPORT_DIR: ${{ github.workspace }}/export
       PREFIX: ${{ github.workspace }}/deploy/${{ matrix.prebuilt_id }}
@@ -289,22 +305,23 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path "${{ env.EXPORT_DIR }}" | Out-Null
-          $zip = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PREBUILT_ID }}.zip"
-          if (Test-Path $zip) { Remove-Item $zip }
-          Compress-Archive -Path (Join-Path "${{ env.PREFIX }}" "*") -DestinationPath $zip
+          $archive = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PREBUILT_ID }}.tar.gz"
+          if (Test-Path $archive) { Remove-Item $archive }
+          tar -czf $archive -C "${{ env.PREFIX }}" .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Create manifest
         shell: pwsh
         run: |
-          $zip = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PREBUILT_ID }}.zip"
-          $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
+          $archive = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PREBUILT_ID }}.tar.gz"
+          $hash = (Get-FileHash -Algorithm SHA256 $archive).Hash.ToLower()
           $jamPath = Join-Path "${{ env.PREFIX }}" "prebuilt.jam"
           $text = Get-Content $jamPath -Raw
           $packages = @()
           foreach ($m in [regex]::Matches($text, 'prebuilt\.(\S+)\.VERSION\s+=\s+([^;]+);')) {
             $packages += "$($m.Groups[1].Value)/$($m.Groups[2].Value.Trim())"
           }
-          $manifest = "$zip.manifest"
+          $manifest = "$archive.manifest"
           $lines = @(
             "Version: ${{ env.PREBUILT_TAG }}"
             "Sha256: $hash"
@@ -327,12 +344,12 @@ jobs:
           if-no-files-found: error
 
   release:
-    needs: build
+    needs: [preflight, build]
     runs-on: windows-2022
     permissions:
       contents: write
     env:
-      PREBUILT_TAG: prebuilt-${{ inputs.versionCode }}
+      PREBUILT_TAG: ${{ needs.preflight.outputs.prebuilt_tag }}
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v8
@@ -347,8 +364,8 @@ jobs:
           name: "Platinum Prebuilt Dependencies (${{ env.PREBUILT_TAG }})"
           body: Precompiled dependencies (zlib, png, jpeg, freetype, openssl)
           files: |
-            ${{ github.workspace }}/artifacts/*.zip
-            ${{ github.workspace }}/artifacts/*.zip.manifest
+            ${{ github.workspace }}/artifacts/*.tar.gz
+            ${{ github.workspace }}/artifacts/*.tar.gz.manifest
             ${{ github.workspace }}/artifacts/conan.lock
           prerelease: true
           make_latest: false

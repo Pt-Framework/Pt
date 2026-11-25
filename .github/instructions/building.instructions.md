@@ -50,7 +50,7 @@ Third-party libraries (zlib, png, jpeg, FreeType, OpenSSL) can come from a
 prebuilt root instead of system or vendrized inline sources.
 
 - `--with-prebuilt` - default `<id>`, check the remote manifest, download
-  `<id>.zip` into `prebuilt/<id>/` when it changed, then configure.
+  `<id>.tar.gz` into `prebuilt/<id>/` when it changed, then configure.
 - `--with-prebuilt=<id>` - same, with that explicit identity.
 - `--prebuilt-local` - modifier of `--with-prebuilt`. Skip the network and
   use `prebuilt/<id>/` on disk. Error if that directory is missing. Alone it
@@ -60,8 +60,11 @@ prebuilt root instead of system or vendrized inline sources.
 Windows always has an ABI tag. Other OS omit it until an ABI split exists.
 
 - Default cache: `prebuilt/<id>/`
-- Release tag: `PREBUILT_RELEASE` (default `prebuilt-1`)
-- Fetch URL: `https://github.com/Pt-Framework/Pt/releases/download/$(PREBUILT_RELEASE)/$(id).zip`
+- Release tag: `PREBUILT_RELEASE`, form `prebuilt-YYYY.MM.N`
+  (`MM` always two digits, `N` starts at `0` each month). The pinned
+  default stays `prebuilt-1` until the first tag of that form is published.
+- Fetch URL: `https://github.com/Pt-Framework/Pt/releases/download/$(PREBUILT_RELEASE)/$(id).tar.gz`
+  The matching manifest is the same URL with `.manifest` appended.
 
 User overrides still win: `--with-inline-zlib` / `--with-inline-libpng` /
 `--with-inline-libjpeg` / `--with-inline-freetype`, and dotted package

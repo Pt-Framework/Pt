@@ -18,7 +18,7 @@ Jam.
 Bundle-wide variables:
 
 - `prebuilt.VERSION` — format version (must be 1)
-- `prebuilt.ID` — same string as the directory / zip name
+- `prebuilt.ID` — same string as the directory and archive name
 - `prebuilt.PACKAGES` — list of package names
 
 Per-package variables use the form `prebuilt.<pkg>.<FIELD>`.
@@ -27,7 +27,7 @@ bundle root:
 
 - `prebuilt.<pkg>.LIBS` — library names inside the bundle
 - `prebuilt.<pkg>.DEPENDS` — other packages in this bundle
-- `prebuilt.<pkg>.SYSLIBS` — OS linker names (not in the zip)
+- `prebuilt.<pkg>.SYSLIBS` — OS linker names (not in the archive)
 - `prebuilt.<pkg>.FRAMEWORKS` — macOS framework names
 - `prebuilt.<pkg>.DEFINES` — preprocessor tokens
 - `prebuilt.<pkg>.INCLUDES` — include paths relative to the bundle root
