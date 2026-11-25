@@ -142,9 +142,10 @@
     %ping() enqueues a ping frame. A received ping is answered by
     the engine. A received pong is consumed. Neither is delivered
     through %incoming(), and neither reports data-ready. %shutdown()
-    enqueues a close frame with a status code and a reason. Codes
-    1005, 1006 and 1015 cannot be sent; they are reserved for "no
-    status received", abnormal closure, and a failed TLS handshake.
+    enqueues a close frame with a status code and a reason. Only codes
+    1000 to 1003, 1007 to 1014 and 3000 to 4999 can be sent. The others
+    are reserved or undefined, and a received close frame with one of
+    them fails the stream with code 1002.
     A received close is answered by the engine. After a local shutdown,
     no more data frames are sent. %close() releases the stream and
     writes no frame. It does not block. The destructor calls it.

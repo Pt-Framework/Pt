@@ -3812,7 +3812,13 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(1005), std::invalid_argument);
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(1006), std::invalid_argument);
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(1015), std::invalid_argument);
-            socket.beginShutdown();
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(0), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(999), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(1004), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(1016), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(2999), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(5000), std::invalid_argument);
+            socket.beginShutdown(4999);
             PT_UNIT_ASSERT_EQUALS(socket.closeCode(), 0u);
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(), std::logic_error);
             socket.beginReceive();

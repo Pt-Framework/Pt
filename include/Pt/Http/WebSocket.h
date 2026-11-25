@@ -355,8 +355,9 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         /** @brief Begins a close handshake.
 
-            @throw %std::invalid_argument if @a code is 1005, 1006 or
-            1015, if @a reason is longer than 123 bytes, or if @a reason
+            @throw %std::invalid_argument if @a code is not in 1000 to
+            1003, 1007 to 1014 or 3000 to 4999, if @a reason is longer
+            than 123 bytes, or if @a reason
             is not valid UTF-8.
             @throw %std::logic_error if a shutdown is outstanding,
             the handshake is not finished, or a close is already queued.

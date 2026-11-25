@@ -224,9 +224,9 @@ const std::string& closeReason() const;
 
 `shutdown()` enqueues a close frame. The code defaults to 1000. The
 reason is UTF-8 and at most 123 bytes. A longer reason or invalid
-UTF-8 throws. `shutdown(1005)`, `shutdown(1006)`, and
-`shutdown(1015)` throw. Those codes are not written on the wire. A
-second `shutdown()` throws. After a local close is queued,
+UTF-8 throws. A code outside 1000 to 1003, 1007 to 1014, and 3000 to
+4999 throws. Those codes are reserved or undefined and are not written
+on the wire. A second `shutdown()` throws. After a local close is queued,
 `beginSend()` throws. The close frame is written after the current
 data frame. It does not wait for `endSend()` and does not cut a frame.
 After a local close is queued, the engine keeps reading until the

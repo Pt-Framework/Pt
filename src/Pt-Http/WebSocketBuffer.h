@@ -183,6 +183,12 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
 
         void discard();
 
+        /** @internal Returns true if @a code may appear in a close frame.
+
+            Valid are 1000 to 1003, 1007 to 1014 and 3000 to 4999.
+        */
+        static bool isValidCloseCode(unsigned code);
+
     protected:
         virtual int_type underflow();
 

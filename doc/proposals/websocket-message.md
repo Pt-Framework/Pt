@@ -205,7 +205,8 @@ or match a pong.
 `beginShutdown(code, reason)` validates the close code and reason,
 enqueues one close frame, and starts input for the peer close. It does
 not wait for `endSend` and does not cut the current data frame. A second
-shutdown throws. 1005, 1006, and 1015 throw and stay off the wire.
+shutdown throws. A code outside 1000 to 1003, 1007 to 1014, and 3000 to
+4999 throws and stays off the wire.
 Its ready signal runs after the peer close has arrived and the local
 close frame has been written. The stream stays bound. Then
 `endShutdown` returns the operation to idle or throws its stored I/O

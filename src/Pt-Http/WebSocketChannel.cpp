@@ -353,7 +353,7 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
     if(_state != Open)
         throw std::logic_error("WebSocket already closing");
 
-    if(code == 1005 || code == 1006 || code == 1015)
+    if( ! WebSocketBuffer::isValidCloseCode(code) )
         throw std::invalid_argument("WebSocket close code");
 
     if(reason.size() > 123 || ! isValidUtf8(reason.data(), reason.size()))
@@ -626,7 +626,7 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
     if(_outputPending && ! _outputQueue.empty() && _outputQueue.front() == &_closeOut)
         return;
 
-    if(code == 1005 || code == 1006 || code == 1015 || code == 0)
+    if( ! WebSocketBuffer::isValidCloseCode(code) )
         code = 1000;
 
     char payload[125];
