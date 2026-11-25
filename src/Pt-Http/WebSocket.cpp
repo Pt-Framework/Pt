@@ -193,7 +193,7 @@ void WebSocket::onReply(Client& client)
             throw HttpError("WebSocket handshake failed: no Upgrade websocket");
 
         // no extension is offered, so any extension in the reply is unsolicited
-        if( replyHeader.field("Sec-WebSocket-Extensions") != replyHeader.end() )
+        if( replyHeader.has("Sec-WebSocket-Extensions") )
             throw HttpError("WebSocket handshake failed: unsolicited extension");
 
         const MessageHeader::FieldIterator accept =
