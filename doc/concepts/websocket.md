@@ -403,11 +403,21 @@ The reply carries the accept digest as one token. HTTP whitespace
 around a field is not part of its value.
 
 On the client, headers set before `beginConnect()` are kept.
-`endConnect()` accepts only status 101, and only when
-`Sec-WebSocket-Accept` is the digest of the key this socket sent. A
-missing or different Accept is a failed handshake. No stream is
-opened. The key and the masking key come from an unpredictable
-source.
+`endConnect()` accepts only status 101 with `Connection` listing
+`Upgrade`, `Upgrade` naming `websocket`, no `Sec-WebSocket-Extensions`,
+and `Sec-WebSocket-Accept` equal to the digest of the key this socket
+sent. The client offers no extension, so an extension field in the
+reply, even an empty one, is a failed handshake. A missing or
+different Accept is a failed handshake. No stream is opened. A
+rejection is an `HttpError` that does not carry the reply. `reply()`
+refers to the reply of the client, like `header()` does for the
+request, so the status and fields such as `Retry-After` or
+`Set-Cookie` are read there. It belongs to the client and is not
+copied. It is the reply of this handshake once `connected()` reports a
+finished receive. If the handshake failed earlier, it is the last
+finished reply of that client, or status 200 with an empty header if
+there was none. Another request on the same client replaces it. The
+key and the masking key come from an unpredictable source.
 
 On the server, a request that is not an upgrade to `websocket` is
 not this protocol. A missing or invalid key is 400. A version other

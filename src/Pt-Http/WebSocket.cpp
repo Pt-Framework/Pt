@@ -60,6 +60,12 @@ const MessageHeader& WebSocket::header() const
 }
 
 
+const Reply& WebSocket::reply() const
+{
+    return _client->reply();
+}
+
+
 void WebSocket::addProtocol(const std::string& name)
 {
     if( ! MessageHeader::isToken(name.c_str()) )
@@ -174,7 +180,21 @@ void WebSocket::onReply(Client& client)
         }
 
         if( client.reply().statusCode() != 101 )
-            throw HttpError("WebSocket handshake failed");
+        {
+            throw HttpError("WebSocket handshake failed: status "
+                            + std::to_string( client.reply().statusCode() ));
+        }
+
+        const MessageHeader& replyHeader = client.reply().header();
+        if( ! replyHeader.matches("Connection", "upgrade") )
+            throw HttpError("WebSocket handshake failed: no Connection upgrade");
+
+        if( ! replyHeader.matches("Upgrade", "websocket") )
+            throw HttpError("WebSocket handshake failed: no Upgrade websocket");
+
+        // no extension is offered, so any extension in the reply is unsolicited
+        if( replyHeader.has("Sec-WebSocket-Extensions") )
+            throw HttpError("WebSocket handshake failed: unsolicited extension");
 
         const MessageHeader::FieldIterator accept =
             client.reply().header().field("Sec-WebSocket-Accept");

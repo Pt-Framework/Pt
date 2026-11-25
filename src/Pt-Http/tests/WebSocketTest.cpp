@@ -1378,6 +1378,24 @@ class AcceptResponder : public DeclineResponder
                 accept = " \t" + accept + "\t ";
             else if(mode == "list")
                 accept += ", " + accept;
+            else if(mode == "upgrade-other")
+                reply.header().set("Upgrade", "h2c");
+            else if(mode == "upgrade-missing")
+                reply.header().remove("Upgrade");
+            else if(mode == "connection-missing")
+                reply.header().remove("Connection");
+            else if(mode == "extensions")
+                reply.header().set("Sec-WebSocket-Extensions", "permessage-deflate");
+            else if(mode == "extensions-empty")
+                reply.header().set("Sec-WebSocket-Extensions", "");
+            else if(mode == "status")
+            {
+                reply.setStatus(503, "Service Unavailable");
+                reply.header().set("Retry-After", "120");
+                reply.header().set("Set-Cookie", "retry=1");
+                setReady(true);
+                return;
+            }
 
             reply.header().set("Sec-WebSocket-Accept", accept.c_str());
             setReady(true);
@@ -2216,6 +2234,15 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("HandshakeVersionMissing", *this, &WebSocketTest::HandshakeVersionMissing);
             registerMethod("HandshakeVersionOther", *this, &WebSocketTest::HandshakeVersionOther);
             registerMethod("HandshakeStatus", *this, &WebSocketTest::HandshakeStatus);
+            registerMethod("HandshakeUpgradeOther", *this, &WebSocketTest::HandshakeUpgradeOther);
+            registerMethod("HandshakeUpgradeMissing", *this, &WebSocketTest::HandshakeUpgradeMissing);
+            registerMethod("HandshakeConnectionMissing", *this, &WebSocketTest::HandshakeConnectionMissing);
+            registerMethod("HandshakeExtensions", *this, &WebSocketTest::HandshakeExtensions);
+            registerMethod("HandshakeExtensionsEmpty", *this, &WebSocketTest::HandshakeExtensionsEmpty);
+            registerMethod("HandshakeExtensionsRequested", *this, &WebSocketTest::HandshakeExtensionsRequested);
+            registerMethod("HandshakeExtensionsEchoed", *this, &WebSocketTest::HandshakeExtensionsEchoed);
+            registerMethod("HandshakeReply", *this, &WebSocketTest::HandshakeReply);
+            registerMethod("HandshakeReplyUnfinished", *this, &WebSocketTest::HandshakeReplyUnfinished);
             registerMethod("EndAfterClosed", *this, &WebSocketTest::EndAfterClosed);
             registerMethod("PingAfterShutdown", *this, &WebSocketTest::PingAfterShutdown);
             registerMethod("IdleBeforeConnect", *this, &WebSocketTest::IdleBeforeConnect);
@@ -4209,6 +4236,136 @@ class WebSocketTest : public Pt::Unit::TestSuite
                 PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
                 PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
             }
+        }
+
+        void HandshakeUpgradeOther()
+        {
+            checkReplyRejected("upgrade-other", 8185, false);
+        }
+
+        void HandshakeUpgradeMissing()
+        {
+            checkReplyRejected("upgrade-missing", 8186, false);
+        }
+
+        void HandshakeConnectionMissing()
+        {
+            checkReplyRejected("connection-missing", 8187, false);
+        }
+
+        void HandshakeExtensions()
+        {
+            checkReplyRejected("extensions", 8188, false);
+        }
+
+        void HandshakeExtensionsEmpty()
+        {
+            checkReplyRejected("extensions-empty", 8189, false);
+        }
+
+        void HandshakeExtensionsRequested()
+        {
+            checkReplyRejected("", 8191, true);
+        }
+
+        void HandshakeExtensionsEchoed()
+        {
+            checkReplyRejected("extensions", 8192, true);
+        }
+
+        void checkReplyRejected(const char* mode, unsigned short port, bool requested)
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", port);
+            Pt::Http::Server server(*_loop, ep);
+            AcceptService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            if(*mode)
+                socket.header().set("X-Test-Reply", mode);
+            if(requested)
+                socket.header().set("Sec-WebSocket-Extensions", "permessage-deflate");
+
+            HandshakeObserver observer(*_loop);
+            socket.connected() += Pt::slot(observer, &HandshakeObserver::onConnected);
+            socket.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            if(*mode)
+            {
+                PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
+                PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
+            }
+            else
+            {
+                // an extension in the request is not a reply extension
+                socket.endConnect();
+            }
+        }
+
+        void HandshakeReply()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8193);
+            Pt::Http::Server server(*_loop, ep);
+            AcceptService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.header().set("X-Test-Reply", "status");
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedReply);
+            socket.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(_status, 503u);
+            PT_UNIT_ASSERT_EQUALS(_message, "120");
+            PT_UNIT_ASSERT_EQUALS(_offered, "retry=1");
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
+            PT_UNIT_ASSERT_EQUALS(socket.reply().statusCode(), 503u);
+            PT_UNIT_ASSERT(socket.reply().header().isSet("Retry-After", "120"));
+            PT_UNIT_ASSERT(socket.reply().header().isSet("Set-Cookie", "retry=1"));
+        }
+
+        void onConnectedReply(Pt::Http::WebSocket& socket)
+        {
+            const Pt::Http::Reply& reply = socket.reply();
+            const char* retry = reply.header().get("Retry-After");
+            const char* cookie = reply.header().get("Set-Cookie");
+            _status = reply.statusCode();
+            _message = retry ? retry : "";
+            _offered = cookie ? cookie : "";
+            _loop->exit();
+        }
+
+        void HandshakeReplyUnfinished()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8194);
+            Pt::Http::Server server(*_loop, ep);
+            SilentService service;
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            http.setTimeout(100);
+            Pt::Http::WebSocket socket(http);
+            HandshakeObserver observer(*_loop);
+            socket.connected() += Pt::slot(observer, &HandshakeObserver::onConnected);
+            socket.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            assertHandshakeTimeout(socket);
+
+            // no reply was finished, so this is the default reply of the client
+            PT_UNIT_ASSERT_EQUALS(socket.reply().statusCode(), 200u);
+            PT_UNIT_ASSERT(socket.reply().header().begin() == socket.reply().header().end());
         }
 
         void AcceptRetry()

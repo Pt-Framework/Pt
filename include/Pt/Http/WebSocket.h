@@ -21,6 +21,7 @@ namespace Http {
 
 class Client;
 class MessageHeader;
+class Reply;
 class WebSocketChannel;
 
 
@@ -97,7 +98,8 @@ class WebSocketChannel;
     %header() accesses the client's request header directly. Set
     Authorization, Cookie or other application fields there before
     %beginConnect(), while the client is idle. No separate header
-    copy is held by the socket. %beginConnect() preserves these
+    copy is held by the socket. %reply() likewise refers to the
+    client's reply. %beginConnect() preserves these
     fields, discards a prepared body, and sends an empty HTTP/1.1
     GET. It resets body-framing fields and sets the Upgrade fields,
     version, key and protocol offer itself. A nonempty Origin
@@ -106,11 +108,22 @@ class WebSocketChannel;
 
     %connected() reports the handshake's completion, including a
     failure. %endConnect() accepts only status 101 with the
-    Sec-WebSocket-Accept value for the key this socket sent. A
-    missing, empty or different Accept fails before any stream is
-    opened. HTTP whitespace around the value is ignored; the value
-    itself is case-sensitive. %endConnect() throws if the handshake
-    failed.
+    Sec-WebSocket-Accept value for the key this socket sent. The
+    reply must also list Upgrade in Connection and websocket in
+    Upgrade, ignoring case. A Sec-WebSocket-Extensions field in the
+    reply, even an empty one, fails the handshake, because the socket
+    offers no extension. A missing, empty or different Accept fails
+    before any stream is opened. HTTP whitespace around the value is
+    ignored; the value itself is case-sensitive. %endConnect() throws
+    %HttpError if the handshake failed. The error does not carry the
+    reply. %reply() is the reply of the client, with the status and
+    the header fields such as Retry-After or Set-Cookie. Read it from
+    the %connected() slot, before or after %endConnect(). It belongs
+    to the client and is not copied. It is the reply of this
+    handshake once %connected() reports a finished receive. If the
+    handshake failed earlier, it is the last finished reply of this
+    client, or status 200 with an empty header if there was none.
+    Another request on the same client replaces it.
     %addProtocol() offers one Sec-WebSocket-Protocol name before
     %beginConnect(). Several calls offer several names, in order.
     The names remain until %clearProtocols(). After a finished
@@ -215,6 +228,19 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         const MessageHeader& header() const;
 
+        /** @brief Returns the reply of the client's handshake.
+
+            The reply belongs to the client and is not copied by the
+            socket. It is the reply of this handshake once
+            %connected() reports a finished receive; read the status
+            and header fields there, also after %endConnect() threw.
+            If the handshake failed before a reply was finished, it is
+            the last finished reply of the client, or status 200 with
+            an empty header if there was none. Another request on the
+            same client replaces it.
+        */
+        const Reply& reply() const;
+
         /** @brief Begins a client handshake for @a url.
 
             @a url is a request path, or a %ws:// URL whose host and
@@ -263,15 +289,17 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         /** @brief Completes the client handshake.
 
-            Requires status 101 and the Sec-WebSocket-Accept value
-            for the key sent by this socket. A rejected response
-            does not open a WebSocket stream.
+            Requires status 101, Upgrade and Connection naming the
+            upgrade, no Sec-WebSocket-Extensions, and the
+            Sec-WebSocket-Accept value for the key sent by this
+            socket. A rejected response does not open a WebSocket
+            stream. The reason is in %reply().
 
             Rethrows the original asynchronous handshake error. The
             error remains available until the next %beginConnect().
 
             @throw %std::logic_error if the handshake is still pending.
-            @throw %HttpError if the status, Accept or protocol was rejected.
+            @throw %HttpError if the reply, Accept or protocol was rejected.
             @throw %IOError if sending or receiving failed.
         */
         void endConnect();

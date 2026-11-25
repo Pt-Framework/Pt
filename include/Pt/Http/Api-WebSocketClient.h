@@ -72,14 +72,26 @@
 
     The server confirms the handshake with Sec-WebSocket-Accept:
     the Base64-encoded SHA-1 digest of the transmitted key followed
-    by the fixed WebSocket GUID. The client requires status 101 and
-    that exact Accept value before it opens a stream. Leading and
+    by the fixed WebSocket GUID. The client requires status 101,
+    Connection and Upgrade naming the upgrade to websocket, no
+    Sec-WebSocket-Extensions, and that exact Accept value before it
+    opens a stream. The client offers no extension, so a
+    Sec-WebSocket-Extensions field in the reply, even an empty one,
+    is unsolicited and fails the handshake. Leading and
     trailing HTTP whitespace is ignored; the digest is case-sensitive.
     A missing, empty or different Accept fails the handshake.
     %connected() reports completion for success and failure alike;
     call %endConnect() to observe the result. A handshake rejection
     throws %HttpError, and repeated calls keep reporting that error
-    until the next %beginConnect().
+    until the next %beginConnect(). The error does not carry the
+    reply. %WebSocket::reply() refers directly to %Client::reply(),
+    like %header() does for the request, so the application reads the
+    status and fields such as Retry-After or Set-Cookie there. The
+    reply belongs to the client and is not copied. It is the reply of
+    this handshake once %connected() reports a finished receive. If
+    the handshake failed earlier, it is the last finished reply of
+    that client, or status 200 with an empty header if there was none.
+    Another request on the same client replaces it.
 
     %protocol() is the single name the server echoed,
     or empty when the server selected none. An echo that was not
