@@ -2233,6 +2233,13 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("HandshakeKeyInvalid", *this, &WebSocketTest::HandshakeKeyInvalid);
             registerMethod("HandshakeVersionMissing", *this, &WebSocketTest::HandshakeVersionMissing);
             registerMethod("HandshakeVersionOther", *this, &WebSocketTest::HandshakeVersionOther);
+            registerMethod("HandshakeMethodOther", *this, &WebSocketTest::HandshakeMethodOther);
+            registerMethod("HandshakeVersionOld", *this, &WebSocketTest::HandshakeVersionOld);
+            registerMethod("HandshakeNoUpgrade", *this, &WebSocketTest::HandshakeNoUpgrade);
+            registerMethod("HandshakeNoUpgradeKeepAlive", *this, &WebSocketTest::HandshakeNoUpgradeKeepAlive);
+            registerMethod("HandshakeConnectionOnly", *this, &WebSocketTest::HandshakeConnectionOnly);
+            registerMethod("HandshakeUpgradeOnly", *this, &WebSocketTest::HandshakeUpgradeOnly);
+            registerMethod("HandshakeUpgradeProtocol", *this, &WebSocketTest::HandshakeUpgradeProtocol);
             registerMethod("HandshakeStatus", *this, &WebSocketTest::HandshakeStatus);
             registerMethod("HandshakeUpgradeOther", *this, &WebSocketTest::HandshakeUpgradeOther);
             registerMethod("HandshakeUpgradeMissing", *this, &WebSocketTest::HandshakeUpgradeMissing);
@@ -4443,6 +4450,87 @@ class WebSocketTest : public Pt::Unit::TestSuite
             checkHandshakeDecline(8188, "12", "dGhlIHNhbXBsZSBub25jZQ==", 426u, true);
         }
 
+        void HandshakeMethodOther()
+        {
+            checkUpgradeDecline(8195, "POST", 1, "upgrade", "websocket", 405u);
+        }
+
+        void HandshakeVersionOld()
+        {
+            checkUpgradeDecline(8196, "GET", 0, "upgrade", "websocket", 400u);
+        }
+
+        void HandshakeNoUpgrade()
+        {
+            checkUpgradeDecline(8197, "GET", 1, 0, 0, 426u);
+        }
+
+        void HandshakeNoUpgradeKeepAlive()
+        {
+            checkUpgradeDecline(8198, "GET", 1, "keep-alive", 0, 426u);
+        }
+
+        void HandshakeConnectionOnly()
+        {
+            checkUpgradeDecline(8199, "GET", 1, "upgrade", 0, 400u);
+        }
+
+        void HandshakeUpgradeOnly()
+        {
+            checkUpgradeDecline(8200, "GET", 1, "keep-alive", "websocket", 400u);
+        }
+
+        void HandshakeUpgradeProtocol()
+        {
+            checkUpgradeDecline(8201, "GET", 1, "upgrade", "h2c", 400u);
+        }
+
+        // Sends a request that is valid except for method, version, Connection and Upgrade.
+        void checkUpgradeDecline(unsigned short port,
+                                 const char* method,
+                                 unsigned versionMinor,
+                                 const char* connection,
+                                 const char* upgrade,
+                                 unsigned expectedStatus)
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", port);
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            HandshakeObserver observer(*_loop);
+            http.replyReceived() += Pt::slot(observer, &HandshakeObserver::onReply);
+            http.request().setUrl("/ws");
+            http.request().setMethod(method);
+            http.request().header().setVersion(1, versionMinor);
+            if(connection)
+                http.request().header().set("Connection", connection);
+            if(upgrade)
+                http.request().header().set("Upgrade", upgrade);
+            http.request().header().set("Sec-WebSocket-Version", "13");
+            http.request().header().set("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ==");
+            http.beginReceive();
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(http.reply().statusCode(), expectedStatus);
+            PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
+
+            const Pt::Http::MessageHeader& header = http.reply().header();
+            PT_UNIT_ASSERT(header.matches("Connection", "close"));
+            if(expectedStatus == Pt::Http::Reply::MethodNotAllowed)
+                PT_UNIT_ASSERT(header.isSet("Allow", "GET"));
+
+            if(expectedStatus == Pt::Http::Reply::UpgradeRequired)
+            {
+                PT_UNIT_ASSERT(header.isSet("Upgrade", "websocket"));
+                PT_UNIT_ASSERT(header.matches("Connection", "upgrade"));
+            }
+        }
+
         void checkHandshakeDecline(unsigned short port,
                                    const char* version,
                                    const char* key,
@@ -4472,6 +4560,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
             PT_UNIT_ASSERT_EQUALS(http.reply().statusCode(), expectedStatus);
             PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT(http.reply().header().matches("Connection", "close"));
             if(expectVersionHeader)
                 PT_UNIT_ASSERT(http.reply().header().isSet("Sec-WebSocket-Version", "13"));
         }

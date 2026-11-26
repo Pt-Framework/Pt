@@ -75,11 +75,14 @@
     %WebSocketService is an HTTP %Service, mapped with a %Servlet
     like any other service. Its handshake responder answers a
     WebSocket Upgrade request with 101 Switching Protocols, with
+    405 and Allow: GET when the method is not GET, with 400 when the
+    HTTP version is below 1.1, with 426 when the request neither lists
+    upgrade in Connection nor has an Upgrade value, with 400 when only
+    one of the two is present or Upgrade does not list websocket, with
     503 when no %WebSocketServlet is attached or the accepted-session
     limit is already reached, with 400 when Sec-WebSocket-Key is
-    missing or invalid, with 426 and Sec-WebSocket-Version: 13 when
-    Sec-WebSocket-Version is not 13, or with 404 when the request is
-    not a WebSocket upgrade. The responder is not the session.
+    missing or invalid, or with 426 and Sec-WebSocket-Version: 13 when
+    Sec-WebSocket-Version is not 13. The responder is not the session.
     %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
     name several values, in preference order. An empty list accepts
@@ -89,8 +92,9 @@
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
     of the %WebSocketService.
-    The handshake takes a place from the session limit before it
-    checks the request. The limit covers %socketCount() and the
+    The handshake takes a place from the session limit after it has
+    checked the method, the version and the upgrade fields, and before
+    it checks the other fields. The limit covers %socketCount() and the
     handshakes that hold a place. A place stays taken until the server
     releases the responder, which is after it has handed over the
     stream. %socketCount() is the number of sessions %getSession()

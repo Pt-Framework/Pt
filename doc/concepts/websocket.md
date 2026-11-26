@@ -419,8 +419,12 @@ finished reply of that client, or status 200 with an empty header if
 there was none. Another request on the same client replaces it. The
 key and the masking key come from an unpredictable source.
 
-On the server, a request that is not an upgrade to `websocket` is
-not this protocol. A missing or invalid key is 400. A version other
+On the server, a method other than `GET` is 405 with `Allow: GET`,
+and a version below HTTP/1.1 is 400. A request that names neither
+the `upgrade` token in `Connection` nor a value in `Upgrade` is 426
+with `Upgrade: websocket` and `Connection: upgrade`. A request with
+only one of the two, or whose `Upgrade` does not list `websocket`,
+is 400. A missing or invalid key is 400. A version other
 than 13 is 426 with `Sec-WebSocket-Version: 13`. No stream is
 opened.
 

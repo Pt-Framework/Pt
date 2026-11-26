@@ -125,7 +125,7 @@ void Acceptor::onRequestReceived(Request& req)
             _servlet = _server.getServlet(_request);
             if( ! _servlet )
             {
-                _reply.setStatus(404, "Not found");
+                _reply.setStatus(Reply::NotFound, "Not found");
                 _reply.beginSend();
                 return;
             }
@@ -323,7 +323,7 @@ void Acceptor::onReplySent(Reply& r)
 
             // 101 Switching Protocols hands the connection to the main
             // thread. WebSocket is one protocol that uses this status.
-            if( r.statusCode() == 101 )
+            if( r.statusCode() == Reply::SwitchingProtocols )
             {
                 PT_LOG_DEBUG("upgrade connection");
 
@@ -421,7 +421,7 @@ void Acceptor::replyError()
 {
     _reply.clear();
 
-    _reply.setStatus(400, "Bad Request");
+    _reply.setStatus(Reply::BadRequest, "Bad Request");
     _reply.header().set("Content-Type", "text/plain");
     _reply.header().set("Connection", "close");
     _reply.body() << "Error 400: Bad Request.";

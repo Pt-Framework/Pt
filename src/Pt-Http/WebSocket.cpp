@@ -179,7 +179,7 @@ void WebSocket::onReply(Client& client)
             return;
         }
 
-        if( client.reply().statusCode() != 101 )
+        if( client.reply().statusCode() != Reply::SwitchingProtocols )
         {
             throw HttpError("WebSocket handshake failed: status "
                             + std::to_string( client.reply().statusCode() ));

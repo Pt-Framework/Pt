@@ -70,12 +70,17 @@ class PT_HTTP_API Reply : public Message
         enum StatusCode
         {
             Continue = 100,              //!< Continue
+            SwitchingProtocols = 101,    //!< Connection switches to another protocol
             OK = 200,                    //!< OK
             MultipleChoices = 300,       //!< Multiple choices for request
             BadRequest = 400,            //!< Bad request received
             Unauthorized = 401,          //!< Unauthorized access
+            NotFound = 404,              //!< Resource not found
+            MethodNotAllowed = 405,      //!< Method not allowed for the resource
             RequestEntityTooLarge = 413, //!< %Request entity too large
-            InternalServerError = 500    //!< Internal server error occured
+            UpgradeRequired = 426,       //!< Another protocol is required
+            InternalServerError = 500,   //!< Internal server error occured
+            ServiceUnavailable = 503     //!< Service is temporarily unavailable
         };
 
     public:

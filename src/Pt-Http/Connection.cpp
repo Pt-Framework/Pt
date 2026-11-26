@@ -816,11 +816,11 @@ MessageProgress Connection::endSendReply()
         return progress;
     }
 
-    bool isUpgrade = _reply->header().isUpgrade();
+    bool isSwitch = _reply->statusCode() == Reply::SwitchingProtocols;
 
     _reply = 0;
 
-    if( ! _keepAlive && ! isUpgrade )
+    if( ! _keepAlive && ! isSwitch )
     {
         PT_LOG_DEBUG("no keep alive, closing connection");
         close();
@@ -1151,7 +1151,7 @@ MessageProgress Connection::endReceiveReply()
             progress.setFinished();
 
             bool keepalive = _reply->header().isKeepAlive();
-            bool upgrade = _reply->header().isUpgrade();
+            bool isSwitch = _reply->statusCode() == Reply::SwitchingProtocols;
 
             _reply = 0;
             _replyParser.reset(true);
@@ -1159,7 +1159,7 @@ MessageProgress Connection::endReceiveReply()
             _readSize = 0;
             _readBytes = 0;
 
-            if( upgrade )
+            if(isSwitch)
             {
                 PT_LOG_DEBUG("reply upgrades the connection");
                 _timer.stop();

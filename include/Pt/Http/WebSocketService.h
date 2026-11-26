@@ -57,10 +57,14 @@ class WebSocketServlet;
     @endcode
 
     The handshake responder answers a WebSocket upgrade with 101,
-    with 404 when the request is not a WebSocket upgrade, with 503
-    when no servlet is attached or the session limit is reached, with
-    400 when Sec-WebSocket-Key is missing or invalid, or with 426 and
-    Sec-WebSocket-Version: 13 when Sec-WebSocket-Version is not 13.
+    with 405 and Allow: GET when the method is not GET, with 400 when
+    the HTTP version is below 1.1, with 426 when the request neither
+    lists upgrade in Connection nor has an Upgrade value, with 400
+    when only one of the two is present or Upgrade does not list
+    websocket, with 503 when no servlet is attached or the session
+    limit is reached, with 400 when Sec-WebSocket-Key is missing or
+    invalid, or with 426 and Sec-WebSocket-Version: 13 when
+    Sec-WebSocket-Version is not 13.
     The responder is not the session. %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
     name several values, in preference order. An empty list accepts
@@ -70,8 +74,9 @@ class WebSocketServlet;
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
     of this service.
-    The handshake takes a place from the session limit before it
-    checks the request. The handshake responder holds that place until
+    The handshake takes a place from the session limit after it has
+    checked the method, the version and the upgrade fields, and before
+    it checks the other fields. The handshake responder holds that place until
     the server releases it, which is after the server has handed over
     the stream. Between %getSession() and that release the upgrade is
     counted twice, so the limit is reached early and never late. The

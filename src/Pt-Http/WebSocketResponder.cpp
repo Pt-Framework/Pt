@@ -89,22 +89,47 @@ void WebSocketResponder::onBeginReply(const Pt::Http::Request& request, Pt::Http
     onWriteReply(request, reply, loop);
 }
 
+
 void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
 {
     const MessageHeader& header = request.header();
-    if( ! header.matches("Connection", "upgrade") || ! header.matches("Upgrade", "websocket") )
+
+    if(request.method() != "GET")
     {
-        reply.setStatus(404, "Not found");
-        setReady(true);
+        reply.header().set("Allow", "GET");
+        decline(reply, Reply::MethodNotAllowed, "Method Not Allowed");
+        return;
+    }
+
+    if( header.versionMajor() < 1 || (header.versionMajor() == 1 && header.versionMinor() < 1) )
+    {
+        decline(reply, Reply::BadRequest, "Bad Request");
+        return;
+    }
+
+    const bool connectionUpgrade = header.matches("Connection", "upgrade");
+    const MessageHeader::FieldIterator upgrade = header.field("Upgrade");
+    const bool upgradeValue = upgrade != header.end() && ! upgrade->empty();
+
+    if( ! connectionUpgrade && ! upgradeValue )
+    {
+        // a 426 must name the protocol in Upgrade and list upgrade in Connection
+        reply.header().set("Upgrade", "websocket");
+        reply.header().setUpgrade();
+        decline(reply, Reply::UpgradeRequired, "Upgrade Required");
+        return;
+    }
+
+    if( ! connectionUpgrade || ! upgradeValue || ! header.matches("Upgrade", "websocket") )
+    {
+        decline(reply, Reply::BadRequest, "Bad Request");
         return;
     }
 
     WebSocketService& service = static_cast<WebSocketService&>( this->service() );
     if( ! service.reservePending() )
     {
-        reply.setStatus(503, "Service Unavailable");
-        reply.header().set("Connection", "close");
-        setReady(true);
+        decline(reply, Reply::ServiceUnavailable, "Service Unavailable");
         return;
     }
 
@@ -112,10 +137,8 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
 
     if( ! header.matches("Sec-WebSocket-Version", "13") )
     {
-        reply.setStatus(426, "Upgrade Required");
         reply.header().set("Sec-WebSocket-Version", "13");
-        reply.header().set("Connection", "close");
-        setReady(true);
+        decline(reply, Reply::UpgradeRequired, "Upgrade Required");
         return;
     }
 
@@ -135,31 +158,38 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
 
     if( keyValue.empty() || ! isWebSocketKey(keyValue) )
     {
-        reply.setStatus(400, "Bad Request");
-        reply.header().set("Connection", "close");
-        setReady(true);
+        decline(reply, Reply::BadRequest, "Bad Request");
         return;
     }
 
     std::string protocol;
     if( ! service.selectProtocol(header, protocol) )
     {
-        reply.setStatus(400, "Bad Request");
-        reply.header().set("Connection", "close");
-        setReady(true);
+        decline(reply, Reply::BadRequest, "Bad Request");
         return;
     }
 
     if( ! protocol.empty() )
         reply.header().set("Sec-WebSocket-Protocol", protocol.c_str());
 
-    reply.setStatus(101, "Switching Protocols");
+    reply.setStatus(Reply::SwitchingProtocols, "Switching Protocols");
     reply.header().setUpgrade();
     reply.header().set("Upgrade", "websocket");
 
     const std::string keyText(keyValue.data(), keyValue.size());
     const std::string accept = WebSocketChannel::getAcceptKey(keyText);
     reply.header().set("Sec-WebSocket-Accept", accept.c_str());
+
+    setReady(true);
+}
+
+
+void WebSocketResponder::decline(Pt::Http::Reply& reply, unsigned status, const char* text)
+{
+    reply.setStatus(status, text);
+
+    if( ! reply.header().matches("Connection", "close") )
+        reply.header().add("Connection", "close");
 
     setReady(true);
 }

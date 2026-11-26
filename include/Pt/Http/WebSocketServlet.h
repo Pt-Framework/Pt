@@ -72,8 +72,9 @@ class WebSocketSession;
     opens no stream. The service owns %setMaxSockets(),
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize(). The handshake takes
-    a place from the session limit of the service before it checks
-    the request. The limit covers %socketCount() and the handshakes
+    a place from the session limit of the service after it has checked
+    the method, the version and the upgrade fields, and before it
+    checks the other fields. The limit covers %socketCount() and the handshakes
     that hold a place. %socketCount() is the number of sessions
     %getSession() returned and %releaseSession() has not yet
     released. The session base

@@ -484,7 +484,7 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         */
         void setKeepAlive();
 
-        /** @brief Returns true if Connection and Upgrade request a protocol switch.
+        /** @brief Returns true if Upgrage header is set.
         */
         bool isUpgrade() const;
 

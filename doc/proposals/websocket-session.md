@@ -43,6 +43,15 @@ Accept is stored for the key actually sent by each client handshake.
 
 ## Decline {#decline}
 
+A method other than `GET` is 405 with `Allow: GET`. A request
+version below HTTP/1.1 is 400. A request that neither lists the
+token `upgrade` in `Connection` nor has a value in `Upgrade` is not
+an upgrade attempt. It is 426 with `Upgrade: websocket` and
+`Connection: upgrade`, and the server closes the connection after
+the reply. A request with only one of the two, or whose `Upgrade`
+does not list `websocket`, is 400. These checks run before the
+handshake takes a place from the session limit.
+
 A missing or invalid `Sec-WebSocket-Key` is 400. A version other
 than 13 is 426 with `Sec-WebSocket-Version: 13`. The handshake
 responder writes those replies. No stream is opened.

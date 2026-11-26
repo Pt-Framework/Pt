@@ -14,9 +14,9 @@ namespace Http {
 
 class WebSocketService;
 
-// Answers the WebSocket handshake. Every upgrade request takes a place from
-// the session limit of the service first and holds it until the responder is
-// destroyed.
+// Answers the WebSocket handshake. A request that passes the method, version
+// and Upgrade field checks takes a place from the session limit of the
+// service and holds it until the responder is destroyed.
 class WebSocketResponder : public Pt::Http::Responder
 {
     public:
@@ -34,6 +34,8 @@ class WebSocketResponder : public Pt::Http::Responder
         virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop);
 
     private:
+        void decline(Pt::Http::Reply& reply, unsigned status, const char* text);
+
         bool _reserved;
 };
 
