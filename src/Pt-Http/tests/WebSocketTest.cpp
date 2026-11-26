@@ -4526,14 +4526,14 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
 
             const Pt::Http::MessageHeader& header = http.reply().header();
-            PT_UNIT_ASSERT(header.matches("Connection", "close"));
+            PT_UNIT_ASSERT(header.contains("Connection", "close"));
             if(expectedStatus == Pt::Http::Reply::MethodNotAllowed)
                 PT_UNIT_ASSERT(header.isSet("Allow", "GET"));
 
             if(expectedStatus == Pt::Http::Reply::UpgradeRequired)
             {
                 PT_UNIT_ASSERT(header.isSet("Upgrade", "websocket"));
-                PT_UNIT_ASSERT(header.matches("Connection", "upgrade"));
+                PT_UNIT_ASSERT(header.contains("Connection", "upgrade"));
             }
         }
 
@@ -4566,7 +4566,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
             PT_UNIT_ASSERT_EQUALS(http.reply().statusCode(), expectedStatus);
             PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
-            PT_UNIT_ASSERT(http.reply().header().matches("Connection", "close"));
+            PT_UNIT_ASSERT(http.reply().header().contains("Connection", "close"));
             if(expectVersionHeader)
                 PT_UNIT_ASSERT(http.reply().header().isSet("Sec-WebSocket-Version", "13"));
         }
@@ -4604,7 +4604,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             if(expectedStatus != 101u)
             {
                 PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
-                PT_UNIT_ASSERT(http.reply().header().matches("Connection", "close"));
+                PT_UNIT_ASSERT(http.reply().header().contains("Connection", "close"));
             }
         }
 

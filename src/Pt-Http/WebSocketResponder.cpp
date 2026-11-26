@@ -113,7 +113,7 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         return;
     }
 
-    const bool connectionUpgrade = header.matches("Connection", "upgrade");
+    const bool connectionUpgrade = header.contains("Connection", "upgrade");
     const MessageHeader::FieldIterator upgrade = header.field("Upgrade");
     const bool upgradeValue = upgrade != header.end() && ! upgrade->empty();
 
@@ -126,13 +126,13 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         return;
     }
 
-    if( ! connectionUpgrade || ! upgradeValue || ! header.matches("Upgrade", "websocket") )
+    if( ! connectionUpgrade || ! upgradeValue || ! header.contains("Upgrade", "websocket") )
     {
         decline(reply, Reply::BadRequest, "Bad Request");
         return;
     }
 
-    if( ! header.matches("Sec-WebSocket-Version", "13") )
+    if( ! header.contains("Sec-WebSocket-Version", "13") )
     {
         reply.header().set("Sec-WebSocket-Version", "13");
         decline(reply, Reply::UpgradeRequired, "Upgrade Required");
@@ -208,7 +208,7 @@ void WebSocketResponder::decline(Pt::Http::Reply& reply, unsigned status, const 
 {
     reply.setStatus(status, text);
 
-    if( ! reply.header().matches("Connection", "close") )
+    if( ! reply.header().contains("Connection", "close") )
         reply.header().add("Connection", "close");
 
     setReady(true);

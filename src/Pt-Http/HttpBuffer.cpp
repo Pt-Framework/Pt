@@ -253,10 +253,9 @@ void HttpBuffer::beginBody(const MessageHeader& reply)
 
     _keepAlive = reply.isKeepAlive();
 
-    MessageHeader::FieldIterator field = reply.field("Transfer-Encoding");
-    if( field != reply.end() )
+    if( reply.has("Transfer-Encoding") )
     {
-        if( ! MessageHeader::isMatch(field->value(), "chunked") )
+        if( ! reply.matches("Transfer-Encoding", "chunked") )
             throw HttpError("unsupported transfer coding");
 
         _chunked = true;

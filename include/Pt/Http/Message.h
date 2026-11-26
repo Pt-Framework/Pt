@@ -54,12 +54,12 @@ class MessageHeader;
     Fields are names and stored values. %set() replaces the value for
     a name, %add() appends another value for the same name, and
     %remove() deletes it. %get() returns the stored value or a null
-    pointer. %has(name) reports presence. %matches(name, value)
+    pointer. %has(name) reports presence. %contains(name, value)
     reports that a list token appears for that name, across every
-    stored line and after comma-splitting, and the comparison ignores
-    ASCII case. %contains(name, value) is the same walk with an exact
-    comparison. %isSet() compares the whole first stored string
-    exactly. %field() returns an iterator to the first field of that
+    stored line and after comma-splitting. %matches(name, value)
+    reports that the first field of that name has exactly that one
+    list value. Both comparisons ignore ASCII case. %isSet() compares
+    the whole first stored string exactly. %field() returns an iterator to the first field of that
     name, or %end() when the name is absent. %begin() and %end() walk
     the fields as %FieldIterator.
     Each field is one stored value. A comma-separated list stays
@@ -423,19 +423,19 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         bool has(const char* key) const
         { return get(key) != 0; }
 
-        /** @brief Returns true if one of the values for @a key matches @a value.
+        /** @brief Returns true if the first field has exactly @a value.
+
+            The first field named @a key must contain one list value,
+            and that value must match @a value. The comparison ignores
+            ASCII case. A list and a missing field return false.
+        */
+        bool matches(const char* key, const char* value) const;
+
+        /** @brief Returns true if a list value for @a key matches @a value.
 
             The search covers every stored line named @a key. A
             comma-separated list is split. The comparison ignores
             ASCII case.
-        */
-        bool matches(const char* key, const char* value) const;
-
-        /** @brief Returns true if one of the values for @a key equals @a value.
-
-            The search covers every stored line named @a key. A
-            comma-separated list is split. The comparison is
-            case-sensitive.
         */
         bool contains(const char* key, const char* value) const;
 

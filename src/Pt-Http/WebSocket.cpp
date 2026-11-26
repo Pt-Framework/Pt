@@ -186,10 +186,10 @@ void WebSocket::onReply(Client& client)
         }
 
         const MessageHeader& replyHeader = client.reply().header();
-        if( ! replyHeader.matches("Connection", "upgrade") )
+        if( ! replyHeader.contains("Connection", "upgrade") )
             throw HttpError("WebSocket handshake failed: no Connection upgrade");
 
-        if( ! replyHeader.matches("Upgrade", "websocket") )
+        if( ! replyHeader.contains("Upgrade", "websocket") )
             throw HttpError("WebSocket handshake failed: no Upgrade websocket");
 
         // no extension is offered, so any extension in the reply is unsolicited

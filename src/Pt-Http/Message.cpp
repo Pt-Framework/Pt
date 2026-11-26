@@ -296,19 +296,15 @@ MessageHeader::FieldIterator MessageHeader::field(const char* name) const
 
 bool MessageHeader::matches(const char* key, const char* value) const
 {
-    for(FieldIterator it = begin(); it != end(); ++it)
-    {
-        if( ! it->matches(key) )
-            continue;
+    const FieldIterator field = this->field(key);
+    if(field == end())
+        return false;
 
-        for(ValueIterator vit = it->begin(); vit != it->end(); ++vit)
-        {
-            if( vit->matches(value) )
-                return true;
-        }
-    }
+    ValueIterator it = field->begin();
+    if(it == field->end() || ! it->matches(value))
+        return false;
 
-    return false;
+    return ++it == field->end();
 }
 
 
@@ -321,7 +317,7 @@ bool MessageHeader::contains(const char* key, const char* value) const
 
         for(ValueIterator vit = it->begin(); vit != it->end(); ++vit)
         {
-            if( vit->equals(value) )
+            if( vit->matches(value) )
                 return true;
         }
     }
@@ -461,7 +457,7 @@ bool MessageHeader::isKeepAlive() const
             && versionMinor() >= 1;
     }
 
-    return matches("Connection", "keep-alive");
+    return contains("Connection", "keep-alive");
 }
 
 void MessageHeader::setKeepAlive()
@@ -472,7 +468,7 @@ void MessageHeader::setKeepAlive()
 
 bool MessageHeader::isUpgrade() const
 {
-    if( ! matches("Connection", "upgrade") )
+    if( ! contains("Connection", "upgrade") )
         return false;
 
     const FieldIterator protocol = field("Upgrade");

@@ -22,10 +22,11 @@
 
     %MessageHeader stores fields in a fixed buffer. %set() replaces a
     field, %add() appends another value for the same name, and %get()
-    and %has() look up a name. %matches(name, value) reports that a
-    list token appears for that name, ignoring ASCII case.
-    %contains(name, value) is the same walk with an exact comparison.
-    %isSet() compares the whole first stored string exactly. %begin()
+    and %has() look up a name. %contains(name, value) reports that a
+    list token appears for that name. %matches(name, value) reports
+    that the first field of that name has exactly that one list value.
+    Both comparisons ignore ASCII case. %isSet() compares the whole
+    first stored string exactly. %begin()
     and %end() walk the fields. A field compares its name with
     %equals() and %matches(), and walks its stored value as list
     values. Keep-alive, chunked transfer coding, content length
