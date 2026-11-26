@@ -3264,7 +3264,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
-        // At the limit, even an invalid handshake is answered with 503.
+        // An invalid handshake is declined before it takes a place from the limit.
         void LimitInvalidHandshake()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8303);
@@ -3295,7 +3295,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->run();
 
             PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
-            PT_UNIT_ASSERT_EQUALS(invalid.reply().statusCode(), 503u);
+            PT_UNIT_ASSERT_EQUALS(invalid.reply().statusCode(), 400u);
             PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(1));
             _limitClient = 0;
         }

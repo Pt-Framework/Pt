@@ -92,9 +92,9 @@
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
     of the %WebSocketService.
-    The handshake takes a place from the session limit after it has
-    checked the method, the version and the upgrade fields, and before
-    it checks the other fields. The limit covers %socketCount() and the
+    The handshake takes a place from the session limit only after all
+    other checks have passed, so an invalid handshake never takes a
+    place and is answered with its own status. The limit covers %socketCount() and the
     handshakes that hold a place. A place stays taken until the server
     releases the responder, which is after it has handed over the
     stream. %socketCount() is the number of sessions %getSession()

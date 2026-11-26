@@ -14,9 +14,9 @@ namespace Http {
 
 class WebSocketService;
 
-// Answers the WebSocket handshake. A request that passes the method, version
-// and Upgrade field checks takes a place from the session limit of the
-// service and holds it until the responder is destroyed.
+// Answers the WebSocket handshake. A request that passes all field checks
+// takes a place from the session limit of the service and holds it until the
+// responder is destroyed.
 class WebSocketResponder : public Pt::Http::Responder
 {
     public:

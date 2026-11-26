@@ -49,12 +49,17 @@ token `upgrade` in `Connection` nor has a value in `Upgrade` is not
 an upgrade attempt. It is 426 with `Upgrade: websocket` and
 `Connection: upgrade`, and the server closes the connection after
 the reply. A request with only one of the two, or whose `Upgrade`
-does not list `websocket`, is 400. These checks run before the
-handshake takes a place from the session limit.
+does not list `websocket`, is 400.
 
-A missing or invalid `Sec-WebSocket-Key` is 400. A version other
-than 13 is 426 with `Sec-WebSocket-Version: 13`. The handshake
-responder writes those replies. No stream is opened.
+A version other than 13 is 426 with `Sec-WebSocket-Version: 13`. A
+missing or invalid `Sec-WebSocket-Key` is 400, and so is a request
+that offers none of the accepted subprotocols. The handshake
+responder writes those replies. Every declined handshake closes the
+connection. No stream is opened.
+
+All of these checks run before the handshake takes a place from the
+session limit. Only a handshake that passes them is 503 at the
+limit, so an invalid handshake never takes a place.
 
 The request is an upgrade to `websocket` only when `Connection`
 lists the token `Upgrade` and `Upgrade` lists the token

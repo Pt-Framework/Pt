@@ -126,15 +126,6 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         return;
     }
 
-    WebSocketService& service = static_cast<WebSocketService&>( this->service() );
-    if( ! service.reservePending() )
-    {
-        decline(reply, Reply::ServiceUnavailable, "Service Unavailable");
-        return;
-    }
-
-    _reserved = true;
-
     if( ! header.matches("Sec-WebSocket-Version", "13") )
     {
         reply.header().set("Sec-WebSocket-Version", "13");
@@ -162,12 +153,22 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         return;
     }
 
+    WebSocketService& service = static_cast<WebSocketService&>( this->service() );
+
     std::string protocol;
     if( ! service.selectProtocol(header, protocol) )
     {
         decline(reply, Reply::BadRequest, "Bad Request");
         return;
     }
+
+    if( ! service.reservePending() )
+    {
+        decline(reply, Reply::ServiceUnavailable, "Service Unavailable");
+        return;
+    }
+
+    _reserved = true;
 
     if( ! protocol.empty() )
         reply.header().set("Sec-WebSocket-Protocol", protocol.c_str());
