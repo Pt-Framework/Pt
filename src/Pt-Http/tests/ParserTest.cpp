@@ -46,6 +46,7 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
             registerMethod( "RequestWithWhitespace", *this, &ParserTest::RequestWithWhitespace);
             registerMethod( "RequestWithQueryParam", *this, &ParserTest::RequestWithQueryParam);
             registerMethod( "LongFieldName", *this, &ParserTest::LongFieldName);
+            registerMethod( "BodyFraming", *this, &ParserTest::BodyFraming);
             registerMethod( "Response", *this, &ParserTest::Response);
         }
 
@@ -156,6 +157,34 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
                 PT_UNIT_ASSERT_THROW(parser.advance(msg), Pt::Http::HttpError);
                 PT_UNIT_ASSERT(header.get(name512.c_str()) == 0);
             }
+        }
+
+        void parseFraming(const std::string& fields)
+        {
+            Pt::Http::MessageHeader header;
+            Pt::Http::HeaderParser::MessageHeaderEvent ev(header);
+            Pt::Http::HeaderParser parser(ev, false);
+
+            std::istringstream msg("GET / HTTP/1.1\r\n" + fields + "\r\n");
+            parser.advance(msg);
+        }
+
+        void BodyFraming()
+        {
+            parseFraming("Content-Length: 4\r\nContent-Length: 4\r\n");
+            parseFraming("Transfer-Encoding: chunked\r\n");
+            parseFraming("Transfer-Encoding: gzip\r\n");
+            parseFraming("Transfer-Encoding: gzip, chunked\r\n");
+            parseFraming("Transfer-Encoding: chunked\r\nTransfer-Encoding: chunked\r\n");
+
+            PT_UNIT_ASSERT_THROW(parseFraming("Content-Length: 4\r\nTransfer-Encoding: chunked\r\n"),
+                                 Pt::Http::HttpError);
+            PT_UNIT_ASSERT_THROW(parseFraming("Transfer-Encoding: chunked\r\nContent-Length: 4\r\n"),
+                                 Pt::Http::HttpError);
+            PT_UNIT_ASSERT_THROW(parseFraming("Content-Length: 4\r\nContent-Length: 5\r\n"),
+                                 Pt::Http::HttpError);
+            PT_UNIT_ASSERT_THROW(parseFraming("Content-Length: 12abc\r\n"),
+                                 Pt::Http::HttpError);
         }
 
         void Response()

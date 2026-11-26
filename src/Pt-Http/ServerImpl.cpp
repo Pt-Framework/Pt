@@ -293,6 +293,13 @@ void Acceptor::onRequest(MessageProgress progress)
         PT_LOG_DEBUG("continue reading request");
         _request.beginReceive();
     }
+    catch(const HttpError& e)
+    {
+        PT_LOG_WARN("EXCEPTION: " << e.what());
+
+        replyError();
+        _finished.send(*this);
+    }
     catch(const System::IOError& e)
     {
         PT_LOG_WARN("EXCEPTION: " << e.what());

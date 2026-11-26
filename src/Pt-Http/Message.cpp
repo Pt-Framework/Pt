@@ -109,6 +109,40 @@ namespace Pt {
 
 namespace Http {
 
+bool MessageHeader::Field::equals(const char* name) const
+{
+    if( ! _name || ! name )
+        return false;
+
+    const char* p = _name;
+    const char* end = _name + _nameSize;
+    for(; p != end && *name; ++p, ++name)
+    {
+        if(*p != *name)
+            return false;
+    }
+
+    return p == end && *name == '\0';
+}
+
+
+bool MessageHeader::Field::matches(const char* name) const
+{
+    if( ! _name || ! name )
+        return false;
+
+    const char* p = _name;
+    const char* end = _name + _nameSize;
+    for(; p != end && *name; ++p, ++name)
+    {
+        if(asciiUpper(*p) != asciiUpper(*name))
+            return false;
+    }
+
+    return p == end && *name == '\0';
+}
+
+
 bool MessageHeader::Value::equals(const char* value) const
 {
     if( ! value )
@@ -240,7 +274,7 @@ const char* MessageHeader::get(const char* key) const
 {
     for(FieldIterator it = begin(); it != end(); ++it)
     {
-        if (compareIgnoreCase(key, it->name()) == 0)
+        if( it->matches(key) )
             return it->value();
     }
 
@@ -252,7 +286,7 @@ MessageHeader::FieldIterator MessageHeader::field(const char* name) const
 {
     for(FieldIterator it = begin(); it != end(); ++it)
     {
-        if(compareIgnoreCase(name, it->name()) == 0)
+        if( it->matches(name) )
             return it;
     }
 
@@ -264,7 +298,7 @@ bool MessageHeader::matches(const char* key, const char* value) const
 {
     for(FieldIterator it = begin(); it != end(); ++it)
     {
-        if(compareIgnoreCase(key, it->name()) != 0)
+        if( ! it->matches(key) )
             continue;
 
         for(ValueIterator vit = it->begin(); vit != it->end(); ++vit)
@@ -282,7 +316,7 @@ bool MessageHeader::contains(const char* key, const char* value) const
 {
     for(FieldIterator it = begin(); it != end(); ++it)
     {
-        if(compareIgnoreCase(key, it->name()) != 0)
+        if( ! it->matches(key) )
             continue;
 
         for(ValueIterator vit = it->begin(); vit != it->end(); ++vit)
@@ -359,7 +393,7 @@ void MessageHeader::remove(const char* key)
     FieldIterator it = begin();
     while (it != end())
     {
-        if (compareIgnoreCase(key, it->name()) == 0)
+        if( it->matches(key) )
         {
             std::size_t slen = it->value() - it->name() + std::strlen(it->value()) + 1;
 
@@ -382,21 +416,40 @@ void MessageHeader::remove(const char* key)
 
 bool MessageHeader::isChunked() const
 {
-    return matches("Transfer-Encoding", "chunked");
+    bool chunked = false;
+
+    for(FieldIterator field = begin(); field != end(); ++field)
+    {
+        if( ! field->matches("Transfer-Encoding") )
+            continue;
+
+        chunked = false;
+        for(ValueIterator it = field->begin(); it != field->end(); ++it)
+            chunked = it->matches("chunked");
+    }
+
+    return chunked;
 }
 
 
 std::size_t MessageHeader::contentLength() const
 {
     const char* s = get("Content-Length");
-    if (s == 0)
+    if( ! s || *s < '0' || *s > '9' )
         return 0;
 
     std::size_t size = 0;
-    while (*s >= '0' && *s <= '9')
-        size = size * 10 + (*s++ - '0');
+    while(*s >= '0' && *s <= '9')
+    {
+        const std::size_t digit = static_cast<std::size_t>(*s - '0');
+        if(size > (static_cast<std::size_t>(-1) - digit) / 10)
+            return 0;
 
-    return size;
+        size = size * 10 + digit;
+        ++s;
+    }
+
+    return *s == '\0' ? size : 0;
 }
 
 
@@ -454,6 +507,28 @@ char* MessageHeader::htdateCurrent(char* buffer)
                     wdays[dayOfWeek], day, months[month-1], year, hour, min, sec);
 
     return buffer;
+}
+
+
+bool MessageHeader::isDigits(const char* value)
+{
+    if( ! value || *value < '0' || *value > '9' )
+        return false;
+
+    std::size_t parsed = 0;
+    for(const char* p = value; *p; ++p)
+    {
+        if(*p < '0' || *p > '9')
+            return false;
+
+        const std::size_t digit = static_cast<std::size_t>(*p - '0');
+        if(parsed > (static_cast<std::size_t>(-1) - digit) / 10)
+            return false;
+
+        parsed = parsed * 10 + digit;
+    }
+
+    return true;
 }
 
 

@@ -201,12 +201,15 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
             it through that iterator. They do not keep it across a
             change of the header.
 
-            %value() is the whole stored value, including commas and
-            optional whitespace. A comma-separated list is one stored
-            value. %begin() and %end() walk that stored value as list
-            values. A %Value is a view into the same stored bytes.
-            Reading it does not allocate. Empty values are skipped. A
-            value that is not a token ends the sequence.
+            %name() is the field name. %equals() compares that name
+            exactly, and %matches() compares it while ignoring ASCII
+            case. A null pointer never matches. %value() is the whole
+            stored value, including commas and optional whitespace. A
+            comma-separated list is one stored value. %begin() and
+            %end() walk that stored value as list values. A %Value is
+            a view into the same stored bytes. Reading it does not
+            allocate. Empty values are skipped. A value that is not a
+            token ends the sequence.
 
             A token is one or more visible ASCII characters other than
             the separators `( ) < > @ , ; : \\ " / [ ] ? = { }` and
@@ -240,6 +243,20 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
                 */
                 std::size_t nameSize() const
                 { return _nameSize; }
+
+                /** @brief Returns true if the field name equals @a name.
+
+                    The comparison is case-sensitive. A null pointer
+                    never matches.
+                */
+                bool equals(const char* name) const;
+
+                /** @brief Returns true if the field name matches @a name.
+
+                    The comparison ignores ASCII case. A null pointer
+                    never matches.
+                */
+                bool matches(const char* name) const;
 
                 /** @brief Returns the stored field value.
 
@@ -465,10 +482,16 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         }
 
         /** @brief Returns true if chunked encoding is set.
+
+            True when chunked is the last transfer coding. A coding
+            after chunked returns false.
         */
         bool isChunked() const;
 
         /** @brief Returns the content length.
+
+            The first Content-Length field is read as 1*DIGIT. A missing
+            or invalid field returns 0.
         */
         std::size_t contentLength() const;
 
@@ -497,6 +520,10 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         /** @brief Returns true if @a value is one token.
         */
         static bool isToken(const char* value);
+
+        /** @brief Returns true if @a value is 1*DIGIT without overflow.
+        */
+        static bool isDigits(const char* value);
 
         /** @brief Returns true if @a a and @a b are equal.
 

@@ -26,8 +26,9 @@
     list token appears for that name, ignoring ASCII case.
     %contains(name, value) is the same walk with an exact comparison.
     %isSet() compares the whole first stored string exactly. %begin()
-    and %end() walk the fields, and a field walks its stored value as
-    list values. Keep-alive, chunked transfer coding, content length
+    and %end() walk the fields. A field compares its name with
+    %equals() and %matches(), and walks its stored value as list
+    values. Keep-alive, chunked transfer coding, content length
     and Upgrade are derived from those fields rather than being a
     second header model.
 

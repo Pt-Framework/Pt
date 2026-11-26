@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2011 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -41,11 +41,11 @@ namespace {
   std::string charToPrint(char ch)
   {
     std::string s;
-    
+
     if (ch >= 32)
     {
       s += '<' ;
-      s += ch; 
+      s += ch;
       s += '>';
     }
 
@@ -115,17 +115,20 @@ void ChunkParser::onSize(char ch)
 {
     PT_LOG_TRACE("onSize, ch=" << charToPrint(ch));
 
+    unsigned digit = 16;
     if (ch >= '0' && ch <= '9')
-    {
-        _chunkSize = _chunkSize * 16 + (ch - '0');
-    }
+        digit = static_cast<unsigned>(ch - '0');
     else if (ch >= 'a' && ch <= 'f')
-    {
-        _chunkSize = _chunkSize * 16 + (ch - 'a' + 10);
-    }
+        digit = static_cast<unsigned>(ch - 'a' + 10);
     else if (ch >= 'A' && ch <= 'F')
+        digit = static_cast<unsigned>(ch - 'A' + 10);
+
+    if(digit < 16)
     {
-        _chunkSize = _chunkSize * 16 + (ch - 'A' + 10);
+        if(_chunkSize > (static_cast<std::size_t>(-1) - digit) / 16)
+            throw HttpError("invalid HTTP message");
+
+        _chunkSize = _chunkSize * 16 + digit;
     }
     else
     {
@@ -249,8 +252,21 @@ void HttpBuffer::beginBody(const MessageHeader& reply)
     setg(0,0,0);
 
     _keepAlive = reply.isKeepAlive();
-    _contentLength = reply.contentLength();
-    _chunked = reply.isChunked();
+
+    MessageHeader::FieldIterator field = reply.field("Transfer-Encoding");
+    if( field != reply.end() )
+    {
+        if( ! MessageHeader::isMatch(field->value(), "chunked") )
+            throw HttpError("unsupported transfer coding");
+
+        _chunked = true;
+        _contentLength = 0;
+    }
+    else
+    {
+        _chunked = false;
+        _contentLength = reply.contentLength();
+    }
 
     PT_LOG_DEBUG("keep-alive: " << _keepAlive);
     PT_LOG_DEBUG("chunked: " << _chunked);
@@ -289,8 +305,8 @@ std::streamsize HttpBuffer::import(std::streamsize n)
     // Move unread bytes and putback to front
     std::size_t putback  = MaxPutback;
     std::size_t leftover = 0;
-    
-    if( this->gptr() ) 
+
+    if( this->gptr() )
     {
         putback = std::min<std::size_t>( this->gptr() - this->eback(), MaxPutback);
         char* to = _buffer + MaxPutback - putback;
@@ -359,7 +375,7 @@ std::streamsize HttpBuffer::import(std::streamsize n)
 
 
 HttpBuffer::int_type HttpBuffer::underflow()
-{ 
+{
     PT_LOG_TRACE("HttpBuffer::underflow()");
 
     if(this->gptr() < this->egptr())
@@ -376,7 +392,7 @@ HttpBuffer::int_type HttpBuffer::underflow()
 
 std::streamsize HttpBuffer::showmanyc()
 {
-    // TODO: return -1 if the underlying stream is EOF, otherwise return 
+    // TODO: return -1 if the underlying stream is EOF, otherwise return
     // always 0, because we can't tell if its the body or chunked encoding
     // statements
 

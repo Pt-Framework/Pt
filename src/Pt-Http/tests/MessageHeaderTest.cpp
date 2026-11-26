@@ -22,6 +22,7 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
             registerMethod("Empty", *this, &MessageHeaderTest::Empty);
             registerMethod("Upgrade", *this, &MessageHeaderTest::Upgrade);
             registerMethod("FieldName", *this, &MessageHeaderTest::FieldName);
+            registerMethod("Field", *this, &MessageHeaderTest::Field);
             registerMethod("MatchesValue", *this, &MessageHeaderTest::MatchesValue);
         }
 
@@ -150,6 +151,33 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
 
             header.set("Transfer-Encoding", "gzip, chunked");
             PT_UNIT_ASSERT( header.isChunked() );
+
+            header.set("Transfer-Encoding", "chunked, gzip");
+            PT_UNIT_ASSERT( ! header.isChunked() );
+
+            header.set("Content-Length", "12abc");
+            PT_UNIT_ASSERT(header.contentLength() == 0);
+
+            header.set("Content-Length", "18");
+            PT_UNIT_ASSERT(header.contentLength() == 18);
+            PT_UNIT_ASSERT( Pt::Http::MessageHeader::isDigits("18") );
+            PT_UNIT_ASSERT( ! Pt::Http::MessageHeader::isDigits("12abc") );
+            PT_UNIT_ASSERT( ! Pt::Http::MessageHeader::isDigits("") );
+        }
+
+        void Field()
+        {
+            Pt::Http::MessageHeader header;
+            header.set("Content-Length", "4");
+
+            Pt::Http::MessageHeader::FieldIterator field = header.field("content-length");
+            PT_UNIT_ASSERT(field != header.end());
+            PT_UNIT_ASSERT( field->matches("Content-Length") );
+            PT_UNIT_ASSERT( field->equals("Content-Length") );
+            PT_UNIT_ASSERT( ! field->equals("content-length") );
+            PT_UNIT_ASSERT( ! field->matches("Content-Lengths") );
+            PT_UNIT_ASSERT( ! field->matches(0) );
+            PT_UNIT_ASSERT( ! field->equals(0) );
         }
 
         void FieldName()

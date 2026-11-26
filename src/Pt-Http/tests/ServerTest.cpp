@@ -290,6 +290,7 @@ class ServerTest : public Pt::Unit::TestSuite
             registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
             registerMethod( "PipelinedRequests", *this,  &ServerTest::PipelinedRequests);
             registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
+            registerMethod( "MixedBodyFraming", *this, &ServerTest::MixedBodyFraming);
             registerMethod( "QueryString", *this, &ServerTest::QueryString);
 
 
@@ -338,6 +339,79 @@ class ServerTest : public Pt::Unit::TestSuite
 
             _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 400);
+        }
+
+        void MixedBodyFraming()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            HelloService service;
+
+            Pt::Http::Server server(*_loop, ep);
+            Pt::Http::MapUrl mapurl("/test", service);
+            server.addServlet(mapurl);
+
+            _mixedSocket.close();
+            _mixedSocket.connected() += Pt::slot(*this, &ServerTest::onMixedConnected);
+            _mixedSocket.setActive(*_loop);
+            _mixedSocket.beginConnect(ep);
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_mixedReply.find("400") != std::string::npos);
+            PT_UNIT_ASSERT(_mixedReply.find("Connection: close") != std::string::npos);
+        }
+
+        void onMixedConnected(Pt::Net::TcpSocket& socket)
+        {
+            socket.endConnect();
+
+            _mixedRequest =
+                "POST /test HTTP/1.1\r\n"
+                "Host: 127.0.0.1\r\n"
+                "Content-Length: 5\r\n"
+                "Transfer-Encoding: chunked\r\n"
+                "\r\n"
+                "0\r\n"
+                "\r\n";
+            _mixedWritten = 0;
+            _mixedReply.clear();
+
+            socket.outputReady() += Pt::slot(*this, &ServerTest::onMixedWritten);
+            socket.beginWrite(_mixedRequest.data() + _mixedWritten,
+                              _mixedRequest.size() - _mixedWritten);
+        }
+
+        void onMixedWritten(Pt::System::IODevice& device)
+        {
+            _mixedWritten += device.endWrite();
+            if(_mixedWritten < _mixedRequest.size())
+            {
+                device.beginWrite(_mixedRequest.data() + _mixedWritten,
+                                  _mixedRequest.size() - _mixedWritten);
+                return;
+            }
+
+            device.inputReady() += Pt::slot(*this, &ServerTest::onMixedRead);
+            device.beginRead(_mixedBuffer, sizeof(_mixedBuffer));
+        }
+
+        void onMixedRead(Pt::System::IODevice& device)
+        {
+            const std::size_t n = device.endRead();
+            if(n == 0)
+            {
+                _loop->exit();
+                return;
+            }
+
+            _mixedReply.append(_mixedBuffer, n);
+            if(_mixedReply.find("\r\n\r\n") != std::string::npos)
+            {
+                _loop->exit();
+                return;
+            }
+
+            device.beginRead(_mixedBuffer, sizeof(_mixedBuffer));
         }
 
         void onMaxRequestSizeReply(Pt::Http::Client& client)
@@ -754,6 +828,11 @@ class ServerTest : public Pt::Unit::TestSuite
     private:
         Pt::System::Timer _exitTimer;
         Pt::System::MainLoop* _loop;
+        Pt::Net::TcpSocket _mixedSocket;
+        std::string _mixedRequest;
+        std::size_t _mixedWritten;
+        std::string _mixedReply;
+        char _mixedBuffer[256];
         std::string _reply;
         std::vector<std::string> _chunks;
         Pt::Http::BasicUserListAuthorizer _authent;

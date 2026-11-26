@@ -107,7 +107,7 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         return;
     }
 
-    if( header.has("Transfer-Encoding") || header.contentLength() > 0 )
+    if( header.isChunked() || header.contentLength() > 0 )
     {
         decline(reply, Reply::BadRequest, "Bad Request");
         return;

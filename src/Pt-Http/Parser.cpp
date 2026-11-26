@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -120,13 +120,28 @@ namespace Http {
 
     void HeaderParser::MessageHeaderEvent::onValue(const std::string& value)
     {
+        if( MessageHeader::isMatch(_key, "Content-Length") )
+        {
+            if( _header->has("Transfer-Encoding") || ! MessageHeader::isDigits(value.c_str()) )
+                throw HttpError("invalid HTTP message");
+
+            const char* current = _header->get("Content-Length");
+            if(current && std::strcmp(current, value.c_str()) != 0)
+                throw HttpError("invalid HTTP message");
+        }
+        else if( MessageHeader::isMatch(_key, "Transfer-Encoding") )
+        {
+            if( _header->has("Content-Length") )
+                throw HttpError("invalid HTTP message");
+        }
+
         _header->add(_key, value.c_str());
     }
 
     void HeaderParser::advance(std::streambuf& sb)
     {
         std::streamsize avail = sb.in_avail();
-        
+
         if(avail < 0)
         {
             state = &HeaderParser::state_error;
