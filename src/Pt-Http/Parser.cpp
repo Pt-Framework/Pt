@@ -27,9 +27,10 @@
  */
 
 #include "Parser.h"
+#include <Pt/Http/HttpError.h>
 #include <cctype>
 #include <algorithm>
-#include <string.h>
+#include <cstring>
 
 #define PT_LOG_DEBUG(e)
 #define PT_LOG_WARN(e)
@@ -110,7 +111,11 @@ namespace Http {
 
     void HeaderParser::MessageHeaderEvent::onKey(const std::string& key)
     {
-        strncpy(_key, key.c_str(), MaxKeySize);
+        if(key.size() >= MaxKeySize)
+            throw HttpError("invalid HTTP message");
+
+        std::memcpy(_key, key.data(), key.size());
+        _key[key.size()] = '\0';
     }
 
     void HeaderParser::MessageHeaderEvent::onValue(const std::string& value)

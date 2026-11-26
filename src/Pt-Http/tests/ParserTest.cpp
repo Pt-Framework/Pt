@@ -30,6 +30,8 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Parser.h"
+#include <Pt/Http/HttpError.h>
+#include <Pt/Http/Message.h>
 #include <string>
 
 class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::Event
@@ -43,6 +45,7 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
             registerMethod( "RequestWithMultilineHeader", *this, &ParserTest::RequestWithMultilineHeader);
             registerMethod( "RequestWithWhitespace", *this, &ParserTest::RequestWithWhitespace);
             registerMethod( "RequestWithQueryParam", *this, &ParserTest::RequestWithQueryParam);
+            registerMethod( "LongFieldName", *this, &ParserTest::LongFieldName);
             registerMethod( "Response", *this, &ParserTest::Response);
         }
 
@@ -123,6 +126,36 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo bar)Q(a=4&b=Hello+World)V(1.1)E()");
+        }
+
+        void LongFieldName()
+        {
+            const std::string name511(511, 'A');
+            const std::string name512(512, 'A');
+
+            {
+                Pt::Http::MessageHeader header;
+                Pt::Http::HeaderParser::MessageHeaderEvent ev(header);
+                Pt::Http::HeaderParser parser(ev, false);
+
+                std::istringstream msg("GET / HTTP/1.1\r\n" + name511 + ": v\r\n\r\n");
+                parser.advance(msg);
+
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(! parser.fail());
+                PT_UNIT_ASSERT(header.get(name511.c_str()) != 0);
+                PT_UNIT_ASSERT_EQUALS(std::string(header.get(name511.c_str())), std::string("v"));
+            }
+
+            {
+                Pt::Http::MessageHeader header;
+                Pt::Http::HeaderParser::MessageHeaderEvent ev(header);
+                Pt::Http::HeaderParser parser(ev, false);
+
+                std::istringstream msg("GET / HTTP/1.1\r\n" + name512 + ": v\r\n\r\n");
+                PT_UNIT_ASSERT_THROW(parser.advance(msg), Pt::Http::HttpError);
+                PT_UNIT_ASSERT(header.get(name512.c_str()) == 0);
+            }
         }
 
         void Response()
