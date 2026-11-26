@@ -18,32 +18,6 @@ namespace Pt {
 
 namespace Http {
 
-namespace {
-
-bool equalsIgnoreCase(const char* value, const std::string& origin)
-{
-    const char* p = value;
-    for(std::size_t i = 0; i < origin.size(); ++i, ++p)
-    {
-        if(*p == '\0')
-            return false;
-
-        unsigned char left = static_cast<unsigned char>(*p);
-        unsigned char right = static_cast<unsigned char>(origin[i]);
-        if(left >= 'a' && left <= 'z')
-            left = static_cast<unsigned char>(left - 'a' + 'A');
-        if(right >= 'a' && right <= 'z')
-            right = static_cast<unsigned char>(right - 'a' + 'A');
-        if(left != right)
-            return false;
-    }
-
-    return *p == '\0';
-}
-
-}
-
-
 WebSocketService::WebSocketService()
 : _servlet(0)
 , _socketCount(0)
@@ -274,7 +248,7 @@ bool WebSocketService::acceptsOrigin(const char* origin) const
 
     for(std::size_t n = 0; n < _origins.size(); ++n)
     {
-        if( equalsIgnoreCase(origin, _origins[n]) )
+        if( MessageHeader::isMatch(origin, _origins[n].c_str()) )
             return true;
     }
 

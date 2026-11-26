@@ -22,6 +22,7 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
             registerMethod("Empty", *this, &MessageHeaderTest::Empty);
             registerMethod("Upgrade", *this, &MessageHeaderTest::Upgrade);
             registerMethod("FieldName", *this, &MessageHeaderTest::FieldName);
+            registerMethod("MatchesValue", *this, &MessageHeaderTest::MatchesValue);
         }
 
         void setUp()
@@ -158,6 +159,17 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( ! Pt::Http::MessageHeader::isToken("Bad Name") );
             PT_UNIT_ASSERT( ! Pt::Http::MessageHeader::isToken("") );
             PT_UNIT_ASSERT_THROW(header.set("Bad Name", "value"), std::invalid_argument);
+        }
+
+        void MatchesValue()
+        {
+            using Pt::Http::MessageHeader;
+            PT_UNIT_ASSERT( MessageHeader::isMatch("https://Example.com", "HTTPS://example.COM") );
+            PT_UNIT_ASSERT( ! MessageHeader::isMatch("https://example.com", "https://example.com:8443") );
+            PT_UNIT_ASSERT( ! MessageHeader::isMatch("https://example.com:8443", "https://example.com") );
+            PT_UNIT_ASSERT( MessageHeader::isMatch("", "") );
+            PT_UNIT_ASSERT( ! MessageHeader::isMatch(0, "a") );
+            PT_UNIT_ASSERT( ! MessageHeader::isMatch("a", 0) );
         }
 };
 

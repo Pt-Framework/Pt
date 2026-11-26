@@ -446,10 +446,6 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         */
         FieldIterator field(const char* name) const;
 
-        /** @brief Returns true if @a value is one token.
-        */
-        static bool isToken(const char* value);
-
         /** @brief Returns the major HTTP version number.
         */
         unsigned versionMajor() const
@@ -497,6 +493,17 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
             @a buffer must have at least 30 bytes.
         */
         static char* htdateCurrent(char* buffer);
+
+        /** @brief Returns true if @a value is one token.
+        */
+        static bool isToken(const char* value);
+
+        /** @brief Returns true if @a a and @a b are equal.
+
+            The comparison covers the whole strings and ignores ASCII
+            case. A null pointer never matches.
+        */
+        static bool isMatch(const char* a, const char* b);
 
     private:
         //! @internal

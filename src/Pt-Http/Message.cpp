@@ -222,23 +222,6 @@ MessageHeader::ValueIterator MessageHeader::Field::begin() const
 }
 
 
-bool MessageHeader::isToken(const char* value)
-{
-    if( ! value || ! *value )
-        return false;
-
-    for(const unsigned char* p = reinterpret_cast<const unsigned char*>(value);
-        *p;
-        ++p)
-    {
-        if( ! isTokenChar(*p) )
-            return false;
-    }
-
-    return true;
-}
-
-
 MessageHeader::MessageHeader()
 : _endOffset(0)
 , _httpVersionMajor(1)
@@ -471,6 +454,29 @@ char* MessageHeader::htdateCurrent(char* buffer)
                     wdays[dayOfWeek], day, months[month-1], year, hour, min, sec);
 
     return buffer;
+}
+
+
+bool MessageHeader::isToken(const char* value)
+{
+    if( ! value || ! *value )
+        return false;
+
+    for(const unsigned char* p = reinterpret_cast<const unsigned char*>(value);
+        *p;
+        ++p)
+    {
+        if( ! isTokenChar(*p) )
+            return false;
+    }
+
+    return true;
+}
+
+
+bool MessageHeader::isMatch(const char* a, const char* b)
+{
+    return a && b && compareIgnoreCase(a, b) == 0;
 }
 
 
