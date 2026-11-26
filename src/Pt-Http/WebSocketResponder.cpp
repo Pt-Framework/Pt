@@ -107,6 +107,12 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         return;
     }
 
+    if( header.has("Transfer-Encoding") || header.contentLength() > 0 )
+    {
+        decline(reply, Reply::BadRequest, "Bad Request");
+        return;
+    }
+
     const bool connectionUpgrade = header.matches("Connection", "upgrade");
     const MessageHeader::FieldIterator upgrade = header.field("Upgrade");
     const bool upgradeValue = upgrade != header.end() && ! upgrade->empty();
