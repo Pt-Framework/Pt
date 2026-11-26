@@ -57,6 +57,16 @@ that offers none of the accepted subprotocols. The handshake
 responder writes those replies. Every declined handshake closes the
 connection. No stream is opened.
 
+`addOrigin()` names one accepted Origin. Several calls name several
+values. An empty list does not check Origin. A non-empty list
+accepts the stored value when that value equals one entry. The
+comparison ignores ASCII case and uses the whole stored value. A
+missing value is 403, and so is a value that matches no entry. An
+empty Origin value is 400. The literal `null` is accepted only when
+it is an entry. The
+check runs with the other field checks, before the handshake takes a
+place from the session limit.
+
 All of these checks run before the handshake takes a place from the
 session limit. Only a handshake that passes them is 503 at the
 limit, so an invalid handshake never takes a place.

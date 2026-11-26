@@ -155,6 +155,19 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
 
     WebSocketService& service = static_cast<WebSocketService&>( this->service() );
 
+    const char* origin = header.get("Origin");
+    if( origin && *origin == '\0' )
+    {
+        decline(reply, Reply::BadRequest, "Bad Request");
+        return;
+    }
+
+    if( ! service.acceptsOrigin(origin) )
+    {
+        decline(reply, Reply::Forbidden, "Forbidden");
+        return;
+    }
+
     std::string protocol;
     if( ! service.selectProtocol(header, protocol) )
     {

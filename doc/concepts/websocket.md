@@ -428,6 +428,12 @@ is 400. A missing or invalid key is 400. A version other
 than 13 is 426 with `Sec-WebSocket-Version: 13`. No stream is
 opened.
 
+`addOrigin()` names one accepted Origin. An empty list does not
+check Origin. A non-empty list accepts a stored value that equals
+one entry. The comparison ignores ASCII case. A missing value is
+403, and so is a value that matches no entry. An empty Origin value
+is 400. The literal `null` is accepted only when it is an entry.
+
 `addProtocol()` offers one subprotocol name. Several calls offer
 several names, in order. `clearProtocols()` drops them. The names
 remain for later `beginConnect()` calls. The selected name, if the

@@ -2240,6 +2240,12 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("HandshakeConnectionOnly", *this, &WebSocketTest::HandshakeConnectionOnly);
             registerMethod("HandshakeUpgradeOnly", *this, &WebSocketTest::HandshakeUpgradeOnly);
             registerMethod("HandshakeUpgradeProtocol", *this, &WebSocketTest::HandshakeUpgradeProtocol);
+            registerMethod("OriginAccepted", *this, &WebSocketTest::OriginAccepted);
+            registerMethod("OriginRejected", *this, &WebSocketTest::OriginRejected);
+            registerMethod("OriginMissing", *this, &WebSocketTest::OriginMissing);
+            registerMethod("OriginUnchecked", *this, &WebSocketTest::OriginUnchecked);
+            registerMethod("OriginNullRejected", *this, &WebSocketTest::OriginNullRejected);
+            registerMethod("OriginNullAccepted", *this, &WebSocketTest::OriginNullAccepted);
             registerMethod("HandshakeStatus", *this, &WebSocketTest::HandshakeStatus);
             registerMethod("HandshakeUpgradeOther", *this, &WebSocketTest::HandshakeUpgradeOther);
             registerMethod("HandshakeUpgradeMissing", *this, &WebSocketTest::HandshakeUpgradeMissing);
@@ -4563,6 +4569,73 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(http.reply().header().matches("Connection", "close"));
             if(expectVersionHeader)
                 PT_UNIT_ASSERT(http.reply().header().isSet("Sec-WebSocket-Version", "13"));
+        }
+
+        void checkOrigin(unsigned short port,
+                         const char* accepted,
+                         const char* origin,
+                         bool sendOrigin,
+                         unsigned expectedStatus)
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", port);
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, _handshake, _upgraded, *_loop);
+            if(accepted)
+                service.addOrigin(accepted);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            HandshakeObserver observer(*_loop);
+            http.replyReceived() += Pt::slot(observer, &HandshakeObserver::onReply);
+            http.request().setUrl("/ws");
+            http.request().header().setUpgrade();
+            http.request().header().set("Upgrade", "websocket");
+            http.request().header().set("Sec-WebSocket-Version", "13");
+            http.request().header().set("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ==");
+            if(sendOrigin)
+                http.request().header().add("Origin", origin ? origin : "");
+            http.beginReceive();
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(observer.count(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(http.reply().statusCode(), expectedStatus);
+            if(expectedStatus != 101u)
+            {
+                PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
+                PT_UNIT_ASSERT(http.reply().header().matches("Connection", "close"));
+            }
+        }
+
+        void OriginAccepted()
+        {
+            checkOrigin(8210, "https://example.test", "HTTPS://example.test", true, 101u);
+        }
+
+        void OriginRejected()
+        {
+            checkOrigin(8211, "https://example.test", "https://other.test", true, 403u);
+        }
+
+        void OriginMissing()
+        {
+            checkOrigin(8212, "https://example.test", 0, false, 403u);
+        }
+
+        void OriginUnchecked()
+        {
+            checkOrigin(8213, 0, "https://any.test", true, 101u);
+        }
+
+        void OriginNullRejected()
+        {
+            checkOrigin(8215, "https://example.test", "null", true, 403u);
+        }
+
+        void OriginNullAccepted()
+        {
+            checkOrigin(8216, "null", "null", true, 101u);
         }
 
         void HandshakeControl()

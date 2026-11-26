@@ -12,10 +12,37 @@
 #include <Pt/Http/Message.h>
 
 #include <stdexcept>
+#include <string>
 
 namespace Pt {
 
 namespace Http {
+
+namespace {
+
+bool equalsIgnoreCase(const char* value, const std::string& origin)
+{
+    const char* p = value;
+    for(std::size_t i = 0; i < origin.size(); ++i, ++p)
+    {
+        if(*p == '\0')
+            return false;
+
+        unsigned char left = static_cast<unsigned char>(*p);
+        unsigned char right = static_cast<unsigned char>(origin[i]);
+        if(left >= 'a' && left <= 'z')
+            left = static_cast<unsigned char>(left - 'a' + 'A');
+        if(right >= 'a' && right <= 'z')
+            right = static_cast<unsigned char>(right - 'a' + 'A');
+        if(left != right)
+            return false;
+    }
+
+    return *p == '\0';
+}
+
+}
+
 
 WebSocketService::WebSocketService()
 : _servlet(0)
@@ -184,6 +211,30 @@ std::vector<std::string> WebSocketService::protocols() const
 }
 
 
+void WebSocketService::addOrigin(const std::string& origin)
+{
+    if( origin.empty() )
+        throw std::invalid_argument("WebSocket origin is empty");
+
+    System::MutexLock lock(_mutex);
+    _origins.push_back(origin);
+}
+
+
+void WebSocketService::clearOrigins()
+{
+    System::MutexLock lock(_mutex);
+    _origins.clear();
+}
+
+
+std::vector<std::string> WebSocketService::origins() const
+{
+    System::MutexLock lock(_mutex);
+    return _origins;
+}
+
+
 bool WebSocketService::selectProtocol(const MessageHeader& header, std::string& selected) const
 {
     System::MutexLock lock(_mutex);
@@ -206,6 +257,25 @@ bool WebSocketService::selectProtocol(const MessageHeader& header, std::string& 
                 return true;
             }
         }
+    }
+
+    return false;
+}
+
+
+bool WebSocketService::acceptsOrigin(const char* origin) const
+{
+    System::MutexLock lock(_mutex);
+    if( _origins.empty() )
+        return true;
+
+    if( ! origin )
+        return false;
+
+    for(std::size_t n = 0; n < _origins.size(); ++n)
+    {
+        if( equalsIgnoreCase(origin, _origins[n]) )
+            return true;
     }
 
     return false;

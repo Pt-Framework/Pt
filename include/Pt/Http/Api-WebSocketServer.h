@@ -81,14 +81,23 @@
     one of the two is present or Upgrade does not list websocket, with
     503 when no %WebSocketServlet is attached or the accepted-session
     limit is already reached, with 400 when Sec-WebSocket-Key is
-    missing or invalid, or with 426 and Sec-WebSocket-Version: 13 when
-    Sec-WebSocket-Version is not 13. The responder is not the session.
+    missing or invalid, with 426 and Sec-WebSocket-Version: 13 when
+    Sec-WebSocket-Version is not 13, with 400 when Origin is empty,
+    or with 403 when a configured Origin list rejects the Origin
+    value. The responder is not the session.
     %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
     name several values, in preference order. An empty list accepts
     the upgrade and selects no name. A non-empty list selects the
     first offered name that is also accepted, and a request that
-    offers none of them is answered with 400. %setMaxSockets(),
+    offers none of them is answered with 400. %addOrigin() names one
+    Origin this endpoint accepts. Several calls name several values.
+    An empty list does not check Origin. A non-empty list accepts
+    one Origin value that matches an entry. The comparison ignores
+    ASCII case and uses the whole stored value. The literal null is
+    accepted only when it is an entry. A missing value or a value
+    that matches no entry is answered with 403. An empty Origin value
+    is answered with 400. %setMaxSockets(),
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
     of the %WebSocketService.

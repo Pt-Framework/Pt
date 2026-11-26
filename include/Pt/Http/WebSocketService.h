@@ -63,14 +63,23 @@ class WebSocketServlet;
     when only one of the two is present or Upgrade does not list
     websocket, with 503 when no servlet is attached or the session
     limit is reached, with 400 when Sec-WebSocket-Key is missing or
-    invalid, or with 426 and Sec-WebSocket-Version: 13 when
-    Sec-WebSocket-Version is not 13.
+    invalid, with 426 and Sec-WebSocket-Version: 13 when
+    Sec-WebSocket-Version is not 13, with 400 when Origin is empty,
+    or with 403 when a configured Origin list rejects the Origin
+    value.
     The responder is not the session. %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
     name several values, in preference order. An empty list accepts
     the upgrade and selects no name. A non-empty list selects the
     first offered name that is also accepted, and a request that
-    offers none of them is answered with 400. %setMaxSockets(),
+    offers none of them is answered with 400. %addOrigin() names one
+    Origin this endpoint accepts. Several calls name several values.
+    An empty list does not check Origin. A non-empty list accepts
+    one Origin value that matches an entry. The comparison ignores
+    ASCII case and uses the whole stored value. The literal null is
+    accepted only when it is an entry. A missing value or a value
+    that matches no entry is answered with 403. An empty Origin value
+    is answered with 400. %setMaxSockets(),
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
     of this service.
@@ -80,7 +89,8 @@ class WebSocketServlet;
     the server releases it, which is after the server has handed over
     the stream. Between %getSession() and that release the upgrade is
     counted twice, so the limit is reached early and never late. The
-    counters, the servlet, the protocol list and the policy values
+    counters, the servlet, the protocol list, the Origin list and
+    the policy values
     are guarded by a mutex, because the handshake may run in a server
     thread while %getSession() and %releaseSession() run in the
     thread of the server loop. The session base
@@ -181,6 +191,29 @@ class PT_HTTP_API WebSocketService : public Service
         /** @brief Drops every accepted protocol name.
         */
         void clearProtocols();
+
+        /** @brief Returns accepted Origin values.
+
+            Returns a copy, because the list may change in another
+            thread while a handshake reads it. An empty list does not
+            check Origin.
+        */
+        std::vector<std::string> origins() const;
+
+        /** @brief Adds one accepted Origin value.
+
+            The handshake compares @a origin to the stored Origin
+            value and ignores ASCII case. An empty list does not check
+            Origin. A missing value is rejected. The literal null is
+            accepted only when it was added.
+
+            @throw %std::invalid_argument if @a origin is empty.
+        */
+        void addOrigin(const std::string& origin);
+
+        /** @brief Drops every accepted Origin value.
+        */
+        void clearOrigins();
 
         /** @brief Returns the maximum number of live sessions.
 
@@ -386,6 +419,13 @@ class PT_HTTP_API WebSocketService : public Service
         */
         bool selectProtocol(const MessageHeader& header, std::string& selected) const;
 
+        /** @brief Returns true when @a origin is accepted.
+
+            An empty list accepts every value. Otherwise the comparison
+            ignores ASCII case. A null @a origin is not an entry.
+        */
+        bool acceptsOrigin(const char* origin) const;
+
     private:
         mutable System::Mutex    _mutex;
         WebSocketServlet*        _servlet;
@@ -398,6 +438,7 @@ class PT_HTTP_API WebSocketService : public Service
         std::size_t              _closeTimeout;
         std::size_t              _maxMessageSize;
         std::vector<std::string> _protocols;
+        std::vector<std::string> _origins;
 };
 
 /** @brief WebSocket service for one session type.

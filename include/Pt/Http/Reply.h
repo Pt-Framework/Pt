@@ -75,6 +75,7 @@ class PT_HTTP_API Reply : public Message
             MultipleChoices = 300,       //!< Multiple choices for request
             BadRequest = 400,            //!< Bad request received
             Unauthorized = 401,          //!< Unauthorized access
+            Forbidden = 403,             //!< Access to the resource is forbidden
             NotFound = 404,              //!< Resource not found
             MethodNotAllowed = 405,      //!< Method not allowed for the resource
             RequestEntityTooLarge = 413, //!< %Request entity too large
