@@ -199,7 +199,7 @@ jobs:
             dist/jam.bat
             dist/jam.tar.gz
             dist/jam.tar.gz.sha256
-          prerelease: false
+          prerelease: true
           make_latest: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
