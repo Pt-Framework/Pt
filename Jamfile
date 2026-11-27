@@ -37,6 +37,7 @@ rule Moc
 #############################################################################
 Load unittest.jam ;
 Load lsbpkg.jam ;
+Load package.jam ;
 Load builtin.jam ;
 
 # set default directory to build objects and targets

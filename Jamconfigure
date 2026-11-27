@@ -535,6 +535,7 @@ if ! $(WITH_ATOMICS)
 # Prebuilt dependencies
 #############################################################################
 
+Load package.jam ;
 Load prebuilt.jam ;
 Load builtin.jam ;
 
@@ -542,32 +543,35 @@ WITH_PREBUILT = [ HasOption --with-prebuilt ] ;
 PREBUILT_ID ?= [ GetOption --with-prebuilt ] ;
 PREBUILT_LOCAL = [ HasOption --prebuilt-local ] ;
 PREBUILT_RELEASE ?= prebuilt-2026.11.0 ;
-PREBUILT_URL_BASE = "https://github.com/Pt-Framework/Pt/releases/download" ;
-PREBUILT_URL_BASE = "$(PREBUILT_URL_BASE)/$(PREBUILT_RELEASE)" ;
+PREBUILT_DIST_ROOT = "https://github.com/Pt-Framework/Pt/releases/download" ;
+PREBUILT_DIST_ROOT = "$(PREBUILT_DIST_ROOT)/$(PREBUILT_RELEASE)" ;
 
 EchoOption --prebuilt-local : "Local prebuilt" : $(PREBUILT_LOCAL:E="no") ;
 EchoOption --with-prebuilt=<id> : "Enable prebuilt" : $(WITH_PREBUILT:E="no") ;
 
 if $(WITH_PREBUILT)
 {
-    local abi ;
-    if $(TARGET_OS:L) in nt win32 windows
+    PREBUILT_ID ?= [ Prebuilt-Id ] ;
+
+    if [ MATCH ^(windows-.*-msvc)$ : $(PREBUILT_ID) ]
     {
-        abi = md ;
         if $(WITH_DEBUG) && ! $(WITH_OPTIM)
         {
-            abi = mdd ;
+            PREBUILT_ID = $(PREBUILT_ID)-mdd ;
+        }
+        else
+        {
+            PREBUILT_ID = $(PREBUILT_ID)-md ;
         }
     }
 
-    PREBUILT_ID ?= [ Prebuilt-Id $(abi) ] ;
     PT_PREBUILT_ROOT = [ FDirName $(PT_TOP) prebuilt $(PREBUILT_ID) ] ;
     EchoOption PREBUILT_ID : "Using prebuilt" ;
 
     if ! $(PREBUILT_LOCAL)
     {
-        local url = $(PREBUILT_URL_BASE)/$(PREBUILT_ID:S=.tar.gz) ;
-        Prebuilt-Fetch-Url $(url) : $(PT_PREBUILT_ROOT) ;
+        local bundleUrl = $(PREBUILT_DIST_ROOT)/$(PREBUILT_ID:S=.tar.gz) ;
+        Prebuilt-Fetch-Url $(bundleUrl) : $(PT_PREBUILT_ROOT) ;
         EchoOption PREBUILT_RELEASE : "Fetched prebuilt" ;
     }
 

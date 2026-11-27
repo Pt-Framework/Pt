@@ -9,6 +9,7 @@ JAMBASE_PREBUILT_JAM_INCLUDED = true ;
 # Prebuilt-Enable pkg fills still-empty pkg.* flag variables.
 
 Load fetch.jam ;
+Load package.jam ;
 
 # Identity: <os>-<arch>-<toolset>[-<abi>]. Windows always has md/mdd.
 # ABI auto-map is WITH_DEBUG && ! WITH_OPTIM -> mdd, else md.
@@ -48,45 +49,37 @@ rule Prebuilt-Id ( abi ? )
 
 # Prebuilt-Fetch-Url <url> : <root> : <headers>
 #
-# Download <url> when <url>.manifest differs from the sidecar
-# root.manifest. root is the prefix directory. The sidecar sits
-# next to root, not inside it, so replacing the tree leaves it in
-# place. <headers> is an optional list of Name: value lines for
-# both downloads. Detects curl and tar itself. Returns root when
+# Download <url> when <url>.sha256 differs from root/meta/sha256.
+# Each side is one line. The download is temporary. After extract,
+# that line is written to root/meta/sha256. meta/format, meta/version
+# and meta/id come with the archive and are one line each. <headers>
+# is an optional list of Name: value lines. Returns root when
 # fetched, empty when up to date.
 #
 rule Prebuilt-Fetch-Url ( url : root : headers * )
 {
     Fetch-Configure ;
 
-    local manifestLocal = $(root).manifest ;
-    local manifestTmp   = $(root).manifest.tmp ;
-    local archiveTmp    = $(root).tmp ;
-    local fetched       = ;
+    local shaTmp     = $(root).sha256.tmp ;
+    local archiveTmp = $(root).tmp ;
+    local sha        = [ FDirName $(root) meta sha256 ] ;
+    local fetched    = ;
 
-    Fetch-Url "$(url).manifest" : $(manifestTmp) : $(headers) ;
-    local remoteContent = [ FILE_GET_CONTENTS $(manifestTmp) ] ;
+    Fetch-Url "$(url).sha256" : $(shaTmp) : $(headers) ;
+    local remote = [ FILE_GET_CONTENTS $(shaTmp) ] ;
+    local current  = [ FILE_GET_CONTENTS $(sha) ] ;
 
-    local localContent = ;
-    if [ CHECK_IF_FILE $(manifestLocal) ]
-    {
-        localContent = [ FILE_GET_CONTENTS $(manifestLocal) ] ;
-    }
-
-    if $(remoteContent) != $(localContent)
+    if $(remote) != $(current)
     {
         Fetch-Url $(url) : $(archiveTmp) : $(headers) ;
         Fetch-RmDir $(root) ;
         Fetch-Unzip $(archiveTmp) : $(root) ;
-        FILE_REMOVE $(manifestLocal) ;
-        FILE_RENAME $(manifestTmp) : $(manifestLocal) ;
+        FILE_REMOVE $(sha) ;
+        FILE_WRITE $(sha) : $(remote) ;
         fetched = $(root) ;
     }
-    else
-    {
-        FILE_REMOVE $(manifestTmp) ;
-    }
 
+    FILE_REMOVE $(shaTmp) ;
     FILE_REMOVE $(archiveTmp) ;
 
     return $(fetched) ;

@@ -13,6 +13,8 @@ JAMBASE_BUILTIN_JAM_INCLUDED = true ;
 # take that name. The parent passes the source path once, at
 # configure, to Builtin-Configure.
 
+Load package.jam ;
+
 # Builtin-Top <pkg>
 #
 # Returns pkg.TOP, the source root set by Builtin-Configure. Empty if

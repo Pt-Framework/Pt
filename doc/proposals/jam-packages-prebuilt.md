@@ -5,11 +5,42 @@ proposal: jam-packages.md
 # Prebuilt Packages
 
 A prebuilt bundle supplies compiled headers and libraries for one
-platform. Its manifest is the pure-data file `prebuilt.jam` in the
-bundle root. `prebuilt.jam` translates the `prebuilt.*` assignments
-into the common package variables.
+platform. `prebuilt.jam` in the bundle root translates the
+`prebuilt.*` assignments into the common package variables.
 
-## Manifest {#manifest}
+## Bundle metadata {#metadata}
+
+Each bundle has a `meta/` directory. The files are one line each, so a
+shell or Jam can read them without a parser. `format` and `version`
+use the same grammar as `jam/meta`.
+
+```text
+prebuilt/<id>/
+  meta/
+    format
+    version
+    id
+    sha256
+  prebuilt.jam
+```
+
+`format` is one positive decimal integer. The first value is `1`.
+`version` is `major.minor.patch`, the suffix of the release tag
+`prebuilt-<version>`. It is the bundle release, not a package version.
+`id` is the platform tuple and the archive name.
+
+`sha256` is one line, the SHA-256 of `<id>.tar.gz`. The release
+publishes that line as `<id>.tar.gz.sha256`. It is not inside the
+archive. A download compares the remote line with `meta/sha256`. When
+they differ, the archive is fetched and the remote line is written to
+`meta/sha256`. There is no local hash tool and no file beside the
+tuple directory.
+
+The published archive contains `format`, `version` and `id`. It does
+not contain `sha256`. There is no `contents` inventory. The bundle is
+replaced as a whole, so the archive digest is the freshness check.
+
+## Package file {#manifest}
 
 The file `prebuilt.jam` contains only assignments. It has no rules,
 no include guard and no toolset flags. Unknown fields are ignored by
@@ -87,6 +118,10 @@ Directory layout:
 
 ```
 prebuilt/<id>/
+  meta/
+    format
+    version
+    id
   prebuilt.jam
   zlib/
     include/

@@ -1,9 +1,9 @@
-4532  Jambase
+4513  Jambase
 520  lib/aix.jam
 1162  lib/android.jam
 14402  lib/base.jam
 31170  lib/build.jam
-2860  lib/builtin.jam
+2880  lib/builtin.jam
 6250  lib/clang.jam
 1035  lib/class.jam
 15345  lib/configure.jam
@@ -30,7 +30,7 @@
 5455  lib/package.jam
 4036  lib/pkgconfig.jam
 5411  lib/posix.jam
-9437  lib/prebuilt.jam
+9290  lib/prebuilt.jam
 2750  lib/pt.jam
 2512  lib/qcc.jam
 482  lib/qnxnto.jam
@@ -118,7 +118,7 @@
 478  src/headers.h
 23481  src/jam.c
 11224  src/jam.h
-6588  src/Jambase
+6777  src/Jambase
 4307  src/jambase.c
 378  src/jambase.h
 78060  src/jamgram.c

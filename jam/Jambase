@@ -84,7 +84,6 @@ rule Load
 }
 
 Load base.jam ;
-Load package.jam ;
 
 if [ CHECK_IF_FILE Jamlocal ]
 {

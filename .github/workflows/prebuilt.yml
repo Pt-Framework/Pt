@@ -301,6 +301,16 @@ jobs:
             }
           }
 
+      - name: Write meta
+        shell: pwsh
+        run: |
+          $meta = Join-Path "${{ env.PREFIX }}" "meta"
+          New-Item -ItemType Directory -Force -Path $meta | Out-Null
+          $version = "${{ env.PREBUILT_TAG }}".Substring("prebuilt-".Length)
+          [IO.File]::WriteAllText((Join-Path $meta "format"), "1`n")
+          [IO.File]::WriteAllText((Join-Path $meta "version"), "$version`n")
+          [IO.File]::WriteAllText((Join-Path $meta "id"), "${{ env.PREBUILT_ID }}`n")
+
       - name: Create archive
         shell: pwsh
         run: |
@@ -310,30 +320,12 @@ jobs:
           tar -czf $archive -C "${{ env.PREFIX }}" .
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Create manifest
+      - name: Create checksum
         shell: pwsh
         run: |
           $archive = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PREBUILT_ID }}.tar.gz"
           $hash = (Get-FileHash -Algorithm SHA256 $archive).Hash.ToLower()
-          $jamPath = Join-Path "${{ env.PREFIX }}" "prebuilt.jam"
-          $text = Get-Content $jamPath -Raw
-          $packages = @()
-          foreach ($m in [regex]::Matches($text, 'prebuilt\.(\S+)\.VERSION\s+=\s+([^;]+);')) {
-            $packages += "$($m.Groups[1].Value)/$($m.Groups[2].Value.Trim())"
-          }
-          $manifest = "$archive.manifest"
-          $lines = @(
-            "Version: ${{ env.PREBUILT_TAG }}"
-            "Sha256: $hash"
-            "Date: $(Get-Date -Format 'yyyy-MM-dd')"
-            "Prebuilt: ${{ env.PREBUILT_ID }}"
-            "Compiler: ${{ matrix.compiler }}"
-            "Runtime: ${{ matrix.runtime }}"
-            "Shared: true"
-            "Packages:"
-          )
-          $lines += $packages
-          $lines -join "`n" | Out-File -FilePath $manifest -Encoding utf8 -NoNewline
+          [IO.File]::WriteAllText("$archive.sha256", "$hash`n")
           Copy-Item "${{ env.LOCKFILE }}" (Join-Path "${{ env.EXPORT_DIR }}" "conan.lock") -Force
 
       - name: Upload artifacts
@@ -365,7 +357,7 @@ jobs:
           body: Precompiled dependencies (zlib, png, jpeg, freetype, openssl)
           files: |
             ${{ github.workspace }}/artifacts/*.tar.gz
-            ${{ github.workspace }}/artifacts/*.tar.gz.manifest
+            ${{ github.workspace }}/artifacts/*.tar.gz.sha256
             ${{ github.workspace }}/artifacts/conan.lock
           prerelease: true
           make_latest: false

@@ -17,7 +17,7 @@ flags. See @ref jam-usage for the rest of the configure and build process.
 @section jam-prebuilt-page-Using Using Prebuilt Dependencies
 
 The usual command checks the matching bundle on the server, downloads it when
-the manifest changed, then configures the build:
+the checksum changed, then configures the build:
 
 @code
 jam.bat configure --with-prebuilt
@@ -73,8 +73,13 @@ archive URL ends with the tag and the platform name:
 https://github.com/Pt-Framework/Pt/releases/download/<PREBUILT_RELEASE>/<name>.tar.gz
 @endverbatim
 
-The manifest is the same URL with @c .manifest appended, for example
-@c windows-x64-msvc-md.tar.gz.manifest.
+The checksum is the same URL with @c .sha256 appended, for example
+@c windows-x64-msvc-md.tar.gz.sha256. That file is one line, the SHA-256
+of the archive. After a download Jam stores the same line at
+@c prebuilt/<name>/meta/sha256. The next configure compares the two lines.
+The archive also contains @c meta/format, @c meta/version and @c meta/id,
+each one line. @c format is @c 1. @c version is the release tag without
+the @c prebuilt- prefix. @c id is the platform folder name.
 
 Settings made explicitly always win. If any of the dotted package flags
 (@c pkg.INCLUDES, @c pkg.DEFINES, @c pkg.LINKLIBS, @c pkg.LIBDIR,
@@ -128,6 +133,10 @@ subdirectory, named after @c prebuilt.PACKAGES (@c zlib, @c png, @c jpeg,
 
 @verbatim
 prebuilt/<name>/
+  meta/format
+  meta/version
+  meta/id
+  meta/sha256
   prebuilt.jam
   zlib/
     include/zlib.h
@@ -359,11 +368,12 @@ file is @c prebuilt.jam. Toolset helpers stay in the project:
   @c TOOLSET, with an optional extra suffix such as @c md.
 
 - @c Prebuilt-Fetch-Url ( url : root : headers * ) \n
-  Downloads @c url when the remote @c url.manifest differs from the sidecar
-  @c root.manifest next to @c root. Replaces @c root with the unzipped
-  archive and leaves the sidecar in place. @c headers is an optional list of
-  @c Name: value lines applied to both downloads of that bundle. Any download
-  failure exits. Detects curl and tar itself.
+  Downloads @c url when the remote @c url.sha256 line differs from
+  @c root/meta/sha256. Replaces @c root with the unzipped archive and
+  writes that line to @c root/meta/sha256. The downloaded checksum is
+  removed. @c headers is an optional list of @c Name: value lines applied
+  to both downloads of that bundle. Any download failure exits. Detects
+  curl and tar itself.
 
 - @c Prebuilt-Import ( root ) \n
   Binds the bundle at @c root, sets @c prebuilt.ROOT, includes @c prebuilt.jam,
@@ -456,6 +466,7 @@ platform folder under @c prebuilt. Conan is not required. @c prebuilt.jam is
 
 A generator, including one driven by Conan in CI, writes the same layout:
 
+- @c meta/format, @c meta/version and @c meta/id, one line each
 - One directory per package: @c $(pkg)/include, @c $(pkg)/lib, @c $(pkg)/bin
 - @c prebuilt.jam: library names to @c prebuilt.<pkg>.LIBS, other
   packages in this bundle to @c prebuilt.<pkg>.DEPENDS, OS linker names to
@@ -469,5 +480,5 @@ A generator, including one driven by Conan in CI, writes the same layout:
 - macOS / Linux: one folder name without a runtime suffix until a second
   variant exists
 - Check: @c zlib/include/zlib.h, @c zlib/lib/zlib.lib or @c libz.a, @c bin/
-  when shared, @c prebuilt.jam, no version directories, no absolute
-  machine paths
+  when shared, @c meta/format, @c prebuilt.jam, no version directories,
+  no absolute machine paths
