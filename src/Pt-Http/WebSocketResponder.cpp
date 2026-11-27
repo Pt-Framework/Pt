@@ -97,19 +97,22 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
     if(request.method() != "GET")
     {
         reply.header().set("Allow", "GET");
-        decline(reply, Reply::MethodNotAllowed, "Method Not Allowed");
+        reply.setStatus(Reply::MethodNotAllowed, "Method Not Allowed");
+        finish(reply);
         return;
     }
 
     if( header.versionMajor() < 1 || (header.versionMajor() == 1 && header.versionMinor() < 1) )
     {
-        decline(reply, Reply::BadRequest, "Bad Request");
+        reply.setStatus(Reply::BadRequest, "Bad Request");
+        finish(reply);
         return;
     }
 
     if( header.isChunked() || header.contentLength() > 0 )
     {
-        decline(reply, Reply::BadRequest, "Bad Request");
+        reply.setStatus(Reply::BadRequest, "Bad Request");
+        finish(reply);
         return;
     }
 
@@ -122,20 +125,23 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         // a 426 must name the protocol in Upgrade and list upgrade in Connection
         reply.header().set("Upgrade", "websocket");
         reply.header().setUpgrade();
-        decline(reply, Reply::UpgradeRequired, "Upgrade Required");
+        reply.setStatus(Reply::UpgradeRequired, "Upgrade Required");
+        finish(reply);
         return;
     }
 
     if( ! connectionUpgrade || ! upgradeValue || ! header.contains("Upgrade", "websocket") )
     {
-        decline(reply, Reply::BadRequest, "Bad Request");
+        reply.setStatus(Reply::BadRequest, "Bad Request");
+        finish(reply);
         return;
     }
 
     if( ! header.contains("Sec-WebSocket-Version", "13") )
     {
         reply.header().set("Sec-WebSocket-Version", "13");
-        decline(reply, Reply::UpgradeRequired, "Upgrade Required");
+        reply.setStatus(Reply::UpgradeRequired, "Upgrade Required");
+        finish(reply);
         return;
     }
 
@@ -155,7 +161,8 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
 
     if( keyValue.empty() || ! isWebSocketKey(keyValue) )
     {
-        decline(reply, Reply::BadRequest, "Bad Request");
+        reply.setStatus(Reply::BadRequest, "Bad Request");
+        finish(reply);
         return;
     }
 
@@ -164,30 +171,51 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
     const char* origin = header.get("Origin");
     if( origin && *origin == '\0' )
     {
-        decline(reply, Reply::BadRequest, "Bad Request");
+        reply.setStatus(Reply::BadRequest, "Bad Request");
+        finish(reply);
         return;
     }
 
     if( ! service.acceptsOrigin(origin) )
     {
-        decline(reply, Reply::Forbidden, "Forbidden");
+        reply.setStatus(Reply::Forbidden, "Forbidden");
+        finish(reply);
         return;
     }
 
     std::string protocol;
     if( ! service.selectProtocol(header, protocol) )
     {
-        decline(reply, Reply::BadRequest, "Bad Request");
+        reply.setStatus(Reply::BadRequest, "Bad Request");
+        finish(reply);
         return;
     }
 
     if( ! service.reservePending() )
     {
-        decline(reply, Reply::ServiceUnavailable, "Service Unavailable");
+        reply.setStatus(Reply::ServiceUnavailable, "Service Unavailable");
+        finish(reply);
         return;
     }
 
     _reserved = true;
+
+    if( ! service.onHandshake(request, reply) )
+    {
+        if( reply.statusCode() < 300 )
+        {
+            reply.clear();
+            reply.setStatus(Reply::InternalServerError, "Internal Server Error");
+        }
+
+        finish(reply);
+        return;
+    }
+
+    reply.header().remove("Content-Length");
+    reply.header().remove("Transfer-Encoding");
+    reply.body().clear();
+    reply.discard();
 
     if( ! protocol.empty() )
         reply.header().set("Sec-WebSocket-Protocol", protocol.c_str());
@@ -204,12 +232,14 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
 }
 
 
-void WebSocketResponder::decline(Pt::Http::Reply& reply, unsigned status, const char* text)
+void WebSocketResponder::finish(Pt::Http::Reply& reply)
 {
-    reply.setStatus(status, text);
-
-    if( ! reply.header().contains("Connection", "close") )
+    reply.header().remove("Content-Length");
+    reply.header().remove("Transfer-Encoding");
+    if( reply.header().contains("Connection", "upgrade") )
         reply.header().add("Connection", "close");
+    else
+        reply.header().set("Connection", "close");
 
     setReady(true);
 }

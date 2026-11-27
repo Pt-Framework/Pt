@@ -380,7 +380,8 @@ stream is opened.
 
 `Service::onUpgrade()` stays the generic HTTP boundary. The
 application does not override it to receive WebSocket streams. It
-implements `onGetSession()`.
+implements `onHandshake()` to accept or reject the opening request,
+and `onGetSession()` to create the session after a finished 101.
 
 A pooled session is released back to the pool from
 `onReleaseSession()`, not destroyed. The next upgrade opens a new
@@ -441,6 +442,16 @@ server echoes one, is `protocol()` after the handshake. No echo
 means no protocol was agreed. The client, the service, and the
 session use one classification of a protocol name. A name that is
 not a token is rejected before it is written.
+
+`onHandshake()` runs after those checks and after a place has been
+taken from the session limit. It runs on a server thread, is
+synchronous, and does not block. The default accepts. A false return
+sends the reply the service described and closes the connection. No
+stream is opened, and `onGetSession()` does not run. A status below
+300 on that reply is sent as 500. A missing servlet or a count at
+the limit is still 503 and does not call `onHandshake()`. A null
+return from `onGetSession()` still closes the stream after the 101
+and carries no HTTP status.
 
 ## Timeouts
 

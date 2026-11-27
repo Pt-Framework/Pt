@@ -21,6 +21,7 @@
 #include "Pt/Http/Request.h"
 #include "Pt/Http/Reply.h"
 #include "Pt/Net/Endpoint.h"
+#include "Pt/Net/TcpSocket.h"
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/Timer.h"
@@ -771,6 +772,195 @@ class PartialCloseService : public Pt::Http::WebSocketService
         bool* _partial;
         bool* _finished;
         bool* _closed;
+        Pt::System::EventLoop* _loop;
+};
+
+
+class HandshakePolicyService : public Pt::Http::WebSocketService
+{
+    public:
+        enum Decision
+        {
+            Accept,
+            Unauthorized,
+            NotFound,
+            Unavailable,
+            Untouched,
+            Switching,
+            Framed,
+            Throw
+        };
+
+        explicit HandshakePolicyService(Decision decision)
+        : _decision(decision)
+        , _asked(0)
+        , _follow(0)
+        {}
+
+        std::size_t asked() const
+        { return _asked; }
+
+        void follow(Pt::Http::WebSocket& socket)
+        { _follow = &socket; }
+
+    protected:
+        virtual bool onHandshake(const Pt::Http::Request&, Pt::Http::Reply& reply)
+        {
+            ++_asked;
+
+            if(_decision == Unauthorized)
+            {
+                reply.setStatus(Pt::Http::Reply::Unauthorized, "Unauthorized");
+                reply.header().set("WWW-Authenticate", "Bearer");
+                return false;
+            }
+
+            if(_decision == NotFound)
+            {
+                reply.setStatus(Pt::Http::Reply::NotFound, "Not Found");
+                return false;
+            }
+
+            if(_decision == Unavailable)
+            {
+                reply.setStatus(Pt::Http::Reply::ServiceUnavailable, "Service Unavailable");
+                reply.header().set("Retry-After", "120");
+                reply.body() << "later";
+                return false;
+            }
+
+            if(_decision == Untouched)
+            {
+                reply.header().set("WWW-Authenticate", "Bearer");
+                reply.body() << "kept";
+                return false;
+            }
+
+            if(_decision == Switching)
+            {
+                reply.setStatus(Pt::Http::Reply::SwitchingProtocols, "Switching Protocols");
+                reply.header().set("Sec-WebSocket-Accept", "not-a-digest");
+                reply.header().setUpgrade();
+                return false;
+            }
+
+            if(_decision == Framed)
+            {
+                reply.header().set("Content-Length", "3");
+                reply.header().set("Transfer-Encoding", "chunked");
+                reply.setStatus(Pt::Http::Reply::Forbidden, "Forbidden");
+                reply.body() << "no";
+                return false;
+            }
+
+            if(_decision == Throw)
+            {
+                reply.setStatus(Pt::Http::Reply::NotFound, "Not Found");
+                throw std::runtime_error("handshake failed");
+            }
+
+            return true;
+        }
+
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            if(_follow)
+            {
+                Pt::Http::WebSocket* socket = _follow;
+                _follow = 0;
+                socket->beginConnect("/ws");
+            }
+
+            return new Pt::Http::WebSocketSession(*this, stream, reply);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        Decision _decision;
+        std::size_t _asked;
+        Pt::Http::WebSocket* _follow;
+};
+
+
+class HandshakeHeaderSession : public Pt::Http::WebSocketSession
+{
+    public:
+        HandshakeHeaderSession(Pt::Http::WebSocketService& service,
+                               Pt::Http::Stream& stream,
+                               const Pt::Http::Reply& reply,
+                               std::string& message,
+                               bool& received,
+                               Pt::System::EventLoop& loop)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        , _message(&message)
+        , _received(&received)
+        , _loop(&loop)
+        {
+            inputReady() += Pt::slot(*this, &HandshakeHeaderSession::onInputReady);
+            beginReceive();
+        }
+
+    private:
+        void onInputReady(Pt::Http::WebSocketSession&)
+        {
+            endReceive();
+            _message->assign( std::istreambuf_iterator<char>( incoming().body() ),
+                              std::istreambuf_iterator<char>() );
+            *_received = true;
+            _loop->exit();
+        }
+
+    private:
+        std::string* _message;
+        bool* _received;
+        Pt::System::EventLoop* _loop;
+};
+
+
+class HandshakeHeaderService : public Pt::Http::WebSocketService
+{
+    protected:
+        virtual bool onHandshake(const Pt::Http::Request&, Pt::Http::Reply& reply)
+        {
+            reply.setStatus(Pt::Http::Reply::OK, "OK");
+            reply.header().set("Set-Cookie", "session=1");
+            reply.header().set("Content-Length", "4");
+            reply.header().set("Transfer-Encoding", "chunked");
+            reply.body() << "body";
+            return true;
+        }
+
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new HandshakeHeaderSession(*this, stream, reply,
+                                              _message, _received, *_loop);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    public:
+        HandshakeHeaderService(std::string& message,
+                               bool& received,
+                               Pt::System::EventLoop& loop)
+        : _message(message)
+        , _received(received)
+        , _loop(&loop)
+        {}
+
+    private:
+        std::string& _message;
+        bool& _received;
         Pt::System::EventLoop* _loop;
 };
 
@@ -2287,6 +2477,15 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("LimitNullSessionReleases", *this, &WebSocketTest::LimitNullSessionReleases);
             registerMethod("LimitConstructFailsReleases", *this, &WebSocketTest::LimitConstructFailsReleases);
             registerMethod("LimitInvalidHandshake", *this, &WebSocketTest::LimitInvalidHandshake);
+            registerMethod("HandshakeUnauthorized", *this, &WebSocketTest::HandshakeUnauthorized);
+            registerMethod("HandshakeNotFound", *this, &WebSocketTest::HandshakeNotFound);
+            registerMethod("HandshakeUnavailable", *this, &WebSocketTest::HandshakeUnavailable);
+            registerMethod("HandshakeUntouched", *this, &WebSocketTest::HandshakeUntouched);
+            registerMethod("HandshakeSwitching", *this, &WebSocketTest::HandshakeSwitching);
+            registerMethod("HandshakeCookie", *this, &WebSocketTest::HandshakeCookie);
+            registerMethod("HandshakeFraming", *this, &WebSocketTest::HandshakeFraming);
+            registerMethod("HandshakeLimitSkips", *this, &WebSocketTest::HandshakeLimitSkips);
+            registerMethod("HandshakeThrows", *this, &WebSocketTest::HandshakeThrows);
         }
 
         void setUp()
@@ -3269,6 +3468,297 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             _status = _limitClient->reply().statusCode();
             _loop->exit();
+        }
+
+        void HandshakeUnauthorized()
+        {
+            checkHandshakeDecision(8311, HandshakePolicyService::Unauthorized, 401u);
+            PT_UNIT_ASSERT_EQUALS(_copied, "Bearer");
+            PT_UNIT_ASSERT(_message.empty());
+        }
+
+        void HandshakeNotFound()
+        {
+            checkHandshakeDecision(8312, HandshakePolicyService::NotFound, 404u);
+        }
+
+        void HandshakeUnavailable()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8313);
+            Pt::Http::Server server(*_loop, ep);
+            HandshakePolicyService service(HandshakePolicyService::Unavailable);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            _limitClient = &http;
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onHandshakeDeclined);
+            socket.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(_status, 503u);
+            PT_UNIT_ASSERT_EQUALS(_copied, "120");
+            PT_UNIT_ASSERT_EQUALS(_message, "later");
+            PT_UNIT_ASSERT_EQUALS(service.asked(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(service.socketCount(), static_cast<std::size_t>(0));
+            _limitClient = 0;
+        }
+
+        void HandshakeUntouched()
+        {
+            checkHandshakeDecision(8314, HandshakePolicyService::Untouched, 500u);
+            PT_UNIT_ASSERT(_copied.empty());
+            PT_UNIT_ASSERT(_message.empty());
+        }
+
+        void HandshakeSwitching()
+        {
+            checkHandshakeDecision(8315, HandshakePolicyService::Switching, 500u);
+            PT_UNIT_ASSERT(_copied.empty());
+            PT_UNIT_ASSERT( ! _handshake );
+        }
+
+        void HandshakeCookie()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8316);
+            Pt::Http::Server server(*_loop, ep);
+            HandshakeHeaderService service(_message, _received, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            _limitClient = &http;
+            _limitSocket = &socket;
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onHandshakeCookie);
+            socket.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(_status, 101u);
+            PT_UNIT_ASSERT_EQUALS(_copied, "session=1");
+            PT_UNIT_ASSERT(_received);
+            PT_UNIT_ASSERT_EQUALS(_message, "frame");
+            _limitClient = 0;
+            _limitSocket = 0;
+        }
+
+        void HandshakeFraming()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8317);
+            Pt::Http::Server server(*_loop, ep);
+            HandshakePolicyService service(HandshakePolicyService::Framed);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Net::TcpSocket raw(*_loop);
+            raw.connected() += Pt::slot(*this, &WebSocketTest::onRawConnected);
+            raw.outputReady() += Pt::slot(*this, &WebSocketTest::onRawWritten);
+            raw.inputReady() += Pt::slot(*this, &WebSocketTest::onRawInput);
+            raw.beginConnect(ep);
+            _loop->run();
+
+            PT_UNIT_ASSERT(_received);
+            const std::string::size_type headerEnd = _message.find("\r\n\r\n");
+            PT_UNIT_ASSERT(headerEnd != std::string::npos);
+            const std::string header = _message.substr(0, headerEnd);
+            PT_UNIT_ASSERT_EQUALS(countHeader(header, "Content-Length"), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(countHeader(header, "Transfer-Encoding"), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT(header.find("Content-Length: 2\r\n") != std::string::npos);
+            PT_UNIT_ASSERT_EQUALS(_message.substr(headerEnd + 4), "no");
+        }
+
+        void HandshakeLimitSkips()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8318);
+            Pt::Http::Server server(*_loop, ep);
+            HandshakePolicyService service(HandshakePolicyService::Accept);
+            service.setMaxSockets(1);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client first(*_loop, ep);
+            Pt::Http::WebSocket held(first);
+            Pt::Http::Client second(*_loop, ep);
+            Pt::Http::WebSocket rejected(second);
+            _limitClient = &second;
+            service.follow(rejected);
+            held.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIdle);
+            rejected.connected() += Pt::slot(*this, &WebSocketTest::onHandshakeDeclined);
+            held.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(_status, 503u);
+            PT_UNIT_ASSERT_EQUALS(service.asked(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(service.socketCount(), static_cast<std::size_t>(1));
+            _limitClient = 0;
+        }
+
+        void HandshakeThrows()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8319);
+            Pt::Http::Server server(*_loop, ep);
+            HandshakePolicyService service(HandshakePolicyService::Throw);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.beginConnect("/ws");
+            PT_UNIT_ASSERT_THROW(_loop->run(), std::runtime_error);
+
+            PT_UNIT_ASSERT_EQUALS(service.asked(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(service.socketCount(), static_cast<std::size_t>(0));
+        }
+
+        void checkHandshakeDecision(unsigned short port,
+                                    HandshakePolicyService::Decision decision,
+                                    unsigned status)
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", port);
+            Pt::Http::Server server(*_loop, ep);
+            HandshakePolicyService service(decision);
+            Pt::Http::WebSocketServlet sockets(service);
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            _limitClient = &http;
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onHandshakeDeclined);
+            socket.beginConnect("/ws");
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(_status, status);
+            PT_UNIT_ASSERT_EQUALS(service.socketCount(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(service.asked(), static_cast<std::size_t>(1));
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << "not sent";
+            PT_UNIT_ASSERT_THROW(socket.beginSend(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
+            _limitClient = 0;
+        }
+
+        void onHandshakeDeclined(Pt::Http::WebSocket& socket)
+        {
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::Http::HttpError);
+            if( ! _limitClient )
+                return;
+
+            Pt::Http::Reply& reply = _limitClient->reply();
+            _status = reply.statusCode();
+            const char* authenticate = reply.header().get("WWW-Authenticate");
+            const char* retryAfter = reply.header().get("Retry-After");
+            const char* accept = reply.header().get("Sec-WebSocket-Accept");
+            if(authenticate)
+                _copied = authenticate;
+            else if(retryAfter)
+                _copied = retryAfter;
+
+            _handshake = accept != 0 || reply.header().isUpgrade();
+            _message.assign( std::istreambuf_iterator<char>( reply.body() ),
+                             std::istreambuf_iterator<char>() );
+            _loop->exit();
+        }
+
+        void onHandshakeThrown(Pt::Http::WebSocket& socket)
+        {
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), std::exception);
+            if(_limitClient)
+                PT_UNIT_ASSERT(_limitClient->reply().statusCode() != 404u);
+
+            _declined = true;
+            _loop->exit();
+        }
+
+        void onHandshakeCookie(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            _status = _limitClient->reply().statusCode();
+            const char* cookie = _limitClient->reply().header().get("Set-Cookie");
+            if(cookie)
+                _copied = cookie;
+
+            _message.clear();
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onHandshakeFrame);
+            socket.outputReady() += Pt::slot(*this, &WebSocketTest::onHandshakeFrameSent);
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << "frame";
+            socket.beginSend();
+        }
+
+        void onHandshakeFrameSent(Pt::Http::WebSocket& socket)
+        {
+            socket.endSend();
+        }
+
+        void onHandshakeFrame(Pt::Http::WebSocket& socket)
+        {
+            socket.endReceive();
+            _message.assign( std::istreambuf_iterator<char>( socket.incoming().body() ),
+                             std::istreambuf_iterator<char>() );
+            _received = true;
+            _loop->exit();
+        }
+
+        void onHandshakeAccepted(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            _received = true;
+            _loop->exit();
+        }
+
+        void onRawConnected(Pt::Net::TcpSocket& socket)
+        {
+            socket.endConnect();
+            const char request[] =
+                "GET /ws HTTP/1.1\r\n"
+                "Host: 127.0.0.1\r\n"
+                "Connection: Upgrade\r\n"
+                "Upgrade: websocket\r\n"
+                "Sec-WebSocket-Version: 13\r\n"
+                "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
+                "\r\n";
+            socket.beginWrite(request, sizeof(request) - 1);
+        }
+
+        void onRawWritten(Pt::System::IODevice& device)
+        {
+            device.endWrite();
+            device.beginRead(_raw, sizeof(_raw));
+        }
+
+        void onRawInput(Pt::System::IODevice& device)
+        {
+            const std::size_t n = device.endRead();
+            _message.append(_raw, n);
+            if( _message.find("\r\n\r\n") == std::string::npos
+                || _message.size() < _message.find("\r\n\r\n") + 6 )
+            {
+                device.beginRead(_raw, sizeof(_raw));
+                return;
+            }
+
+            _received = true;
+            _loop->exit();
+        }
+
+        static std::size_t countHeader(const std::string& header, const char* name)
+        {
+            const std::string field = std::string(name) + ":";
+            std::size_t count = 0;
+            std::string::size_type at = 0;
+            while( (at = header.find(field, at)) != std::string::npos )
+            {
+                ++count;
+                at += field.size();
+            }
+            return count;
         }
 
         // An invalid handshake is declined before it takes a place from the limit.
@@ -6009,6 +6499,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         Pt::Http::WebSocketMessage::Type _type;
         Pt::Http::WebSocket* _limitSocket;
         Pt::Http::Client* _limitClient;
+        char _raw[512];
         DeferredCloseService* _deferredCloseService;
         Pt::System::Timer* _ioWait;
         Pt::Http::Server* _server;

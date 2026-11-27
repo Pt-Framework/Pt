@@ -84,7 +84,13 @@
     missing or invalid, with 426 and Sec-WebSocket-Version: 13 when
     Sec-WebSocket-Version is not 13, with 400 when Origin is empty,
     or with 403 when a configured Origin list rejects the Origin
-    value. The responder is not the session.
+    value. After those checks, and after a place has been taken from
+    the session limit, %onHandshake() may reject the opening request.
+    A false return sends the reply the service described, closes the
+    connection, and opens no stream. A status below 300 on that reply
+    is sent as 500. A missing servlet or a reached session limit is
+    still 503 and does not call %onHandshake(). The responder is not
+    the session.
     %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
     name several values, in preference order. An empty list accepts
@@ -101,9 +107,11 @@
     %setIdleTimeout(), %setPingInterval(), %setPingTimeout(),
     %setCloseTimeout() and %setMaxMessageSize() are endpoint policy
     of the %WebSocketService.
-    The handshake takes a place from the session limit only after all
-    other checks have passed, so an invalid handshake never takes a
-    place and is answered with its own status. The limit covers %socketCount() and the
+    The handshake takes a place from the session limit only after the
+    field checks have passed, so an invalid handshake never takes a
+    place and is answered with its own status. %onHandshake() runs
+    after that place is taken. A rejection there holds the place until
+    the responder is released. The limit covers %socketCount() and the
     handshakes that hold a place. A place stays taken until the server
     releases the responder, which is after it has handed over the
     stream. %socketCount() is the number of sessions %getSession()

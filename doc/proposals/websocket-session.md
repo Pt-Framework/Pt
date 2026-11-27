@@ -71,6 +71,15 @@ All of these checks run before the handshake takes a place from the
 session limit. Only a handshake that passes them is 503 at the
 limit, so an invalid handshake never takes a place.
 
+`onHandshake()` runs after that place is taken. The default accepts
+and leaves the reply unchanged. A false return sends the reply the
+service described, with a status of 300 or higher, and closes the
+connection. A status below 300 is sent as 500 with the reply
+cleared. The place stays taken until the responder is released. A
+full service does not call `onHandshake()`. The responder discards a
+body before it writes the 101, and removes `Content-Length` and
+`Transfer-Encoding` before it sends, so the writer owns both fields.
+
 The request is an upgrade to `websocket` only when `Connection`
 lists the token `Upgrade` and `Upgrade` lists the token
 `websocket`. Both comparisons ignore ASCII case. Optional

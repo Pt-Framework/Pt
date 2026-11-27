@@ -318,6 +318,12 @@ void WebSocketService::onSessionClosed(WebSocketSession& session)
 }
 
 
+bool WebSocketService::onHandshake(const Request&, Reply&)
+{
+    return true;
+}
+
+
 Responder* WebSocketService::onGetResponder(const Request&)
 {
     return new WebSocketResponder(*this);

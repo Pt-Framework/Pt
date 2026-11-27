@@ -135,6 +135,11 @@ class WebSocketServlet;
     }
     @endcode
 
+    %onHandshake() runs before the 101 is written. Return false there
+    to reject the opening request with an HTTP status. The handshake
+    responder sends that reply and closes the connection. No stream
+    is opened. %onGetSession() does not run.
+
     %getSession() is the factory call. It calls %onGetSession() and
     counts a non-null session. %releaseSession() calls
     %onReleaseSession() and drops that count. %onGetSession() creates
@@ -143,12 +148,14 @@ class WebSocketServlet;
     reply. Both are valid for that call. Copy any header the session
     must keep. The session does not store the request or the reply.
     The two methods must use the same allocator. A pool, or any other
-    detach, lives in the derived service. Return null from
-    %onGetSession() to decline the upgrade. The servlet owns the live
-    sessions only. This service owns the endpoint policy, the
-    allocator, and the count of sessions %getSession() returned and
-    %releaseSession() has not yet released. This service does not keep
-    a session list. %socketCount() is that count.
+    detach, lives in the derived service. A null return from
+    %onGetSession() closes the stream after the 101 and carries no
+    HTTP status. A rejection that needs a status uses %onHandshake().
+    The servlet owns the live sessions only. This service owns the
+    endpoint policy, the allocator, and the count of sessions
+    %getSession() returned and %releaseSession() has not yet released.
+    This service does not keep a session list. %socketCount() is that
+    count.
 
     @ingroup Pt-Http-WebSocket-Server
 */
@@ -361,13 +368,56 @@ class PT_HTTP_API WebSocketService : public Service
                                const Reply& reply) final;
 
     protected:
+        /** @brief Accepts or rejects the opening handshake.
+
+            Runs on a server thread, before the 101 is written, and
+            only after the field checks have passed and a place has
+            been taken from the session limit. It does not run on the
+            loop of the server. It is synchronous and must not block.
+            A check that needs I/O has no place here. The responder
+            does not hold the service mutex during this call. Protect
+            shared state the way the Origin list and the socket count
+            are protected.
+
+            @a request and @a reply are valid until this call returns.
+            There is no stream, no event loop, and no servlet. The
+            reply starts at status 200 with an empty header and an
+            empty body.
+
+            Return true to accept. Extra header fields, such as
+            Set-Cookie, are kept. A status or a body set here is
+            discarded. The responder writes status 101, Upgrade,
+            Connection, and Sec-WebSocket-Accept afterwards.
+
+            Return false to reject. Describe the reply completely:
+            status, reason, header, and body. A status of 300 or
+            higher is sent, and the connection is closed. No stream
+            is opened. A status below 300, including the default 200
+            and a 101 set here, is a broken contract and is sent as
+            500 without the header or body set here. Do not set
+            Content-Length or Transfer-Encoding. The writer owns both
+            and a value set here is removed before the reply is sent.
+
+            An exception does not send the reply prepared here.
+            %HttpError becomes 400. Any other exception ends the
+            exchange without that reply. The reserved place is
+            released when the responder is destroyed. Return false to
+            send a status.
+
+            The default returns true and leaves @a reply unchanged.
+        */
+        virtual bool onHandshake(const Request& request, Reply& reply);
+
         /** @brief Creates the session for @a stream.
 
-            Called by %getSession(). The active %WebSocketServlet owns
-            a non-null result. @a request is the opening request and
-            @a reply is the opening reply. Both are valid for this
-            call. Copy any header the session must keep. Return null
-            to decline the upgrade. A null return is not counted.
+            Called by %getSession() after a finished 101. The active
+            %WebSocketServlet owns a non-null result. @a request is
+            the opening request and @a reply is the opening reply.
+            Both are valid for this call. Copy any header the session
+            must keep. Return null to close the stream. A null return
+            carries no HTTP status and is not counted. A rejection
+            that needs a status uses %onHandshake() before the 101 is
+            written.
         */
         virtual WebSocketSession* onGetSession(Stream& stream,
                                                const Request& request,
