@@ -149,13 +149,17 @@ if errorlevel 1 (
     exit /b 1
 )
 
-where tar.exe >nul 2>&1
-if errorlevel 1 (
-    echo Required tool "tar.exe" was not found.
-    rd /s /q "%INCOMING%"
-    exit /b 1
+set "TAR=%SystemRoot%\System32\tar.exe"
+if not exist "%TAR%" (
+    where tar.exe >nul 2>&1
+    if errorlevel 1 (
+        echo Required tool "tar.exe" was not found.
+        rd /s /q "%INCOMING%"
+        exit /b 1
+    )
+    set "TAR=tar.exe"
 )
-tar.exe -xzf "%ARCHIVE%" -C "%INCOMING%"
+"%TAR%" -xzf "%ARCHIVE%" -C "%INCOMING%"
 if errorlevel 1 (
     echo Could not extract "%ARCHIVE%".
     rd /s /q "%INCOMING%"
