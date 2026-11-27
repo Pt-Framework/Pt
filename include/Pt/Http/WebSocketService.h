@@ -69,7 +69,7 @@ class WebSocketServlet;
     value.
     The responder is not the session. %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
-    name several values, in preference order. An empty list accepts
+    name several accepted values. An empty list accepts
     the upgrade and selects no name. A non-empty list selects the
     first offered name that is also accepted, and a request that
     offers none of them is answered with 400. %addOrigin() names one
@@ -178,7 +178,7 @@ class PT_HTTP_API WebSocketService : public Service
         */
         ~WebSocketService();
 
-        /** @brief Returns accepted Sec-WebSocket-Protocol names in preference order.
+        /** @brief Returns accepted Sec-WebSocket-Protocol names in the order they were added.
 
             Returns a copy, because the list may change in another
             thread while a handshake reads it.
@@ -187,8 +187,7 @@ class PT_HTTP_API WebSocketService : public Service
 
         /** @brief Adds one accepted Sec-WebSocket-Protocol name.
 
-            Names are matched in the order they were added. An empty
-            list accepts the upgrade and selects no name.
+            An empty list accepts the upgrade and selects no name.
 
             @throw %std::invalid_argument if @a name is empty or is
             not a single protocol token.

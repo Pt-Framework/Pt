@@ -93,7 +93,7 @@
     the session.
     %addProtocol() names one
     Sec-WebSocket-Protocol value this endpoint accepts. Several calls
-    name several values, in preference order. An empty list accepts
+    name several accepted values. An empty list accepts
     the upgrade and selects no name. A non-empty list selects the
     first offered name that is also accepted, and a request that
     offers none of them is answered with 400. %addOrigin() names one
