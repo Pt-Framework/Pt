@@ -926,47 +926,6 @@ void HeaderParser::pushValue()
     ev.onValue(token);
 }
 
-
-bool HeaderParser::isStartLine() const
-{
-    return state == &HeaderParser::state_cmd0
-        || state == &HeaderParser::state_cmd
-        || state == &HeaderParser::state_url0
-        || state == &HeaderParser::state_url
-        || state == &HeaderParser::state_urlesc
-        || state == &HeaderParser::state_qparam
-        || state == &HeaderParser::state_protocol0
-        || state == &HeaderParser::state_protocol
-        || state == &HeaderParser::state_version0
-        || state == &HeaderParser::state_version_major
-        || state == &HeaderParser::state_version_major_e
-        || state == &HeaderParser::state_version_minor
-        || state == &HeaderParser::state_end0
-        || state == &HeaderParser::state_cl_protocol0
-        || state == &HeaderParser::state_cl_protocol
-        || state == &HeaderParser::state_cl_version0
-        || state == &HeaderParser::state_cl_version_major
-        || state == &HeaderParser::state_cl_version_major_e
-        || state == &HeaderParser::state_cl_version_minor
-        || state == &HeaderParser::state_cl_httpresult0
-        || state == &HeaderParser::state_cl_httpresult
-        || state == &HeaderParser::state_cl_httpresulttext
-        || state == &HeaderParser::state_cl_httpresult_cr;
-}
-
-
-bool HeaderParser::isHeader() const
-{
-    return state == &HeaderParser::state_h0
-        || state == &HeaderParser::state_hcr
-        || state == &HeaderParser::state_hfieldname
-        || state == &HeaderParser::state_hfieldbody0
-        || state == &HeaderParser::state_hfieldbody
-        || state == &HeaderParser::state_hfieldbody_cr
-        || state == &HeaderParser::state_hfieldbody_crlf
-        || state == &HeaderParser::state_hend_cr;
-}
-
 } // namespace
 
 } // namespace

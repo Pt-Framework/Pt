@@ -119,8 +119,6 @@ class PT_HTTP_API HeaderParser
 
     private:
         void pushValue();
-        bool isStartLine() const;
-        bool isHeader() const;
 
     private:
         state_type state;
@@ -147,7 +145,8 @@ class PT_HTTP_API HeaderParser
         /// parses a single character and returns true, if message is finished
         bool parse(char ch)
         {
-            if( isStartLine() || isHeader() )
+            if(state != &HeaderParser::state_end &&
+               state != &HeaderParser::state_error)
             {
                 if(_headerSize >= MessageHeader::MaxHeaderSize)
                 {
@@ -159,7 +158,9 @@ class PT_HTTP_API HeaderParser
             }
 
             (this->*state)(ch);
-            return state == &HeaderParser::state_end || state == &HeaderParser::state_error;
+
+            return state == &HeaderParser::state_end ||
+                   state == &HeaderParser::state_error;
         }
 
         bool begin() const
