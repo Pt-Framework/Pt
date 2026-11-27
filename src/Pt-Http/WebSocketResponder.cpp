@@ -232,7 +232,7 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
 
 void WebSocketResponder::decline(Pt::Http::Reply& reply)
 {
-    if( reply.header().contains("Connection", "upgrade") )
+    if( reply.statusCode() == Reply::UpgradeRequired )
         reply.header().add("Connection", "close");
     else
         reply.header().set("Connection", "close");

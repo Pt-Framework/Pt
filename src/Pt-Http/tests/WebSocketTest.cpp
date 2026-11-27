@@ -812,6 +812,7 @@ class HandshakePolicyService : public Pt::Http::WebSocketService
             {
                 reply.setStatus(Pt::Http::Reply::Unauthorized, "Unauthorized");
                 reply.header().set("WWW-Authenticate", "Bearer");
+                reply.header().setUpgrade();
                 return false;
             }
 
@@ -3476,6 +3477,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             checkHandshakeDecision(8311, HandshakePolicyService::Unauthorized, 401u);
             PT_UNIT_ASSERT_EQUALS(_copied, "Bearer");
             PT_UNIT_ASSERT(_message.empty());
+            PT_UNIT_ASSERT( ! _handshake );
         }
 
         void HandshakeNotFound()
@@ -3661,7 +3663,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             else if(retryAfter)
                 _copied = retryAfter;
 
-            _handshake = accept != 0 || reply.header().isUpgrade();
+            _handshake = accept != 0
+                      || reply.header().contains("Connection", "upgrade");
             _message.assign( std::istreambuf_iterator<char>( reply.body() ),
                              std::istreambuf_iterator<char>() );
             _loop->exit();
