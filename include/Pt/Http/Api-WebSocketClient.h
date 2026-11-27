@@ -56,8 +56,8 @@
     remain in the request; the socket keeps no separate copy.
     %beginConnect() discards a prepared body and query parameters
     from an earlier request, sets HTTP/1.1 and the new target, and
-    resets Content-Length, Transfer-Encoding and Trailer for an
-    empty GET. The Upgrade fields, key, version and protocol offer
+    resets Trailer for an empty GET. The writer determines
+    Content-Length and Transfer-Encoding. The Upgrade fields, key, version and protocol offer
     are controlled by the socket. A nonempty Origin argument
     replaces a prepared Origin field; otherwise it is preserved.
     Do not modify the header while the handshake is pending.

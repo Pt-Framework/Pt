@@ -212,8 +212,6 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         return;
     }
 
-    reply.header().remove("Content-Length");
-    reply.header().remove("Transfer-Encoding");
     reply.body().clear();
     reply.discard();
 
@@ -234,8 +232,6 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
 
 void WebSocketResponder::finish(Pt::Http::Reply& reply)
 {
-    reply.header().remove("Content-Length");
-    reply.header().remove("Transfer-Encoding");
     if( reply.header().contains("Connection", "upgrade") )
         reply.header().add("Connection", "close");
     else

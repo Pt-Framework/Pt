@@ -808,6 +808,8 @@ class ServerTest : public Pt::Unit::TestSuite
             client.replyReceived() += Pt::slot(*this, &ServerTest::onHelloReceived);
             client.request().setUrl("/test");
             client.request().header().set("foo", "bar");
+            client.request().header().set("Content-Length", "9");
+            client.request().header().set("Transfer-Encoding", "chunked");
             client.request().body() << "Hello";
             client.beginReceive();
 
@@ -823,6 +825,9 @@ class ServerTest : public Pt::Unit::TestSuite
             if( progress.header() )
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.reply().header().contentLength(),
+                                      static_cast<std::size_t>(14));
+                PT_UNIT_ASSERT( ! client.reply().header().has("Transfer-Encoding") );
             }
 
             if( progress.body() )

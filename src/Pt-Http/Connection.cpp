@@ -1457,6 +1457,9 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     MessageHeader::FieldIterator it;
     for (it = header.begin(); it != header.end(); ++it)
     {
+        if( it->matches("Content-Length") || it->matches("Transfer-Encoding") )
+            continue;
+
         os << it->name() << ": " << it->value() << "\r\n";
     }
 
@@ -1520,6 +1523,9 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     MessageHeader::FieldIterator it;
     for(it = header.begin(); it != header.end(); ++it)
     {
+        if( it->matches("Content-Length") || it->matches("Transfer-Encoding") )
+            continue;
+
         os << it->name() << ": " << it->value() << "\r\n";
     }
 

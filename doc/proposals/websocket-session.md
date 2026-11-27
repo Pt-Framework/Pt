@@ -77,8 +77,9 @@ service described, with a status of 300 or higher, and closes the
 connection. A status below 300 is sent as 500 with the reply
 cleared. The place stays taken until the responder is released. A
 full service does not call `onHandshake()`. The responder discards a
-body before it writes the 101, and removes `Content-Length` and
-`Transfer-Encoding` before it sends, so the writer owns both fields.
+body before it writes the 101. The writer determines
+`Content-Length` and `Transfer-Encoding` and does not send a value
+set on the reply.
 
 The request is an upgrade to `websocket` only when `Connection`
 lists the token `Upgrade` and `Upgrade` lists the token

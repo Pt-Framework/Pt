@@ -394,9 +394,9 @@ class PT_HTTP_API WebSocketService : public Service
             higher is sent, and the connection is closed. No stream
             is opened. A status below 300, including the default 200
             and a 101 set here, is a broken contract and is sent as
-            500 without the header or body set here. Do not set
-            Content-Length or Transfer-Encoding. The writer owns both
-            and a value set here is removed before the reply is sent.
+            500 without the header or body set here. The writer
+            determines Content-Length and Transfer-Encoding. A value
+            set here is not sent.
 
             An exception does not send the reply prepared here.
             %HttpError becomes 400. Any other exception ends the

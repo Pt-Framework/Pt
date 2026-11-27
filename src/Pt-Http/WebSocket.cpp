@@ -104,8 +104,6 @@ void WebSocket::beginConnect(const std::string& url, const std::string& origin)
     request.setUrl(_path);
     request.setQParams(std::string());
     request.header().setVersion(1, 1);
-    request.header().remove("Content-Length");
-    request.header().remove("Transfer-Encoding");
     request.header().remove("Trailer");
     request.header().remove("Sec-WebSocket-Protocol");
     request.header().set("Connection", "Upgrade");
