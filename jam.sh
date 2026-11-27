@@ -7,9 +7,8 @@ JAM_DIST_ROOT=${JAM_DIST_ROOT:-"$JAM_DIST_ROOT_DEFAULT"}
 
 ROOT=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 JAM_ROOT=${JAM_ROOT:-"$ROOT/jam"}
-CORE="$JAM_ROOT/core"
-INCOMING="$JAM_ROOT/core.incoming"
-OUTGOING="$JAM_ROOT/core.outgoing"
+INCOMING="$JAM_ROOT.incoming"
+OUTGOING="$JAM_ROOT.outgoing"
 SUPPORTED_FORMAT=1
 
 INIT=
@@ -30,9 +29,9 @@ Linux)
     exit 1
     ;;
 esac
-JAM_BINARY_DIR="$CORE/bin/$HOST_ID"
+JAM_BINARY_DIR="$JAM_ROOT/bin/$HOST_ID"
 JAM="$JAM_BINARY_DIR/jam"
-SRC="$CORE/src"
+SRC="$JAM_ROOT/src"
 
 SOURCES="
 builtins.c class.c command.c compile.c constants.c debug.c debugger.c execcmd.c execunix.c
@@ -46,15 +45,15 @@ modules/order.c
 
 need_init()
 {
-    echo "Jam core is missing or does not match snapshot $JAM_PIN at \"$JAM_ROOT\"." >&2
+    echo "Jam is missing or does not match snapshot $JAM_PIN at \"$JAM_ROOT\"." >&2
     echo "Run: \"$0\" init" >&2
     exit 1
 }
 
-invalid_core()
+invalid_snapshot()
 {
-    echo "Jam core is invalid at \"$JAM_ROOT\"." >&2
-    echo "Remove core/ and run init to install snapshot $JAM_PIN." >&2
+    echo "Jam is invalid at \"$JAM_ROOT\"." >&2
+    echo "Remove \"$JAM_ROOT\" and run init to install snapshot $JAM_PIN." >&2
     exit 1
 }
 
@@ -118,7 +117,7 @@ version_ok()
     return 1
 }
 
-core_state()
+snapshot_state()
 {
     _core=$1
     if [ -e "$_core" ] && [ ! -d "$_core" ]; then
@@ -214,23 +213,16 @@ download_archive()
 
 install_snapshot()
 {
-    if [ ! -d "$JAM_ROOT" ]; then
-        mkdir -p "$JAM_ROOT" || {
-            echo "Could not create \"$JAM_ROOT\"." >&2
-            exit 1
-        }
+    if [ ! -d "$JAM_ROOT" ] && [ -d "$OUTGOING" ]; then
+        mv "$OUTGOING" "$JAM_ROOT"
     fi
 
-    if [ ! -d "$CORE" ] && [ -d "$OUTGOING" ]; then
-        mv "$OUTGOING" "$CORE"
-    fi
-
-    STATE=`core_state "$CORE"`
+    STATE=`snapshot_state "$JAM_ROOT"`
     if [ "$STATE" = "match" ]; then
         return
     fi
     if [ "$STATE" = "invalid" ]; then
-        invalid_core
+        invalid_snapshot
     fi
 
     echo "Installing Jam snapshot $JAM_PIN..."
@@ -257,30 +249,30 @@ install_snapshot()
         exit 1
     fi
 
-    STAGED="$INCOMING/core"
+    STAGED="$INCOMING/jam"
     if ! check_extracted "$STAGED"; then
         echo "Downloaded snapshot failed checks." >&2
         rm -rf "$INCOMING"
         exit 1
     fi
 
-    if [ -d "$CORE" ]; then
+    if [ -d "$JAM_ROOT" ]; then
         rm -rf "$OUTGOING"
-        if ! mv "$CORE" "$OUTGOING"; then
-            echo "Could not move \"$CORE\" aside." >&2
+        if ! mv "$JAM_ROOT" "$OUTGOING"; then
+            echo "Could not move \"$JAM_ROOT\" aside." >&2
             rm -rf "$INCOMING"
             exit 1
         fi
-        if ! mv "$STAGED" "$CORE"; then
-            echo "Could not install \"$CORE\"." >&2
-            mv "$OUTGOING" "$CORE"
+        if ! mv "$STAGED" "$JAM_ROOT"; then
+            echo "Could not install \"$JAM_ROOT\"." >&2
+            mv "$OUTGOING" "$JAM_ROOT"
             rm -rf "$INCOMING"
             exit 1
         fi
         rm -rf "$OUTGOING"
     else
-        if ! mv "$STAGED" "$CORE"; then
-            echo "Could not install \"$CORE\"." >&2
+        if ! mv "$STAGED" "$JAM_ROOT"; then
+            echo "Could not install \"$JAM_ROOT\"." >&2
             rm -rf "$INCOMING"
             exit 1
         fi
@@ -294,7 +286,7 @@ build_host_binary()
         return
     fi
     if [ ! -d "$SRC" ]; then
-        invalid_core
+        invalid_snapshot
     fi
 
     echo "Building jam..."
@@ -353,9 +345,9 @@ initialize()
     done
 
     install_snapshot "$@"
-    STATE=`core_state "$CORE"`
+    STATE=`snapshot_state "$JAM_ROOT"`
     if [ "$STATE" != "match" ]; then
-        invalid_core
+        invalid_snapshot
     fi
     build_host_binary
 }
@@ -365,9 +357,9 @@ if [ -n "$INIT" ]; then
     exit 0
 fi
 
-STATE=`core_state "$CORE"`
+STATE=`snapshot_state "$JAM_ROOT"`
 if [ "$STATE" = "invalid" ]; then
-    invalid_core
+    invalid_snapshot
 fi
 if [ "$STATE" != "match" ]; then
     need_init
@@ -375,4 +367,4 @@ fi
 build_host_binary
 
 export JAM_ROOT
-exec "$JAM" -f "$CORE/Jambase" "$@"
+exec "$JAM" -f "$JAM_ROOT/Jambase" "$@"

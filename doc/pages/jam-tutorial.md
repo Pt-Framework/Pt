@@ -9,7 +9,7 @@ sources, headers, and the files required for building with Jam there.
 
 Copy the entry scripts and the Jam snapshot into the project root as
 described in @ref jam-getting. After that step the project root contains
-@c jam.sh, @c jam.bat, and @c jam/core/.
+@c jam.sh, @c jam.bat, and @c jam/.
 
 All examples in this tutorial use the script @c jam.sh when commands are
 shown. On a Windows build host, run @c jam.bat instead of @c jam.sh,
@@ -26,7 +26,6 @@ adding those two files the project directory contains:
 - jam.sh
 - jam.bat
 - [jam]
-    - [core]
 - Jamconfigure
 - Jamfile
 @endverbatim

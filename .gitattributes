@@ -24,12 +24,12 @@
 *.props            text eol=crlf
 *.targets          text eol=crlf
 
-jam/core/** text eol=lf
+jam/** text eol=lf
 
 *.exe      binary
 jam/jam-linux-x64 binary
-jam/core/bin/** binary
-jam/core/meta/* text eol=lf
+jam/bin/** binary
+jam/meta/* text eol=lf
 *.zip      binary
 *.pdf      binary
 *.pptx     binary

@@ -25,7 +25,7 @@ jobs:
         id: version
         run: |
           set -euo pipefail
-          file=jam/core/meta/version
+          file=jam/meta/version
           if [ ! -r "$file" ]; then
             echo "Missing $file" >&2
             exit 1
@@ -71,15 +71,15 @@ jobs:
           - os: windows-2022
             host_id: windows-x64
             init: .\jam.bat init
-            binary: jam/core/bin/windows-x64/jam.exe
+            binary: jam/bin/windows-x64/jam.exe
           - os: ubuntu-24.04
             host_id: linux-x64
             init: ./jam.sh init
-            binary: jam/core/bin/linux-x64/jam
+            binary: jam/bin/linux-x64/jam
           - os: macos-latest
             host_id: macos-universal
             init: ./jam.sh init
-            binary: jam/core/bin/macos-universal/jam
+            binary: jam/bin/macos-universal/jam
     steps:
       - uses: actions/checkout@v6
 
@@ -106,7 +106,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.host_id }}
-          path: jam/core/bin/${{ matrix.host_id }}/
+          path: jam/bin/${{ matrix.host_id }}/
           if-no-files-found: error
 
   release:
@@ -128,27 +128,31 @@ jobs:
       - name: Stage host binaries
         run: |
           set -euo pipefail
-          mkdir -p jam/core/bin/windows-x64 jam/core/bin/linux-x64 jam/core/bin/macos-universal
-          cp artifacts/windows-x64/jam.exe jam/core/bin/windows-x64/jam.exe
-          cp artifacts/linux-x64/jam jam/core/bin/linux-x64/jam
-          cp artifacts/macos-universal/jam jam/core/bin/macos-universal/jam
-          chmod +x jam/core/bin/linux-x64/jam jam/core/bin/macos-universal/jam
-          test -f jam/core/bin/windows-x64/jam.exe
-          test -x jam/core/bin/linux-x64/jam
-          test -x jam/core/bin/macos-universal/jam
+          mkdir -p jam/bin/windows-x64 jam/bin/linux-x64 jam/bin/macos-universal
+          cp artifacts/windows-x64/jam.exe jam/bin/windows-x64/jam.exe
+          cp artifacts/linux-x64/jam jam/bin/linux-x64/jam
+          cp artifacts/macos-universal/jam jam/bin/macos-universal/jam
+          chmod +x jam/bin/linux-x64/jam jam/bin/macos-universal/jam
+          test -f jam/bin/windows-x64/jam.exe
+          test -x jam/bin/linux-x64/jam
+          test -x jam/bin/macos-universal/jam
 
       - name: Pack snapshot archive
         run: |
           set -euo pipefail
           mkdir -p dist
           tmp=$(mktemp)
-          find jam/core -type f ! -path 'jam/core/meta/*' ! -path 'jam/core/bin/*' \
-            | sed 's|^jam/core/||' | LC_ALL=C sort | while read -r path; do
-              size=$(wc -c < "jam/core/$path" | tr -d ' \t')
+          stage=$(mktemp -d)
+          mkdir -p "$stage/jam"
+          find jam -type f ! -path 'jam/meta/*' ! -path 'jam/bin/*' \
+            | sed 's|^jam/||' | LC_ALL=C sort | while read -r path; do
+              size=$(wc -c < "jam/$path" | tr -d ' \t')
               printf '%s  %s\n' "$size" "$path"
             done > "$tmp"
-          mv "$tmp" jam/core/meta/contents
-          tar -C jam --exclude='*.o' --exclude='*.obj' -czf dist/jam.tar.gz core
+          mv "$tmp" jam/meta/contents
+          cp -a jam/. "$stage/jam/"
+          tar -C "$stage" --exclude='*.o' --exclude='*.obj' -czf dist/jam.tar.gz jam
+          rm -rf "$stage"
           (cd dist && sha256sum jam.tar.gz > jam.tar.gz.sha256)
           sed -i "s/^JAM_PIN=.*/JAM_PIN=${JAM_VERSION}/" jam.sh
           sed -i "s/set \"JAM_PIN=[^\"]*\"/set \"JAM_PIN=${JAM_VERSION}\"/" jam.bat
@@ -157,16 +161,16 @@ jobs:
           cp jam.sh jam.bat dist/
 
           list=$(tar tzf dist/jam.tar.gz)
-          echo "$list" | grep -qx 'core/Jambase'
-          echo "$list" | grep -qx 'core/meta/format'
-          echo "$list" | grep -qx 'core/meta/version'
-          echo "$list" | grep -qx 'core/meta/contents'
-          echo "$list" | grep -qx 'core/bin/windows-x64/jam.exe'
-          echo "$list" | grep -qx 'core/bin/linux-x64/jam'
-          echo "$list" | grep -qx 'core/bin/macos-universal/jam'
-          bad=$(echo "$list" | grep -v '^core/' | grep -v '^core$' || true)
+          echo "$list" | grep -qx 'jam/Jambase'
+          echo "$list" | grep -qx 'jam/meta/format'
+          echo "$list" | grep -qx 'jam/meta/version'
+          echo "$list" | grep -qx 'jam/meta/contents'
+          echo "$list" | grep -qx 'jam/bin/windows-x64/jam.exe'
+          echo "$list" | grep -qx 'jam/bin/linux-x64/jam'
+          echo "$list" | grep -qx 'jam/bin/macos-universal/jam'
+          bad=$(echo "$list" | grep -v '^jam/' | grep -v '^jam$' || true)
           if [ -n "$bad" ]; then
-            echo "Archive must have a single top-level core/ directory:" >&2
+            echo "Archive must have a single top-level jam/ directory:" >&2
             echo "$bad" >&2
             exit 1
           fi

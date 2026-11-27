@@ -12,8 +12,44 @@ if ! $(JAM_ROOT)
 }
 
 JAM_ROOT = $(JAM_ROOT:J=" ") ;
-JAM_LIBPATH = $(JAM_ROOT)/core/lib ;
-JAM_LIBPATH += $(JAM_ROOT)/local/lib ;
+JAM_LIBPATH = $(JAM_ROOT)/lib ;
+
+# JamModuleDir <dir> +
+#
+# Appends directories to the search path of Load, behind the snapshot
+# library directory. An empty argument is an error. A path that is not a
+# directory is an error. A directory already on the path is skipped.
+# Comparison is literal.
+#
+rule JamModuleDir
+{
+    if ! $(<)
+    {
+        Exit "JamModuleDir requires a directory" ;
+    }
+
+    for local _dir in $(<)
+    {
+        if ! [ FILE_IS_DIR $(_dir) ]
+        {
+            Exit "JamModuleDir:" $(_dir) "is not a directory" ;
+        }
+
+        local _found ;
+        for local _have in $(JAM_LIBPATH)
+        {
+            if $(_have) = $(_dir)
+            {
+                _found = true ;
+            }
+        }
+
+        if ! $(_found)
+        {
+            JAM_LIBPATH += $(_dir) ;
+        }
+    }
+}
 
 # Load <dir> * <name>
 #
@@ -49,6 +85,11 @@ rule Load
 
 Load base.jam ;
 Load package.jam ;
+
+if [ CHECK_IF_FILE Jamlocal ]
+{
+    include Jamlocal ;
+}
 
 ##########################################################################
 # Configuration Switch

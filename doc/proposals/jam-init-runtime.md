@@ -7,8 +7,8 @@ proposal: jam-init.md
 ## Runtime invocation
 
 After initialization, the entry script starts the selected host binary from
-`<JAM_ROOT>/core/bin/`. It selects the platform host ID; macOS always selects
-`macos-universal`. It explicitly selects the installed `<JAM_ROOT>/core/Jambase`.
+`<JAM_ROOT>/bin/`. It selects the platform host ID; macOS always selects
+`macos-universal`. It explicitly selects the installed `<JAM_ROOT>/Jambase`.
 The runtime does not depend on a vendored `jam/` directory below the project
 root.
 
@@ -19,48 +19,45 @@ rules; the project supplies its build configuration and targets.
 
 The mechanism by which the entry script makes `JAM_ROOT` available to the
 installed `Jambase` is an implementation detail. Before the installed
-`Jambase` loads a Jam module, it derives the core library directory from
+`Jambase` loads a Jam module, it derives the library directory from
 `JAM_ROOT`.
 
-## Local extensions
+## Project modules
 
-`<JAM_ROOT>/local/` is the permanent extension directory. It is outside the
-update-managed `core/` tree and may contain:
-
-```text
-<JAM_ROOT>/local/
-  lib/
-    *.jam
-```
+`Jamlocal` is an optional script in the project root. `Jambase` includes it
+once after `Load` and `JamModuleDir` exist and after the snapshot modules
+required for boot have loaded, before the phase branch. A missing `Jamlocal`
+is not an error. Paths in it are relative to the project root. It is found
+by `include`, like `Jamconfigure` and `Jamfile`, and is not a snapshot file.
 
 `Load` remains the single rule for loading Jam runtime files. A relative name
-is resolved first below `<JAM_ROOT>/core/lib/` and, only if the core file does
-not exist, below `<JAM_ROOT>/local/lib/`.
+is resolved through `JAM_LIBPATH`. The first entry is `<JAM_ROOT>/lib/`.
+`JamModuleDir` is the rule that appends directories behind that entry. It
+rejects an empty argument and a path that is not a directory. Comparison is
+literal. A directory already on the path is skipped. The rule cannot remove
+or replace the snapshot entry. Call order is search order.
 
-A project loads the extensions it needs from its `Jamconfigure`. The core
-`Jambase` remains the sole owner of the runtime and configure phases. This
-keeps each project's module dependencies explicit while allowing several
-projects to use the same local extension installation.
+A project registers the directories it needs from `Jamlocal`, then loads the
+modules those directories provide. `Jambase` remains the sole owner of the
+runtime and configure phases. A directory registered in `Jamlocal` is visible
+in every phase, because every process reads `Jamlocal` again. A call from
+`Jamconfigure` or `Jamfile` applies to the rest of that process only.
 
-For example:
+For example, `Jamlocal` contains:
 
 ```jam
+JamModuleDir Jamlib ;
 Load company-tools.jam ;
 ```
 
-first tests:
+`Load` then tests `<JAM_ROOT>/lib/company-tools.jam` and, only if that file
+does not exist, `Jamlib/company-tools.jam`. The first existing file is
+loaded. A project module supplements the runtime but does not override a
+same-named snapshot module. This gives versioned runtime rules priority and
+prevents an update from changing snapshot behavior through an unintended
+name collision.
 
-```text
-<JAM_ROOT>/core/lib/company-tools.jam
-<JAM_ROOT>/local/lib/company-tools.jam
-```
-
-The first existing file is loaded. A local file supplements the runtime but
-does not override a same-named core file. This gives versioned runtime rules
-priority and prevents an update from changing core behavior through an
-unintended local name collision.
-
-If no file exists, the error identifies the requested name and both checked
+If no file exists, the error identifies the requested name and the checked
 locations. Future rules that resolve Jam modules use the same path-resolution
 behavior rather than introducing a separate extension search mechanism.
 
@@ -68,11 +65,11 @@ behavior rather than introducing a separate extension search mechanism.
 
 The Jam getting-started and usage documentation describes `init`,
 `JAM_ROOT`, the three installation sources, the snapshot pin, the
-`core/` and `local/` ownership boundary, and the local module search
-order. It documents `JAM_DIST_ROOT` and replacing the entry scripts to
-take a newer snapshot when distribution initialization is implemented.
+snapshot layout, and the project module search order. It documents
+`JAM_DIST_ROOT` and replacing the entry scripts to take a newer
+snapshot when distribution initialization is implemented.
 
 Projects start Jam through their entry scripts, which select the
-installed core `Jambase`. Pt versions `jam/core/` in this repository.
-Other projects copy the entry scripts and install `core/` from the
+installed `Jambase`. Pt versions `jam/` in this repository.
+Other projects copy the entry scripts and install the snapshot from the
 distribution.

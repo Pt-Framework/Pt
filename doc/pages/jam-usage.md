@@ -138,7 +138,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     build operations, like compiling, linking, etc. Projects start Jam
     through <CODE>jam.sh</CODE> or <CODE>jam.bat</CODE>. Those entry scripts
     pass <CODE>-f</CODE> with the installed Jambase at
-    <CODE>&lt;JAM_ROOT&gt;/core/Jambase</CODE>. The project working directory
+    <CODE>&lt;JAM_ROOT&gt;/Jambase</CODE>. The project working directory
     remains the current directory of the invocation, so Jamconfigure and
     Jamfile are found in the project. The installed runtime supplies the
     Jam rules; the project supplies its build configuration and targets.
@@ -163,20 +163,20 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     build hosts. When <CODE>JAM_ROOT</CODE> is unset, it defaults to
     <CODE>jam</CODE> below the directory that contains the entry script.
     The scripts start
-    <CODE>&lt;JAM_ROOT&gt;/core/bin/&lt;host-id&gt;/jam</CODE> with
-    <CODE>-f &lt;JAM_ROOT&gt;/core/Jambase</CODE>. The initial host IDs
+    <CODE>&lt;JAM_ROOT&gt;/bin/&lt;host-id&gt;/jam</CODE> with
+    <CODE>-f &lt;JAM_ROOT&gt;/Jambase</CODE>. The initial host IDs
     are <CODE>windows-x64</CODE>, <CODE>linux-x64</CODE>, and
     <CODE>macos-universal</CODE>.
 <P>
     <CODE>init</CODE> is a command of the entry scripts. They consume it
     before invoking the Jam executable. <CODE>init</CODE> validates the
-    supported snapshot format revision in <CODE>core/</CODE> and builds a
+    supported snapshot format revision and builds a
     binary for the selected host when that binary is missing, then exits
     without running a project build. It ignores arguments that follow the
     command. A normal invocation may also build a
-    missing host binary from <CODE>core/src/</CODE>. A packaged
+    missing host binary from <CODE>src/</CODE> under <CODE>JAM_ROOT</CODE>. A packaged
     <CODE>windows-x64</CODE> binary is checked in under
-    <CODE>jam/core/bin/windows-x64/</CODE>. Other hosts build the binary
+    <CODE>jam/bin/windows-x64/</CODE>. Other hosts build the binary
     with <CODE>cc</CODE> on first use. The <CODE>-f</CODE> flag and the
     other options in the synopsis above are options of the Jam executable.
 <P>
@@ -185,11 +185,11 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
     The Jambase loads runtime files with the <CODE>Load</CODE> rule. A
     relative module name is resolved first below
-    <CODE>&lt;JAM_ROOT&gt;/core/lib/</CODE> and, only if the core file does
-    not exist, below <CODE>&lt;JAM_ROOT&gt;/local/lib/</CODE>. A local file
-    supplements the runtime and does not override a same-named core file.
-    A project loads the extensions it needs from its Jamconfigure. See
-    <a href="jam-getting.html">Getting Jam</a> for the snapshot layout.
+    <CODE>&lt;JAM_ROOT&gt;/lib/</CODE>. <CODE>JamModuleDir</CODE> appends
+    project directories behind that entry. An optional <CODE>Jamlocal</CODE>
+    in the project root registers directories used by every phase. A project
+    file supplements the runtime and does not override a same-named snapshot
+    file. See <a href="jam-getting.html">Getting Jam</a> for the snapshot layout.
 <P>
 
 <A NAME="jam_build_layout">

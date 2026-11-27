@@ -7,12 +7,11 @@ if not defined JAM_DIST_ROOT set "JAM_DIST_ROOT=https://github.com/Pt-Framework/
 set "ROOT=%~dp0"
 if not defined JAM_ROOT set "JAM_ROOT=%ROOT%jam"
 
-set "CORE=%JAM_ROOT%\core"
-set "INCOMING=%JAM_ROOT%\core.incoming"
-set "OUTGOING=%JAM_ROOT%\core.outgoing"
-set "JAM_BINARY_DIR=%CORE%\bin\windows-x64"
+set "INCOMING=%JAM_ROOT%.incoming"
+set "OUTGOING=%JAM_ROOT%.outgoing"
+set "JAM_BINARY_DIR=%JAM_ROOT%\bin\windows-x64"
 set "JAM=%JAM_BINARY_DIR%\jam.exe"
-set "SRC=%CORE%\src"
+set "SRC=%JAM_ROOT%\src"
 
 set "INIT="
 if /i "%~1"=="init" (
@@ -21,9 +20,9 @@ if /i "%~1"=="init" (
 )
 if defined INIT goto parse_init
 
-call :classify_core "%CORE%"
-if /i "!CORE_STATE!"=="invalid" goto invalid_core
-if /i not "!CORE_STATE!"=="match" goto need_init
+call :classify_snapshot "%JAM_ROOT%"
+if /i "!SNAPSHOT_STATE!"=="invalid" goto invalid_snapshot
+if /i not "!SNAPSHOT_STATE!"=="match" goto need_init
 goto build_host_binary
 
 :parse_init
@@ -56,19 +55,19 @@ goto parse_init_loop
 setlocal EnableDelayedExpansion
 
 :do_init
-if not exist "%CORE%\" (
-    if exist "%OUTGOING%\" move "%OUTGOING%" "%CORE%" >nul
+if not exist "%JAM_ROOT%\" (
+    if exist "%OUTGOING%\" move "%OUTGOING%" "%JAM_ROOT%" >nul
 )
-call :classify_core "%CORE%"
-if /i "!CORE_STATE!"=="match" goto build_host_binary
-if /i "!CORE_STATE!"=="invalid" goto invalid_core
+call :classify_snapshot "%JAM_ROOT%"
+if /i "!SNAPSHOT_STATE!"=="match" goto build_host_binary
+if /i "!SNAPSHOT_STATE!"=="invalid" goto invalid_snapshot
 call :install_snapshot
 if errorlevel 1 exit /b 1
 goto build_host_binary
 
 :build_host_binary
 if exist "%JAM%" goto run_or_exit
-if not exist "%SRC%\" goto invalid_core
+if not exist "%SRC%\" goto invalid_snapshot
 echo Building jam.exe...
 
 setlocal EnableDelayedExpansion
@@ -116,7 +115,7 @@ endlocal
 :run_or_exit
 if defined INIT exit /b 0
 
-"%JAM%" -f "%CORE%\Jambase" %*
+"%JAM%" -f "%JAM_ROOT%\Jambase" %*
 exit /b %ERRORLEVEL%
 
 :install_snapshot
@@ -163,9 +162,9 @@ if errorlevel 1 (
     exit /b 1
 )
 
-set "STAGED=%INCOMING%\core"
-call :classify_core "%STAGED%"
-if /i not "!CORE_STATE!"=="match" (
+set "STAGED=%INCOMING%\jam"
+call :classify_snapshot "%STAGED%"
+if /i not "!SNAPSHOT_STATE!"=="match" (
     echo Downloaded snapshot failed checks.
     rd /s /q "%INCOMING%"
     exit /b 1
@@ -177,26 +176,26 @@ if errorlevel 1 (
     exit /b 1
 )
 
-if exist "%CORE%\" (
+if exist "%JAM_ROOT%\" (
     if exist "%OUTGOING%\" rd /s /q "%OUTGOING%"
-    move "%CORE%" "%OUTGOING%"
+    move "%JAM_ROOT%" "%OUTGOING%"
     if errorlevel 1 (
-        echo Could not move "%CORE%" aside.
+        echo Could not move "%JAM_ROOT%" aside.
         rd /s /q "%INCOMING%"
         exit /b 1
     )
-    move "%STAGED%" "%CORE%"
+    move "%STAGED%" "%JAM_ROOT%"
     if errorlevel 1 (
-        echo Could not install "%CORE%".
-        move "%OUTGOING%" "%CORE%"
+        echo Could not install "%JAM_ROOT%".
+        move "%OUTGOING%" "%JAM_ROOT%"
         rd /s /q "%INCOMING%"
         exit /b 1
     )
     rd /s /q "%OUTGOING%"
 ) else (
-    move "%STAGED%" "%CORE%"
+    move "%STAGED%" "%JAM_ROOT%"
     if errorlevel 1 (
-        echo Could not install "%CORE%".
+        echo Could not install "%JAM_ROOT%".
         rd /s /q "%INCOMING%"
         exit /b 1
     )
@@ -204,50 +203,50 @@ if exist "%CORE%\" (
 rd /s /q "%INCOMING%"
 exit /b 0
 
-:classify_core
+:classify_snapshot
 set "CHECK_CORE=%~1"
-set "CORE_STATE="
+set "SNAPSHOT_STATE="
 if exist "%CHECK_CORE%\" goto classify_dir
 if exist "%CHECK_CORE%" (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
-set "CORE_STATE=absent"
+set "SNAPSHOT_STATE=absent"
 goto :eof
 
 :classify_dir
 if not exist "%CHECK_CORE%\meta\format" (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 if not exist "%CHECK_CORE%\meta\version" (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 
 set "FORMAT_LINE="
 for /f "usebackq delims=" %%a in ("%CHECK_CORE%\meta\format") do (
     if defined FORMAT_LINE (
-        set "CORE_STATE=invalid"
+        set "SNAPSHOT_STATE=invalid"
         goto :eof
     )
     set "FORMAT_LINE=%%a"
 )
 if not "!FORMAT_LINE!"=="1" (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 
 set "VERSION_LINE="
 for /f "usebackq delims=" %%a in ("%CHECK_CORE%\meta\version") do (
     if defined VERSION_LINE (
-        set "CORE_STATE=invalid"
+        set "SNAPSHOT_STATE=invalid"
         goto :eof
     )
     set "VERSION_LINE=%%a"
 )
 if not defined VERSION_LINE (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 
@@ -262,38 +261,38 @@ for /f "tokens=1-4 delims=." %%a in ("!VERSION_LINE!") do (
     set "VERSION_EXTRA=%%d"
 )
 if not defined VERSION_MAJOR (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 if not defined VERSION_MINOR (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 if not defined VERSION_PATCH (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 if defined VERSION_EXTRA (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 echo(!VERSION_MAJOR!| findstr /r /x "[1-9][0-9]*" >nul || (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 echo(!VERSION_MINOR!| findstr /r /x "[0-9][0-9]*" >nul || (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 echo(!VERSION_PATCH!| findstr /r /x "[0-9][0-9]*" >nul || (
-    set "CORE_STATE=invalid"
+    set "SNAPSHOT_STATE=invalid"
     goto :eof
 )
 
 if "!VERSION_LINE!"=="!JAM_PIN!" (
-    set "CORE_STATE=match"
+    set "SNAPSHOT_STATE=match"
 ) else (
-    set "CORE_STATE=mismatch"
+    set "SNAPSHOT_STATE=mismatch"
 )
 goto :eof
 
@@ -334,13 +333,13 @@ for /f "usebackq tokens=1*" %%a in ("%CHECK_CORE%\meta\contents") do (
 exit /b 0
 
 :need_init
-echo Jam core is missing or does not match snapshot %JAM_PIN% at "%JAM_ROOT%".
+echo Jam is missing or does not match snapshot %JAM_PIN% at "%JAM_ROOT%".
 echo Run: "%~f0" init
 exit /b 1
 
-:invalid_core
-echo Jam core is invalid at "%JAM_ROOT%".
-echo Remove core/ and run init to install snapshot %JAM_PIN%.
+:invalid_snapshot
+echo Jam is invalid at "%JAM_ROOT%".
+echo Remove "%JAM_ROOT%" and run init to install snapshot %JAM_PIN%.
 exit /b 1
 
 :compiler_missing

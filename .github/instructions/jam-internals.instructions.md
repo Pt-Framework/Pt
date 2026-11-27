@@ -1,36 +1,35 @@
 ---
 applyTo: "jam/**"
-description: "Jam build tool internals — C implementation in jam/core/src/ and Jam script layer in jam/core/lib/ and jam/core/Jambase. Use when extending the jam executable with new builtin rules, modifying jam's C source, editing the Jambase boot sequence, or working with configure/build/toolset .jam files."
+description: "Jam build tool internals — C implementation in jam/src/ and Jam script layer in jam/lib/ and jam/Jambase. Use when extending the jam executable with new builtin rules, modifying jam's C source, editing the Jambase boot sequence, or working with configure/build/toolset .jam files."
 ---
 
 # Jam Internals
 
 The Pt project ships a customized jam executable based on Boost.Jam (b2)
 v4.0.0, compiled as C. The implementation spans two layers: a C core
-(`jam/core/src/`) and a Jam-script layer (`jam/core/Jambase` and
-`jam/core/lib/`). Extensions should follow existing patterns and be
+(`jam/src/`) and a Jam-script layer (`jam/Jambase` and
+`jam/lib/`). Extensions should follow existing patterns and be
 marked with `/* Pt extension */` comments in C code.
 
 ## Directory Layout
 
 ```
 jam/
-└── core/
-    ├── Jambase              # Boot script: loads base.jam, runs configure or build
-    ├── meta/                # Snapshot version and contents inventory
-    ├── lib/                 # Jam runtime modules
-    │   ├── base.jam         # Core rules reused from original Jambase (Cc, C++, Main, Library...)
-    │   ├── build.jam        # Build-phase rules (Cc, C++, File, SharedLibrary...)
-    │   ├── class.jam        # OOP support (new, INSTANCE)
-    │   ├── configure.jam    # Configure-phase: detect tools, write Jamrules
-    │   ├── shell.jam        # Shell/script rules
-    │   ├── unittest.jam     # RunUnitTest rule and PtUnitTestAction
-    │   ├── pt.jam           # ConfigurePt — Pt-specific library detection
-    │   └── vc*.jam / gcc.jam ...  # Toolset-specific compiler flags and rules
-    ├── bin/
-    │   └── <host-id>/       # windows-x64, linux-x64, macos-universal
-    │       └── jam[.exe]
-    └── src/                 # C source for the jam executable
+├── Jambase                  # Boot script: loads base.jam, runs configure or build
+├── meta/                    # Snapshot version and contents inventory
+├── lib/                     # Jam runtime modules
+│   ├── base.jam             # Core rules reused from original Jambase (Cc, C++, Main, Library...)
+│   ├── build.jam            # Build-phase rules (Cc, C++, File, SharedLibrary...)
+│   ├── class.jam            # OOP support (new, INSTANCE)
+│   ├── configure.jam        # Configure-phase: detect tools, write Jamrules
+│   ├── shell.jam            # Shell/script rules
+│   ├── unittest.jam         # RunUnitTest rule and PtUnitTestAction
+│   ├── pt.jam               # ConfigurePt — Pt-specific library detection
+│   └── vc*.jam / gcc.jam ...  # Toolset-specific compiler flags and rules
+├── bin/
+│   └── <host-id>/           # windows-x64, linux-x64, macos-universal
+│       └── jam[.exe]
+└── src/                     # C source for the jam executable
         ├── jam.c            # Entry point, option parsing, main()
         ├── jam.h            # Platform detection, OS macros, global config
         ├── config.h         # OPT_* feature flags and JAM_DEBUGGER
@@ -70,8 +69,8 @@ Jam rules are defined in one of two ways:
 
 | Layer | Location | Mechanism | Example |
 |-------|----------|-----------|---------|
-| **C builtin** | `jam/core/src/builtins.c` | `bind_builtin()` in `load_builtins()` | `ECHO`, `GLOB`, `EXEC`, `WriteFile` |
-| **Jam script** | `jam/core/lib/*.jam`, `jam/core/Jambase` | `rule RuleName { ... }` | `Cc`, `C++`, `Main`, `SharedLibrary`, `RunUnitTest` |
+| **C builtin** | `jam/src/builtins.c` | `bind_builtin()` in `load_builtins()` | `ECHO`, `GLOB`, `EXEC`, `WriteFile` |
+| **Jam script** | `jam/lib/*.jam`, `jam/Jambase` | `rule RuleName { ... }` | `Cc`, `C++`, `Main`, `SharedLibrary`, `RunUnitTest` |
 
 C builtins are available globally. Jam-script rules are loaded via
 `Load <file>.jam ;` from the `Jambase` or from other `.jam` files.
@@ -100,12 +99,15 @@ from Pt into the Boost.Jam engine is marked with `/* Pt extension */`.
 
 `jam.c` without `-f` opens `./Jambase` in the current directory, then falls
 back to the compiled-in default (`+`). The entry scripts always pass
-`-f` with `jam/core/Jambase`.
+`-f` with `jam/Jambase`.
 
 ### Pt-Specific Extension (Jam Script)
 
 Installed `Jambase` requires `JAM_ROOT` and loads modules from
-`JAM_ROOT/core/lib` then `JAM_ROOT/local/lib` through `Load`.
+`JAM_ROOT/lib` through `Load`. `JamModuleDir` appends project directories
+behind that entry. An optional project-root `Jamlocal` is included once
+before the phase branch and is the place that registers directories used
+by every phase.
 
 ## How to Add a New C Builtin Rule
 
@@ -295,13 +297,13 @@ The engine is compiled as C (`cl` / `cc`), not as C++.
 
 - `jam.bat` and `jam.sh` at the repository root bootstrap the host jam
   binary when it is missing.
-- Windows: `jam/core/bin/windows-x64/jam.exe` is checked in. If it is
+- Windows: `jam/bin/windows-x64/jam.exe` is checked in. If it is
   absent, `jam.bat` builds it with `cl` (MSVC Developer Command Prompt).
-- Unix: `jam.sh` builds `jam/core/bin/<host-id>/jam` with `cc` (`CC`
+- Unix: `jam.sh` builds `jam/bin/<host-id>/jam` with `cc` (`CC`
   overrides the compiler). On macOS the binary is a universal x86_64/arm64
   image with `-mmacosx-version-min=11.0`.
 - New `.c` files must be added to the source lists in both `jam.bat` and
   `jam.sh`.
-- `jam/core/src/build.bat`, `build.sh`, and `build.jam` are Boost's C++
+- `jam/src/build.bat`, `build.sh`, and `build.jam` are Boost's C++
   bootstrap and are kept as a reference for a later Pt bootstrap. Do not
   use them to build `jam.exe`.
