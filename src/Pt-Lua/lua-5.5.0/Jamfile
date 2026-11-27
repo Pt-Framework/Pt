@@ -1,6 +1,6 @@
 SubDir BRAVO_TOP extern lua-5.5.0 ;
 SubDirHdrs $(LUA_INCLUDES) ;
-SubDirObjects $(BRAVO_OUTPUT_OBJECT) lua ;
+SubDirObjects $(PT_OUTPUT_OBJECT) lua ;
 
 Library lua : lapi.c
               lauxlib.c
@@ -35,4 +35,4 @@ Library lua : lapi.c
               lvm.c
               lzio.c ;
 
-MakeLocate lua : $(BRAVO_OUTPUT_LIB) ;
+MakeLocate lua : $(PT_OUTPUT_LIB) ;

@@ -34,7 +34,7 @@ PT_OUTPUT_TARGET ?= [ FDirName $(PT_TOP) build $(CONFIG) ] ;
 EchoOption PT_OUTPUT_TARGET : "Pt Binary Output Dir" ;
 Configure PT_OUTPUT_TARGET ;
 
-PT_OUTPUT_OBJECT ?= [ FDirName $(PT_TOP) tmp $(CONFIG) ] ;
+PT_OUTPUT_OBJECT ?= [ FDirName $(PT_OUTPUT_TARGET) obj ] ;
 EchoOption PT_OUTPUT_OBJECT : "Pt Object Output Dir" ;
 Configure PT_OUTPUT_OBJECT ;
 

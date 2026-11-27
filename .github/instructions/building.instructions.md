@@ -39,7 +39,7 @@ description: "Build system & setup"
 - `jam.bat switch <Config>` changes to an existing, previously configured build configuration
 - `configure` and `switch` are arguments to the jam command
 - `-sCONFIG=<Config>` sets configuration name, determines the output subdirectory
-  under `build/<Config>/` and `tmp/<Config>/`
+  under `build/<Config>/` and `build/<Config>/obj/`
 - Run `jam.bat switch <Config>` before building to confirm the active configuration.
 - `--debug` — enable debug symbols
 - `--optimize` — enable compiler optimizations
@@ -132,7 +132,7 @@ The following Jam variables control where build artifacts are placed:
 
 | Use for                      | Build path            | Variable              |
 |------------------------------|-----------------------|-----------------------|
-| Object files                 | `tmp/<Config>/`       | `PT_OUTPUT_OBJECT`    |
+| Object files                 | `build/<Config>/obj/` | `PT_OUTPUT_OBJECT`    |
 | Executables                  | `build/<Config>/`     | `PT_OUTPUT_TARGET`    |
 | Shared libraries             | `build/<Config>/`     | `PT_OUTPUT_TARGET`    |
 | Install dest for executables | `deploy/<Config>/`    | `PT_INSTALL_BINDIR`   |

@@ -33,7 +33,7 @@ description: "Coding Styles and Guidelines"
 
 -  Build Output:
   - Build output: `build/<Config>/`
-  - Object file: `tmp/<Config>/`
+  - Object file: `build/<Config>/obj/`
 
 # Coding Style
 

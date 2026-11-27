@@ -1,6 +1,5 @@
 # Build directories
 build/
-tmp/
 deploy/
 /prebuilt/
 Jamrules*
