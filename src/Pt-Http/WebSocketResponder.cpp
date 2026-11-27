@@ -98,21 +98,21 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
     {
         reply.header().set("Allow", "GET");
         reply.setStatus(Reply::MethodNotAllowed, "Method Not Allowed");
-        finish(reply);
+        decline(reply);
         return;
     }
 
     if( header.versionMajor() < 1 || (header.versionMajor() == 1 && header.versionMinor() < 1) )
     {
         reply.setStatus(Reply::BadRequest, "Bad Request");
-        finish(reply);
+        decline(reply);
         return;
     }
 
     if( header.isChunked() || header.contentLength() > 0 )
     {
         reply.setStatus(Reply::BadRequest, "Bad Request");
-        finish(reply);
+        decline(reply);
         return;
     }
 
@@ -126,14 +126,14 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         reply.header().set("Upgrade", "websocket");
         reply.header().setUpgrade();
         reply.setStatus(Reply::UpgradeRequired, "Upgrade Required");
-        finish(reply);
+        decline(reply);
         return;
     }
 
     if( ! connectionUpgrade || ! upgradeValue || ! header.contains("Upgrade", "websocket") )
     {
         reply.setStatus(Reply::BadRequest, "Bad Request");
-        finish(reply);
+        decline(reply);
         return;
     }
 
@@ -141,7 +141,7 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
     {
         reply.header().set("Sec-WebSocket-Version", "13");
         reply.setStatus(Reply::UpgradeRequired, "Upgrade Required");
-        finish(reply);
+        decline(reply);
         return;
     }
 
@@ -162,7 +162,7 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
     if( keyValue.empty() || ! isWebSocketKey(keyValue) )
     {
         reply.setStatus(Reply::BadRequest, "Bad Request");
-        finish(reply);
+        decline(reply);
         return;
     }
 
@@ -172,14 +172,14 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
     if( origin && *origin == '\0' )
     {
         reply.setStatus(Reply::BadRequest, "Bad Request");
-        finish(reply);
+        decline(reply);
         return;
     }
 
     if( ! service.acceptsOrigin(origin) )
     {
         reply.setStatus(Reply::Forbidden, "Forbidden");
-        finish(reply);
+        decline(reply);
         return;
     }
 
@@ -187,14 +187,14 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
     if( ! service.selectProtocol(header, protocol) )
     {
         reply.setStatus(Reply::BadRequest, "Bad Request");
-        finish(reply);
+        decline(reply);
         return;
     }
 
     if( ! service.reservePending() )
     {
         reply.setStatus(Reply::ServiceUnavailable, "Service Unavailable");
-        finish(reply);
+        decline(reply);
         return;
     }
 
@@ -208,7 +208,7 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
             reply.setStatus(Reply::InternalServerError, "Internal Server Error");
         }
 
-        finish(reply);
+        decline(reply);
         return;
     }
 
@@ -230,7 +230,7 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
 }
 
 
-void WebSocketResponder::finish(Pt::Http::Reply& reply)
+void WebSocketResponder::decline(Pt::Http::Reply& reply)
 {
     if( reply.header().contains("Connection", "upgrade") )
         reply.header().add("Connection", "close");

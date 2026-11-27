@@ -34,7 +34,7 @@ class WebSocketResponder : public Pt::Http::Responder
         virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop);
 
     private:
-        void finish(Pt::Http::Reply& reply);
+        void decline(Pt::Http::Reply& reply);
 
         bool _reserved;
 };
