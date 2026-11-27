@@ -2363,6 +2363,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         }
 
     protected:
+    protected:
         void Accepted()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8012);

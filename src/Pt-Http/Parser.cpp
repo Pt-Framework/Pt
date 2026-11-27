@@ -61,15 +61,15 @@ inline bool isFieldValueChar(unsigned char ch)
 inline bool isHexDigit(char ch)
 {
     return (ch >= '0' && ch <= '9')
-        || (ch >= 'A' && ch <= 'Z')
-        || (ch >= 'a' && ch <= 'z');
+        || (ch >= 'A' && ch <= 'F')
+        || (ch >= 'a' && ch <= 'f');
 }
 
 inline unsigned valueOfHexDigit(char ch)
 {
     return ch >= '0' && ch <= '9' ? ch - '0'
-            : ch >= 'a' && ch <= 'z' ? ch - 'a' + 10
-            : ch >= 'A' && ch <= 'Z' ? ch - 'A' + 10
+            : ch >= 'a' && ch <= 'f' ? ch - 'a' + 10
+            : ch >= 'A' && ch <= 'F' ? ch - 'A' + 10
             : 0;
 }
 
@@ -147,6 +147,14 @@ void HeaderParser::MessageHeaderEvent::onValue(const std::string& value)
         if( _header->has("Content-Length") )
             throw HttpError("invalid HTTP message");
     }
+    else if( MessageHeader::isMatch(_key, "Host") )
+    {
+        const bool http11 = _header->versionMajor() > 1 ||
+                           (_header->versionMajor() == 1 && _header->versionMinor() >= 1);
+
+        if( http11 && (_header->has("Host") || value.empty()) )
+            throw HttpError("invalid HTTP message");
+    }
 
     _header->add(_key, value.c_str());
 }
@@ -171,7 +179,7 @@ void HeaderParser::advance(std::streambuf& sb)
 
 void HeaderParser::state_cmd0(char ch)
 {
-    if (MessageHeader::isTokenChar(static_cast<unsigned char>(ch)))
+    if (MessageHeader::isTokenChar(ch))
     {
         token.reserve(32);
         token = ch;
@@ -194,7 +202,7 @@ void HeaderParser::state_cmd0(char ch)
 
 void HeaderParser::state_cmd(char ch)
 {
-    if (MessageHeader::isTokenChar(static_cast<unsigned char>(ch)))
+    if (MessageHeader::isTokenChar(ch))
     {
         token += ch;
         return;
@@ -257,11 +265,6 @@ void HeaderParser::state_url(char ch)
         state = &HeaderParser::state_protocol0;
         return;
     }
-    else if (ch == '+')
-    {
-        token += ' ';
-        return;
-    }
     else if (ch == '%')
     {
         token += ch;
@@ -289,6 +292,12 @@ void HeaderParser::state_urlesc(char ch)
         if (token.size() >= 2 && token[token.size() - 2] == '%')
         {
             unsigned v = (valueOfHexDigit(token[token.size() - 1]) << 4) | valueOfHexDigit(ch);
+            if(v == 0)
+            {
+                state = &HeaderParser::state_error;
+                return;
+            }
+
             token[token.size() - 2] = static_cast<char>(v);
             token.resize(token.size() - 1);
             state = &HeaderParser::state_url;
@@ -318,6 +327,11 @@ void HeaderParser::state_qparam(char ch)
         token.clear();
         token.reserve(32);
         state = &HeaderParser::state_protocol0;
+        return;
+    }
+    else if (ch == '+')
+    {
+        token += ' ';
         return;
     }
     else
@@ -484,7 +498,7 @@ void HeaderParser::state_end0(char ch)
 
 void HeaderParser::state_h0(char ch)
 {
-    if (MessageHeader::isTokenChar(static_cast<unsigned char>(ch)))
+    if (MessageHeader::isTokenChar(ch))
     {
         token.reserve(32);
         token = ch;
@@ -537,7 +551,7 @@ void HeaderParser::state_hfieldname(char ch)
         state = &HeaderParser::state_hfieldbody0;
         return;
     }
-    else if (MessageHeader::isTokenChar(static_cast<unsigned char>(ch)))
+    else if (MessageHeader::isTokenChar(ch))
     {
         token += ch;
         return;
@@ -641,7 +655,7 @@ void HeaderParser::state_hfieldbody_crlf(char ch)
         state = &HeaderParser::state_end;
         return;
     }
-    else if (MessageHeader::isTokenChar(static_cast<unsigned char>(ch)))
+    else if (MessageHeader::isTokenChar(ch))
     {
         pushValue();
         token.reserve(32);
@@ -910,6 +924,34 @@ void HeaderParser::pushValue()
     token.resize(n);
 
     ev.onValue(token);
+}
+
+
+bool HeaderParser::isStartLine() const
+{
+    return state == &HeaderParser::state_cmd0
+        || state == &HeaderParser::state_cmd
+        || state == &HeaderParser::state_url0
+        || state == &HeaderParser::state_url
+        || state == &HeaderParser::state_urlesc
+        || state == &HeaderParser::state_qparam
+        || state == &HeaderParser::state_protocol0
+        || state == &HeaderParser::state_protocol
+        || state == &HeaderParser::state_version0
+        || state == &HeaderParser::state_version_major
+        || state == &HeaderParser::state_version_major_e
+        || state == &HeaderParser::state_version_minor
+        || state == &HeaderParser::state_end0
+        || state == &HeaderParser::state_cl_protocol0
+        || state == &HeaderParser::state_cl_protocol
+        || state == &HeaderParser::state_cl_version0
+        || state == &HeaderParser::state_cl_version_major
+        || state == &HeaderParser::state_cl_version_major_e
+        || state == &HeaderParser::state_cl_version_minor
+        || state == &HeaderParser::state_cl_httpresult0
+        || state == &HeaderParser::state_cl_httpresult
+        || state == &HeaderParser::state_cl_httpresulttext
+        || state == &HeaderParser::state_cl_httpresult_cr;
 }
 
 

@@ -543,11 +543,14 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
             the separators `( ) < > @ , ; : \\ " / [ ] ? = { }` and
             other than space, controls, and DEL.
         */
-        static bool isTokenChar(unsigned char ch);
+        static bool isTokenChar(char ch);
 
-        /** @brief Maximum size of the stored header block.
+        /** @brief Maximum size of the start line plus the header block.
+
+            The limit includes the trailing CRLF. The start line is the
+            request line or the status line.
         */
-        static const unsigned MaxHeaderSize = 4096;
+        static const std::size_t MaxHeaderSize = 4096;
 
     private:
         //! @internal
@@ -555,7 +558,10 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         { return _rawdata + _endOffset; }
 
     private:
-        char _rawdata[MaxHeaderSize];  // key_1\0value_1\0key_2\0value_2\0...key_n\0value_n\0\0
+        // Buffer layout:
+        // key_1\0value_1\0key_2\0value_2\0...key_n\0value_n\0\0
+        static const unsigned MaxDataSize = 4096;
+        char _rawdata[MaxDataSize];
         std::size_t _endOffset;
         unsigned _httpVersionMajor;
         unsigned _httpVersionMinor;

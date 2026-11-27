@@ -227,6 +227,16 @@ void Acceptor::onRequest(MessageProgress progress)
         {
             PT_LOG_DEBUG("received request header");
 
+            const MessageHeader& header = _request.header();
+            const bool http11 = header.versionMajor() > 1
+                || (header.versionMajor() == 1 && header.versionMinor() >= 1);
+
+            if( http11 && ! header.has("Host") )
+            {
+                PT_LOG_WARN("missing Host field");
+                throw HttpError("invalid HTTP message");
+            }
+
             _state = OnBeginRequest;
 
             assert(_responder == 0);

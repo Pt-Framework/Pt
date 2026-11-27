@@ -275,6 +275,8 @@ class ServerTest : public Pt::Unit::TestSuite
     public:
         ServerTest()
         : Pt::Unit::TestSuite("ServerTest")
+        , _loop(0)
+        , _mixedSocket(0)
         , _authent("test-realm")
         {
             Pt::System::Logger::setLogLevel("Pt", Pt::System::Error);
@@ -292,8 +294,17 @@ class ServerTest : public Pt::Unit::TestSuite
             registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
             registerMethod( "MixedBodyFraming", *this, &ServerTest::MixedBodyFraming);
             registerMethod( "QueryString", *this, &ServerTest::QueryString);
+            registerMethod( "HostHttp10", *this, &ServerTest::HostHttp10);
+            registerMethod( "HostPresent", *this, &ServerTest::HostPresent);
+            registerMethod( "HostMissing", *this, &ServerTest::HostMissing);
+            registerMethod( "HostEmpty", *this, &ServerTest::HostEmpty);
+            registerMethod( "HostDuplicate", *this, &ServerTest::HostDuplicate);
+        }
 
-
+        ~ServerTest()
+        {
+            delete _mixedSocket;
+            delete _loop;
         }
 
         void setUp()
@@ -308,6 +319,7 @@ class ServerTest : public Pt::Unit::TestSuite
             _chunks.push_back("ChunkE");
 
             _loop = new Pt::System::MainLoop();
+            _mixedSocket = new Pt::Net::TcpSocket();
 
             _exitTimer.setActive(*_loop);
 //            _exitTimer.start(10000);
@@ -316,7 +328,11 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void tearDown()
         {
+            delete _mixedSocket;
+            _mixedSocket = 0;
+
             delete _loop;
+            _loop = 0;
         }
 
         void MaxRequestSize()
@@ -341,6 +357,117 @@ class ServerTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 400);
         }
 
+        void HostHttp10()
+        {
+            Pt::Http::Server server(*_loop, Pt::Net::Endpoint("127.0.0.1", 8001));
+            HelloService service;
+            Pt::Http::MapUrl mapurl("/test", service);
+            server.addServlet(mapurl);
+
+            beginHostRequest("GET /test HTTP/1.0\r\n\r\n");
+            _loop->run();
+            PT_UNIT_ASSERT(_mixedReply.find("200") != std::string::npos);
+        }
+
+        void HostPresent()
+        {
+            Pt::Http::Server server(*_loop, Pt::Net::Endpoint("127.0.0.1", 8001));
+            HelloService service;
+            Pt::Http::MapUrl mapurl("/test", service);
+            server.addServlet(mapurl);
+
+            beginHostRequest("GET /test HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n");
+            _loop->run();
+            PT_UNIT_ASSERT(_mixedReply.find("200") != std::string::npos);
+        }
+
+        void HostMissing()
+        {
+            Pt::Http::Server server(*_loop, Pt::Net::Endpoint("127.0.0.1", 8001));
+            HelloService service;
+            Pt::Http::MapUrl mapurl("/test", service);
+            server.addServlet(mapurl);
+
+            beginHostRequest("GET /test HTTP/1.1\r\n\r\n");
+            _loop->run();
+            PT_UNIT_ASSERT(_mixedReply.find("400") != std::string::npos);
+        }
+
+        void HostEmpty()
+        {
+            Pt::Http::Server server(*_loop, Pt::Net::Endpoint("127.0.0.1", 8001));
+            HelloService service;
+            Pt::Http::MapUrl mapurl("/test", service);
+            server.addServlet(mapurl);
+
+            beginHostRequest("GET /test HTTP/1.1\r\nHost:\r\n\r\n");
+            _loop->run();
+            PT_UNIT_ASSERT(_mixedReply.find("400") != std::string::npos);
+        }
+
+        void HostDuplicate()
+        {
+            Pt::Http::Server server(*_loop, Pt::Net::Endpoint("127.0.0.1", 8001));
+            HelloService service;
+            Pt::Http::MapUrl mapurl("/test", service);
+            server.addServlet(mapurl);
+
+            beginHostRequest("GET /test HTTP/1.1\r\nHost: a\r\nHost: b\r\n\r\n");
+            _loop->run();
+            PT_UNIT_ASSERT(_mixedReply.find("400") != std::string::npos);
+        }
+
+        void beginHostRequest(const std::string& request)
+        {
+            _mixedRequest = request;
+            _mixedWritten = 0;
+            _mixedReply.clear();
+            _mixedSocket->connected() += Pt::slot(*this, &ServerTest::onHostConnected);
+            _mixedSocket->setActive(*_loop);
+            _mixedSocket->beginConnect(Pt::Net::Endpoint("127.0.0.1", 8001));
+        }
+
+        void onHostConnected(Pt::Net::TcpSocket& socket)
+        {
+            socket.endConnect();
+            socket.outputReady() += Pt::slot(*this, &ServerTest::onHostWritten);
+            socket.beginWrite(_mixedRequest.data() + _mixedWritten,
+                              _mixedRequest.size() - _mixedWritten);
+        }
+
+        void onHostWritten(Pt::System::IODevice& device)
+        {
+            _mixedWritten += device.endWrite();
+            if(_mixedWritten < _mixedRequest.size())
+            {
+                device.beginWrite(_mixedRequest.data() + _mixedWritten,
+                                  _mixedRequest.size() - _mixedWritten);
+                return;
+            }
+
+            device.inputReady() += Pt::slot(*this, &ServerTest::onHostRead);
+            device.beginRead(_mixedBuffer, sizeof(_mixedBuffer));
+        }
+
+        void onHostRead(Pt::System::IODevice& device)
+        {
+            const std::size_t n = device.endRead();
+            if(n == 0)
+            {
+                _loop->exit();
+                return;
+            }
+
+            _mixedReply.append(_mixedBuffer, n);
+            if(_mixedReply.find("\r\n\r\n") != std::string::npos)
+            {
+                _loop->exit();
+                return;
+            }
+
+            device.beginRead(_mixedBuffer, sizeof(_mixedBuffer));
+        }
+
         void MixedBodyFraming()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8001);
@@ -350,10 +477,9 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
-            _mixedSocket.close();
-            _mixedSocket.connected() += Pt::slot(*this, &ServerTest::onMixedConnected);
-            _mixedSocket.setActive(*_loop);
-            _mixedSocket.beginConnect(ep);
+            _mixedSocket->connected() += Pt::slot(*this, &ServerTest::onMixedConnected);
+            _mixedSocket->setActive(*_loop);
+            _mixedSocket->beginConnect(ep);
 
             _loop->run();
 
@@ -828,7 +954,7 @@ class ServerTest : public Pt::Unit::TestSuite
     private:
         Pt::System::Timer _exitTimer;
         Pt::System::MainLoop* _loop;
-        Pt::Net::TcpSocket _mixedSocket;
+        Pt::Net::TcpSocket* _mixedSocket;
         std::string _mixedRequest;
         std::size_t _mixedWritten;
         std::string _mixedReply;

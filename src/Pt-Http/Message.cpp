@@ -345,7 +345,7 @@ void MessageHeader::add(const char* key, const char* value)
     std::size_t lk = std::strlen(key);     // length of key
     std::size_t lv = std::strlen(value);   // length of value
 
-    if (p - _rawdata + lk + lv + 2 > MaxHeaderSize)
+    if (p - _rawdata + lk + lv + 2 > MaxDataSize)
         throw HttpError("message header too big");
 
     std::strcpy(p, key);   // copy key
@@ -506,12 +506,13 @@ bool MessageHeader::isDigits(const char* value)
 }
 
 
-bool MessageHeader::isTokenChar(unsigned char ch)
+bool MessageHeader::isTokenChar(char ch)
 {
-    if(ch <= 32 || ch >= 127)
+    const unsigned char uc = static_cast<unsigned char>(ch);
+    if(uc <= 32 || uc >= 127)
         return false;
 
-    switch(ch)
+    switch(uc)
     {
         case '(': case ')': case '<': case '>': case '@':
         case ',': case ';': case ':': case '\\': case '"':
@@ -534,7 +535,7 @@ bool MessageHeader::isToken(const char* value)
         *p;
         ++p)
     {
-        if( ! isTokenChar(*p) )
+        if( ! isTokenChar(static_cast<char>(*p)) )
             return false;
     }
 

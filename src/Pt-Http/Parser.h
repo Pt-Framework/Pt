@@ -119,6 +119,7 @@ class PT_HTTP_API HeaderParser
 
     private:
         void pushValue();
+        bool isStartLine() const;
         bool isHeader() const;
 
     private:
@@ -127,14 +128,14 @@ class PT_HTTP_API HeaderParser
 
         std::string token;
         unsigned value;
-        std::size_t _headerBytes;
+        std::size_t _headerSize;
 
     public:
         HeaderParser(Event& ev_, bool client)
             : state(client ? &HeaderParser::state_cl_protocol0 : &HeaderParser::state_cmd0)
             , ev(ev_)
             , value(0)
-            , _headerBytes(0)
+            , _headerSize(0)
             { }
 
         /// parse as many characters as available in buffer without blocking
@@ -146,15 +147,15 @@ class PT_HTTP_API HeaderParser
         /// parses a single character and returns true, if message is finished
         bool parse(char ch)
         {
-            if( isHeader() )
+            if( isStartLine() || isHeader() )
             {
-                if(_headerBytes >= MessageHeader::MaxHeaderSize)
+                if(_headerSize >= MessageHeader::MaxHeaderSize)
                 {
                     state = &HeaderParser::state_error;
                     return true;
                 }
 
-                ++_headerBytes;
+                ++_headerSize;
             }
 
             (this->*state)(ch);
@@ -180,7 +181,7 @@ class PT_HTTP_API HeaderParser
         {
             state = client ? &HeaderParser::state_cl_protocol0
                            : &HeaderParser::state_cmd0;
-            _headerBytes = 0;
+            _headerSize = 0;
         }
 
         /// returns parser to header reading state
@@ -188,7 +189,7 @@ class PT_HTTP_API HeaderParser
         {
             state = &HeaderParser::state_h0;
             token.clear();
-            _headerBytes = 0;
+            _headerSize = 0;
         }
 };
 
