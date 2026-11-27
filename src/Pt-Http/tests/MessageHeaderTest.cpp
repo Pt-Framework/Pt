@@ -22,6 +22,7 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
             registerMethod("Empty", *this, &MessageHeaderTest::Empty);
             registerMethod("Upgrade", *this, &MessageHeaderTest::Upgrade);
             registerMethod("FieldName", *this, &MessageHeaderTest::FieldName);
+            registerMethod("Characters", *this, &MessageHeaderTest::Characters);
             registerMethod("Field", *this, &MessageHeaderTest::Field);
             registerMethod("MatchesValue", *this, &MessageHeaderTest::MatchesValue);
         }
@@ -192,6 +193,23 @@ class MessageHeaderTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( ! Pt::Http::MessageHeader::isToken("Bad Name") );
             PT_UNIT_ASSERT( ! Pt::Http::MessageHeader::isToken("") );
             PT_UNIT_ASSERT_THROW(header.set("Bad Name", "value"), std::invalid_argument);
+        }
+
+        void Characters()
+        {
+            using Pt::Http::MessageHeader;
+
+            PT_UNIT_ASSERT( MessageHeader::isOws(' ') );
+            PT_UNIT_ASSERT( MessageHeader::isOws('\t') );
+            PT_UNIT_ASSERT( ! MessageHeader::isOws('\n') );
+            PT_UNIT_ASSERT( ! MessageHeader::isOws('\v') );
+
+            PT_UNIT_ASSERT( MessageHeader::isTokenChar('!') );
+            PT_UNIT_ASSERT( MessageHeader::isTokenChar('A') );
+            PT_UNIT_ASSERT( MessageHeader::isTokenChar('5') );
+            PT_UNIT_ASSERT( ! MessageHeader::isTokenChar('(') );
+            PT_UNIT_ASSERT( ! MessageHeader::isTokenChar(' ') );
+            PT_UNIT_ASSERT( ! MessageHeader::isTokenChar(0x7f) );
         }
 
         void MatchesValue()

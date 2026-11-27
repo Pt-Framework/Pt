@@ -32,6 +32,7 @@
 #include "Parser.h"
 #include <Pt/Http/HttpError.h>
 #include <Pt/Http/Message.h>
+#include <sstream>
 #include <string>
 
 class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::Event
@@ -48,6 +49,12 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
             registerMethod( "LongFieldName", *this, &ParserTest::LongFieldName);
             registerMethod( "BodyFraming", *this, &ParserTest::BodyFraming);
             registerMethod( "Response", *this, &ParserTest::Response);
+            registerMethod( "SpaceBeforeColon", *this, &ParserTest::SpaceBeforeColon);
+            registerMethod( "ObsFold", *this, &ParserTest::ObsFold);
+            registerMethod( "FieldValue", *this, &ParserTest::FieldValue);
+            registerMethod( "FieldName", *this, &ParserTest::FieldName);
+            registerMethod( "EmptyValue", *this, &ParserTest::EmptyValue);
+            registerMethod( "HeaderSize", *this, &ParserTest::HeaderSize);
         }
 
         void setUp()
@@ -91,28 +98,28 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
         {
             Pt::Http::HeaderParser parser(*this, false);
 
-            std::istringstream msg("GET /foo HTTP/1.0\r\nContent-Size:47\nFoo:line1\r\n line2\n line3\nBar:bar\r\n\r\n");
+            std::istringstream msg("GET /foo HTTP/1.0\r\nFoo: line1\r\nBar: line2\r\n\r\n");
 
             parser.advance(msg);
 
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
-            PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo)V(1.0)K(Content-Size)H(47)K(Foo)H(line1 line2 line3)K(Bar)H(bar)E()");
+            PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo)V(1.0)K(Foo)H(line1)K(Bar)H(line2)E()");
         }
 
         void RequestWithWhitespace()
         {
             Pt::Http::HeaderParser parser(*this, false);
 
-            std::istringstream msg("PUT   /foo   HTTP  /  1  .  0  \r\n  Content-Size  :  47  \r\n\r\n");
+            std::istringstream msg("PUT /foo HTTP/1.0\r\nContent-Size:  47  \r\n\r\n");
 
             parser.advance(msg);
 
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
-            PT_UNIT_ASSERT_EQUALS(events.str(), "M(PUT)U(/foo)V(1.0)K(Content-Size)H(47  )E()");
+            PT_UNIT_ASSERT_EQUALS(events.str(), "M(PUT)U(/foo)V(1.0)K(Content-Size)H(47)E()");
         }
 
         void RequestWithQueryParam()
@@ -191,7 +198,7 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
         {
             Pt::Http::HeaderParser parser(*this, true);
 
-            std::istringstream msg("HTTP/1.1 200 OK\r\nConnection:close\nContent-Type : text/xml\r\n\r\n");
+            std::istringstream msg("HTTP/1.1 200 OK\r\nConnection:close\nContent-Type: text/xml\r\n\r\n");
 
             parser.advance(msg);
 
@@ -199,6 +206,178 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "V(1.1)R(200,OK)K(Connection)H(close)K(Content-Type)H(text/xml)E()");
+        }
+
+        void parseUntilEnd(bool client, const std::string& msg)
+        {
+            Pt::Http::HeaderParser parser(*this, client);
+            for(std::size_t n = 0; n < msg.size(); ++n)
+            {
+                if( parser.parse(msg[n]) )
+                    break;
+            }
+        }
+
+        void SpaceBeforeColon()
+        {
+            parseUntilEnd(false, "GET / HTTP/1.1\r\nHost: example.com\r\n\r\n");
+            PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/)V(1.1)K(Host)H(example.com)E()");
+
+            events.str(std::string());
+            events.clear();
+            parseUntilEnd(false, "GET / HTTP/1.1\r\nHost : example.com\r\n\r\n");
+            PT_UNIT_ASSERT(events.str().find("H(") == std::string::npos);
+
+            {
+                Pt::Http::HeaderParser parser(*this, false);
+                std::istringstream msg("GET / HTTP/1.1\r\nHost : example.com\r\n\r\n");
+                parser.advance(msg);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+
+            {
+                Pt::Http::HeaderParser parser(*this, false);
+                std::istringstream msg("GET / HTTP/1.1\r\nHost\t: example.com\r\n\r\n");
+                parser.advance(msg);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+
+            {
+                Pt::Http::HeaderParser parser(*this, true);
+                std::istringstream msg("HTTP/1.1 200 OK\r\nHost : example.com\r\n\r\n");
+                parser.advance(msg);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+        }
+
+        void ObsFold()
+        {
+            {
+                Pt::Http::HeaderParser parser(*this, false);
+                std::istringstream msg("GET / HTTP/1.1\r\nFoo: line1\r\n line2\r\n\r\n");
+                parser.advance(msg);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+
+            {
+                Pt::Http::HeaderParser parser(*this, false);
+                std::istringstream msg("GET / HTTP/1.1\r\n Foo: line1\r\n\r\n");
+                parser.advance(msg);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+
+            {
+                Pt::Http::HeaderParser parser(*this, true);
+                std::istringstream msg("HTTP/1.1 200 OK\r\nFoo: line1\r\n line2\r\n\r\n");
+                parser.advance(msg);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+
+            {
+                Pt::Http::HeaderParser parser(*this, true);
+                std::istringstream msg("HTTP/1.1 200 OK\r\n Foo: line1\r\n\r\n");
+                parser.advance(msg);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+        }
+
+        void FieldValue()
+        {
+            parseUntilEnd(false, std::string("GET / HTTP/1.1\r\nX: a b\tc\x21\x7e\x80\r\n\r\n"));
+            PT_UNIT_ASSERT_EQUALS(events.str(), std::string("M(GET)U(/)V(1.1)K(X)H(a b\tc\x21\x7e\x80)E()"));
+
+            const char rejected[] = { '\0', '\x01', '\x7f', '\v', '\f' };
+            for(std::size_t n = 0; n < sizeof(rejected); ++n)
+            {
+                Pt::Http::HeaderParser parser(*this, false);
+                std::string msg = std::string("GET / HTTP/1.1\r\nX: a") + rejected[n] + "\r\n\r\n";
+                std::istringstream in(msg);
+                parser.advance(in);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+        }
+
+        void FieldName()
+        {
+            parseUntilEnd(false, "GET / HTTP/1.1\r\nX-Token_1.2: v\r\n!: v\r\n\r\n");
+            PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/)V(1.1)K(X-Token_1.2)H(v)K(!)H(v)E()");
+
+            const char rejected[] = "(),/;<=>?@[\\]{}\"";
+            for(const char* p = rejected; *p; ++p)
+            {
+                Pt::Http::HeaderParser parser(*this, false);
+                std::string msg = std::string("GET / HTTP/1.1\r\nX") + *p + ": v\r\n\r\n";
+                std::istringstream in(msg);
+                parser.advance(in);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+        }
+
+        void EmptyValue()
+        {
+            parseUntilEnd(false, "GET / HTTP/1.1\r\nOrigin:\r\n\r\n");
+            PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/)V(1.1)K(Origin)H()E()");
+
+            Pt::Http::MessageHeader header;
+            Pt::Http::HeaderParser::MessageHeaderEvent ev(header);
+            Pt::Http::HeaderParser parser(ev, false);
+            std::istringstream msg("GET / HTTP/1.1\r\nContent-Length: 0 \r\n\r\n");
+            parser.advance(msg);
+
+            PT_UNIT_ASSERT(parser.end());
+            PT_UNIT_ASSERT(! parser.fail());
+            PT_UNIT_ASSERT(header.isSet("Content-Length", "0"));
+            PT_UNIT_ASSERT_EQUALS(std::string(header.get("Content-Length")), std::string("0"));
+        }
+
+        void HeaderSize()
+        {
+            const std::size_t limit = Pt::Http::MessageHeader::MaxHeaderSize;
+            const std::string prefix = "GET / HTTP/1.1\r\nX: ";
+            const std::string ending = "\r\n\r\n";
+
+            {
+                Pt::Http::HeaderParser parser(*this, false);
+                const std::size_t valueSize = limit - std::string("X: ").size() - ending.size();
+                std::string msg = prefix + std::string(valueSize, 'a') + ending;
+                std::istringstream in(msg);
+                parser.advance(in);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(! parser.fail());
+            }
+
+            {
+                Pt::Http::HeaderParser parser(*this, false);
+                const std::size_t valueSize = limit - std::string("X: ").size() - ending.size() + 1;
+                std::string msg = prefix + std::string(valueSize, 'a') + ending;
+                std::istringstream in(msg);
+                parser.advance(in);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+
+            {
+                Pt::Http::HeaderParser parser(*this, false);
+                const std::size_t valueSize = limit - std::string("X: ").size() - ending.size() + 1;
+                std::string msg = prefix + std::string(valueSize, 'a') + ending;
+                std::istringstream first(msg.substr(0, prefix.size() + 8));
+                parser.advance(first);
+                PT_UNIT_ASSERT(! parser.end());
+
+                std::istringstream second(msg.substr(prefix.size() + 8));
+                parser.advance(second);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
         }
 
     private:

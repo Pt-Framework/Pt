@@ -532,13 +532,29 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         */
         static bool isMatch(const char* a, const char* b);
 
+        /** @brief Returns true if @a ch is SP or HTAB.
+        */
+        static bool isOws(char ch)
+        { return ch == ' ' || ch == '\t'; }
+
+        /** @brief Returns true if @a ch is one token character.
+
+            A token character is a visible ASCII character other than
+            the separators `( ) < > @ , ; : \\ " / [ ] ? = { }` and
+            other than space, controls, and DEL.
+        */
+        static bool isTokenChar(unsigned char ch);
+
+        /** @brief Maximum size of the stored header block.
+        */
+        static const unsigned MaxHeaderSize = 4096;
+
     private:
         //! @internal
         char* eptr()
         { return _rawdata + _endOffset; }
 
     private:
-        static const unsigned MaxHeaderSize = 4096;
         char _rawdata[MaxHeaderSize];  // key_1\0value_1\0key_2\0value_2\0...key_n\0value_n\0\0
         std::size_t _endOffset;
         unsigned _httpVersionMajor;

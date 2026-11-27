@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -72,7 +72,7 @@ class PT_HTTP_API HeaderParser
 
                 void init(MessageHeader& header)
                 { _header = &header; }
-                
+
                 virtual void onHttpVersion(unsigned major, unsigned minor);
                 virtual void onKey(const std::string& key);
                 virtual void onValue(const std::string& value);
@@ -97,7 +97,6 @@ class PT_HTTP_API HeaderParser
         void state_h0(char ch);
         void state_hcr(char ch);
         void state_hfieldname(char ch);
-        void state_hfieldnamespace(char ch);
         void state_hfieldbody0(char ch);
         void state_hfieldbody(char ch);
         void state_hfieldbody_cr(char ch);
@@ -118,16 +117,24 @@ class PT_HTTP_API HeaderParser
         void state_end(char ch);
         void state_error(char ch);
 
+    private:
+        void pushValue();
+        bool isHeader() const;
+
+    private:
         state_type state;
         Event& ev;
 
         std::string token;
         unsigned value;
+        std::size_t _headerBytes;
 
     public:
         HeaderParser(Event& ev_, bool client)
-            : state(client ? &HeaderParser::state_cl_protocol0 : &HeaderParser::state_cmd0),
-              ev(ev_)
+            : state(client ? &HeaderParser::state_cl_protocol0 : &HeaderParser::state_cmd0)
+            , ev(ev_)
+            , value(0)
+            , _headerBytes(0)
             { }
 
         /// parse as many characters as available in buffer without blocking
@@ -139,27 +146,49 @@ class PT_HTTP_API HeaderParser
         /// parses a single character and returns true, if message is finished
         bool parse(char ch)
         {
+            if( isHeader() )
+            {
+                if(_headerBytes >= MessageHeader::MaxHeaderSize)
+                {
+                    state = &HeaderParser::state_error;
+                    return true;
+                }
+
+                ++_headerBytes;
+            }
+
             (this->*state)(ch);
             return state == &HeaderParser::state_end || state == &HeaderParser::state_error;
         }
 
-        bool begin() const  { return state == &HeaderParser::state_cl_protocol0
-                                || state == &HeaderParser::state_cmd0; }
+        bool begin() const
+        {
+            return state == &HeaderParser::state_cl_protocol0 ||
+                   state == &HeaderParser::state_cmd0;
+        }
 
-        bool end() const    { return state == &HeaderParser::state_end
-                                || state == &HeaderParser::state_error; }
+        bool end() const
+        {
+            return state == &HeaderParser::state_end ||
+                   state == &HeaderParser::state_error;
+        }
 
-        bool fail() const   { return state == &HeaderParser::state_error; }
+        bool fail() const
+        { return state == &HeaderParser::state_error; }
 
         void reset(bool client)
         {
-            state = (client ? &HeaderParser::state_cl_protocol0 : &HeaderParser::state_cmd0);
+            state = client ? &HeaderParser::state_cl_protocol0
+                           : &HeaderParser::state_cmd0;
+            _headerBytes = 0;
         }
 
         /// returns parser to header reading state
         void readHeader()
         {
-          state = &HeaderParser::state_h0;
+            state = &HeaderParser::state_h0;
+            token.clear();
+            _headerBytes = 0;
         }
 };
 

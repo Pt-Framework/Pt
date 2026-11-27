@@ -79,31 +79,9 @@ int compareIgnoreCase(const char* s1, const char* s2)
 }
 
 
-bool isOws(char ch)
-{
-    return ch == ' ' || ch == '\t';
 }
 
 
-bool isTokenChar(unsigned char ch)
-{
-    if(ch <= 32 || ch >= 127)
-        return false;
-
-    switch(ch)
-    {
-        case '(': case ')': case '<': case '>': case '@':
-        case ',': case ';': case ':': case '\\': case '"':
-        case '/': case '[': case ']': case '?': case '=':
-        case '{': case '}':
-            return false;
-
-        default:
-            return true;
-    }
-}
-
-}
 
 namespace Pt {
 
@@ -196,7 +174,7 @@ MessageHeader::ValueIterator& MessageHeader::ValueIterator::operator++()
         return *this;
 
     const char* p = _current + _value.size();
-    while(p != _end && isOws(*p))
+    while(p != _end && MessageHeader::isOws(*p))
         ++p;
 
     if(p != _end && *p == ',')
@@ -218,13 +196,13 @@ MessageHeader::ValueIterator& MessageHeader::ValueIterator::operator++()
 void MessageHeader::ValueIterator::advance()
 {
     const char* p = _current;
-    while(p != _end && isOws(*p))
+    while(p != _end && MessageHeader::isOws(*p))
         ++p;
 
     while(p != _end && *p == ',')
     {
         ++p;
-        while(p != _end && isOws(*p))
+        while(p != _end && MessageHeader::isOws(*p))
             ++p;
     }
 
@@ -237,7 +215,7 @@ void MessageHeader::ValueIterator::advance()
     }
 
     const char* begin = p;
-    while(p != _end && *p != ',' && ! isOws(*p))
+    while(p != _end && *p != ',' && ! MessageHeader::isOws(*p))
         ++p;
 
     _value = Value(begin, static_cast<std::size_t>(p - begin));
@@ -525,6 +503,25 @@ bool MessageHeader::isDigits(const char* value)
     }
 
     return true;
+}
+
+
+bool MessageHeader::isTokenChar(unsigned char ch)
+{
+    if(ch <= 32 || ch >= 127)
+        return false;
+
+    switch(ch)
+    {
+        case '(': case ')': case '<': case '>': case '@':
+        case ',': case ';': case ':': case '\\': case '"':
+        case '/': case '[': case ']': case '?': case '=':
+        case '{': case '}':
+            return false;
+
+        default:
+            return true;
+    }
 }
 
 
