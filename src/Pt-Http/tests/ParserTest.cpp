@@ -144,6 +144,37 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
             parseUntilEnd(false, "GET /foo%20bar HTTP/1.1\r\n\r\n");
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo bar)V(1.1)E()");
 
+            events.str(std::string());
+            events.clear();
+            parseUntilEnd(false, "GET /%25%41 HTTP/1.1\r\n\r\n");
+            PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/%A)V(1.1)E()");
+
+            events.str(std::string());
+            events.clear();
+            parseUntilEnd(false, "GET /%2541 HTTP/1.1\r\n\r\n");
+            PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/%41)V(1.1)E()");
+
+            events.str(std::string());
+            events.clear();
+            parseUntilEnd(false, "GET /a%2fb%7E HTTP/1.1\r\n\r\n");
+            PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/a/b~)V(1.1)E()");
+
+            const char* invalid[] = {
+                "GET /a% HTTP/1.1\r\n\r\n",
+                "GET /a%4 HTTP/1.1\r\n\r\n",
+                "GET /a%4g HTTP/1.1\r\n\r\n",
+                "GET /a%g4 HTTP/1.1\r\n\r\n"
+            };
+
+            for(std::size_t n = 0; n < sizeof(invalid) / sizeof(invalid[0]); ++n)
+            {
+                Pt::Http::HeaderParser parser(*this, false);
+                std::istringstream msg(invalid[n]);
+                parser.advance(msg);
+                PT_UNIT_ASSERT(parser.end());
+                PT_UNIT_ASSERT(parser.fail());
+            }
+
             {
                 Pt::Http::HeaderParser parser(*this, false);
                 std::istringstream msg("GET /foo%gg HTTP/1.1\r\n\r\n");

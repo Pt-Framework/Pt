@@ -86,6 +86,7 @@ class PT_HTTP_API HeaderParser
         void state_url0(char ch);
         void state_url(char ch);
         void state_urlesc(char ch);
+        void state_urlesc2(char ch);
         void state_qparam(char ch);
         void state_protocol0(char ch);
         void state_protocol(char ch);

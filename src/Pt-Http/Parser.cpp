@@ -267,7 +267,6 @@ void HeaderParser::state_url(char ch)
     }
     else if (ch == '%')
     {
-        token += ch;
         state = &HeaderParser::state_urlesc;
         return;
     }
@@ -289,25 +288,34 @@ void HeaderParser::state_urlesc(char ch)
 {
     if (isHexDigit(ch))
     {
-        if (token.size() >= 2 && token[token.size() - 2] == '%')
-        {
-            unsigned v = (valueOfHexDigit(token[token.size() - 1]) << 4) | valueOfHexDigit(ch);
-            if(v == 0)
-            {
-                state = &HeaderParser::state_error;
-                return;
-            }
+        value = valueOfHexDigit(ch);
+        state = &HeaderParser::state_urlesc2;
+        return;
+    }
+    else
+    {
+        PT_LOG_WARN("invalid hex digit " << chartoprint(ch) << " in url");
+        state = &HeaderParser::state_error;
+        return;
+    }
+}
 
-            token[token.size() - 2] = static_cast<char>(v);
-            token.resize(token.size() - 1);
-            state = &HeaderParser::state_url;
-            return;
-        }
-        else
+
+void HeaderParser::state_urlesc2(char ch)
+{
+    if (isHexDigit(ch))
+    {
+        const unsigned v = (value << 4) | valueOfHexDigit(ch);
+        if(v == 0)
         {
-            token += ch;
+            PT_LOG_WARN("NUL escape in url");
+            state = &HeaderParser::state_error;
             return;
         }
+
+        token += static_cast<char>(v);
+        state = &HeaderParser::state_url;
+        return;
     }
     else
     {
