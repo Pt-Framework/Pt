@@ -178,7 +178,7 @@ class PT_HTTP_API WebSocketService : public Service
         */
         ~WebSocketService();
 
-        /** @brief Returns accepted Sec-WebSocket-Protocol names in the order they were added.
+        /** @brief Returns the accepted Sec-WebSocket-Protocol names.
 
             Returns a copy, because the list may change in another
             thread while a handshake reads it.
